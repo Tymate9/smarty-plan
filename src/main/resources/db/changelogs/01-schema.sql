@@ -1,0 +1,205 @@
+--liquibase formatted sql
+
+--changeset smarty_plan:1
+
+/* ===========================
+     Table: Group
+   =========================== */
+create table "group"
+(
+    id    SERIAL PRIMARY KEY,
+    label varchar(255) NOT NULL
+);
+
+/* ===========================
+     Table: Team
+   =========================== */
+create table team
+(
+    id       SERIAL PRIMARY KEY,
+    label    varchar(255) NOT NULL,
+    group_id varchar(255)
+);
+
+/* ===========================
+     Table: Service
+   =========================== */
+create table service
+(
+    id      SERIAL PRIMARY KEY,
+    label   varchar(255) NOT NULL,
+    team_id varchar(255)
+);
+
+
+/* ===========================
+     Table: User
+   =========================== */
+CREATE TYPE UserRole AS ENUM ('Admin', 'RES', 'QSE');
+CREATE TABLE "user"
+(
+    id          SERIAL PRIMARY KEY,
+
+-- ---
+-- in keycloak
+-- ---
+--  enabled
+--  email
+--  first_name
+--  last_name
+--  role
+    role        UserRole     NOT NULL,
+    employee_id VARCHAR(255) NOT NULL,
+    gender      BOOLEAN      NOT NULL
+);
+
+/* ===========================
+     Table: Driver
+   =========================== */
+CREATE TABLE driver
+(
+    id                  SERIAL PRIMARY KEY,
+    first_name          VARCHAR(255) NOT NULL,
+    last_name           VARCHAR(255) NOT NULL,
+    phone_number        VARCHAR(10),
+    allows_localization BOOLEAN      NOT NULL DEFAULT true
+);
+
+/* ===========================
+     Table: Vehicle
+   =========================== */
+create table vehicle
+(
+    id         varchar(36)           not null
+        primary key,
+    energy     varchar(255),
+    engine     varchar(255),
+    externalid varchar(255),
+--     gearbox               varchar(255),
+--     generatedonthefly     boolean               not null,
+--     label                 varchar(255),
+--     manufacturer          varchar(255),
+--     model                 varchar(255),
+--     productid             varchar(255),
+--     range                 varchar(255),
+--     type                  varchar(255),
+--     regcountry            varchar(2),
+--     vin                   varchar(17),
+--     version               varchar(255),
+--     datefirstregistration timestamp,
+--     dateregistration      timestamp,
+--     datenextinspection    timestamp,
+--     color                 varchar(255),
+--     nbgears               integer,
+--     enginesize            integer,
+--     nbcylinders           integer,
+--     propulsiontype        varchar(255),
+--     turbo                 varchar(255),
+--     realpower             integer,
+--     fiscalpower           integer,
+--     weightrolling         integer,
+--     weighttowing          integer,
+--     weightempty           integer,
+--     body                  varchar(255),
+--     height                integer,
+--     width                 integer,
+--     length                integer,
+--     wheelbase             integer,
+--     nbseats               integer,
+--     nbdoors               integer,
+--     co2                   integer,
+--     critair               integer,
+--     euronorm              varchar(255),
+--     source                varchar(255),
+    validated  boolean default false not null
+);
+
+/* ===========================
+     Table : Vehicle_Service
+   =========================== */
+create table vehicle_service
+(
+    vehicle_id varchar(36) not null references vehicle,
+    service_id integer     not null references service,
+    date       timestamp   not null,
+    primary key (vehicle_id, service_id, date)
+);
+
+/* ===========================
+     Table: Vehicle_Driver
+   =========================== */
+create table vehicle_driver
+(
+    vehicle_id varchar(36) not null references vehicle,
+    driver_id  integer     not null references driver,
+    date       timestamp   not null,
+    primary key (vehicle_id, driver_id, date)
+);
+
+/* ===========================
+     Table: Device
+   =========================== */
+create table device
+(
+    id                      serial               not null primary key,
+    imei                    varchar(20),
+    label                   varchar(255),
+    manufacturer            varchar(255),
+    model                   varchar(255),
+    serialnumber            varchar(255),
+    simnumber               varchar(255),
+    gateway_enabled         boolean default true NOT NULL,
+    last_data_date          timestamp,
+    comment                 text,
+    last_communication_date timestamp
+);
+
+/* =================================
+     Table: Device_Vehicle_Install
+   ================================= */
+create table device_vehicle_install
+(
+    device_id               integer     not null references device,
+    vehicle_id              varchar(36) not null references vehicle,
+    date                    timestamp   not null,
+    fitment_odometer        integer,
+    fitment_operator        varchar(255),
+    fitment_device_location varchar(255),
+    fitment_supply_location varchar(255),
+    fitment_supply_type     varchar(255),
+    primary key (device_id, vehicle_id, date)
+);
+
+
+/* ============================
+     Table: Point of Interest
+   ============================ */
+create type POIType as enum ('Domicile', 'Fournisseur', 'Client', 'Bureau', 'Chantier', 'Prospect', 'Autre', 'PMU 🐟');
+create table point_of_interest
+(
+    id        serial primary key,
+    label     varchar(255)     NOT NULL,
+    type      POIType          NOT NULL,
+    latitude  double precision NOT NULL,
+    longitude double precision NOT NULL,
+    radius    integer          NOT NULL
+);
+
+/* ========================
+      Table : Intervention
+   ======================== */
+create type InterventionStatus as enum ('Incoming', 'Done');
+create type InterventionType as enum ('CT', 'Visite générale', 'Réparations', 'Autre');
+create table intervention
+(
+    id                  serial primary key,
+    status              InterventionStatus NOT NULL,
+    type                InterventionType   NOT NULL,
+    date                TIMESTAMP          NOT NULL,
+    distance            INTEGER,
+    price               INTEGER,
+    comment             TEXT,
+    distance_until_next INTEGER,
+    duration_until_next INTEGER,
+    vehicle_id          VARCHAR(36)        NOT NULL references vehicle
+)

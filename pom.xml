@@ -7,8 +7,8 @@
 
     <properties>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
-        <kotlin.version>1.9.21</kotlin.version>
-        <maven.compiler.release>17</maven.compiler.release>
+        <kotlin.version>2.0.21</kotlin.version>
+        <maven.compiler.reease>17</maven.compiler.reease>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
@@ -42,6 +42,14 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-keycloak-authorization</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

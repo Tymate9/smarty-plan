@@ -3,10 +3,8 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.Model
 import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.domain.vehicle.vehicle_driver.VehicleDriver
-import net.enovea.domain.vehicle.vehicle_service.VehicleService
 
 
 @Entity(name = DriverEntity.ENTITY_NAME )
@@ -39,9 +37,7 @@ data class DriverEntity(
     val vehicleDrivers: List<VehicleDriver> = mutableListOf()  // One service can be associated with many vehicles
 
 
-) : PanacheEntityBase, Model<Int> {
-
-    override fun getID(): Int = id
+) : PanacheEntityBase {
 
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "DriverEntity"

@@ -38,8 +38,6 @@ data class VehicleService (
     @JoinColumn(name = "service_id",  referencedColumnName = "id", nullable = false)
     val service: ServiceEntity? = null,  // Many-to-one relationship with Service
 
-//    @Column(name = "date", nullable = false)
-//    var date: Timestamp = Timestamp(System.currentTimeMillis())  // Date when the service was done
 
 ): PanacheEntityBase {
 

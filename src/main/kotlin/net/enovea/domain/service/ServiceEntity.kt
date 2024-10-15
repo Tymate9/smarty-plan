@@ -4,8 +4,6 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.Model
-import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.domain.vehicle.vehicle_service.VehicleService
 
 
@@ -33,15 +31,13 @@ import net.enovea.domain.vehicle.vehicle_service.VehicleService
 
 
 
-    ): PanacheEntityBase, Model<Int> {
+    ): PanacheEntityBase {
     constructor(service : ServiceEntity) : this(
         id=service.id,
         label=service.label,
         teamId=service.teamId
     )
 
-
-    override fun getID(): Int = id
 
 
     companion object : PanacheCompanionBase<ServiceEntity, String> {

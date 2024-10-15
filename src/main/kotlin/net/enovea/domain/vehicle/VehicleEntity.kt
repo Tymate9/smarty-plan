@@ -3,12 +3,16 @@ package net.enovea.domain.vehicle
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.Model
+import net.enovea.domain.vehicle.vehicle_driver.VehicleDriver
+import net.enovea.domain.vehicle.vehicle_service.VehicleService
 import java.util.*
 
 /**
  * Représente un véhicule
  **/
+
 
 @Entity(name = VehicleEntity.ENTITY_NAME )
 @Table(name = VehicleEntity.TABLE_NAME)
@@ -16,9 +20,11 @@ import java.util.*
 data class VehicleEntity(
 
     /** Identifiant unique du vehicle UUID */
+
     @Id
-    @Column(name = "id", nullable = false)
-    val id: String = UUID.randomUUID().toString(),
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
+    @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
+    var id: Int = -1,
 
     @Column(name = "energy", nullable = true)
     var energy: String? = null,
@@ -30,23 +36,42 @@ data class VehicleEntity(
     var externalId: String? = null,
 
     @Column(name = "validated", nullable = false)
-    var validated: Boolean = false
+    var validated: Boolean = false,
+
+//    @JoinTable(
+//        name = "vehicle_service",
+//        joinColumns = [JoinColumn(name = "vehicle_id")],
+//        inverseJoinColumns = [JoinColumn(name = "service_id")]
+//    )
 
 
-) : PanacheEntityBase, Model<String> {
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "vehicle",
+        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        )
+    val vehicleServices: List<VehicleService> = mutableListOf(),  // One vehicle can have many services
+
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "vehicle",
+        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        )
+    val vehicleDrivers: List<VehicleDriver> = mutableListOf()  // One vehicle can have many services
 
 
-    override fun getID(): String = id
+
+) : PanacheEntityBase, Model<Int> {
+
+
+    override fun getID(): Int = id
 
 
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"
-        const val ID_COLUMN = "id"
-        const val ENERGY_COLUMN = "energy"
-        const val ENGINE_COLUMN = "engine"
-        const val EXTERNAL_ID_COLUMN = "externalid"
-        const val VALIDATED = "validated"
+        const val COLUMN_ID = "id"
+
 
     }
 }

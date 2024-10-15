@@ -1,37 +1,55 @@
 package net.enovea.domain.service
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
-import net.enovea.domain.service.ServiceEntity
-import java.util.*
+import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
+import net.enovea.domain.Model
+import net.enovea.domain.vehicle.VehicleEntity
+import net.enovea.domain.vehicle.vehicle_service.VehicleService
 
 
 @Entity(name = ServiceEntity.ENTITY_NAME )
 @Table(name = ServiceEntity.TABLE_NAME)
  data class ServiceEntity(
     @Id
-    @Column(name = "id", nullable = false)
-    val id: String = UUID.randomUUID().toString(),
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
+    @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
+    var id: Int = -1,
 
     @Column(name = "label", nullable = false)
-    var label: String,
+    var label: String="",
 
     @Column(name = "team_id", nullable = true)
-    var teamId: String? = null
+    var teamId: String? = null,
+
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "service",
+        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+    )
+
+    val vehicleServices: List<VehicleService> = mutableListOf()  // One service can be associated with many vehicles
 
 
-    ) {
-   constructor(service : ServiceEntity) : this(
-      id=service.id,
-      label=service.label,
-      teamId=service.teamId
-   )
+
+    ): PanacheEntityBase, Model<Int> {
+    constructor(service : ServiceEntity) : this(
+        id=service.id,
+        label=service.label,
+        teamId=service.teamId
+    )
 
 
+    override fun getID(): Int = id
 
 
+    companion object : PanacheCompanionBase<ServiceEntity, String> {
+        const val ENTITY_NAME = "ServiceEntity"
+        const val TABLE_NAME = "service"
+        const val COLUMN_ID = "id"
+    }
 }
-
 
 
 

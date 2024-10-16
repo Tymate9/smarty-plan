@@ -4,7 +4,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle.VehicleEntity
-import net.enovea.domain.vehicle.vehicle_driver.VehicleDriver
+import net.enovea.domain.vehicle.VehicleDriver
 
 
 @Entity(name = DriverEntity.ENTITY_NAME )

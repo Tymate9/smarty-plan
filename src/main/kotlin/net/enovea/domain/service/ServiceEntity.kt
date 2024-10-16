@@ -4,7 +4,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.vehicle.vehicle_service.VehicleService
+import net.enovea.domain.vehicle.VehicleService
 
 
 @Entity(name = ServiceEntity.ENTITY_NAME )
@@ -37,7 +37,6 @@ import net.enovea.domain.vehicle.vehicle_service.VehicleService
         label=service.label,
         teamId=service.teamId
     )
-
 
 
     companion object : PanacheCompanionBase<ServiceEntity, String> {

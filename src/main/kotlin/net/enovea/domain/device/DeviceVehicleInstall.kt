@@ -1,21 +1,15 @@
-package net.enovea.domain.device.device_vehicle_install
+package net.enovea.domain.device
 
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
-import net.enovea.domain.device.DeviceEntity
 import net.enovea.domain.service.ServiceEntity
 import net.enovea.domain.vehicle.VehicleEntity
 import java.sql.Timestamp
 import java.io.Serializable
 
 
-data class DeviceVehicleInstallId(
-    val deviceId: Int = 0,
-    val vehicleId: Int = 0,
-    val date: Timestamp = Timestamp(System.currentTimeMillis())
-) : Serializable
 
 @Entity(name= DeviceVehicleInstall.ENTITY_NAME)
 @Table(name= DeviceVehicleInstall.TABLE_NAME)
@@ -65,4 +59,9 @@ data class DeviceVehicleInstall(
     }
 }
 
+data class DeviceVehicleInstallId(
+    val deviceId: Int = 0,
+    val vehicleId: Int = 0,
+    val date: Timestamp = Timestamp(System.currentTimeMillis())
+) : Serializable
 

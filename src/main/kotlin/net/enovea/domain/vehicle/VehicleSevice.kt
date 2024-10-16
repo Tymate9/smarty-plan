@@ -1,24 +1,12 @@
-package net.enovea.domain.vehicle.vehicle_service
+package net.enovea.domain.vehicle
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.domain.service.ServiceEntity
-import net.enovea.domain.vehicle.VehicleEntity
 import java.io.Serializable
 import java.sql.Timestamp
 
-@Embeddable
-data class VehicleServiceId(
-    @Column(name = "vehicle_id", nullable = false)
-    val vehicleId: String="",
-
-    @Column(name = "service_id", nullable = false)
-    val serviceId: Int=0,
-
-    @Column(name = "date", nullable = false)
-    val date: Timestamp=Timestamp(System.currentTimeMillis())
-) : Serializable // Must be serializable for composite keys
 
 
 @Entity(name = VehicleService.ENTITY_NAME)
@@ -49,3 +37,15 @@ data class VehicleService (
 
     }
 }
+
+@Embeddable
+data class VehicleServiceId(
+    @Column(name = "vehicle_id", nullable = false)
+    val vehicleId: String="",
+
+    @Column(name = "service_id", nullable = false)
+    val serviceId: Int=0,
+
+    @Column(name = "date", nullable = false)
+    val date: Timestamp=Timestamp(System.currentTimeMillis())
+) : Serializable

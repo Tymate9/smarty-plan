@@ -4,9 +4,6 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.vehicle.vehicle_driver.VehicleDriver
-import net.enovea.domain.vehicle.vehicle_service.VehicleService
-import java.util.*
 
 /**
  * Représente un véhicule
@@ -37,12 +34,6 @@ data class VehicleEntity(
     @Column(name = "validated", nullable = false)
     var validated: Boolean = false,
 
-//    @JoinTable(
-//        name = "vehicle_service",
-//        joinColumns = [JoinColumn(name = "vehicle_id")],
-//        inverseJoinColumns = [JoinColumn(name = "service_id")]
-//    )
-
 
     @OneToMany(
         fetch = FetchType.LAZY,
@@ -56,8 +47,7 @@ data class VehicleEntity(
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleDrivers: List<VehicleDriver> = mutableListOf()  // One vehicle can have many services
-
+    val vehicleDrivers: List<VehicleDriver> = mutableListOf()  // One vehicle can have many drivers
 
 
 ) : PanacheEntityBase {

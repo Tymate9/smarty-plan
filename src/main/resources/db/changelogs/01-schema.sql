@@ -186,7 +186,7 @@ create table device_vehicle_install
 /* ============================
      Table: Point of Interest
    ============================ */
-drop type if exists POIType;
+DROP TYPE IF EXISTS POIType;
 create type POIType as enum ('Domicile', 'Fournisseur', 'Client', 'Bureau', 'Chantier', 'Prospect', 'Autre', 'PMU 🐟');
 create table point_of_interest
 (

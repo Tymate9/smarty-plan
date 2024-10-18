@@ -1,0 +1,22 @@
+### Définition des variables
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = test@test.com
+@password_admin = root
+
+
+### Obtenir le token d'accès pour l'utilisateur admin
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {% client.global.set("access_token_admin", response.body.access_token); %}
+
+### Appeler /admin avec le token de l'utilisateur admin
+GET http://{{api_host}}/admin
+Authorization: Bearer {{access_token_admin}}

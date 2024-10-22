@@ -2,6 +2,7 @@ package net.enovea.dto
 
 import java.sql.Timestamp
 
+
 data class VehicleDTO (
     val id: String,
     val energy: String?,
@@ -11,6 +12,6 @@ data class VehicleDTO (
     val validated:Boolean?,
 
     //val vehicleServices: List<VehicleServiceDTO>,
-    val drivers: Map<ClosedRange<Timestamp> ,DriverDTO>?
+    val drivers: Map<ClosedRange<Timestamp>, DriverDTO>? = null
 )
 

@@ -9,7 +9,7 @@
     <properties>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
         <kotlin.version>2.0.21</kotlin.version>
-        <maven.compiler.reease>17</maven.compiler.reease>
+        <maven.compiler.release>17</maven.compiler.release>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -183,7 +183,7 @@
                 </dependencies>
                 <configuration>
                     <javaParameters>true</javaParameters>
-                    <jvmTarget>21</jvmTarget>
+                    <jvmTarget>17</jvmTarget>
                     <compilerPlugins>
                         <plugin>all-open</plugin>
                     </compilerPlugins>

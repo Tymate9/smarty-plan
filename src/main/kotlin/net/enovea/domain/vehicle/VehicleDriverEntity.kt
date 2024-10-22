@@ -14,12 +14,12 @@ data class VehicleDriverEntity (
     @EmbeddedId
     val id: VehicleDriverId = VehicleDriverId(),
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("vehicleId")  // Maps the vehicleId field from VehicleServiceId to Vehicle
     @JoinColumn(name = "vehicle_id", nullable = false)
     val vehicle: VehicleEntity? = null,  // Many-to-one relationship with Vehicle
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("driverId")  // Maps the serviceId field from VehicleServiceId to Service
     @JoinColumn(name = "driver_id", nullable = false)
     val driver: DriverEntity? = null,  // Many-to-one relationship with Service

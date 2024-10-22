@@ -9,7 +9,7 @@ import net.enovea.repository.VehicleRepository
 
 @ApplicationScoped
 class VehicleService (
-
+    var vehicleMapper: VehicleMapper = VehicleMapper.instance
 ){
 
     @Inject
@@ -21,7 +21,7 @@ class VehicleService (
 
     fun getAllVehicles(): List<VehicleDTO> {
         val vehicles = vehicleRepository.listAll()
-        return vehicles.map { VehicleMapper.INSTANCE.toVehicleDTO(it) }
+        return vehicles.map { vehicleMapper.toVehicleDTO(it) }
     }
 
 

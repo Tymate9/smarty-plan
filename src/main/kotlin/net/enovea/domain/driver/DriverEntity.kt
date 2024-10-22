@@ -4,7 +4,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle.VehicleEntity
-import net.enovea.domain.vehicle.VehicleDriver
+import net.enovea.domain.vehicle.VehicleDriverEntity
 
 
 @Entity(name = DriverEntity.ENTITY_NAME )
@@ -34,7 +34,7 @@ data class DriverEntity(
     mappedBy = "driver",
     cascade = [CascadeType.ALL, CascadeType.REMOVE]
     )
-    val vehicleDrivers: List<VehicleDriver> = mutableListOf()  // One service can be associated with many vehicles
+    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf()  // One service can be associated with many vehicles
 
 
 ) : PanacheEntityBase {

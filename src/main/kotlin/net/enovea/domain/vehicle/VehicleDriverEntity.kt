@@ -7,12 +7,9 @@ import java.io.Serializable
 import java.sql.Timestamp
 
 
-
-
-@Entity(name = VehicleDriver.ENTITY_NAME)
-@Table(name = VehicleDriver.TABLE_NAME)
-
-data class VehicleDriver (
+@Entity(name = VehicleDriverEntity.ENTITY_NAME)
+@Table(name = VehicleDriverEntity.TABLE_NAME)
+data class VehicleDriverEntity (
 
     @EmbeddedId
     val id: VehicleDriverId = VehicleDriverId(),
@@ -27,10 +24,11 @@ data class VehicleDriver (
     @JoinColumn(name = "driver_id", nullable = false)
     val driver: DriverEntity? = null,  // Many-to-one relationship with Service
 
+
 ): PanacheEntityBase {
 
     companion object : PanacheCompanionBase<VehicleEntity, String> {
-        const val ENTITY_NAME = "VehicleDriver"
+        const val ENTITY_NAME = "VehicleDriverEntity"
         const val TABLE_NAME = "vehicle_driver"
 
     }

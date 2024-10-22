@@ -4,7 +4,6 @@ package net.enovea.domain.device
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
-import net.enovea.domain.service.ServiceEntity
 import net.enovea.domain.vehicle.VehicleEntity
 import java.sql.Timestamp
 import java.io.Serializable
@@ -52,7 +51,7 @@ data class DeviceVehicleInstall(
     val vehicle: VehicleEntity? = null  // Vehicle entity relationship
 ): PanacheEntityBase {
 
-    companion object : PanacheCompanionBase<ServiceEntity, String> {
+    companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "DeviceVehicleInstall"
         const val TABLE_NAME = "device_vehicle_install"
 

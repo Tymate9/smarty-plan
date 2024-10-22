@@ -3,38 +3,35 @@
 --changeset smarty_plan:1
 
 /* ===========================
-     Table: Group
-   =========================== */
-create table "group"
+ Table: team_category
+=========================== */
+create table team_category
 (
-    id    SERIAL PRIMARY KEY,
-    label varchar(255) NOT NULL
+    id      SERIAL PRIMARY KEY,
+    label   varchar(255) NOT NULL
+
 );
 
 /* ===========================
-     Table: Team
+     Table: team
    =========================== */
 create table team
 (
-    id       SERIAL PRIMARY KEY,
-    label    varchar(255) NOT NULL,
-    group_id varchar(255)
+    id    SERIAL PRIMARY KEY,
+    label varchar(255) NOT NULL,
+    parent_id Int references team,
+    category_id Int NOT NULL references team_category,
+    path varchar(255)
 );
 
-/* ===========================
-     Table: Service
-   =========================== */
-create table service
-(
-    id      SERIAL PRIMARY KEY,
-    label   varchar(255) NOT NULL,
-    team_id varchar(255)
-);
+
+
 
 
 /* ===========================
      Table: User
    =========================== */
+DROP TYPE IF EXISTS UserRole;
 CREATE TYPE UserRole AS ENUM ('Admin', 'RES', 'QSE');
 CREATE TABLE "user"
 (
@@ -75,6 +72,7 @@ create table vehicle
     energy     varchar(255),
     engine     varchar(255),
     externalid varchar(255),
+    licenseplate varchar(255),
 --     gearbox               varchar(255),
 --     generatedonthefly     boolean               not null,
 --     label                 varchar(255),
@@ -117,12 +115,12 @@ create table vehicle
 /* ===========================
      Table : Vehicle_Service
    =========================== */
-create table vehicle_service
+create table vehicle_team
 (
     vehicle_id varchar(36) not null references vehicle,
-    service_id integer     not null references service,
+    team_id integer     not null references team,
     date       timestamp   not null,
-    primary key (vehicle_id, service_id, date)
+    primary key (vehicle_id, team_id, date)
 );
 
 /* ===========================
@@ -151,7 +149,10 @@ create table device
     gateway_enabled         boolean default true NOT NULL,
     last_data_date          timestamp,
     comment                 text,
-    last_communication_date timestamp
+    last_communication_date timestamp,
+    active                  boolean default true NOT NULL,
+    last_communication_latitude double precision,
+    last_communication_longitude double precision
 );
 
 /* =================================
@@ -174,6 +175,7 @@ create table device_vehicle_install
 /* ============================
      Table: Point of Interest
    ============================ */
+drop type if exists POIType;
 create type POIType as enum ('Domicile', 'Fournisseur', 'Client', 'Bureau', 'Chantier', 'Prospect', 'Autre', 'PMU 🐟');
 create table point_of_interest
 (
@@ -188,9 +190,11 @@ create table point_of_interest
 /* ========================
       Table : Intervention
    ======================== */
+DROP TYPE IF EXISTS InterventionStatus;
 create type InterventionStatus as enum ('Incoming', 'Done');
+DROP TYPE IF EXISTS InterventionType;
 create type InterventionType as enum ('CT', 'Visite générale', 'Réparations', 'Autre');
-create table intervention
+create table vehicle_maintenance
 (
     id                  serial primary key,
     status              InterventionStatus NOT NULL,

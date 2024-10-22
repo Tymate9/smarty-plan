@@ -1,4 +1,4 @@
-package net.enovea.domain.device
+package net.enovea.dto
 
 import java.sql.Timestamp
 
@@ -13,5 +13,8 @@ data class DeviceDTO (
     var gatewayEnabled :Boolean,
     var lastDataDate : Timestamp,
     var comment: String,
-    var lastCommunicationDate: Timestamp
+    var lastCommunicationDate: Timestamp,
+    var active : Boolean,
+    var last_communication_latitude : Double,
+    var last_communication_longitude : Double
 )

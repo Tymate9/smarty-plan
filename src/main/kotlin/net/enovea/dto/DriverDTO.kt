@@ -1,6 +1,5 @@
-package net.enovea.domain.driver
+package net.enovea.dto
 
-import net.enovea.domain.vehicle.VehicleDriver
 
 data class DriverDTO (
     val id : Int,
@@ -8,5 +7,5 @@ data class DriverDTO (
     val lastName: String,
     val phoneNumber: String,
     val allowsLocalization: Boolean,
-    val vehicleDrivers: List<VehicleDriver>
+    //val vehicleDrivers: List<VehicleDriverDTO>
 )

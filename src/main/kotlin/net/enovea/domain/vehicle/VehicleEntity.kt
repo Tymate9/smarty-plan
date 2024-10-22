@@ -9,7 +9,6 @@ import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
  * Représente un véhicule
  **/
 
-
 @Entity(name = VehicleEntity.ENTITY_NAME )
 @Table(name = VehicleEntity.TABLE_NAME)
 
@@ -20,16 +19,19 @@ data class VehicleEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
     @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
-    var id: Int = -1,
+    var id: String ?= "",
 
     @Column(name = "energy", nullable = true)
-    var energy: String? = null,
+    var energy: String ?= null,
 
     @Column(name = "engine", nullable = true)
-    var engine: String? = null,
+    var engine: String ?= null,
 
     @Column(name = "externalid", nullable = true)
-    var externalId: String? = null,
+    var externalId: String ?= null,
+
+    @Column(name = "licenseplate", nullable = true)
+    var licenseplate: String ?= null,
 
     @Column(name = "validated", nullable = false)
     var validated: Boolean = false,
@@ -40,24 +42,19 @@ data class VehicleEntity(
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleServices: List<VehicleService> = mutableListOf(),  // One vehicle can have many services
+    val vehicleServices: List<VehicleTeamEntity> = mutableListOf(),  // One vehicle can have many teams
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleDrivers: List<VehicleDriver> = mutableListOf()  // One vehicle can have many drivers
+    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf()  // One vehicle can have many drivers
 
 
 ) : PanacheEntityBase {
-
-
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"
-        const val COLUMN_ID = "id"
-
-
     }
 }

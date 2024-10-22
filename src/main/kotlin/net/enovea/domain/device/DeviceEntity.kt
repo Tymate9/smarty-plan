@@ -44,8 +44,16 @@ data class DeviceEntity (
     var comment: String? = null,
 
     @Column(name = "last_communication_date", nullable = true)
-    var lastCommunicationDate: Timestamp? = null
+    var lastCommunicationDate: Timestamp? = null,
 
+    @Column(name = "active", nullable = false)
+    var active: Boolean = true,
+
+    @Column(name = "last_communication_latitude", nullable = true)
+    var latitude: Double = 0.0,
+
+    @Column(name = "last_communication_longitude", nullable = true)
+    var longitude: Double = 0.0
 
     ): PanacheEntityBase {
 

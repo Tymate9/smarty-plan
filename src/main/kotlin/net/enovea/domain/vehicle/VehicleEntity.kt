@@ -42,7 +42,7 @@ data class VehicleEntity(
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleServices: List<VehicleTeamEntity> = mutableListOf(),  // One vehicle can have many teams
+    val vehicleDevices: List<VehicleDeviceEntity> = mutableListOf(),  // One vehicle can have many teams
 
     @OneToMany(
         fetch = FetchType.LAZY,

@@ -15,6 +15,6 @@ data class DeviceDTO (
     var comment: String,
     var lastCommunicationDate: Timestamp,
     var active : Boolean,
-    var last_communication_latitude : Double,
-    var last_communication_longitude : Double
+    var lastCommunicationLatitude : Double,
+    var lastCommunicationLongitude : Double
 )

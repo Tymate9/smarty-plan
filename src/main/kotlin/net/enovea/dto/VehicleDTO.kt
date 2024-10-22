@@ -12,6 +12,7 @@ data class VehicleDTO (
     val validated:Boolean?,
 
     //val vehicleServices: List<VehicleServiceDTO>,
-    val drivers: Map<ClosedRange<Timestamp>, DriverDTO>? = null
+    val drivers: Map<ClosedRange<Timestamp>, DriverDTO>? = null ,
+    val devices: List<DeviceDTO>
 )
 

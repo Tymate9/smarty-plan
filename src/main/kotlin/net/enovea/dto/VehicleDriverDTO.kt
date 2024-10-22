@@ -1,8 +1,6 @@
 package net.enovea.dto
 
-import net.enovea.domain.driver.DriverEntity
-import net.enovea.domain.vehicle.VehicleDriverId
-import net.enovea.domain.vehicle.VehicleEntity
+
 import java.sql.Timestamp
 
 data class VehicleDriverDTO (

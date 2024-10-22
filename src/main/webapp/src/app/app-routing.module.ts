@@ -1,16 +1,21 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LandingPageComponent } from './features/auth/landing-page/landing-page.component';
-import { AdminComponent } from './features/auth/admin/admin.component';
-import { authGuard } from './auth.guard';
-import {MapComponent} from "./features/map/map.component";
+import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { CartographyComponent } from './features/cartography/cartography.component';
 
 const routes: Routes = [
-  { path: '', component: LandingPageComponent, canActivate: [authGuard] },
-  { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
-  { path: 'map', component: MapComponent, canActivate:[authGuard]}
+  {
+    path: '',
+    component: MainLayoutComponent,
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'cartography', component: CartographyComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ]
+  },
+  { path: '**', redirectTo: 'dashboard' }
 ];
-
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

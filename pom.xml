@@ -45,10 +45,6 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-oidc</artifactId>
         </dependency>
         <dependency>
@@ -97,7 +93,17 @@
             <artifactId>quarkus-liquibase</artifactId>
         </dependency>
 
+        <!-- Jackson Resteasy -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-jackson</artifactId>
+        </dependency>
 
+        <!-- Test library -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-framework-datatest-jvm</artifactId>
@@ -278,6 +284,35 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>3.2.1263</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <classPatterns>
+                        <pattern>net.enovea.api.*.*Entity</pattern>
+                    </classPatterns>
+                    <outputKind>module</outputKind>
+                    <outputFile>src/main/webapp/src/habarta/dto.ts</outputFile>
+                    <namespace>dto</namespace>
+                    <nullabilityDefinition>nullInlineUnion</nullabilityDefinition>
+                    <optionalPropertiesDeclaration>questionMarkAndNullableType</optionalPropertiesDeclaration>
+                    <mapClasses>asClasses</mapClasses>
+                    <outputFileType>implementationFile</outputFileType>
+                    <mapEnum>asEnum</mapEnum>
+                    <nonConstEnums>true</nonConstEnums>
                 </configuration>
             </plugin>
         </plugins>

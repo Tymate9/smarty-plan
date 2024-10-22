@@ -186,13 +186,23 @@ create table device_vehicle_install
 /* ============================
      Table: Point of Interest
    ============================ */
-DROP TYPE IF EXISTS POIType;
-create type POIType as enum ('Domicile', 'Fournisseur', 'Client', 'Bureau', 'Chantier', 'Prospect', 'Autre', 'PMU 🐟');
+create table point_of_interest_category
+(
+    id    serial primary key,
+    label varchar(255) NOT NULL,
+    color varchar(7),
+    CONSTRAINT color_hex_constraint CHECK ( color is null or color ~* '^#[a-f0-9]{6}$' )
+);
+
+/* ============================
+     Table: Point of Interest
+   ============================ */
+
 create table point_of_interest
 (
     id        serial primary key,
     label     varchar(255)     NOT NULL,
-    type      POIType          NOT NULL,
+    type      integer          NOT NULL references point_of_interest_category,
     latitude  double precision NOT NULL,
     longitude double precision NOT NULL,
     radius    integer          NOT NULL

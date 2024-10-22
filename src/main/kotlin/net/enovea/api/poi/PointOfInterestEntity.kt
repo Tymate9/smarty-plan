@@ -2,14 +2,8 @@ package net.enovea.api.poi
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.SequenceGenerator
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 
 
 @Entity(name=PointOfInterestEntity.ENTITY_NAME)
@@ -20,15 +14,19 @@ data class PointOfInterestEntity(
     @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
     var id: Int = -1,
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "type", nullable = false)
+    var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
+
     var label: String = "",
 
-    @Enumerated(EnumType.STRING)
-    var type: PointOfInterestType = PointOfInterestType.PMU,
     var latitude: Double = 0.0,
+
     var longitude: Double = 0.0,
+
     var radius: Int = 0,
 
-): PanacheEntityBase {
+    ): PanacheEntityBase {
 
     companion object: PanacheCompanionBase<PointOfInterestEntity, Int> {
         const val ID_SEQUENCE = "point_of_interest_id_seq"
@@ -39,15 +37,4 @@ data class PointOfInterestEntity(
             return listAll().filter { it.radius < 100 }
         }
     }
-}
-
-enum class PointOfInterestType {
-    DOMICILE,
-    FOURNISSEUR,
-    CLIENT,
-    BUREAU,
-    CHANTIER,
-    PROSPECT,
-    AUTRE,
-    PMU,
 }

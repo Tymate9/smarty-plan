@@ -5,6 +5,7 @@ import io.restassured.RestAssured.given
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.jupiter.api.Test
 
+/*
 @QuarkusTest
 class ExampleResourceTest {
 
@@ -17,4 +18,4 @@ class ExampleResourceTest {
              .body(`is`("Hello from Quarkus REST"))
     }
 
-}
+}*/

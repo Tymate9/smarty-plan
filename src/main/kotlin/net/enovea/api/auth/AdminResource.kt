@@ -2,6 +2,7 @@ package com.example
 
 import com.fasterxml.jackson.databind.JsonNode
 import jakarta.annotation.security.PermitAll
+import jakarta.annotation.security.RolesAllowed
 import jakarta.inject.Inject
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
@@ -24,7 +25,7 @@ class AdminResource {
         lateinit var jwt: JsonWebToken
 
         @GET
-        @PermitAll
+        @RolesAllowed("admin")
         @Produces(MediaType.TEXT_PLAIN)
         fun adminEndpoint(@Context ctx: SecurityContext): String {
             // Extraire les rôles depuis realm_access.roles en tant que Map

@@ -60,7 +60,6 @@ data class DeviceEntity (
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "DeviceEntity"
         const val TABLE_NAME = "device"
-        const val COLUMN_ID = "id"
 
     }
 }

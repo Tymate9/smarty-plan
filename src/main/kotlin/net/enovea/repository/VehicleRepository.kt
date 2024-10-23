@@ -15,12 +15,10 @@ class VehicleRepository : PanacheRepository<VehicleEntity> {
     }
 
     // Custom query to fetch vehicles with drivers
-
     fun findAllWithDrivers(): List<VehicleEntity> {
         return find(query = "SELECT v FROM VehicleEntity v " +
                 "JOIN FETCH v.VehicleDriverEntity vd" +
                 "JOIN FETCH vd.DriverEntity").list()
-
     }
 
 }

@@ -10,9 +10,8 @@ data class VehicleDTO (
     val externalId: String?,
     val licenseplate:String?,
     val validated:Boolean?,
-
-    //val vehicleServices: List<VehicleServiceDTO>,
     val drivers: Map<ClosedRange<Timestamp>, DriverDTO>? = null ,
-    val devices: List<DeviceDTO>
+    val devices: List<DeviceDTO>,
+    val teams: List<TeamDTO>?
 )
 

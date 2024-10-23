@@ -12,7 +12,6 @@ interface DriverMapper {
     // Map from DriverDTO to DriverEntity
     fun toEntity(driverDTO: DriverDTO): DriverEntity
 
-    // Create an instance of the mapper
     companion object {
         val instance = Mappers.getMapper(DriverMapper::class.java)
     }

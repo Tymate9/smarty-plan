@@ -1,8 +1,6 @@
 package net.enovea.domain.team
 
-
 import jakarta.persistence.*
-import java.io.Serializable
 
 @Entity
 @Table(name = "team_category")
@@ -13,4 +11,4 @@ class TeamCategoryEntity(
 
     @Column(nullable = false)
     var label: String=""
-) : Serializable
+)

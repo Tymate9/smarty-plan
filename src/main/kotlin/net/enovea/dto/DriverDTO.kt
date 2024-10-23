@@ -7,5 +7,4 @@ data class DriverDTO (
     val lastName: String,
     val phoneNumber: String,
     val allowsLocalization: Boolean,
-    //val vehicleDrivers: List<VehicleDriverDTO>
 )

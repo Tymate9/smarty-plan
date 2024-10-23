@@ -16,21 +16,20 @@ data class VehicleTeamEntity (
     @EmbeddedId
     val id: VehicleTeamId = VehicleTeamId(),
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("vehicleId")  // Maps the vehicleId field from VehicleServiceId to Vehicle
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id",nullable = false)
-    val vehicle: VehicleEntity? = null,  // Many-to-one relationship with Vehicle
+    val vehicle: VehicleEntity? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("teamId")  // Maps the teamId field from VehicleTeamId to Team
     @JoinColumn(name = "team_id",  referencedColumnName = "id", nullable = false)
-    val team: TeamEntity? = null,  // Many-to-one relationship with Service
-
+    val team: TeamEntity? = null,
 
 ): PanacheEntityBase {
 
     companion object : PanacheCompanionBase<VehicleEntity, String> {
-        const val ENTITY_NAME = "VehicleTeam"
+        const val ENTITY_NAME = "VehicleTeamEntity"
         const val TABLE_NAME = "vehicle_team"
 
     }

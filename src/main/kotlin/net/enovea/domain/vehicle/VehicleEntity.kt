@@ -42,14 +42,21 @@ data class VehicleEntity(
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleDevices: List<VehicleDeviceEntity> = mutableListOf(),  // One vehicle can have many teams
+    val vehicleDevices: List<VehicleDeviceEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf()  // One vehicle can have many drivers
+    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf() ,
+
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "vehicle",
+        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        )
+    val vehicleTeams: List<VehicleTeamEntity> = mutableListOf()
 
 
 ) : PanacheEntityBase {

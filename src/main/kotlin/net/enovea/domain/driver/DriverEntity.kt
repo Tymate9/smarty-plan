@@ -23,10 +23,10 @@ data class DriverEntity(
     var lastName: String ="",
 
     @Column(name = "phone_number", nullable = true, length = 10)
-    var phoneNumber: String? = null,  // Optional, can be null
+    var phoneNumber: String? = null,
 
     @Column(name = "allows_localization", nullable = false)
-    var allowsLocalization: Boolean = true, // Default value is true
+    var allowsLocalization: Boolean = true,
 
 
     @OneToMany(
@@ -34,7 +34,7 @@ data class DriverEntity(
     mappedBy = "driver",
     cascade = [CascadeType.ALL, CascadeType.REMOVE]
     )
-    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf()  // One service can be associated with many vehicles
+    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf()
 
 
 ) : PanacheEntityBase {
@@ -42,8 +42,5 @@ data class DriverEntity(
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "DriverEntity"
         const val TABLE_NAME = "driver"
-        const val COLUMN_ID = "id"
-
-
     }
 }

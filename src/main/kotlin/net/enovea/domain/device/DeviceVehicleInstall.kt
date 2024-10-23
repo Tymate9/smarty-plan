@@ -8,8 +8,6 @@ import net.enovea.domain.vehicle.VehicleEntity
 import java.sql.Timestamp
 import java.io.Serializable
 
-
-
 @Entity(name= DeviceVehicleInstall.ENTITY_NAME)
 @Table(name= DeviceVehicleInstall.TABLE_NAME)
 @IdClass(DeviceVehicleInstallId::class)  // Composite primary key class
@@ -17,15 +15,15 @@ import java.io.Serializable
 data class DeviceVehicleInstall(
     @Id
     @Column(name = "device_id", nullable = false)
-    val deviceId: Int ?=null,  // Foreign key to Device
+    val deviceId: Int ?=null,
 
     @Id
     @Column(name = "vehicle_id", nullable = false)
-    val vehicleId: Int ?=null,  // Foreign key to Vehicle
+    val vehicleId: Int ?=null,
 
     @Id
     @Column(name = "date", nullable = false)
-    val date: Timestamp=Timestamp(System.currentTimeMillis()),  // Installation date
+    val date: Timestamp=Timestamp(System.currentTimeMillis()),
 
     @Column(name = "fitment_odometer", nullable = true)
     var fitmentOdometer: Int? = null,

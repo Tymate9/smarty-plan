@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
+import net.enovea.domain.vehicle_category.VehicleCategoryEntity
 
 /**
  * Représente un véhicule
@@ -13,8 +14,6 @@ import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 @Table(name = VehicleEntity.TABLE_NAME)
 
 data class VehicleEntity(
-
-    /** Identifiant unique du vehicle UUID */
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
@@ -30,8 +29,8 @@ data class VehicleEntity(
     @Column(name = "externalid", nullable = true)
     var externalId: String ?= null,
 
-    @Column(name = "licenseplate", nullable = true)
-    var licenseplate: String ?= null,
+    @Column(name = "licenseplate", nullable = false)
+    var licenseplate: String ="",
 
     @Column(name = "validated", nullable = false)
     var validated: Boolean = false,
@@ -42,24 +41,28 @@ data class VehicleEntity(
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleDevices: List<VehicleDeviceEntity> = mutableListOf(),
+    val vehicleDevices: List<DeviceVehicleInstallEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf() ,
+    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
         )
-    val vehicleTeams: List<VehicleTeamEntity> = mutableListOf()
+    val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    var category: VehicleCategoryEntity? = null,
 
 
-) : PanacheEntityBase {
+    ) : PanacheEntityBase {
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"

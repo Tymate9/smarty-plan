@@ -1,6 +1,6 @@
 package net.enovea.dto
 
-data class TeamCategoryDTO(
+data class VehicleCategoryDTO(
     val id: Int,
     val label: String
 )

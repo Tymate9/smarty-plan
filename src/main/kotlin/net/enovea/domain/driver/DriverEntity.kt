@@ -3,7 +3,6 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.domain.vehicle.VehicleDriverEntity
 
 
@@ -25,10 +24,6 @@ data class DriverEntity(
     @Column(name = "phone_number", nullable = true, length = 10)
     var phoneNumber: String? = null,
 
-    @Column(name = "allows_localization", nullable = false)
-    var allowsLocalization: Boolean = true,
-
-
     @OneToMany(
     fetch = FetchType.LAZY,
     mappedBy = "driver",
@@ -39,7 +34,7 @@ data class DriverEntity(
 
 ) : PanacheEntityBase {
 
-    companion object : PanacheCompanionBase<VehicleEntity, String> {
+    companion object : PanacheCompanionBase<DriverEntity, Int> {
         const val ENTITY_NAME = "DriverEntity"
         const val TABLE_NAME = "driver"
     }

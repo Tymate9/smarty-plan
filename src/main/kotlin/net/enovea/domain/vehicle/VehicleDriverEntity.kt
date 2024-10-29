@@ -6,28 +6,31 @@ import net.enovea.domain.driver.DriverEntity
 import java.io.Serializable
 import java.sql.Timestamp
 
-
 @Entity(name = VehicleDriverEntity.ENTITY_NAME)
 @Table(name = VehicleDriverEntity.TABLE_NAME)
+
 data class VehicleDriverEntity (
 
     @EmbeddedId
     val id: VehicleDriverId = VehicleDriverId(),
 
+    @Column(name = "end_date", nullable = true)
+    val endDate: Timestamp=Timestamp(System.currentTimeMillis()),
+
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("vehicleId")  // Maps the vehicleId field from VehicleServiceId to Vehicle
+    @MapsId("vehicleId")
     @JoinColumn(name = "vehicle_id", nullable = false)
     val vehicle: VehicleEntity? = null,
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("driverId")  // Maps the serviceId field from VehicleServiceId to Service
+    @MapsId("driverId")
     @JoinColumn(name = "driver_id", nullable = false)
     val driver: DriverEntity? = null,
 
 
 ): PanacheEntityBase {
 
-    companion object : PanacheCompanionBase<VehicleEntity, String> {
+    companion object : PanacheCompanionBase<VehicleDriverEntity, VehicleDriverId> {
         const val ENTITY_NAME = "VehicleDriverEntity"
         const val TABLE_NAME = "vehicle_driver"
 
@@ -42,6 +45,6 @@ data class VehicleDriverId(
     @Column(name = "driver_id", nullable = false)
     val driverId: Int=0,
 
-    @Column(name = "date", nullable = false)
-    val date: Timestamp=Timestamp(System.currentTimeMillis())
+    @Column(name = "start_date", nullable = false)
+    val startDate: Timestamp=Timestamp(System.currentTimeMillis())
 ) : Serializable

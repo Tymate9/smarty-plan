@@ -13,6 +13,6 @@ interface DriverMapper {
     fun toEntity(driverDTO: DriverDTO): DriverEntity
 
     companion object {
-        val instance = Mappers.getMapper(DriverMapper::class.java)
+        val INSTANCE: DriverMapper = Mappers.getMapper(DriverMapper::class.java)
     }
 }

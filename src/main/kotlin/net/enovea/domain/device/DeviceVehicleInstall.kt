@@ -1,6 +1,5 @@
 package net.enovea.domain.device
 
-
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
@@ -10,20 +9,15 @@ import java.io.Serializable
 
 @Entity(name= DeviceVehicleInstall.ENTITY_NAME)
 @Table(name= DeviceVehicleInstall.TABLE_NAME)
-@IdClass(DeviceVehicleInstallId::class)  // Composite primary key class
+
 
 data class DeviceVehicleInstall(
-    @Id
-    @Column(name = "device_id", nullable = false)
-    val deviceId: Int ?=null,
 
-    @Id
-    @Column(name = "vehicle_id", nullable = false)
-    val vehicleId: Int ?=null,
+    @EmbeddedId
+    val id: DeviceVehicleInstallId = DeviceVehicleInstallId(),
 
-    @Id
-    @Column(name = "date", nullable = false)
-    val date: Timestamp=Timestamp(System.currentTimeMillis()),
+    @Column(name = "end_date", nullable = true)
+    val endDate: Timestamp=Timestamp(System.currentTimeMillis()),
 
     @Column(name = "fitment_odometer", nullable = true)
     var fitmentOdometer: Int? = null,
@@ -42,23 +36,27 @@ data class DeviceVehicleInstall(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", insertable = false, updatable = false)
-    val device: DeviceEntity? = null,  // Device entity relationship
+    val device: DeviceEntity? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", insertable = false, updatable = false)
-    val vehicle: VehicleEntity? = null  // Vehicle entity relationship
+    val vehicle: VehicleEntity? = null
 ): PanacheEntityBase {
 
-    companion object : PanacheCompanionBase<VehicleEntity, String> {
+    companion object : PanacheCompanionBase<DeviceVehicleInstall, DeviceVehicleInstallId> {
         const val ENTITY_NAME = "DeviceVehicleInstall"
         const val TABLE_NAME = "device_vehicle_install"
 
     }
 }
 
+@Embeddable
 data class DeviceVehicleInstallId(
+    @Column(name = "device_id", nullable = false)
     val deviceId: Int = 0,
+    @Column(name = "vehicle_id", nullable = false)
     val vehicleId: Int = 0,
-    val date: Timestamp = Timestamp(System.currentTimeMillis())
+    @Column(name = "start_date", nullable = false)
+    val startDate: Timestamp = Timestamp(System.currentTimeMillis())
 ) : Serializable
 

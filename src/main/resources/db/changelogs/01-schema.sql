@@ -13,6 +13,16 @@ create table team_category
 );
 
 /* ===========================
+ Table: vehicle_category
+=========================== */
+create table vehicle_category
+(
+    id      SERIAL PRIMARY KEY,
+    label   varchar(255) NOT NULL
+
+);
+
+/* ===========================
      Table: team
    =========================== */
 create table team
@@ -23,9 +33,6 @@ create table team
     category_id Int NOT NULL references team_category,
     path varchar(255)
 );
-
-
-
 
 
 /* ===========================
@@ -58,8 +65,8 @@ CREATE TABLE driver
     id                  SERIAL PRIMARY KEY,
     first_name          VARCHAR(255) NOT NULL,
     last_name           VARCHAR(255) NOT NULL,
-    phone_number        VARCHAR(10),
-    allows_localization BOOLEAN      NOT NULL DEFAULT true
+    phone_number        VARCHAR(10)
+    --allowed_tracking BOOLEAN      NOT NULL DEFAULT true
 );
 
 /* ===========================
@@ -73,6 +80,7 @@ create table vehicle
     engine     varchar(255),
     externalid varchar(255),
     licenseplate varchar(255),
+    category_id Int NOT NULL references vehicle_category,
 --     gearbox               varchar(255),
 --     generatedonthefly     boolean               not null,
 --     label                 varchar(255),
@@ -119,8 +127,9 @@ create table vehicle_team
 (
     vehicle_id varchar(36) not null references vehicle,
     team_id integer     not null references team,
-    date       timestamp   not null,
-    primary key (vehicle_id, team_id, date)
+    start_date       timestamp   not null,
+    end_date       timestamp,
+    primary key (vehicle_id, team_id, start_date)
 );
 
 /* ===========================
@@ -130,8 +139,9 @@ create table vehicle_driver
 (
     vehicle_id varchar(36) not null references vehicle,
     driver_id  integer     not null references driver,
-    date       timestamp   not null,
-    primary key (vehicle_id, driver_id, date)
+    start_date       timestamp   not null,
+    end_date       timestamp,
+    primary key (vehicle_id, driver_id, start_date)
 );
 
 /* ===========================
@@ -162,13 +172,14 @@ create table device_vehicle_install
 (
     device_id               integer     not null references device,
     vehicle_id              varchar(36) not null references vehicle,
-    date                    timestamp   not null,
+    start_date                    timestamp   not null,
+    end_date                    timestamp,
     fitment_odometer        integer,
     fitment_operator        varchar(255),
     fitment_device_location varchar(255),
     fitment_supply_location varchar(255),
     fitment_supply_type     varchar(255),
-    primary key (device_id, vehicle_id, date)
+    primary key (device_id, vehicle_id, start_date)
 );
 
 
@@ -206,4 +217,18 @@ create table vehicle_maintenance
     distance_until_next INTEGER,
     duration_until_next INTEGER,
     vehicle_id          VARCHAR(36)        NOT NULL references vehicle
-)
+);
+
+CREATE TABLE vehicle_untracked_period (
+    vehicle_id          VARCHAR(36)        NOT NULL references vehicle,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    primary key (vehicle_id, start_date)
+);
+
+CREATE TABLE driver_untracked_period (
+    driver_id          INT        NOT NULL references driver,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    primary key (driver_id, start_date)
+);

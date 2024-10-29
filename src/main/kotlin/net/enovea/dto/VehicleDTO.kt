@@ -1,6 +1,6 @@
 package net.enovea.dto
 
-import java.sql.Timestamp
+import net.enovea.domain.vehicle.TimestampRange
 
 
 data class VehicleDTO (
@@ -8,10 +8,11 @@ data class VehicleDTO (
     val energy: String?,
     val engine: String?,
     val externalId: String?,
-    val licenseplate:String?,
-    val validated:Boolean?,
-    val drivers: Map<ClosedRange<Timestamp>, DriverDTO>? = null ,
-    val devices: List<DeviceDTO>,
-    val teams: List<TeamDTO>?
+    val licenseplate:String,
+    val validated:Boolean,
+    val category: VehicleCategoryDTO,
+    val drivers: Map<TimestampRange, DriverDTO>? = null,
+    val devices: Map<TimestampRange, DeviceDTO>? = null,
+    val teams: Map<TimestampRange, TeamDTO>? = null,
 )
 

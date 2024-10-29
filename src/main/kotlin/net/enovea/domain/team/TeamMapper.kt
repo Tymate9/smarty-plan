@@ -1,6 +1,5 @@
 package net.enovea.domain.team
 
-
 import net.enovea.dto.TeamDTO
 import org.mapstruct.Mapper
 import org.mapstruct.factory.Mappers
@@ -14,6 +13,6 @@ interface TeamMapper {
     fun toEntity(teamDTO: TeamDTO): TeamEntity
 
     companion object {
-        val instance = Mappers.getMapper(TeamMapper::class.java)
+        val INSTANCE: TeamMapper = Mappers.getMapper(TeamMapper::class.java)
     }
 }

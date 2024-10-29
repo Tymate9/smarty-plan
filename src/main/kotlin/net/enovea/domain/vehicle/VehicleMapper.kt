@@ -3,42 +3,50 @@ package net.enovea.domain.vehicle
 import net.enovea.domain.device.DeviceMapper
 import net.enovea.domain.driver.DriverMapper
 import net.enovea.domain.team.TeamMapper
-import net.enovea.dto.DeviceDTO
-import net.enovea.dto.DriverDTO
-import net.enovea.dto.TeamDTO
-import net.enovea.dto.VehicleDTO
+import net.enovea.domain.vehicle_category.VehicleCategoryMapper
+import net.enovea.dto.*
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
-import java.sql.Timestamp
 
-@Mapper(uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class])
+@Mapper(uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class])
 interface VehicleMapper {
 
     @Mapping(source = "vehicleDrivers", target = "drivers")
     @Mapping(source = "vehicleDevices", target = "devices")
     @Mapping(source = "vehicleTeams", target = "teams")
+    @Mapping(source = "category",target = "category")
     fun toVehicleDTO(vehicle: VehicleEntity): VehicleDTO
 
+    //Map VehicleDriversEntity to DriverDTOs with start and end date
+    fun mapVehicleDriversToDriversDTO(vehicleDrivers: List<VehicleDriverEntity>): Map<TimestampRange, DriverDTO> =
+        vehicleDrivers.associate {
+            val startDate = it.id.startDate
+            val endDate = it.endDate
+            TimestampRange(startDate, endDate) to DriverMapper.INSTANCE.toDto(it.driver!!)
+        }
 
-    // Map List<VehicleDriver> to List<DriverDTO>
-    fun mapVehicleDriversToDriversDTO(vehicleDrivers: List<VehicleDriverEntity>): Map<ClosedRange<Timestamp>, DriverDTO> =
-        vehicleDrivers.associate { Pair(it.id.date..it.id.date, DriverMapper.instance.toDto(it.driver!!)) }
+    //Map DeviceVehicleInstallEntity to DeviceDTOs with start and end date
+    fun mapVehicleDevicesToDevicesDTO(vehicleDevices: List<DeviceVehicleInstallEntity>):Map<TimestampRange, DeviceDTO> =
+        vehicleDevices.associate {
+            val startDate = it.id.startDate
+            val endDate = it.endDate
+            TimestampRange(startDate, endDate) to DeviceMapper.INSTANCE.toDto(it.device!!)
+        }
 
 
-    // Map List<VehicleDevices> to List<DeviceDTO>
-    fun mapVehicleDevicesToDevicesDTO(vehicleDevices: List<VehicleDeviceEntity>):List<DeviceDTO> =
-        vehicleDevices.map { DeviceMapper.instance.toDto(it.device!!) }
-
-
-    // Map List<VehicleTeams> to List<TeamDTO>
-    fun mapVehicleTeamsToTeamsDTO(vehicleTeams: List<VehicleTeamEntity>):List<TeamDTO> =
-        vehicleTeams.map { TeamMapper.instance.toDto(it.team!!) }
-
+    //Map VehicleTeamEntity to TeamDTOs with start and end date
+    fun mapVehicleTeamsToTeamsDTO(vehicleTeams: List<VehicleTeamEntity>):Map<TimestampRange, TeamDTO> =
+        vehicleTeams.associate {
+            val startDate = it.id.startDate
+            val endDate = it.endDate
+            TimestampRange(startDate, endDate) to TeamMapper.INSTANCE.toDto(it.team!!)
+        }
 
 
     companion object {
-        val instance = Mappers.getMapper(VehicleMapper::class.java)
+        val INSTANCE: VehicleMapper = Mappers.getMapper(VehicleMapper::class.java)
+
     }
 }
 

@@ -2,6 +2,7 @@
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
 import { PoiService} from "../../POI/poi.service";
 import * as turf from '@turf/turf';
+import {dto} from "../../../../habarta/dto";
 
 
 @Component({
@@ -9,12 +10,17 @@ import * as turf from '@turf/turf';
   template: `
     <div>
       <h4>Modifier le POI</h4>
+      <h4>Adresse : {{ address }}</h4>
       <form (ngSubmit)="submitUpdate()">
         <label for="label">Nom :</label>
         <input type="text" id="label" [(ngModel)]="updatedPoi.label" name="label"><br>
 
-        <label for="type">Type :</label>
-        <input type="number" id="type" [(ngModel)]="updatedPoi.type" name="type"><br>
+        <label for="category">Type :</label>
+        <select id="category" [(ngModel)]="selectedCategoryId" name="category">
+          <option *ngFor="let category of categories" [value]="category.id">
+            {{ category.label }}
+          </option>
+        </select><br>
 
         <label for="radius">Rayon (mètres) :</label>
         <input type="number" id="radius" [(ngModel)]="updatedPoi.radius" name="radius"><br>
@@ -30,17 +36,24 @@ export class PoiPopupComponent implements OnInit {
   @Output() poiDeleted = new EventEmitter<number>();
   @Output() poiUpdated = new EventEmitter<any>();
 
+  address: string = 'Chargement...';
+  updatedPoi: { label: string; radius: number };
+  categories: dto.PointOfInterestCategoryEntity[] = [];
 
-
-  updatedPoi: { label: string; type: number; radius: number };
+  selectedCategoryId: number | null = null;
 
   constructor(private poiService: PoiService) {}
 
   ngOnInit() {
+    this.poiService.getAddressFromCoordinates(this.poi.coordinate.coordinates[1],this.poi.coordinate.coordinates[0]).subscribe({
+      next: (response) => {
+        this.address = response.adresse; // Assurez-vous que 'address' est la bonne clé
+      },
+      error: () => this.address = 'Adresse non disponible',
+    });
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {
       label: this.poi.label,
-      type: this.poi.category.id, // Assurez-vous que category.id est correct
       radius: 50, // Valeur par défaut si le calcul échoue
     };
 
@@ -50,11 +63,24 @@ export class PoiPopupComponent implements OnInit {
       const edgePointCoord = this.poi.area.coordinates[0][0]; // Premier point du polygone
       const edgePoint = turf.point(edgePointCoord);
       const distance = turf.distance(center, edgePoint, { units: 'meters' });
-      this.updatedPoi.radius = distance;
+      this.updatedPoi.radius = Math.round(distance);
     } else {
       // Si le calcul du radius échoue, utilisez une valeur par défaut
       this.updatedPoi.radius = 50;
     }
+
+    // Récupérer les catégories
+    this.poiService.getAllPOICategory().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+
+        // Initialiser selectedCategoryId avec l'ID de la catégorie actuelle du POI
+        this.selectedCategoryId = this.poi.category.id;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des catégories:', error);
+      }
+    });
   }
 
   deletePOI() {
@@ -73,9 +99,14 @@ export class PoiPopupComponent implements OnInit {
   }
 
   submitUpdate() {
+    if (this.selectedCategoryId === null) {
+      alert('Veuillez sélectionner une catégorie pour le POI.');
+      return;
+    }
+
     const updatedData = {
       label: this.updatedPoi.label,
-      type: this.updatedPoi.type,
+      type: this.selectedCategoryId,
       WKTPoint: `POINT(${this.poi.coordinate.coordinates[0]} ${this.poi.coordinate.coordinates[1]})`,
       radius: this.updatedPoi.radius,
     };

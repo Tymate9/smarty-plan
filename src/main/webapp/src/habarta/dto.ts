@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2024-10-28 19:56:47.
+// Generated using typescript-generator version 3.2.1263 on 2024-10-29 16:59:06.
 
 import * as custom from "../habarta/custom";
 

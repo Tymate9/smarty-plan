@@ -67,6 +67,9 @@ export class MapComponent implements OnInit {
       this.resetCrossMarker();
       componentRef.destroy();
     });
+    componentRef.instance.radiusChanged.subscribe((radius: number) => {
+      this.updateCircleOnMap(lat, lng, radius);
+    });
 
     // Ajoute le composant Angular dans le conteneur DOM
     container.appendChild((componentRef.hostView as any).rootNodes[0]);
@@ -81,6 +84,12 @@ export class MapComponent implements OnInit {
     this.map.on('popupclose', () => {
       componentRef.destroy();
       this.resetCrossMarker();
+
+      // Supprimer le cercle de la carte
+      if (this.circleLayer) {
+        this.map.removeLayer(this.circleLayer);
+        this.circleLayer = null;
+      }
     });
   }
 
@@ -161,6 +170,25 @@ export class MapComponent implements OnInit {
 
   private onPoiCreated(poi: any): void {
     this.markerFactory.createMarker(EntityType.POI, poi, this.map, this.viewContainerRef);
+  }
+
+  private circleLayer: L.Circle | null = null;
+
+  private updateCircleOnMap(lat: number, lng: number, radius: number) {
+    if (this.circleLayer) {
+      // Mettre à jour le rayon du cercle existant
+      this.circleLayer.setRadius(radius);
+    } else {
+      // Créer un nouveau cercle
+      this.circleLayer = L.circle([lat, lng], {
+        radius: radius,
+        color: 'blue',
+        fillColor: 'blue',
+        fillOpacity: 0.2,
+      }).addTo(this.map);
+    }
+    // Mettre à jour la position du cercle
+    this.circleLayer.setLatLng([lat, lng]);
   }
 }
 

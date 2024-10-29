@@ -57,8 +57,8 @@ export class NavbarComponent implements OnInit {
   userProfile: KeycloakProfile | null = null;
 
   agencyOptions = ['Normandie Manutention', 'Le Havre', 'Paris'];
-  vehicleOptions = ['Vehicle 1', 'Vehicle 2', 'Vehicle 3'];
-  driverOptions = ['Driver 1', 'Driver 2', 'Driver 3'];
+  vehicleOptions = ['Véhicule 1', 'Véhicule 2', 'Véhicule 3'];
+  driverOptions = ['Conducteur 1', 'Conducteur 2', 'Conducteur 3', 'Conducteur 4'];
 
   agencySelected: string[] = [];
   vehicleSelected: string[] = [];
@@ -109,6 +109,7 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
-    this.keycloakService.logout();
+    this.keycloakService.logout("http://localhost:8080/")
+
   }
 }

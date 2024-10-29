@@ -17,6 +17,10 @@ export class PoiService {
     return this.http.get<any>(`${this.baseUrl}`);
   }
 
+  getAllPOICategory(): Observable<dto.PointOfInterestCategoryEntity[]> {
+    return this.http.get<any>(`${this.baseUrl}/category`)
+  }
+
   getNearestPOIs(latitude: number, longitude: number, limit: number = 10): Observable<any> {
     const params = { latitude: latitude.toString(), longitude: longitude.toString(), limit: limit.toString() };
     return this.http.get<any>(`${this.baseUrl}/nearest`, { params });

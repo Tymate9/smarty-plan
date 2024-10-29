@@ -22,6 +22,14 @@ class PointOfInterestResource (
     }
 
     @GET
+    @Path("/category")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun getPOICategory() : List<PointOfInterestCategoryEntity>
+    {
+        return PointOfInterestCategoryEntity.listAll()
+    }
+
+    @GET
     @Path("/nearest")
     @Produces(MediaType.APPLICATION_JSON)
     fun getNearestPOI(

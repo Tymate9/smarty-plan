@@ -75,6 +75,22 @@
       "containerId" : "Normandie Manutention",
       "attributes" : { }
     }, {
+      "id" : "8fe91143-55e2-411f-8452-1ad5b380ffa3",
+      "name" : "NM_RES",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "Normandie Manutention",
+      "attributes" : { }
+    }, {
+      "id" : "3bd3d55b-647d-405e-813b-82da70a7b696",
+      "name" : "NM_QSE",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "Normandie Manutention",
+      "attributes" : { }
+    }, {
       "id" : "67ada186-3181-44b6-9744-471312a65bd3",
       "name" : "offline_access",
       "description" : "${role_offline-access}",
@@ -777,32 +793,81 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
   "users" : [ {
-    "id" : "401df7bf-954a-44cd-ad87-5117a39f09ca",
-    "username" : "adminres",
+    "id" : "d74d471b-53a6-4d69-98db-fd19b92ebca1",
+    "username" : "admin",
     "firstName" : "John",
     "lastName" : "Doe",
-    "email" : "adminres@nm.com",
+    "email" : "admin@nm.com",
     "emailVerified" : true,
     "attributes" : {
       "locale" : [ "fr" ]
     },
-    "createdTimestamp" : 1729753178587,
+    "createdTimestamp" : 1730199700663,
     "enabled" : true,
     "totp" : false,
     "credentials" : [ {
-      "id" : "b62eb975-a98e-4ab2-99ab-35c39b1ce7aa",
+      "id" : "7778cb68-1314-4efc-911a-b2540144ebba",
       "type" : "password",
       "userLabel" : "My password",
-      "createdDate" : 1729753564192,
-      "secretData" : "{\"value\":\"h23PsEf8cUZk/oygOvJT0kJZhhdhBXksFsPc7Vd0UlQ=\",\"salt\":\"0zWdxcvv9ZKAn9XJlOsEug==\",\"additionalParameters\":{}}",
+      "createdDate" : 1730199716649,
+      "secretData" : "{\"value\":\"dArR5GYy0KuuDgLCxCievrpcXXPNMFoj9oeVM+piGgw=\",\"salt\":\"64gmU9mtUAGISRY5GWgJ6g==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "admin", "default-roles-normandie manutention" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "b50494e0-8304-4064-907b-106e7d5de696",
+    "username" : "qse",
+    "firstName" : "Jane",
+    "lastName" : "Doe",
+    "email" : "qse@nm.com",
+    "emailVerified" : true,
+    "attributes" : {
+      "locale" : [ "fr" ]
+    },
+    "createdTimestamp" : 1730199771967,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "c0e55844-b2d7-46c6-9229-6dd053137c7d",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1730199780733,
+      "secretData" : "{\"value\":\"xX7YGLnVBDckJV1otu2FAP86vFXemsM+W4dFrbOJb0o=\",\"salt\":\"lnICKlCYaRzCQcTpxQsqcQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-normandie manutention", "NM_QSE" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "22fc2ecf-d1fb-42fd-8512-96e3ae8d868f",
+    "username" : "res",
+    "firstName" : "alan",
+    "lastName" : "smithee",
+    "email" : "res@nm.com",
+    "emailVerified" : true,
+    "attributes" : {
+      "locale" : [ "fr" ]
+    },
+    "createdTimestamp" : 1730199830397,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "13a10172-0cf1-4e92-a106-e966d3dd22b2",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1730199841181,
+      "secretData" : "{\"value\":\"q/fY9PhlLSxvSE/fGPh0QJaTwMBUqbiEcTRv6EyJncc=\",\"salt\":\"wtWeElrYfzeM0ugMI/Pd+g==\",\"additionalParameters\":{}}",
       "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ "UPDATE_PASSWORD" ],
-    "realmRoles" : [ "admin", "default-roles-normandie manutention" ],
-    "clientRoles" : {
-      "SmartChariot-server" : [ "NM_RES" ]
-    },
+    "realmRoles" : [ "default-roles-normandie manutention", "NM_RES" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -852,35 +917,6 @@
     "realmRoles" : [ "default-roles-normandie manutention" ],
     "clientRoles" : {
       "smarty-plan-api" : [ "uma_protection" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "f02fa08f-2bb4-4867-8aee-57142837ce43",
-    "username" : "user",
-    "firstName" : "Johnette",
-    "lastName" : "Doa",
-    "email" : "user@nm.com",
-    "emailVerified" : true,
-    "attributes" : {
-      "locale" : [ "fr" ]
-    },
-    "createdTimestamp" : 1729753516882,
-    "enabled" : true,
-    "totp" : false,
-    "credentials" : [ {
-      "id" : "1c27edbb-25f7-476f-9e45-47c1452ddc3f",
-      "type" : "password",
-      "userLabel" : "My password",
-      "createdDate" : 1729753539522,
-      "secretData" : "{\"value\":\"vgNNdHNE6c41Q2NZ6tYTMNQu8rritID5zT5+X/wEja8=\",\"salt\":\"Q9yvl+XtoyOHpkkQB0ODfg==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
-    } ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ "UPDATE_PASSWORD" ],
-    "realmRoles" : [ "default-roles-normandie manutention" ],
-    "clientRoles" : {
-      "SmartChariot-server" : [ "NM_RES" ]
     },
     "notBefore" : 0,
     "groups" : [ ]
@@ -1502,7 +1538,7 @@
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
-    "redirectUris" : [ "http://localhost:4200/*", "+" ],
+    "redirectUris" : [ "http://localhost:8080/*", "http://localhost:4200/*", "+" ],
     "webOrigins" : [ "+" ],
     "notBefore" : 0,
     "bearerOnly" : false,
@@ -1519,7 +1555,7 @@
       "client.secret.creation.time" : "1729013972",
       "backchannel.logout.session.required" : "true",
       "login_theme" : "keycloak",
-      "post.logout.redirect.uris" : "+",
+      "post.logout.redirect.uris" : "+##http://localhost:8080/",
       "oauth2.device.authorization.grant.enabled" : "false",
       "display.on.consent.screen" : "false",
       "use.jwks.url" : "false",
@@ -2147,7 +2183,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-usermodel-property-mapper", "saml-user-attribute-mapper", "saml-role-list-mapper", "oidc-full-name-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-user-property-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper" ]
       }
     }, {
       "id" : "e38df35b-7a6a-43b9-868a-f139477b86eb",
@@ -2156,7 +2192,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-usermodel-attribute-mapper", "oidc-full-name-mapper", "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "oidc-address-mapper", "saml-user-property-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper", "oidc-full-name-mapper", "oidc-address-mapper" ]
       }
     }, {
       "id" : "d017729a-8c6e-469c-a979-f3d34302691d",

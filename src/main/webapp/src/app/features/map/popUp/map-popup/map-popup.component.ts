@@ -1,7 +1,8 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {MarkerFactory} from "../../MarkerFactory";
-import { HttpClient } from '@angular/common/http';
 import {PoiService} from "../../../POI/poi.service";
+import {dto} from "../../../../../habarta/dto";
+import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 
 @Component({
   selector: 'app-map-popup',
@@ -23,12 +24,15 @@ import {PoiService} from "../../../POI/poi.service";
         <label for="poiName">Nom du POI:</label>
         <input type="text" id="poiName" placeholder="Nom du POI" [(ngModel)]="poiName"><br>
 
-        <label for="poiType">Type de POI:</label>
-        <input type="number" id="poiType" placeholder="Type de POI" [(ngModel)]="poiType"><br>
+        <label for="poiCategory">Type de POI:</label>
+        <select id="poiCategory" [(ngModel)]="selectedCategoryId" name="poiCategory">
+          <option *ngFor="let category of categories" [value]="category.id">
+            {{ category.label }}
+          </option>
+        </select><br>
 
         <label for="poiRadius">Rayon (mètres):</label>
-        <input type="number" id="poiRadius" placeholder="Rayon en mètres" [(ngModel)]="poiRadius"><br>
-
+        <input type="number" id="poiRadius" placeholder="Rayon en mètres" [(ngModel)]="poiRadius" (ngModelChange)="onRadiusChange($event)"><br>
         <button (click)="submitPOI()">Soumettre</button>
       </div>
     </div>
@@ -44,11 +48,12 @@ export class MapPopupComponent implements OnInit,OnDestroy {
   @Output() buttonClick = new EventEmitter<void>();
   @Output() poiCreated = new EventEmitter<any>();
   @Output() closePopup = new EventEmitter<void>();
+  @Output() radiusChanged = new EventEmitter<number>();
 
   address: string = 'Chargement...';
-
+  categories: PointOfInterestCategoryEntity[] = [];
+  selectedCategoryId: number = -1;
   poiName: string = '';
-  poiType: number = 1;
   poiRadius : number = 1;
   showForm: boolean = false;
   highlightedVehicleNames: string[] = [];
@@ -56,14 +61,31 @@ export class MapPopupComponent implements OnInit,OnDestroy {
   ngOnInit() {
     this.poiService.getAddressFromCoordinates(this.latitude, this.longitude).subscribe({
       next: (response) => {
-        this.address = response.adresse; // Assurez-vous que 'address' est la bonne clé
+        this.address = response.adresse;
       },
       error: () => this.address = 'Adresse non disponible',
+    });
+
+    // Récupérer les catégories
+    this.poiService.getAllPOICategory().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        if (this.categories.length > 0) {
+          this.selectedCategoryId = this.categories[0].id;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des catégories:', error);
+      }
     });
   }
 
   ngOnDestroy() {
     this.resetHighlights();
+  }
+
+  onRadiusChange(newRadius: number) {
+    this.radiusChanged.emit(newRadius);
   }
 
   onButtonClick() {
@@ -128,9 +150,14 @@ export class MapPopupComponent implements OnInit,OnDestroy {
   }
 
   submitPOI() {
+    if (this.selectedCategoryId === -1) {
+      alert("Veuillez sélectionner une catégorie pour le POI.");
+      return;
+    }
+
     const poiData = {
       label: this.poiName,
-      type: this.poiType,
+      type: this.selectedCategoryId,
       WKTPoint: `POINT(${this.longitude} ${this.latitude})`,
       radius: this.poiRadius
     };

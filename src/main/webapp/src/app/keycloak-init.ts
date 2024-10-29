@@ -9,7 +9,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
       config: keycloakConfig,
       initOptions: {
         onLoad: 'login-required',
-        checkLoginIframe: false, // Désactive la vérification de l'iframe pour éviter des problèmes dans certains environnements
+        checkLoginIframe: false,
         enableLogging: true,
         pkceMethod: 'S256',
         flow: 'standard',

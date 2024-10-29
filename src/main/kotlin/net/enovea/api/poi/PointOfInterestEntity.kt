@@ -11,6 +11,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 
+
 @Entity(name=PointOfInterestEntity.ENTITY_NAME)
 @Table(name=PointOfInterestEntity.TABLE_NAME)
 data class PointOfInterestEntity(

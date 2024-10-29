@@ -3,38 +3,42 @@
 --changeset smarty_plan:1
 
 /* ===========================
-     Table: Group
-   =========================== */
-create table "group"
+ Table: team_category
+=========================== */
+create table team_category
 (
-    id    SERIAL PRIMARY KEY,
-    label varchar(255) NOT NULL
+    id      SERIAL PRIMARY KEY,
+    label   varchar(255) NOT NULL
+
 );
 
 /* ===========================
-     Table: Team
+ Table: vehicle_category
+=========================== */
+create table vehicle_category
+(
+    id      SERIAL PRIMARY KEY,
+    label   varchar(255) NOT NULL
+
+);
+
+/* ===========================
+     Table: team
    =========================== */
 create table team
 (
-    id       SERIAL PRIMARY KEY,
-    label    varchar(255) NOT NULL,
-    group_id varchar(255)
-);
-
-/* ===========================
-     Table: Service
-   =========================== */
-create table service
-(
-    id      SERIAL PRIMARY KEY,
-    label   varchar(255) NOT NULL,
-    team_id varchar(255)
+    id    SERIAL PRIMARY KEY,
+    label varchar(255) NOT NULL,
+    parent_id Int references team,
+    category_id Int NOT NULL references team_category,
+    path varchar(255)
 );
 
 
 /* ===========================
      Table: User
    =========================== */
+DROP TYPE IF EXISTS UserRole;
 CREATE TYPE UserRole AS ENUM ('Admin', 'RES', 'QSE');
 CREATE TABLE "user"
 (
@@ -61,8 +65,8 @@ CREATE TABLE driver
     id                  SERIAL PRIMARY KEY,
     first_name          VARCHAR(255) NOT NULL,
     last_name           VARCHAR(255) NOT NULL,
-    phone_number        VARCHAR(10),
-    allows_localization BOOLEAN      NOT NULL DEFAULT true
+    phone_number        VARCHAR(10)
+    --allowed_tracking BOOLEAN      NOT NULL DEFAULT true
 );
 
 /* ===========================
@@ -75,6 +79,8 @@ create table vehicle
     energy     varchar(255),
     engine     varchar(255),
     externalid varchar(255),
+    licenseplate varchar(255),
+    category_id Int NOT NULL references vehicle_category,
 --     gearbox               varchar(255),
 --     generatedonthefly     boolean               not null,
 --     label                 varchar(255),
@@ -117,12 +123,13 @@ create table vehicle
 /* ===========================
      Table : Vehicle_Service
    =========================== */
-create table vehicle_service
+create table vehicle_team
 (
     vehicle_id varchar(36) not null references vehicle,
-    service_id integer     not null references service,
-    date       timestamp   not null,
-    primary key (vehicle_id, service_id, date)
+    team_id integer     not null references team,
+    start_date       timestamp   not null,
+    end_date       timestamp,
+    primary key (vehicle_id, team_id, start_date)
 );
 
 /* ===========================
@@ -132,8 +139,9 @@ create table vehicle_driver
 (
     vehicle_id varchar(36) not null references vehicle,
     driver_id  integer     not null references driver,
-    date       timestamp   not null,
-    primary key (vehicle_id, driver_id, date)
+    start_date       timestamp   not null,
+    end_date       timestamp,
+    primary key (vehicle_id, driver_id, start_date)
 );
 
 /* ===========================
@@ -142,7 +150,7 @@ create table vehicle_driver
 create table device
 (
     id                      serial               not null primary key,
-    imei                    varchar(20),
+    imei                    varchar(20) NOT NULL ,
     label                   varchar(255),
     manufacturer            varchar(255),
     model                   varchar(255),
@@ -151,7 +159,10 @@ create table device
     gateway_enabled         boolean default true NOT NULL,
     last_data_date          timestamp,
     comment                 text,
-    last_communication_date timestamp
+    last_communication_date timestamp,
+    active                  boolean default true NOT NULL,
+    last_communication_latitude double precision,
+    last_communication_longitude double precision
 );
 
 /* =================================
@@ -161,19 +172,21 @@ create table device_vehicle_install
 (
     device_id               integer     not null references device,
     vehicle_id              varchar(36) not null references vehicle,
-    date                    timestamp   not null,
+    start_date                    timestamp   not null,
+    end_date                    timestamp,
     fitment_odometer        integer,
     fitment_operator        varchar(255),
     fitment_device_location varchar(255),
     fitment_supply_location varchar(255),
     fitment_supply_type     varchar(255),
-    primary key (device_id, vehicle_id, date)
+    primary key (device_id, vehicle_id, start_date)
 );
 
 
 /* ============================
      Table: Point of Interest
    ============================ */
+drop type if exists POIType;
 create type POIType as enum ('Domicile', 'Fournisseur', 'Client', 'Bureau', 'Chantier', 'Prospect', 'Autre', 'PMU 🐟');
 create table point_of_interest
 (
@@ -188,9 +201,11 @@ create table point_of_interest
 /* ========================
       Table : Intervention
    ======================== */
+DROP TYPE IF EXISTS InterventionStatus;
 create type InterventionStatus as enum ('Incoming', 'Done');
+DROP TYPE IF EXISTS InterventionType;
 create type InterventionType as enum ('CT', 'Visite générale', 'Réparations', 'Autre');
-create table intervention
+create table vehicle_maintenance
 (
     id                  serial primary key,
     status              InterventionStatus NOT NULL,
@@ -202,4 +217,18 @@ create table intervention
     distance_until_next INTEGER,
     duration_until_next INTEGER,
     vehicle_id          VARCHAR(36)        NOT NULL references vehicle
-)
+);
+
+CREATE TABLE vehicle_untracked_period (
+    vehicle_id          VARCHAR(36)        NOT NULL references vehicle,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    primary key (vehicle_id, start_date)
+);
+
+CREATE TABLE driver_untracked_period (
+    driver_id          INT        NOT NULL references driver,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    primary key (driver_id, start_date)
+);

@@ -1,0 +1,33 @@
+package net.enovea.domain.vehicle
+
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+import jakarta.persistence.*
+import java.io.Serializable
+import java.time.LocalDateTime
+
+@Entity(name = VehicleUntrackedPeriodEntity.ENTITY_NAME)
+@Table(name = VehicleUntrackedPeriodEntity.TABLE_NAME)
+
+class VehicleUntrackedPeriodEntity(
+    @EmbeddedId
+    val id: VehicleUntrackedPeriodId=VehicleUntrackedPeriodId(),
+
+    @Column(name = "end_date" , nullable = true)
+    val endDate: LocalDateTime? = null
+
+) : PanacheEntityBase {
+    companion object : PanacheCompanionBase<VehicleUntrackedPeriodEntity, VehicleUntrackedPeriodId> {
+        const val ENTITY_NAME = "VehicleUntrackedPeriodEntity"
+        const val TABLE_NAME = "vehicle_untracked_period"
+    }
+}
+
+@Embeddable
+data class VehicleUntrackedPeriodId(
+    @Column(name = "vehicle_id", nullable = false)
+    val vehicleId: String = "",
+
+    @Column(name = "start_date", nullable = false)
+    val startDate: LocalDateTime = LocalDateTime.now()
+) : Serializable

@@ -150,7 +150,7 @@ create table vehicle_driver
 create table device
 (
     id                      serial               not null primary key,
-    imei                    varchar(20),
+    imei                    varchar(20) NOT NULL ,
     label                   varchar(255),
     manufacturer            varchar(255),
     model                   varchar(255),

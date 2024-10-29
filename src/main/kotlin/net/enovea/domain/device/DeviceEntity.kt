@@ -15,8 +15,8 @@ data class DeviceEntity (
     @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
     var id: Int = -1,
 
-    @Column(name = "imei", length = 20, nullable = true)
-    var imei: String? = null,
+    @Column(name = "imei", length = 20, nullable = false)
+    var imei: String = "",
 
     @Column(name = "label", nullable = true)
     var label: String? = null,

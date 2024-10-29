@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 data class DeviceDTO (
     var id : Int,
-    var imei :String?,
+    var imei :String,
     var label: String?,
     var manufacturer: String?,
     var model :String?,

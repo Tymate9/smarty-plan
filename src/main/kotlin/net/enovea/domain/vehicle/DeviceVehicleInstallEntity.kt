@@ -12,7 +12,7 @@ import java.sql.Timestamp
 data class DeviceVehicleInstallEntity (
 
     @EmbeddedId
-    val id: VehicleDeviceId = VehicleDeviceId(),
+    val id: DeviceVehicleInstallId = DeviceVehicleInstallId(),
 
     @Column(name = "end_date", nullable = true)
     val endDate: Timestamp = Timestamp(System.currentTimeMillis()),
@@ -45,7 +45,7 @@ data class DeviceVehicleInstallEntity (
 
     ): PanacheEntityBase {
 
-    companion object : PanacheCompanionBase<DeviceVehicleInstallEntity, VehicleDeviceId> {
+    companion object : PanacheCompanionBase<DeviceVehicleInstallEntity, DeviceVehicleInstallId> {
         const val ENTITY_NAME = "DeviceVehicleInstallEntity"
         const val TABLE_NAME = "device_vehicle_install"
 
@@ -53,7 +53,7 @@ data class DeviceVehicleInstallEntity (
 }
 
 @Embeddable
-data class VehicleDeviceId(
+data class DeviceVehicleInstallId(
     @Column(name = "vehicle_id", nullable = false)
     val vehicleId: String="",
 

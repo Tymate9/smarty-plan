@@ -1,7 +1,7 @@
 package net.enovea.dto
 
 import net.enovea.domain.device.DeviceEntity
-import net.enovea.domain.device.DeviceVehicleInstallId
+import net.enovea.domain.vehicle.DeviceVehicleInstallId
 import net.enovea.domain.vehicle.VehicleEntity
 import java.sql.Timestamp
 

@@ -6,7 +6,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HelloWorldComponent } from './features/hello-world/hello-world.component';
 
-import keycloakConfig from "./keycloak.config";
 import { initializeKeycloak } from './keycloak-init';
 import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
 
@@ -20,6 +19,12 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
+import { HTTP_INTERCEPTORS } from "@angular/common/http";
+import { CacheInterceptor } from "./commons/api/cache.interceptor";
+import { MapPopupComponent } from './features/map/popUp/map-popup/map-popup.component';
+import { PoiPopupComponent } from './features/tempTest/poi-popup/poi-popup.component';
+import { VehiclePopupComponent } from './features/tempTest/vehicle-popup/vehicle-popup.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -31,7 +36,10 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
     SearchAutocompleteComponent,
     DashboardComponent,
     CartographyComponent,
-    MainLayoutComponent
+    MainLayoutComponent,
+    MapPopupComponent,
+    PoiPopupComponent,
+    VehiclePopupComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,6 +53,10 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
     useFactory: initializeKeycloak,
     multi: true,
     deps: [KeycloakService],
+  }, {
+    provide: HTTP_INTERCEPTORS,
+    useClass: CacheInterceptor,
+    multi: true
   }],
   bootstrap: [AppComponent]
 })

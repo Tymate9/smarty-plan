@@ -1,0 +1,41 @@
+###
+# 1. GET - Récupérer tous les POIs
+GET http://localhost:8080/poi
+Accept: application/json
+
+###
+
+###
+# 2. POST - Créer un nouveau POI
+POST http://localhost:8080/poi
+Content-Type: application/json
+
+{
+  "label": "Tour Eiffel",
+  "type": "1",
+  "WKTPoint": "POINT(2.2945 48.8584)",
+  "radius": 3
+}
+
+###
+
+###
+# 3. PUT - Mettre à jour un POI existant
+PUT http://localhost:8080/poi/61
+Content-Type: application/json
+
+{
+  "label": "Tour Eiffel - Mise à Jour",
+  "type": "2",
+  "WKTPoint": "POINT(2.2945 48.8584)",
+  "radius": 300000
+}
+
+###
+
+###
+# 4. DELETE - Supprimer un POI existant (par exemple, ID = 1)
+DELETE http://localhost:8080/poi/61
+Accept: application/json
+
+###

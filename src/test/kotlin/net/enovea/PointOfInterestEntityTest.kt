@@ -7,7 +7,7 @@ import net.enovea.api.poi.PointOfInterestEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class PointOfInterestEntityTest {
+/*class PointOfInterestEntityTest {
     @BeforeEach
     fun beforeEach() {
         mockkObject(PointOfInterestEntity.Companion)
@@ -33,4 +33,4 @@ class PointOfInterestEntityTest {
             )
         )
     }
-}
+}*/

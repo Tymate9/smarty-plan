@@ -198,14 +198,13 @@ create table point_of_interest_category
      Table: Point of Interest
    ============================ */
 
-create table point_of_interest
+CREATE TABLE point_of_interest
 (
-    id        serial primary key,
-    label     varchar(255)     NOT NULL,
-    type      integer          NOT NULL references point_of_interest_category,
-    latitude  double precision NOT NULL,
-    longitude double precision NOT NULL,
-    radius    integer          NOT NULL
+    id         SERIAL PRIMARY KEY,
+    label      VARCHAR(255)     NOT NULL,
+    type       INTEGER          NOT NULL REFERENCES point_of_interest_category,
+    coordinate GEOGRAPHY(Point, 4326) NOT NULL,
+    area       GEOGRAPHY(Polygon, 4326) NOT NULL
 );
 
 /* ========================

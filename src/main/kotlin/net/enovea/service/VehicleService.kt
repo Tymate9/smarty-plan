@@ -1,28 +1,28 @@
 package net.enovea.service
+import net.enovea.domain.vehicle.VehicleEntity
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.domain.vehicle.VehicleMapper
 import net.enovea.domain.vehicle.VehicleSummaryMapper
 import net.enovea.dto.VehicleDTO
+import net.enovea.repository.*
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.repository.DriverUntrackedPeriodRepository
 import net.enovea.repository.VehicleRepository
 import net.enovea.repository.VehicleUntrackedPeriodRepository
 
 
-@ApplicationScoped
-class VehicleService (
-    private val vehicleMapper: VehicleMapper = VehicleMapper.INSTANCE,
-    private val vehicleSummaryMapper: VehicleSummaryMapper = VehicleSummaryMapper.INSTANCE,
-){
 
-    @Inject
-    private lateinit var vehicleRepository: VehicleRepository
-    @Inject
-    private lateinit var vehicleUntrackedRepository: VehicleUntrackedPeriodRepository
-    @Inject
-    private lateinit var driverUntrackedRepository: DriverUntrackedPeriodRepository
+class VehicleService (
+    private val teamRepository: TeamRepository,
+    private val driverRepository: DriverRepository,
+    private val vehicleRepository: VehicleRepository,
+    private val vehicleSummaryMapper: VehicleSummaryMapper,
+    private val vehicleUntrackedRepository: VehicleUntrackedPeriodRepository,
+    private val driverUntrackedRepository: DriverUntrackedPeriodRepository,
+    private val vehicleMapper: VehicleMapper,
+
+){
 
 
     //function returns all vehicles details (tracked and untracked)
@@ -133,6 +133,118 @@ class VehicleService (
         return allVehicleDTOs
     }
 
+    // Connection setup (replace with actual connection details)
+//    private fun getConnection(): Connection {
+//        val url = "jdbc:postgresql://localhost:5432/your_database"
+//        val user = "your_user"
+//        val password = "your_password"
+//        return DriverManager.getConnection(url, user, password)
+//    }
+
+    // Updated function to accept lists for teamLabels and vehicleIds, return list of Vehicle entities
+//    fun getFilteredVehiclesPostgis(
+//        teamLabels: List<String>? = null,
+//        vehicleIds: List<String>? = null,
+//        driverNames: List<String>? = null
+//    ): List<VehicleEntity> {
+//
+//        val vehicles = mutableListOf<VehicleEntity>()
+//
+//
+//        // Base SQL query with joins to connect the relational tables
+//        var query = """
+//            SELECT v.id, v.energy, v.engine, v.externalid, v.licenseplate
+//            FROM vehicle v
+//            JOIN vehicle_team vt ON v.id = vt.vehicle_id
+//            JOIN team t ON vt.team_id = t.id
+//            JOIN vehicle_driver vd ON v.id = vd.vehicle_id
+//            JOIN driver d ON vd.driver_id = d.id
+//            WHERE 1=1
+//        """
+//
+//        // Parameters for the prepared statement
+//        val params = mutableListOf<Any>()
+//
+//        // Add dynamic filtering for team labels
+//        if (!teamLabels.isNullOrEmpty()) {
+//            val placeholders = teamLabels.joinToString(", ") { "?" }
+//            query += " AND t.label IN ($placeholders)"
+//            params.addAll(teamLabels)
+//        }
+//
+//        // Add dynamic filtering for vehicle IDs
+//        if (!vehicleIds.isNullOrEmpty()) {
+//            val placeholders = vehicleIds.joinToString(", ") { "?" }
+//            query += " AND v.id IN ($placeholders)"
+//            params.addAll(vehicleIds)
+//        }
+//
+//        // Add dynamic filtering for driver names
+//        if (!driverNames.isNullOrEmpty()) {
+//            val placeholders = driverNames.joinToString(", ") { "?" }
+//            query += " AND (d.first_name || ' ' || d.last_name) IN ($placeholders)"
+//            params.addAll(driverNames)
+//        }
+//
+//        // Execute the query and fetch results as Vehicle entities
+//        getConnection().use { connection ->
+//            val preparedStatement: PreparedStatement = connection.prepareStatement(query)
+//
+//            // Set parameters dynamically
+//            for ((index, param) in params.withIndex()) {
+//                preparedStatement.setObject(index + 1, param)
+//            }
+//
+//            // Execute the query and populate the vehicle list
+//            val resultSet = preparedStatement.executeQuery()
+//            while (resultSet.next()) {
+//                val vehicle = VehicleEntity(
+//                    id = resultSet.getString("id"),
+//                    energy = resultSet.getString("energy"),
+//                    engine = resultSet.getString("engine"),
+//                    externalid = resultSet.getString("externalid"),
+//                    licenseplate = resultSet.getString("licenseplate")
+//                    validated=resultSet.get
+//                )
+//                vehicles.add(vehicle)
+//            }
+//        }
+//
+//        return vehicles
+//    }
+
+    fun getFilteredVehicles(
+        teamLabels: List<String>? = null,
+        vehicleIds: List<String>? = null,
+        driverNames: List<String>? = null
+    ): List<VehicleEntity> {
+
+        // Fetch all vehicles and apply filters if provided
+        var vehicles = vehicleRepository.listAll()
+
+        // Filter by team labels
+        if (!teamLabels.isNullOrEmpty()) {
+            val teamIds = teamRepository.findByLabels(teamLabels).map { it.id }
+            vehicles = vehicles.filter { vehicle ->
+                vehicle.vehicleTeams.any { it.team?.id in teamIds }
+            }
+        }
+
+        // Filter by vehicle IDs
+        if (!vehicleIds.isNullOrEmpty()) {
+            vehicles = vehicles.filter { it.id in vehicleIds }
+        }
+
+        // Filter by driver names
+        if (!driverNames.isNullOrEmpty()) {
+            val driverIds = driverRepository.findByFullNames(driverNames).map { it.id }
+            vehicles = vehicles.filter { vehicle ->
+                vehicle.vehicleDrivers.any { it.driver?.id in driverIds }
+            }
+        }
+
+        return vehicles
+    }
 }
 
 

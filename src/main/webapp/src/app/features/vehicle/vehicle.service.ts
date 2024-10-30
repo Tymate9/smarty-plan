@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { dto} from "../../../habarta/dto";
+
+export interface VehicleWithDistanceDTO {
+  first: number; // Distance en mètres
+  second: dto.VehicleSummaryDTO;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +20,28 @@ export class VehicleService {
   // Méthode pour récupérer tous les véhicules
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
+  }
+
+  // Méthode pour récupérer les véhicules les plus proches avec leur distance
+  getNearestVehiclesWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<VehicleWithDistanceDTO[]> {
+    const params = { latitude: latitude.toString(), longitude: longitude.toString(), limit: limit.toString() }
+    return this.http.get<VehicleWithDistanceDTO[]>(`${this.baseUrl}/withDistance`, { params });
+  }
+
+  // Méthode pour récupérer les véhicules les plus proches sans distance (déjà existante)
+  getNearestVehiclesDetails( latitude: number, longitude: number, limit: number = 10 ): Observable<dto.VehicleSummaryDTO[]> {
+    const params = {
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+      limit: limit.toString(),
+    };
+    return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}/nearest`, { params });
+  }
+
+  // Méthode pour récupérer les véhicules dans un polygone (déjà existante)
+  getVehicleInPolygon(polygonWKT: string): Observable<dto.VehicleSummaryDTO[]> {
+    const params = { polygonWKT };
+    return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}/inPolygon`, { params });
   }
 
 }

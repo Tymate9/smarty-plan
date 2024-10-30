@@ -18,7 +18,7 @@ data class DeviceVehicleInstallEntity (
     val endDate: Timestamp = Timestamp(System.currentTimeMillis()),
 
     @Column(name = "fitment_odometer" ,nullable = true)
-    var fitmentOdometer: Int=0,
+    var fitmentOdometer: Int?=null,
 
     @Column(name = "fitment_operator",nullable = true)
     var fitmentOperator: String?=null,

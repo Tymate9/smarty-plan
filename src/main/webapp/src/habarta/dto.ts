@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2024-10-30 09:47:57.
+// Generated using typescript-generator version 3.2.1263 on 2024-10-30 16:41:36.
 
 import * as custom from "../habarta/custom";
 
@@ -153,7 +153,7 @@ export namespace dto {
     export class DeviceVehicleInstallEntity implements PanacheEntityBase {
         id: DeviceVehicleInstallId;
         endDate: Date;
-        fitmentOdometer: number;
+        fitmentOdometer: number | null;
         fitmentOperator: string | null;
         fitmentDeviceLocation: string | null;
         fitmentSupplyLocation: string | null;

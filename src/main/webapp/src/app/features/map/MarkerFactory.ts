@@ -168,7 +168,7 @@ export class MarkerFactory {
     marker.bindPopup('Chargement...');
 
     // Mettre à jour le tooltip avec les nouvelles propriétés
-    const driverName = entity.driver ? `${entity.driver.firstName} ${entity.driver}` : 'Aucun conducteur';
+    const driverName = entity.driver ? `${entity.driver.firstName} ${entity.driver.lastName}` : 'Aucun conducteur';
     marker.bindTooltip(`${entity.licenseplate} - ${driverName}`, {
       permanent: false,
       direction: 'bottom',

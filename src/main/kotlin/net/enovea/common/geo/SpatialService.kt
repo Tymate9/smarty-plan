@@ -1,9 +1,7 @@
 package net.enovea.common.geo
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import jakarta.persistence.Column
-import jakarta.persistence.Table
-import jakarta.persistence.EntityManager
+import jakarta.persistence.*
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import kotlin.reflect.KClass
@@ -26,9 +24,12 @@ class SpatialService<T : PanacheEntityBase>(
         val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
 
         val query = """
-            SELECT *
+            SELECT e.*, ST_Distance(
+            e.$coordinateColumnName::geography,
+            ST_GeomFromText(:pointWKT, 4326)::geography
+            ) AS distance
             FROM $tableName e
-            ORDER BY ST_Distance(e.$coordinateColumnName::geography, ST_GeomFromText(:pointWKT, 4326)::geography)
+            ORDER BY distance
             LIMIT :limit
         """.trimIndent()
 
@@ -39,6 +40,67 @@ class SpatialService<T : PanacheEntityBase>(
 
         @Suppress("UNCHECKED_CAST")
         return resultList as List<T>
+    }
+
+    fun getNearestEntityWithDistance(point: Point, limit : Int) : List<Pair<Double, T>>{
+        val wktPoint = point.toText()
+
+        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
+        val tableName = tableAnnotation?.name ?: entityClass.simpleName
+
+        val entityAnnotation = entityClass.java.getAnnotation(Entity::class.java)
+        val entityName = entityAnnotation?.name?.takeIf { it.isNotBlank() } ?: entityClass.simpleName
+
+        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
+            ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
+        val columnAnnotation = coordinateField.getAnnotation(Column::class.java)
+        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
+
+        // Trouver le champ annoté avec @Id
+        val idField = entityClass.java.declaredFields.firstOrNull { it.isAnnotationPresent(Id::class.java) }
+            ?: throw IllegalArgumentException("Aucun champ annoté avec @Id trouvé dans ${entityClass.simpleName}")
+
+        val idFieldName = idField.name
+
+        val query = """
+        SELECT e.$idFieldName, ST_Distance(
+            e.$coordinateColumnName::geography,
+            ST_GeomFromText(:pointWKT, 4326)::geography
+        ) AS distance
+        FROM $tableName e
+        ORDER BY distance
+        LIMIT :limit
+    """.trimIndent()
+
+        val resultList = entityManager.createNativeQuery(query)
+            .setParameter("pointWKT", wktPoint)
+            .setParameter("limit", limit)
+            .resultList
+
+        val idDistanceMap = mutableMapOf<Any, Double>()
+
+        for (result in resultList) {
+            val row = result as Array<Any>
+            val id = row[0]
+            val distance = (row[1] as Number).toDouble()
+            idDistanceMap[id] = distance
+        }
+
+        // Récupérer les entités correspondantes en une seule requête HQL
+        val ids = idDistanceMap.keys
+        val entities = entityManager.createQuery("FROM $entityName WHERE $idFieldName IN :ids", entityClass.java)
+            .setParameter("ids", ids)
+            .resultList
+
+        // Associer les distances aux entités
+        val entitiesWithDistances = entities.map { entity ->
+            idField.isAccessible = true
+            val id = idField.get(entity)
+            val distance = idDistanceMap[id] ?: 0.0
+            Pair(distance, entity)
+        }.sortedBy { it.first }
+
+        return entitiesWithDistances
     }
 
     fun getEntityInPolygone(polygon: Polygon): List<T> {

@@ -16,7 +16,7 @@ interface VehicleSummaryMapper {
     @Mapping(source ="vehicleDrivers",target = "driver")
     @Mapping(source ="vehicleDevices",target = "device")
     @Mapping(source ="vehicleTeams",target = "team")
-    fun toVehicleDTOsummary(vehicleEntity: VehicleEntity): VehicleDTOsummary
+    fun toVehicleDTOsummary(vehicleEntity: VehicleEntity): VehicleSummaryDTO
 
     //Map VehicleDrivers to recent DriverDTO
     fun mapMostRecentDriver(vehicleDrivers: List<VehicleDriverEntity>): DriverDTO? {
@@ -27,7 +27,7 @@ interface VehicleSummaryMapper {
     }
 
     //Map most recent Device to DeviceDTOsummary
-    fun mapMostRecentDevice(vehicleDevices: List<DeviceVehicleInstallEntity>): DeviceDTOsummary? {
+    fun mapMostRecentDevice(vehicleDevices: List<DeviceVehicleInstallEntity>): DeviceSummaryDTO? {
         return vehicleDevices
             .filter { it.endDate == null }
             .maxByOrNull { it.id.startDate }
@@ -35,7 +35,7 @@ interface VehicleSummaryMapper {
     }
 
     //Map the most recent team to TeamDTO
-    fun mapMostRecentTeam(vehicleTeams: List<VehicleTeamEntity>): TeamDTOsummary? {
+    fun mapMostRecentTeam(vehicleTeams: List<VehicleTeamEntity>): TeamSummaryDTO? {
         return vehicleTeams
             .filter { it.endDate == null }
             .maxByOrNull { it.id.startDate }

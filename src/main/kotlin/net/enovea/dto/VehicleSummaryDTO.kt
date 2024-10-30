@@ -1,11 +1,11 @@
 package net.enovea.dto
 
 
-data class VehicleDTOsummary (
+data class VehicleSummaryDTO (
     val id: String,
     val licenseplate:String,
     val category: VehicleCategoryDTO,
     val driver: DriverDTO?,
-    val device: DeviceDTOsummary,
-    val team: TeamDTOsummary,
+    val device: DeviceSummaryDTO,
+    val team: TeamSummaryDTO,
 )

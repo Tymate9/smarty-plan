@@ -1,4 +1,4 @@
-package net.dilivia.maestro.webapp
+package net.enovea
 
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.core.Context
@@ -19,6 +19,7 @@ class WebPagesManager {
     fun index(
         @Context uriInfo: UriInfo,
     ): Response {
+        println("Méthode index invoquée")
         val indexHtmlAsStream =
             Thread.currentThread().contextClassLoader.getResourceAsStream("/META-INF/resources/index.html")
         return if (indexHtmlAsStream == null) {

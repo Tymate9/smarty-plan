@@ -1,16 +1,16 @@
 import {Component,OnInit,ViewContainerRef} from '@angular/core';
 import * as L from 'leaflet';
 import {EntityType, MarkerFactory} from './MarkerFactory';
-import {vehicleDTO} from "../../../habarta/custom";
 import {MapPopupComponent} from "./popUp/map-popup/map-popup.component";
-import {PoiService} from "../POI/poi.service";
+import {PoiService} from "../poi/poi.service";
+import {VehicleService} from "../vehicle/vehicle.service";
+import {dto} from "../../../habarta/dto";
+import 'leaflet.markercluster';
+
 
 @Component({
   selector: 'app-map',
   template: `
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossorigin=""/>
     <div id="map"></div>
   `,
   styles: [`
@@ -23,10 +23,12 @@ import {PoiService} from "../POI/poi.service";
 export class MapComponent implements OnInit {
 
   private map!: L.Map;
+  clusterGroup: L.MarkerClusterGroup;
   private crossMarker?: L.Marker;
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
+              private readonly vehicleService: VehicleService,
               private readonly markerFactory: MarkerFactory) {
   }
 
@@ -34,6 +36,8 @@ export class MapComponent implements OnInit {
     this.initMap();
     this.loadPOIs();
     this.loadVehicles();
+/*    this.clusterGroup = L.markerClusterGroup();
+    this.map.addLayer(this.clusterGroup);*/
   }
 
   private initMap(): void {
@@ -120,7 +124,11 @@ export class MapComponent implements OnInit {
     this.poiService.getAllPOIs().subscribe({
       next: (pois) => {
         pois.forEach(poi =>
-          this.markerFactory.createMarker(EntityType.POI, poi, this.map, this.viewContainerRef)
+          { const marker = this.markerFactory.createMarker(EntityType.POI, poi, this.map, this.viewContainerRef)
+/*            if (marker !== null) {
+              this.clusterGroup.addLayer(marker);
+            }*/
+          }
         );
       },
       error: (error) => {
@@ -130,42 +138,23 @@ export class MapComponent implements OnInit {
   }
 
   private loadVehicles(): void {
-    // Liste en dur pour simuler les véhicules
-    const vehicles: vehicleDTO[] = [
-      {
-        id: '1',
-        serialNumber: 'ABC123',
-        adresse: '123 Rue de Paris',
-        driverName: 'John Doe',
-        coordinate: {
-          type: 'Point',
-          coordinates: [2.3522, 48.8566]
-        }
+    this.vehicleService.getAllVehicles().subscribe({
+      next: (vehicles: dto.VehicleSummaryDTO[]) => {
+        vehicles.forEach(vehicle => {
+          if (vehicle.device && vehicle.device.coordinate) {
+            // Ajouter le véhicule à la carte
+            console.log(vehicle)
+            const marker = this.markerFactory.createMarker(EntityType.VEHICLE, vehicle, this.map, this.viewContainerRef);
+/*            if (marker !== null) {
+              this.clusterGroup.addLayer(marker);
+            }*/
+          }
+        });
       },
-      {
-        id: '2',
-        serialNumber: 'DEF456',
-        adresse: '456 Rue de Lyon',
-        driverName: 'Jane Doe',
-        coordinate: {
-          type: 'Point',
-          coordinates: [4.8357, 45.7640]
-        }
-      },
-      {
-        id: '3',
-        serialNumber: 'GHI789',
-        adresse: '789 Rue de Marseille',
-        driverName: 'Jack Smith',
-        coordinate: {
-          type: 'Point',
-          coordinates: [5.3698, 43.2965]
-        }
+      error: (error) => {
+        console.error('Erreur lors de la récupération des véhicules:', error);
       }
-    ];
-
-    // Simule l'affichage des véhicules
-    vehicles.forEach(vehicle => this.markerFactory.createMarker(EntityType.VEHICLE, vehicle, this.map, this.viewContainerRef));
+    });
   }
 
   private onPoiCreated(poi: any): void {

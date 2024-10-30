@@ -1,7 +1,7 @@
 package net.enovea.domain.device
 
 
-import net.enovea.dto.DeviceDTOsummary
+import net.enovea.dto.DeviceSummaryDTO
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
@@ -12,9 +12,8 @@ interface DeviceSummaryMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "lastCommunicationDate", source = "lastCommunicationDate")
     @Mapping(target = "active", source = "active")
-    @Mapping(target = "lastCommunicationLatitude", source = "lastCommunicationLatitude")
-    @Mapping(target = "lastCommunicationLongitude", source = "lastCommunicationLongitude")
-    fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceDTOsummary
+    @Mapping(target = "coordinate", source = "coordinate")
+    fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
 
     companion object {
         val INSTANCE: DeviceSummaryMapper = Mappers.getMapper(DeviceSummaryMapper::class.java)

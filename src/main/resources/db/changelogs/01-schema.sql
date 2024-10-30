@@ -161,8 +161,7 @@ create table device
     comment                 text,
     last_communication_date timestamp,
     active                  boolean default true NOT NULL,
-    last_communication_latitude double precision,
-    last_communication_longitude double precision
+    coordinate              GEOGRAPHY(Point, 4326) NOT NULL
 );
 
 /* =================================
@@ -185,6 +184,7 @@ create table device_vehicle_install
 
 /* ============================
      Table: Point of Interest
+
    ============================ */
 create table point_of_interest_category
 (

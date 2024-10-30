@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {MarkerFactory} from "../../MarkerFactory";
-import {PoiService} from "../../../POI/poi.service";
+import {PoiService} from "../../../poi/poi.service";
 import {dto} from "../../../../../habarta/dto";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 

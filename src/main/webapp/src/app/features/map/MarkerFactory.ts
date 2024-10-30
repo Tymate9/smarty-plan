@@ -1,8 +1,9 @@
 import * as L from 'leaflet';
 import {ComponentRef, Injectable, ViewContainerRef} from '@angular/core';
-import {PoiService} from "../POI/poi.service";
+import {PoiService} from "../poi/poi.service";
 import {PoiPopupComponent} from "../tempTest/poi-popup/poi-popup.component";
 import {VehiclePopupComponent} from "../tempTest/vehicle-popup/vehicle-popup.component";
+import {dto} from "../../../habarta/dto";
 
 export enum EntityType {
   POI = 'poi',
@@ -14,6 +15,7 @@ interface CustomMarker extends L.Marker {
   highlight: () => void;
   resetHighlight: () => void;
   areaPolygon?: L.Polygon;
+  isHighlighted: boolean;
 }
 
 @Injectable({
@@ -26,22 +28,21 @@ export class MarkerFactory {
     private readonly poiService: PoiService
   ) {}
 
-  createMarker(type: EntityType, entity: any, map: L.Map, viewContainerRef: ViewContainerRef) {
-    const coords: [number, number] = [entity.coordinate.coordinates[1], entity.coordinate.coordinates[0]];
+  createMarker(type: EntityType, entity: any, map: L.Map, viewContainerRef: ViewContainerRef) : L.Marker | null{
     let marker: CustomMarker;
 
     switch (type) {
       case EntityType.POI:
-        marker = this.createPOIMarker(coords, entity, map, viewContainerRef);
+        marker = this.createPOIMarker([entity.coordinate.coordinates[1], entity.coordinate.coordinates[0]], entity, map, viewContainerRef);
         marker.id = `poi-${entity.id}`;
         break;
       case EntityType.VEHICLE:
-        marker = this.createVehicleMarker(coords, entity, map, viewContainerRef);
+        marker = this.createVehicleMarker([entity.device.coordinate.coordinates[1], entity.device.coordinate.coordinates[0]], entity, map, viewContainerRef);
         marker.id = `vehicle-${entity.id}`;
         break;
       default:
         console.error("Type d'entité inconnu");
-        return;
+        return null;
     }
 
     this.markersMap.set(marker.id, marker);
@@ -76,6 +77,10 @@ export class MarkerFactory {
       componentRef.instance.poiUpdated.subscribe((updatedPoi: any) => {
         // Mettre à jour le marqueur
         this.updateMarker(updatedPoi, map, viewContainerRef);
+      });
+      componentRef.instance.zoomToHighlightedMarkers.subscribe(() => {
+        this.zoomToHighlightedMarkers(map);
+        map.closePopup();
       });
       // Ajouter le composant Angular dans le conteneur DOM
       container.appendChild((componentRef.hostView as any).rootNodes[0]);
@@ -121,26 +126,53 @@ export class MarkerFactory {
 
   }
 
-  private createVehicleMarker(coords: [number, number], entity: any, map: L.Map, viewContainerRef: ViewContainerRef): CustomMarker {
+  private createVehicleMarker(coords: [number, number],entity: any,map: L.Map,viewContainerRef: ViewContainerRef): CustomMarker {
     const marker = L.marker(coords, {
       icon: this.getVehicleIcon(entity),
     }) as CustomMarker;
+    console.log("Je rentre dans la fonction")
 
-    const container = L.DomUtil.create('div');
+    let componentRef: ComponentRef<VehiclePopupComponent> | null = null;
 
-    // Créer et injecter le composant Angular dans le conteneur
-    const componentRef = viewContainerRef.createComponent(VehiclePopupComponent);
-    componentRef.instance.vehicle = entity;
+    marker.on('popupopen', () => {
+      const container = L.DomUtil.create('div');
 
-    // Ajouter le composant Angular dans le conteneur DOM
-    container.appendChild((componentRef.hostView as any).rootNodes[0]);
+      // Créer et injecter le composant Angular dans le conteneur
+      componentRef = viewContainerRef.createComponent(VehiclePopupComponent);
+      componentRef.instance.vehicle = entity;
 
-    // Lier la popup au marqueur
-    marker.bindPopup(container);
+      componentRef.instance.centerOnPOI.subscribe((poiCoordinates: [number, number]) => {
+        // Fermer la popup
+        map.closePopup();
+        // Centrer la carte sur le POI
+        const lat = poiCoordinates[1];
+        const lng = poiCoordinates[0];
+        map.setView([lat, lng], map.getMaxZoom());
+      });
 
-    // Nettoyer le composant lorsque la popup est fermée
+      // Ajouter le composant Angular dans le conteneur DOM
+      container.appendChild((componentRef.hostView as any).rootNodes[0]);
+
+      // Mettre à jour le contenu de la popup
+      marker.setPopupContent(container);
+    });
+
     marker.on('popupclose', () => {
-      /*componentRef.destroy();*/
+      if (componentRef) {
+        componentRef.destroy();
+        componentRef = null;
+      }
+    });
+
+    // Lier une popup vide au marqueur pour déclencher les événements
+    marker.bindPopup('Chargement...');
+
+    // Mettre à jour le tooltip avec les nouvelles propriétés
+    const driverName = entity.driver ? `${entity.driver.firstName} ${entity.driver}` : 'Aucun conducteur';
+    marker.bindTooltip(`${entity.licenseplate} - ${driverName}`, {
+      permanent: false,
+      direction: 'bottom',
+      opacity: 0.9,
     });
 
     return marker;
@@ -150,11 +182,13 @@ export class MarkerFactory {
     marker.highlight = () => {
       const element = marker.getElement();
       if (element) element.style.border = '3px solid gold';
+      marker.isHighlighted = true;
     };
 
     marker.resetHighlight = () => {
       const element = marker.getElement();
       if (element) element.style.border = '';
+      marker.isHighlighted = false;
     };
 
     marker.on('click', () => this.handleMarkerClick(type, marker));
@@ -171,7 +205,8 @@ export class MarkerFactory {
 
   private simulateProximityForPOI(marker: CustomMarker) {
 
-    const proximityIds = ['vehicle-1', 'vehicle-3'];
+    const proximityIds = ['vehicle-cc'];
+    console.log(this.markersMap)
     proximityIds.forEach(id => {
       const nearbyMarker = this.markersMap.get(id);
       if (nearbyMarker) nearbyMarker.highlight();
@@ -269,6 +304,20 @@ export class MarkerFactory {
 
       // Mettre à jour l'entrée dans markersMap si nécessaire
       this.markersMap.set(markerId, marker);
+    }
+  }
+
+  getHighlightedMarkers(): CustomMarker[] {
+    return Array.from(this.markersMap.values()).filter(marker => marker.isHighlighted);
+  }
+
+  zoomToHighlightedMarkers(map: L.Map) {
+    const highlightedMarkers = this.getHighlightedMarkers();
+    if (highlightedMarkers.length > 0) {
+      const group = L.featureGroup(highlightedMarkers);
+      map.fitBounds(group.getBounds(), { padding: [50, 50] });
+    } else {
+      alert('Aucun marqueur mis en évidence.');
     }
   }
 

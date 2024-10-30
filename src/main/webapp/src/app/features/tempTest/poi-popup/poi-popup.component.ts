@@ -1,6 +1,6 @@
 // src/app/components/poi-popup/poi-popup.component.ts
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
-import { PoiService} from "../../POI/poi.service";
+import { PoiService} from "../../poi/poi.service";
 import * as turf from '@turf/turf';
 import {dto} from "../../../../habarta/dto";
 
@@ -28,6 +28,7 @@ import {dto} from "../../../../habarta/dto";
         <button type="submit">Mettre à jour</button>
       </form>
       <button (click)="deletePOI()">Supprimer le POI</button>
+      <button (click)="zoomToHighlighted()">Afficher tous les marqueurs mis en évidence</button>
     </div>
   `,
 })
@@ -35,6 +36,9 @@ export class PoiPopupComponent implements OnInit {
   @Input() poi: any;
   @Output() poiDeleted = new EventEmitter<number>();
   @Output() poiUpdated = new EventEmitter<any>();
+  @Output() zoomToHighlightedMarkers = new EventEmitter<void>();
+
+
 
   address: string = 'Chargement...';
   updatedPoi: { label: string; radius: number };
@@ -121,5 +125,9 @@ export class PoiPopupComponent implements OnInit {
         alert('Une erreur est survenue lors de la mise à jour du POI.');
       },
     });
+  }
+
+  zoomToHighlighted() {
+    this.zoomToHighlightedMarkers.emit();
   }
 }

@@ -372,6 +372,7 @@
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
                         <pattern>net.enovea.api.*.*Entity</pattern>
+                        <pattern>net.enovea.dto.*DTO</pattern>
                     </classPatterns>
                     <customTypeMappings>
                         <mapping>org.locationtech.jts.geom.Point:custom.GeoPoint</mapping>

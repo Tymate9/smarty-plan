@@ -253,6 +253,7 @@ class PointOfInterestResource (
     @Transactional
     fun deletePOI(
         @PathParam("id") id: Int
+
     ): Response {
         return try {
             // 1. Vérifier si le POI existe
@@ -279,6 +280,34 @@ class PointOfInterestResource (
             // 5. Gestion des exceptions inattendues
             Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(mapOf("error" to "Erreur lors de la suppression du POI: ${e.message}"))
+                .build()
+        }
+    }
+
+    @GET
+    @Path("/withDistance")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun getNearestPOIWithDistance(
+        @QueryParam("latitude") latitude: Double?,
+        @QueryParam("longitude") longitude: Double?,
+        @QueryParam("limit") limit: Int?
+    ): Response {
+        if (latitude == null || longitude == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Les paramètres 'latitude' et 'longitude' sont requis."))
+                .build()
+        }
+
+        val geometryFactory = GeometryFactory()
+        val point: Point = geometryFactory.createPoint(Coordinate(longitude, latitude))
+        val maxResults = limit ?: 10
+
+        return try {
+            val resultList = pointOfInterestSpatialService.getNearestEntityWithDistance(point, maxResults)
+            Response.ok(resultList).build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Erreur lors de la récupération des POIs: ${e.message}"))
                 .build()
         }
     }

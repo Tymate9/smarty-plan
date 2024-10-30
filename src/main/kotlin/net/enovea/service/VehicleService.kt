@@ -4,7 +4,7 @@ import jakarta.inject.Inject
 import net.enovea.domain.vehicle.VehicleMapper
 import net.enovea.domain.vehicle.VehicleSummaryMapper
 import net.enovea.dto.VehicleDTO
-import net.enovea.dto.VehicleDTOsummary
+import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.repository.DriverUntrackedPeriodRepository
 import net.enovea.repository.VehicleRepository
 import net.enovea.repository.VehicleUntrackedPeriodRepository
@@ -31,7 +31,7 @@ class VehicleService (
     }
 
     //function returns all vehicles summaries (tracked and untracked)
-    fun getAllVehiclesSummaries(): List<VehicleDTOsummary> {
+    fun getAllVehiclesSummaries(): List<VehicleSummaryDTO> {
         val vehicles = vehicleRepository.listAll()
         return vehicles.map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
     }
@@ -64,7 +64,7 @@ class VehicleService (
     }
 
     //function returns tracked and untracked vehicles(summary) with replacing the last position by null for untracked vehicles/drivers
-    fun getVehiclesSummary(): List<VehicleDTOsummary> {
+    fun getVehiclesSummary(): List<VehicleSummaryDTO> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = vehicleUntrackedRepository.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = driverUntrackedRepository.findDriverIdsWithUntrackedPeriod()
@@ -82,8 +82,7 @@ class VehicleService (
             val isDriverTracked = vehicleDTOsummary.driver?.id == null || vehicleDTOsummary.driver.id !in untrackedDriverIds
 
             if (!isVehicleTracked || !isDriverTracked) {
-                vehicleDTOsummary.device.lastCommunicationLongitude = null
-                vehicleDTOsummary.device.lastCommunicationLatitude = null
+                vehicleDTOsummary.device.coordinate = null
 
             }
         }
@@ -121,8 +120,7 @@ class VehicleService (
                     ?.filter { it.key.end == null }
                     ?.maxByOrNull { it.key.start }
                     ?.let { recentDevice ->
-                        recentDevice.value.lastCommunicationLongitude = null
-                        recentDevice.value.lastCommunicationLatitude = null
+                        recentDevice.value.coordinate = null
                     }
             }
         }

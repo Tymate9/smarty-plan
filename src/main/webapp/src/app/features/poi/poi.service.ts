@@ -3,6 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {dto} from "../../../habarta/dto";
 
+export interface PoiWithDistance {
+  distance: number;
+  poi: dto.PointOfInterestEntity;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,6 +29,15 @@ export class PoiService {
   getNearestPOIs(latitude: number, longitude: number, limit: number = 10): Observable<any> {
     const params = { latitude: latitude.toString(), longitude: longitude.toString(), limit: limit.toString() };
     return this.http.get<any>(`${this.baseUrl}/nearest`, { params });
+  }
+
+  getNearestPOIsWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<PoiWithDistance[]> {
+    const params = {
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+      limit: limit.toString(),
+    };
+    return this.http.get<PoiWithDistance[]>(`${this.baseUrl}/withDistance`, { params });
   }
 
   getPOIsInPolygon(polygonWKT: string): Observable<any> {

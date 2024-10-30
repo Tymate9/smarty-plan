@@ -1,8 +1,8 @@
-package net.enovea
+package net.enovea.api.vehicle
 
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
-import net.enovea.dto.VehicleDTOsummary
+import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.service.VehicleService
 
 @Path("/vehicles")
@@ -11,7 +11,7 @@ import net.enovea.service.VehicleService
 class VehicleResource(private val vehicleService: VehicleService) {
 
     @GET
-    fun getAllVehiclesDetails(): List<VehicleDTOsummary> {
+    fun getAllVehiclesDetails(): List<VehicleSummaryDTO> {
         return vehicleService.getVehiclesSummary()
     }
 

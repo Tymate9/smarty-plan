@@ -15,91 +15,91 @@ VALUES ('Bureau', '#FF5733'),
 
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
-VALUES ('Bureau Caen',
+VALUES ('Bureau HYDRECO',
         1,
-        ST_SetSRID(ST_MakePoint(-0.3708, 49.1829), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3708, 49.1829), 4326)::geography, 50)),
-       ('Bureau Rouen',
+        ST_SetSRID(ST_MakePoint(-0.7307, 49.2694), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.7307,49.2694 ), 4326)::geography, 50)),
+       ('Bureau ID MARKET',
         1,
-        ST_SetSRID(ST_MakePoint(1.0993, 49.4431), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.0993, 49.4431), 4326)::geography, 60)),
-       ('Bureau Le Havre',
+        ST_SetSRID(ST_MakePoint(-0.302, 49.1359), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.302,49.1359), 4326)::geography, 60)),
+       ('Bureau GIFI',
         1,
-        ST_SetSRID(ST_MakePoint(0.1079, 49.4944), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1079, 49.4944), 4326)::geography, 70)),
-       ('Bureau Alençon',
+        ST_SetSRID(ST_MakePoint(-0.6903,49.283 ), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.6903,49.283 ), 4326)::geography, 70)),
+       ('Bureau SAINT ETIENNE',
         1,
-        ST_SetSRID(ST_MakePoint(0.0931, 48.4320), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.0931, 48.4320), 4326)::geography, 80)),
-       ('Bureau Évreux',
+        ST_SetSRID(ST_MakePoint(1.0936, 49.369), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.0936,49.369), 4326)::geography, 80)),
+       ('Bureau LE HAVRE',
         1,
-        ST_SetSRID(ST_MakePoint(1.1500, 49.0241), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1500, 49.0241), 4326)::geography, 90));
+        ST_SetSRID(ST_MakePoint(0.3551,49.5401 ), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.3551,49.5401), 4326)::geography, 90));
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
 VALUES
     (
-        'Domicile Caen',
+        'Domicile Barentin',
         2,
-        ST_SetSRID(ST_MakePoint(-0.3710, 49.1840), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3710, 49.1840), 4326)::geography, 30)
+        ST_SetSRID(ST_MakePoint(0.96762, 49.1840), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.96762, 49.1840), 4326)::geography, 30)
+    ),
+    (
+        'Domicile DIEPPE',
+        2,
+        ST_SetSRID(ST_MakePoint(1.0881,49.9198 ), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.0881,49.9198 ), 4326)::geography, 40)
     ),
     (
         'Domicile Rouen',
         2,
-        ST_SetSRID(ST_MakePoint(1.1000, 49.4440), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1000, 49.4440), 4326)::geography, 40)
+        ST_SetSRID(ST_MakePoint(1.06288,49.43512), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.06288,49.43512), 4326)::geography, 50)
     ),
     (
-        'Domicile Le Havre',
+        'Domicile Incarville',
         2,
-        ST_SetSRID(ST_MakePoint(0.1080, 49.4950), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1080, 49.4950), 4326)::geography, 50)
+        ST_SetSRID(ST_MakePoint(1.16821,49.23334), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.16821,49.23334), 4326)::geography, 60)
     ),
     (
-        'Domicile Alençon',
+        'Domicile Saint-Étienne-du-Rouvray',
         2,
-        ST_SetSRID(ST_MakePoint(0.0940, 48.4330), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.0940, 48.4330), 4326)::geography, 60)
-    ),
-    (
-        'Domicile Évreux',
-        2,
-        ST_SetSRID(ST_MakePoint(1.1510, 49.0250), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1510, 49.0250), 4326)::geography, 70)
+        ST_SetSRID(ST_MakePoint(1.10492,49.36676), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.10492,49.36676), 4326)::geography, 70)
     );
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
 VALUES
     (
-        'Fournisseur Caen',
+        'Fournisseur PARIS',
         3,
-        ST_SetSRID(ST_MakePoint(-0.3720, 49.1850), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3720, 49.1850), 4326)::geography, 100)
+        ST_SetSRID(ST_MakePoint(1.0917, 49.4233), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.0917, 49.4233), 4326)::geography, 100)
     ),
     (
-        'Fournisseur Rouen',
+        'Fournisseur ALMENCE RENAULT',
         3,
-        ST_SetSRID(ST_MakePoint(1.1010, 49.4450), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1010, 49.4450), 4326)::geography, 120)
+        ST_SetSRID(ST_MakePoint(0.35583, 49.5372), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.35583, 49.5372), 4326)::geography, 120)
     ),
     (
-        'Fournisseur Le Havre',
+        'Fournisseur STIPA',
         3,
-        ST_SetSRID(ST_MakePoint(0.1090, 49.4960), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1090, 49.4960), 4326)::geography, 140)
+        ST_SetSRID(ST_MakePoint(0.537,48.5248), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.537,48.5248), 4326)::geography, 140)
     ),
     (
-        'Fournisseur Alençon',
+        'Fournisseur ARNO',
         3,
-        ST_SetSRID(ST_MakePoint(0.0950, 48.4340), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.0950, 48.4340), 4326)::geography, 160)
+        ST_SetSRID(ST_MakePoint(1.07357,49.44081), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.07357,49.44081), 4326)::geography, 160)
     ),
     (
-        'Fournisseur Évreux',
+        'Fournisseur MASSA',
         3,
-        ST_SetSRID(ST_MakePoint(1.1520, 49.0260), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1520, 49.0260), 4326)::geography, 180)
+        ST_SetSRID(ST_MakePoint(0.14359, 49.48289), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.14359, 49.48289), 4326)::geography, 180)
     );
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
@@ -138,34 +138,34 @@ VALUES
 INSERT INTO point_of_interest (label, type, coordinate, area)
 VALUES
     (
-        'Client Caen',
+        'Client LA POSTE',
         5,
-        ST_SetSRID(ST_MakePoint(-0.3740, 49.1870), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3740, 49.1870), 4326)::geography, 80)
+        ST_SetSRID(ST_MakePoint(0.7408, 49.6222), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.7408, 49.6222), 4326)::geography, 80)
     ),
     (
-        'Client Rouen',
+        'Client POINT P - Vire',
         5,
-        ST_SetSRID(ST_MakePoint(1.1030, 49.4470), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1030, 49.4470), 4326)::geography, 90)
+        ST_SetSRID(ST_MakePoint(-0.8712, 48.8699), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.8712,48.8699 ), 4326)::geography, 90)
     ),
     (
-        'Client Le Havre',
+        'Client LA NORMANDISE',
         5,
-        ST_SetSRID(ST_MakePoint(0.1110, 49.4980), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1110, 49.4980), 4326)::geography, 100)
+        ST_SetSRID(ST_MakePoint(-0.8638,48.8582 ), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.8638,48.8582 ), 4326)::geography, 100)
     ),
     (
-        'Client Alençon',
+        'Client CEDEO ',
         5,
-        ST_SetSRID(ST_MakePoint(0.0970, 48.4360), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.0970, 48.4360), 4326)::geography, 110)
+        ST_SetSRID(ST_MakePoint(1.4706, 49.1017), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.4706,49.1017 ), 4326)::geography, 110)
     ),
     (
-        'Client Évreux',
+        'Client ORNADEC',
         5,
-        ST_SetSRID(ST_MakePoint(1.1540, 49.0280), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1540, 49.0280), 4326)::geography, 120)
+        ST_SetSRID(ST_MakePoint(0.3856,49.0144 ), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.3856, 49.0144), 4326)::geography, 120)
     );
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
@@ -237,67 +237,67 @@ VALUES
 INSERT INTO point_of_interest (label, type, coordinate, area)
 VALUES
     (
-        'Station Service Caen',
+        'Station Service Total Saint-Étienne-du-Rouvray',
         8,
-        ST_SetSRID(ST_MakePoint(-0.3770, 49.1900), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3770, 49.1900), 4326)::geography, 60)
+        ST_SetSRID(ST_MakePoint(1.0597, 49.3937), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.0597, 49.3937), 4326)::geography, 60)
+    ),
+    (
+        'Station Service Total Esso Saint-Étienne-du-Rouvray ',
+        8,
+        ST_SetSRID(ST_MakePoint(1.11213, 49.39555), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.11213, 49.39555), 4326)::geography, 80)
+    ),
+    (
+        'Station Service Station Esso Express Rouen',
+        8,
+        ST_SetSRID(ST_MakePoint(1.04932, 49.44976), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.04932, 49.44976), 4326)::geography, 100)
     ),
     (
         'Station Service Rouen',
         8,
-        ST_SetSRID(ST_MakePoint(1.1060, 49.4500), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1060, 49.4500), 4326)::geography, 80)
+        ST_SetSRID(ST_MakePoint(1.05788, 49.45069), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.05788, 49.45069), 4326)::geography, 120)
     ),
     (
-        'Station Service Le Havre',
+        'Station Service Duclair',
         8,
-        ST_SetSRID(ST_MakePoint(0.1140, 49.5010), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1140, 49.5010), 4326)::geography, 100)
-    ),
-    (
-        'Station Service Alençon',
-        8,
-        ST_SetSRID(ST_MakePoint(0.1000, 48.4390), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1000, 48.4390), 4326)::geography, 120)
-    ),
-    (
-        'Station Service Évreux',
-        8,
-        ST_SetSRID(ST_MakePoint(1.1570, 49.0310), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1570, 49.0310), 4326)::geography, 140)
+        ST_SetSRID(ST_MakePoint(0.87276, 49.4805), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.87276, 49.4805), 4326)::geography, 140)
     );
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
 VALUES
     (
-        'Restaurant Caen',
+        'Restaurant Val de Reuil',
         9,
-        ST_SetSRID(ST_MakePoint(-0.3780, 49.1910), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3780, 49.1910), 4326)::geography, 50)
+        ST_SetSRID(ST_MakePoint(1.1844, 49.2503), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1844,49.2503), 4326)::geography, 50)
     ),
     (
-        'Restaurant Rouen',
+        'Restaurant Le Cinoche',
         9,
-        ST_SetSRID(ST_MakePoint(1.1070, 49.4510), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1070, 49.4510), 4326)::geography, 70)
+        ST_SetSRID(ST_MakePoint(1.09541, 49.32846), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.09541, 49.32846), 4326)::geography, 70)
     ),
     (
-        'Restaurant Le Havre',
+        'Restaurant Best Burger',
         9,
-        ST_SetSRID(ST_MakePoint(0.1150, 49.5020), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1150, 49.5020), 4326)::geography, 90)
+        ST_SetSRID(ST_MakePoint(0.1932, 49.5456), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1932, 49.5456), 4326)::geography, 90)
     ),
     (
-        'Restaurant Alençon',
+        'Restaurant Les Andelys',
         9,
-        ST_SetSRID(ST_MakePoint(0.1010, 48.4400), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(0.1010, 48.4400), 4326)::geography, 110)
+        ST_SetSRID(ST_MakePoint(1.41903, 49.2467), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.41903, 49.2467), 4326)::geography, 110)
     ),
     (
-        'Restaurant Évreux',
+        'Restaurant Le relai des Hayons',
         9,
-        ST_SetSRID(ST_MakePoint(1.1580, 49.0320), 4326),
-        ST_Buffer(ST_SetSRID(ST_MakePoint(1.1580, 49.0320), 4326)::geography, 130)
+        ST_SetSRID(ST_MakePoint(1.36609, 49.69498), 4326),
+        ST_Buffer(ST_SetSRID(ST_MakePoint(1.36609, 49.69498), 4326)::geography, 130)
     );
 
 INSERT INTO point_of_interest (label, type, coordinate, area)

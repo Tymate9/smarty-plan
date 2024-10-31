@@ -11,7 +11,6 @@ class SpatialService<T : PanacheEntityBase>(
     private val entityManager: EntityManager,
     private val geoCodingService: GeoCodingService
 ) {
-    // TODO (Ajouter la distance à vol d'oiseaux)
     fun getNearestEntity(point: Point, limit: Int): List<T> {
         val wktPoint = point.toText()
 

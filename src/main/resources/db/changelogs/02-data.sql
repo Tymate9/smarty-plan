@@ -63,34 +63,33 @@ INSERT INTO vehicle (id, energy, engine, externalid, licenseplate, category_id, 
 /* Seed pour la table device - 25 dispositifs */
 -- Les coordonnées sont aléatoires mais situées en Normandie
 INSERT INTO device (imei, label, manufacturer, model, serialnumber, simnumber, coordinate) VALUES
-('imei1', 'Device 1', 'Manufacturer A', 'Model X', 'SN001', 'SIM001', ST_GeogFromText('SRID=4326;POINT(0.102 49.443)')),
-('imei2', 'Device 2', 'Manufacturer B', 'Model Y', 'SN002', 'SIM002', ST_GeogFromText('SRID=4326;POINT(0.355 49.182)')),
-('imei3', 'Device 3', 'Manufacturer A', 'Model Z', 'SN003', 'SIM003', ST_GeogFromText('SRID=4326;POINT(-0.456 49.650)')),
-('imei4', 'Device 4', 'Manufacturer C', 'Model W', 'SN004', 'SIM004', ST_GeogFromText('SRID=4326;POINT(0.145 49.290)')),
-('imei5', 'Device 5', 'Manufacturer A', 'Model V', 'SN005', 'SIM005', ST_GeogFromText('SRID=4326;POINT(-0.789 49.500)')),
-('imei6', 'Device 6', 'Manufacturer A', 'Model X', 'SN006', 'SIM006', ST_GeogFromText('SRID=4326;POINT(0.212 49.482)')),
-('imei7', 'Device 7', 'Manufacturer B', 'Model Y', 'SN007', 'SIM007', ST_GeogFromText('SRID=4326;POINT(0.589 49.372)')),
-('imei8', 'Device 8', 'Manufacturer A', 'Model Z', 'SN008', 'SIM008', ST_GeogFromText('SRID=4326;POINT(-0.334 49.732)')),
-('imei9', 'Device 9', 'Manufacturer C', 'Model W', 'SN009', 'SIM009', ST_GeogFromText('SRID=4326;POINT(0.254 49.285)')),
-('imei10', 'Device 10', 'Manufacturer A', 'Model V', 'SN010', 'SIM010', ST_GeogFromText('SRID=4326;POINT(-0.789 49.504)')),
-('imei11', 'Device 11', 'Manufacturer B', 'Model X', 'SN011', 'SIM011', ST_GeogFromText('SRID=4326;POINT(0.112 49.562)')),
-('imei12', 'Device 12', 'Manufacturer A', 'Model Y', 'SN012', 'SIM012', ST_GeogFromText('SRID=4326;POINT(0.367 49.692)')),
-('imei13', 'Device 13', 'Manufacturer B', 'Model Z', 'SN013', 'SIM013', ST_GeogFromText('SRID=4326;POINT(-0.246 49.674)')),
-('imei14', 'Device 14', 'Manufacturer C', 'Model W', 'SN014', 'SIM014', ST_GeogFromText('SRID=4326;POINT(0.357 49.390)')),
-('imei15', 'Device 15', 'Manufacturer A', 'Model V', 'SN015', 'SIM015', ST_GeogFromText('SRID=4326;POINT(-0.619 49.530)')),
-('imei16', 'Device 16', 'Manufacturer B', 'Model X', 'SN016', 'SIM016', ST_GeogFromText('SRID=4326;POINT(0.144 49.571)')),
-('imei17', 'Device 17', 'Manufacturer A', 'Model Y', 'SN017', 'SIM017', ST_GeogFromText('SRID=4326;POINT(0.215 49.402)')),
-('imei18', 'Device 18', 'Manufacturer C', 'Model Z', 'SN018', 'SIM018', ST_GeogFromText('SRID=4326;POINT(-0.412 49.680)')),
-('imei19', 'Device 19', 'Manufacturer B', 'Model W', 'SN019', 'SIM019', ST_GeogFromText('SRID=4326;POINT(0.231 49.278)')),
-('imei20', 'Device 20', 'Manufacturer A', 'Model V', 'SN020', 'SIM020', ST_GeogFromText('SRID=4326;POINT(-0.689 49.501)')),
-('imei21', 'Device 21', 'Manufacturer C', 'Model X', 'SN021', 'SIM021', ST_GeogFromText('SRID=4326;POINT(0.189 49.349)')),
-('imei22', 'Device 22', 'Manufacturer B', 'Model Y', 'SN022', 'SIM022', ST_GeogFromText('SRID=4326;POINT(0.487 49.732)')),
-('imei23', 'Device 23', 'Manufacturer A', 'Model Z', 'SN023', 'SIM023', ST_GeogFromText('SRID=4326;POINT(-0.415 49.683)')),
-('imei24', 'Device 24', 'Manufacturer C', 'Model W', 'SN024', 'SIM024', ST_GeogFromText('SRID=4326;POINT(0.411 49.383)')),
-('imei25', 'Device 25', 'Manufacturer B', 'Model V', 'SN025', 'SIM025', ST_GeogFromText('SRID=4326;POINT(-0.579 49.510)'));
+('imei1', 'Device 1', 'Manufacturer A', 'Model X', 'SN001', 'SIM001', ST_GeogFromText('SRID=4326;POINT(0.9987 49.7894)')),
+('imei2', 'Device 2', 'Manufacturer B', 'Model Y', 'SN002', 'SIM002', ST_GeogFromText('SRID=4326;POINT(0.96762 49.53574)')),
+('imei3', 'Device 3', 'Manufacturer A', 'Model Z', 'SN003', 'SIM003', ST_GeogFromText('SRID=4326;POINT(1.1833 49.2476)')),
+('imei4', 'Device 4', 'Manufacturer C', 'Model W', 'SN004', 'SIM004', ST_GeogFromText('SRID=4326;POINT(1.09396 49.32978)')),
+('imei5', 'Device 5', 'Manufacturer A', 'Model V', 'SN005', 'SIM005', ST_GeogFromText('SRID=4326;POINT(1.10329 49.40367)')),
+('imei6', 'Device 6', 'Manufacturer A', 'Model X', 'SN006', 'SIM006', ST_GeogFromText('SRID=4326;POINT(0.31541 49.47799)')),
+('imei7', 'Device 7', 'Manufacturer B', 'Model Y', 'SN007', 'SIM007', ST_GeogFromText('SRID=4326;POINT(1.07566 49.38886)')),
+('imei8', 'Device 8', 'Manufacturer A', 'Model Z', 'SN008', 'SIM008', ST_GeogFromText('SRID=4326;POINT(1.09019 49.44962)')),
+('imei9', 'Device 9', 'Manufacturer C', 'Model W', 'SN009', 'SIM009', ST_GeogFromText('SRID=4326;POINT(1.06288 49.43512)')),
+('imei10', 'Device 10', 'Manufacturer A', 'Model V', 'SN010', 'SIM010', ST_GeogFromText('SRID=4326;POINT(1.06553 49.44734)')),
+('imei11', 'Device 11', 'Manufacturer B', 'Model X', 'SN011', 'SIM011', ST_GeogFromText('SRID=4326;POINT(1.01222 49.38768)')),
+('imei12', 'Device 12', 'Manufacturer A', 'Model Y', 'SN012', 'SIM012', ST_GeogFromText('SRID=4326;POINT(1.0173 49.3711)')),
+('imei13', 'Device 13', 'Manufacturer B', 'Model Z', 'SN013', 'SIM013', ST_GeogFromText('SRID=4326;POINT(1.09543 49.34827)')),
+('imei14', 'Device 14', 'Manufacturer C', 'Model W', 'SN014', 'SIM014', ST_GeogFromText('SRID=4326;POINT(0.5795 49.4866)')),
+('imei15', 'Device 15', 'Manufacturer A', 'Model V', 'SN015', 'SIM015', ST_GeogFromText('SRID=4326;POINT(0.96058 49.53768)')),
+('imei16', 'Device 16', 'Manufacturer B', 'Model X', 'SN016', 'SIM016', ST_GeogFromText('SRID=4326;POINT(1.9758 48.7969)')),
+('imei17', 'Device 17', 'Manufacturer A', 'Model Y', 'SN017', 'SIM017', ST_GeogFromText('SRID=4326;POINT(1.61245 49.30577)')),
+('imei18', 'Device 18', 'Manufacturer C', 'Model Z', 'SN018', 'SIM018', ST_GeogFromText('SRID=4326;POINT(1.1587 49.0404)')),
+('imei19', 'Device 19', 'Manufacturer B', 'Model W', 'SN019', 'SIM019', ST_GeogFromText('SRID=4326;POINT(1.03063 49.41557)')),
+('imei20', 'Device 20', 'Manufacturer A', 'Model V', 'SN020', 'SIM020', ST_GeogFromText('SRID=4326;POINT(1.2059 49.2861)')),
+('imei21', 'Device 21', 'Manufacturer C', 'Model X', 'SN021', 'SIM021', ST_GeogFromText('SRID=4326;POINT(1.06247 49.43445)')),
+('imei22', 'Device 22', 'Manufacturer B', 'Model Y', 'SN022', 'SIM022', ST_GeogFromText('SRID=4326;POINT(1.139 49.8801)')),
+('imei23', 'Device 23', 'Manufacturer A', 'Model Z', 'SN023', 'SIM023', ST_GeogFromText('SRID=4326;POINT(-0.2939 49.1962)')),
+('imei24', 'Device 24', 'Manufacturer C', 'Model W', 'SN024', 'SIM024', ST_GeogFromText('SRID=4326;POINT(0.2792 48.772)')),
+('imei25', 'Device 25', 'Manufacturer B', 'Model V', 'SN025', 'SIM025', ST_GeogFromText('SRID=4326;POINT(0.1743 49.4887)'));
 
 
-/* Seed pour la table vehicle_driver - 25 associations véhicule/conducteur */
 INSERT INTO driver (first_name, last_name, phone_number) VALUES
 ('John', 'Doe', '0600000001'),
 ('Jane', 'Smith', '0600000002'),
@@ -215,52 +214,6 @@ INSERT INTO vehicle_untracked_period (vehicle_id, start_date, end_date) VALUES
 INSERT INTO driver_untracked_period (driver_id, start_date, end_date) VALUES
 (5, '2023-11-01', NULL),
 (12, '2023-11-01', NULL);
-
-
-/*INSERT INTO vehicle_category(id, label) VALUES (1,'car');
-INSERT INTO vehicle_category(id, label) VALUES (2,'bus');
-
-INSERT INTO vehicle (id, energy, engine ,externalId,validated , category_id , licenseplate ) VALUES ('aa', 'test', 'test', 'test' , 'true' , 1 ,'MM-AA');
-INSERT INTO vehicle (id, energy, engine ,externalId,validated , category_id , licenseplate) VALUES ('bb', 'test', 'test', 'test' , 'true' , 1 ,'EE-88');
-INSERT INTO vehicle (id, energy, engine ,externalId,validated , category_id, licenseplate ) VALUES ('cc', 'test', 'test', 'test' , 'true' , 2 , 'CC-10');
-
-INSERT INTO driver (id, first_name, last_name, phone_number) VALUES ('1','mariam' , 'helala' , '12345');
-INSERT INTO driver (id, first_name, last_name, phone_number) VALUES ('2','JB' , 'Soyez' , '54321' );
-INSERT INTO driver (id, first_name, last_name, phone_number) VALUES ('3','ilyes' , 'ismaili' , '2323' );
-
-INSERT INTO vehicle_driver(vehicle_id, driver_id, start_date) VALUES ('aa','1','01/10/2024');
-INSERT INTO vehicle_driver(vehicle_id, driver_id, start_date) VALUES ('bb','2','01/02/2024');
-INSERT INTO vehicle_driver(vehicle_id, driver_id, start_date) VALUES ('cc','3','01/03/2024');
-INSERT INTO vehicle_driver(vehicle_id, driver_id, start_date) VALUES ('aa','2','01/03/2024');
-
-INSERT INTO device(id,imei,label,manufacturer,model,serialNumber,simNumber,gateway_enabled,last_data_date,comment,last_communication_date,active,coordinate) VALUES ('11','test','test','test','test','test','test','true','01/01/2024','test','01/01/2024','true',ST_SetSRID(ST_MakePoint(1.1090,49.4530), 4326));
-INSERT INTO device(id,imei,label,manufacturer,model,serialNumber,simNumber,gateway_enabled,last_data_date,comment,last_communication_date,active,coordinate) VALUES ('12','test','test','test','test','test','test','true','01/01/2024','test','01/01/2024','true',ST_SetSRID(ST_MakePoint(0.1040,48.4430), 4326));
-INSERT INTO device(id,imei,label,manufacturer,model,serialNumber,simNumber,gateway_enabled,last_data_date,comment,last_communication_date,active,coordinate) VALUES ('13','test','test','test','test','test','test','true','01/01/2024','test','01/01/2024','true',ST_SetSRID(ST_MakePoint(1.1610,49.0350), 4326));
-INSERT INTO device(id,imei,label,manufacturer,model,serialNumber,simNumber,gateway_enabled,last_data_date,comment,last_communication_date,active,coordinate) VALUES ('14','test','test','test','test','test','test','true','01/01/2024','test','01/01/2024','true',ST_SetSRID(ST_MakePoint(1.1610,49.0350), 4326));
-
-INSERT INTO driver_untracked_period(driver_id, start_date, end_date) VALUES (1,'01/10/2024', null);
-INSERT INTO vehicle_untracked_period(vehicle_id, start_date, end_date) VALUES ('bb','01/10/2024', null);
-
-
-INSERT INTO device_vehicle_install(vehicle_id, device_id, start_date, end_date, fitment_odometer,fitment_operator, fitment_device_location,fitment_supply_location,fitment_supply_type ) VALUES ('aa','11','01/01/2024',null,'10','test','test','test','test');
-INSERT INTO device_vehicle_install(vehicle_id, device_id, start_date , end_date,fitment_odometer,fitment_operator, fitment_device_location,fitment_supply_location,fitment_supply_type) VALUES ('bb','12','01/01/2024',null,'10','test','test','test','test');
-INSERT INTO device_vehicle_install(vehicle_id, device_id, start_date, end_date,fitment_odometer,fitment_operator, fitment_device_location,fitment_supply_location,fitment_supply_type) VALUES ('cc','13','01/01/2024',null,'10','test','test','test','test');
-
-INSERT INTO team_category(id, label) VALUES (1,'team');
-INSERT INTO team_category(id, label) VALUES (2,'agency');
-INSERT INTO team_category(id, label) VALUES (3,'service');
-
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (1,'Normandie Manutention ',null, 1, null);
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (2,'Le Havre',1,2,null );
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (3,'service1',2,3,null );
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (4,'service2',2,3,null );
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (5,'CAEN',1,2,null );
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (6,'service3',5,3,null );
-INSERT INTO team(id, label, parent_id, category_id, path) VALUES (7,'service4',5,3,null );
-
-INSERT INTO vehicle_team(vehicle_id, team_id, start_date) VALUES ('aa', 3 ,'01/01/2024' );
-INSERT INTO vehicle_team(vehicle_id, team_id, start_date) VALUES ('bb', 4 ,'01/01/2024' );
-INSERT INTO vehicle_team(vehicle_id, team_id, start_date) VALUES ('cc', 6 ,'01/01/2024' );*/
 
 
 

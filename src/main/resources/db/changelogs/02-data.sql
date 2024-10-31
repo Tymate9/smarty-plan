@@ -216,5 +216,10 @@ INSERT INTO driver_untracked_period (driver_id, start_date, end_date) VALUES
 (12, '2023-11-01', NULL);
 
 
+INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (1, 3 ,'01/01/2024' );
+INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (2, 4 ,'01/01/2024' );
+INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (3, 6 ,'01/01/2024' );
+
+
 
 

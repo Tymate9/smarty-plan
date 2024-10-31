@@ -22,8 +22,8 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { CacheInterceptor } from "./commons/api/cache.interceptor";
 import { MapPopupComponent } from './features/map/popUp/map-popup/map-popup.component';
-import { PoiPopupComponent } from './features/tempTest/poi-popup/poi-popup.component';
-import { VehiclePopupComponent } from './features/tempTest/vehicle-popup/vehicle-popup.component';
+import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
+import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
 
 @NgModule({
   declarations: [

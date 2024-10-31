@@ -1,6 +1,6 @@
 // src/app/components/poi-popup/poi-popup.component.ts
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {PoiService} from "../../poi/poi.service";
+import {PoiService} from "../poi.service";
 import * as turf from '@turf/turf';
 import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";

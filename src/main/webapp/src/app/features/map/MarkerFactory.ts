@@ -1,8 +1,8 @@
 import * as L from 'leaflet';
 import {ComponentRef, Injectable, ViewContainerRef} from '@angular/core';
 import {PoiService} from "../poi/poi.service";
-import {PoiPopupComponent} from "../tempTest/poi-popup/poi-popup.component";
-import {VehiclePopupComponent} from "../tempTest/vehicle-popup/vehicle-popup.component";
+import {PoiPopupComponent} from "../poi/poi-popup/poi-popup.component";
+import {VehiclePopupComponent} from "../vehicle/vehicle-popup/vehicle-popup.component";
 import {dto} from "../../../habarta/dto";
 import {VehicleService} from "../vehicle/vehicle.service";
 

@@ -31,13 +31,13 @@ export class PoiService {
     return this.http.get<any>(`${this.baseUrl}/nearest`, { params });
   }
 
-  getNearestPOIsWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<PoiWithDistance[]> {
+  getNearestPOIsWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<any> {
     const params = {
       latitude: latitude.toString(),
       longitude: longitude.toString(),
       limit: limit.toString(),
     };
-    return this.http.get<PoiWithDistance[]>(`${this.baseUrl}/withDistance`, { params });
+    return this.http.get<any>(`${this.baseUrl}/withDistance`, { params });
   }
 
   getPOIsInPolygon(polygonWKT: string): Observable<any> {

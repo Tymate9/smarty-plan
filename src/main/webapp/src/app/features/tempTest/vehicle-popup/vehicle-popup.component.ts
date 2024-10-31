@@ -5,16 +5,33 @@ import {dto} from "../../../../habarta/dto";
 @Component({
   selector: 'app-vehicle-popup',
   template: `
-    <div>
-      <div *ngIf="showVehicleInfo">
+    <div class="tabs">
+      <button
+        [class.active]="activeTab === 'information'"
+        (click)="selectTab('information')"
+      >
+        Information
+      </button>
+      <button
+        [class.active]="activeTab === 'poi'"
+        (click)="selectTab('poi')"
+      >
+        POI
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Onglet Information -->
+      <div *ngIf="activeTab === 'information'">
         <h4>{{ vehicle.licenseplate }}</h4>
-        <p><strong>Conducteur:</strong> {{ vehicle.driver?.firstName + ' ' + vehicle.driver?.firstName || 'Aucun conducteur' }}</p>
+        <p><strong>Conducteur:</strong> {{ vehicle.driver?.firstName + ' ' + (vehicle.driver?.lastName || 'Aucun conducteur') }}</p>
         <p><strong>Équipe:</strong> {{ vehicle.team.label }}</p>
         <p><strong>Catégorie:</strong> {{ vehicle.category.label }}</p>
         <p><strong>Dernière communication:</strong> {{ vehicle.device.lastCommunicationDate | date:'short' }}</p>
       </div>
 
-      <div *ngIf="!showVehicleInfo">
+      <!-- Onglet POI -->
+      <div *ngIf="activeTab === 'poi'">
         <p>Liste des POIs les plus proches :</p>
         <ul>
           <li *ngFor="let poi of nearbyPOIs">
@@ -23,7 +40,6 @@ import {dto} from "../../../../habarta/dto";
           </li>
         </ul>
       </div>
-      <button type="button" (click)="togglePOIList()">Afficher les POIs les plus proches</button>
     </div>
   `,
 })
@@ -33,14 +49,32 @@ export class VehiclePopupComponent implements OnInit {
 
   showVehicleInfo = true;
   nearbyPOIs: any[] = [];
+  activeTab: string = 'information'; // Onglet par défaut
+
 
   constructor(private poiService: PoiService) {}
 
   ngOnInit() {
+    this.loadNearbyPOIs()
+  }
+
+  selectTab(tab: string) {
+    this.activeTab = tab;
+
+    if (tab === 'information') {
+      // Aucune action supplémentaire nécessaire pour l'onglet Information
+    }
+
+    if (tab === 'poi' && this.nearbyPOIs.length === 0) {
+      this.loadNearbyPOIs();
+    }
+  }
+
+  loadNearbyPOIs() {
     const latitude = this.vehicle.device.coordinate?.coordinates[1] ?? 0.0;
     const longitude = this.vehicle.device.coordinate?.coordinates[0] ?? 0.0;
 
-    this.poiService.getNearestPOIsWithDistance(latitude, longitude, 5).subscribe({
+    this.poiService.getNearestPOIsWithDistance(latitude, longitude, 3).subscribe({
       next: (response) => {
         this.nearbyPOIs = response.map((pair: any) => {
           return {
@@ -53,10 +87,6 @@ export class VehiclePopupComponent implements OnInit {
         console.error('Erreur lors de la récupération des POIs les plus proches:', error);
       },
     });
-  }
-
-  togglePOIList() {
-    this.showVehicleInfo = !this.showVehicleInfo;
   }
 
   centerMapOnPOI(poi: any) {

@@ -12,6 +12,7 @@ export class CacheInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
+
     // TODO(tester plus précisément le système de cache une fois que les méthodes POST auront été ajouté et que les filtre auront été ajouté.)
     if ((req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE')) {
       const basePath = req.url.split('?')[0].split(window.origin)[0];
@@ -24,7 +25,7 @@ export class CacheInterceptor implements HttpInterceptor {
 
     const cacheKey = this.createCacheKey(req.urlWithParams, req.body);
     const cachedResponse = this.cacheService.getCache(cacheKey);
-
+    console.log(this.cacheService.cache)
     if (cachedResponse) {
       console.log("Réponse fournis par le cache" + cachedResponse)
       return of(cachedResponse);

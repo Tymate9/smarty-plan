@@ -4,8 +4,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class CacheService {
-  private cache = new Map<string, any>();
-  private maxCacheSize = 50 * 1024 * 1024; // Limite de cache de 50 Mo en octets
+  readonly cache = new Map<string, any>();
+  private readonly maxCacheSize = 50 * 1024 * 1024; // Limite de cache de 50 Mo en octets
 
   setCache(key: string, data: any, maxAge: number = 90000) {
     const size = this.getObjectSize(data);
@@ -15,7 +15,6 @@ export class CacheService {
 
   getCache(key: string): any {
     const cacheEntry = this.cache.get(key);
-    console.log(this.cache)
     if (cacheEntry) {
       const { data, timestamp, maxAge } = cacheEntry;
       if (Date.now() - timestamp < maxAge) {

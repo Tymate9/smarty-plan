@@ -4,6 +4,7 @@ import {PoiService} from "../poi/poi.service";
 import {PoiPopupComponent} from "../tempTest/poi-popup/poi-popup.component";
 import {VehiclePopupComponent} from "../tempTest/vehicle-popup/vehicle-popup.component";
 import {dto} from "../../../habarta/dto";
+import {VehicleService} from "../vehicle/vehicle.service";
 
 export enum EntityType {
   POI = 'poi',
@@ -25,7 +26,8 @@ export class MarkerFactory {
   markersMap: Map<string, CustomMarker> = new Map();
 
   constructor(
-    private readonly poiService: PoiService
+    private readonly poiService: PoiService,
+    private readonly vehicleService : VehicleService
   ) {}
 
   createMarker(type: EntityType, entity: any, map: L.Map, viewContainerRef: ViewContainerRef) : L.Marker | null{
@@ -60,6 +62,7 @@ export class MarkerFactory {
     marker.on('popupopen', () => {
       const container = L.DomUtil.create('div');
       // Créer et injecter le composant Angular dans le conteneur
+
       componentRef = viewContainerRef.createComponent(PoiPopupComponent);
       componentRef.instance.poi = entity;
       componentRef.instance.poiDeleted.subscribe((poiId: number) => {
@@ -75,11 +78,16 @@ export class MarkerFactory {
         componentRef = null;
       });
       componentRef.instance.poiUpdated.subscribe((updatedPoi: any) => {
-        // Mettre à jour le marqueur
         this.updateMarker(updatedPoi, map, viewContainerRef);
       });
       componentRef.instance.zoomToHighlightedMarkers.subscribe(() => {
         this.zoomToHighlightedMarkers(map);
+      });
+      // Ajouter un listener pour l'événement zoomToVehicleMarker
+      componentRef.instance.zoomToVehicleMarker.subscribe((coordinates: [number, number]) => {
+        const lat = coordinates[1];
+        const lng = coordinates[0];
+        map.setView([lat, lng], map.getMaxZoom());
         map.closePopup();
       });
       // Ajouter le composant Angular dans le conteneur DOM
@@ -130,7 +138,6 @@ export class MarkerFactory {
     const marker = L.marker(coords, {
       icon: this.getVehicleIcon(entity),
     }) as CustomMarker;
-    console.log("Je rentre dans la fonction")
 
     let componentRef: ComponentRef<VehiclePopupComponent> | null = null;
 
@@ -197,25 +204,34 @@ export class MarkerFactory {
 
   private handleMarkerClick(type: EntityType, marker: CustomMarker) {
     if (type === EntityType.POI) {
-      this.simulateProximityForPOI(marker);
+      this.proximityForPOI(marker);
     } else if (type === EntityType.VEHICLE) {
-      this.simulateProximityForVehicle(marker);
+      this.proximityForVehicle(marker);
     }
   }
 
-  private simulateProximityForPOI(marker: CustomMarker) {
+  private proximityForPOI(marker: CustomMarker) {
+    const {lat, lng} = marker.getLatLng();
+    const limit = 5;
 
-    const proximityIds = ['vehicle-cc'];
-    console.log(this.markersMap)
-    proximityIds.forEach(id => {
-      const nearbyMarker = this.markersMap.get(id);
-      if (nearbyMarker) nearbyMarker.highlight();
+    this.vehicleService.getNearestVehiclesDetails(lat, lng, limit).subscribe({
+      next: (nearbyVehicles) => {
+        nearbyVehicles.forEach((vehicle: any) => {
+          const nearbyMarker = this.markersMap.get(`vehicle-${vehicle.id}`);
+          if (nearbyMarker) nearbyMarker.highlight();
+        });
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des POI proches:', error);
+      }
     });
+
+
   }
 
-  private simulateProximityForVehicle(marker: CustomMarker) {
+  private proximityForVehicle(marker: CustomMarker) {
     const {lat, lng} = marker.getLatLng();
-    const limit = 10;
+    const limit = 5;
 
     this.poiService.getNearestPOIs(lat, lng, limit).subscribe({
       next: (nearbyPois) => {
@@ -247,63 +263,91 @@ export class MarkerFactory {
 
   private getVehicleIcon(entity: any): L.Icon {
     return L.icon({
-      iconUrl: '../../../assets/icon/car-top-view.svg',
+      iconUrl: `../../../assets/icon/${entity.category.label}-gris.svg`,
       iconSize: [30, 45],
       iconAnchor: [15, 45],
     });
   }
 
   updateMarker(poi: any, map: L.Map, viewContainerRef: ViewContainerRef) {
+    // Fermer la popup actuelle pour éviter les conflits
     map.closePopup();
+
+    // Générer l'ID du marqueur de manière cohérente
     const markerId = `poi-${poi.id}`;
+
+    // Récupérer le marqueur depuis markersMap en utilisant l'ID correct
     const marker = this.markersMap.get(markerId);
 
     if (marker) {
       // Mettre à jour l'icône du marqueur si nécessaire
       marker.setIcon(this.getPOIIcon(poi));
 
-      // Mettre à jour la popup
-      const container = L.DomUtil.create('div');
-
-      // Créer et injecter le composant Angular dans le conteneur
-      const componentRef = viewContainerRef.createComponent(PoiPopupComponent);
-      componentRef.instance.poi = poi;
-      componentRef.instance.poiDeleted.subscribe((poiId: number) => {
-        // Supprimer le marqueur de la carte et de la map des marqueurs
-        map.removeLayer(marker);
-        this.markersMap.delete(marker.id);
-        componentRef.destroy();
-      });
-      componentRef.instance.poiUpdated.subscribe((updatedPoi: any) => {
-        // Appeler updateMarker récursivement pour mettre à jour le marqueur
-        this.updateMarker(updatedPoi, map, viewContainerRef);
-        componentRef.destroy();
-      });
-
-      // Ajouter le composant Angular dans le conteneur DOM
-      container.appendChild((componentRef.hostView as any).rootNodes[0]);
-
-      // Mettre à jour le contenu de la popup
-      marker.unbindPopup();
-      marker.bindPopup(container);
-
       // Mettre à jour la position du marqueur si les coordonnées ont changé
       const newCoords: [number, number] = [poi.coordinate.coordinates[1], poi.coordinate.coordinates[0]];
       marker.setLatLng(newCoords);
 
-      // Supprimer l'ancien polygone
+      // Mettre à jour l'aire du POI si elle existe
       if (marker.areaPolygon) {
         map.removeLayer(marker.areaPolygon);
         marker.areaPolygon = undefined;
       }
-
-      // Ajouter le nouveau polygone si nécessaire
       if (poi.area && poi.area.type === 'Polygon') {
         marker.areaPolygon = this.addAreaPolygon(poi.area, poi.category.color, map);
       }
 
-      // Mettre à jour l'entrée dans markersMap si nécessaire
-      this.markersMap.set(markerId, marker);
+      // Réattacher l'événement 'popupopen' avec les nouvelles données
+      marker.off('popupopen'); // Retirer l'ancien écouteur pour éviter les duplications
+      marker.on('popupopen', () => {
+        const container = L.DomUtil.create('div');
+
+        // Créer et injecter le composant Angular dans le conteneur
+        const componentRef = viewContainerRef.createComponent(PoiPopupComponent);
+        componentRef.instance.poi = poi;
+
+        // Abonner aux événements du composant
+        componentRef.instance.poiDeleted.subscribe((poiId: number) => {
+          if (marker.areaPolygon) {
+            map.removeLayer(marker.areaPolygon);
+            marker.areaPolygon = undefined;
+          }
+          map.removeLayer(marker);
+          this.markersMap.delete(marker.id);
+          map.closePopup();
+          componentRef.destroy();
+        });
+
+        componentRef.instance.poiUpdated.subscribe((updatedPoi: any) => {
+          // Mettre à jour le marqueur avec les nouvelles données POI
+          this.updateMarker(updatedPoi, map, viewContainerRef);
+          componentRef.destroy();
+        });
+
+        componentRef.instance.zoomToHighlightedMarkers.subscribe(() => {
+          this.zoomToHighlightedMarkers(map);
+          map.closePopup();
+        });
+
+        componentRef.instance.zoomToVehicleMarker.subscribe((coordinates: [number, number]) => {
+          const lat = coordinates[1];
+          const lng = coordinates[0];
+          map.setView([lat, lng], map.getMaxZoom());
+          map.closePopup();
+        });
+
+        // Ajouter le composant Angular dans le conteneur DOM
+        container.appendChild((componentRef.hostView as any).rootNodes[0]);
+
+        // Mettre à jour le contenu de la popup avec le nouveau conteneur
+        marker.setPopupContent(container);
+      });
+      marker.bindTooltip(`${poi.label} - ${poi.category.label}`, {
+        permanent: false, // Le tooltip ne sera pas toujours visible
+        direction: 'bottom', // Position du tooltip
+        opacity: 0.9, // Opacité
+      });
+    } else {
+      console.error(`Marqueur avec ID ${markerId} non trouvé dans markersMap.`);
     }
   }
 
@@ -320,5 +364,6 @@ export class MarkerFactory {
       alert('Aucun marqueur mis en évidence.');
     }
   }
+
 
 }

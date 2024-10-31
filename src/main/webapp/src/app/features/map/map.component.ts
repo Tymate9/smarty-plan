@@ -11,6 +11,7 @@ import 'leaflet.markercluster';
 @Component({
   selector: 'app-map',
   template: `
+    <p>{{unTrackedVehicle}}</p>
     <div id="map"></div>
   `,
   styles: [`
@@ -25,6 +26,7 @@ export class MapComponent implements OnInit {
   private map!: L.Map;
   clusterGroup: L.MarkerClusterGroup;
   private crossMarker?: L.Marker;
+  protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
@@ -62,9 +64,16 @@ export class MapComponent implements OnInit {
     componentRef.instance.longitude = lng;
     componentRef.instance.addPOIRequest.subscribe((coords) => {
       this.resetCrossMarker();
-      this.zoomToLocation(coords.lat, coords.lng);
+      this.createCrossMark(coords.lat, coords.lng);
     });
-    componentRef.instance.buttonClick.subscribe(() => this.resetCrossMarker());
+    componentRef.instance.buttonClick.subscribe(() => {
+      if (this.circleLayer) {
+        console.log("je suis la")
+        this.map.removeLayer(this.circleLayer);
+        this.circleLayer = null;
+      }
+      this.resetCrossMarker()
+    });
     componentRef.instance.poiCreated.subscribe((poi) => this.onPoiCreated(poi));
     componentRef.instance.closePopup.subscribe(() => {
       this.map.closePopup();
@@ -73,6 +82,12 @@ export class MapComponent implements OnInit {
     });
     componentRef.instance.radiusChanged.subscribe((radius: number) => {
       this.updateCircleOnMap(lat, lng, radius);
+    });
+    // Abonnement à l'événement zoomRequest
+    componentRef.instance.zoomRequest.subscribe((coordinates: [number, number]) => {
+      this.handleZoomRequest(coordinates);
+      this.map.closePopup();
+      componentRef.destroy();
     });
 
     // Ajoute le composant Angular dans le conteneur DOM
@@ -97,7 +112,7 @@ export class MapComponent implements OnInit {
     });
   }
 
-  private zoomToLocation(lat: number, lng: number): void {
+  private createCrossMark(lat: number, lng: number): void {
     this.map.setView([lat, lng], this.map.getMaxZoom());
 
     // Dessiner une croix rouge
@@ -143,11 +158,13 @@ export class MapComponent implements OnInit {
         vehicles.forEach(vehicle => {
           if (vehicle.device && vehicle.device.coordinate) {
             // Ajouter le véhicule à la carte
-            console.log(vehicle)
             const marker = this.markerFactory.createMarker(EntityType.VEHICLE, vehicle, this.map, this.viewContainerRef);
 /*            if (marker !== null) {
               this.clusterGroup.addLayer(marker);
             }*/
+          }
+          else {
+              this.unTrackedVehicle += `${vehicle.licenseplate}     `
           }
         });
       },
@@ -179,5 +196,11 @@ export class MapComponent implements OnInit {
     // Mettre à jour la position du cercle
     this.circleLayer.setLatLng([lat, lng]);
   }
+
+  private handleZoomRequest(coordinates: [number, number]): void {
+    const [lat, lng] = coordinates;
+    this.map.setView([lat, lng], 15); // Ajustez le niveau de zoom selon vos besoins
+  }
+
 }
 

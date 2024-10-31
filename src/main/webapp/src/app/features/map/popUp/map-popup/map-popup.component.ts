@@ -1,39 +1,91 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {MarkerFactory} from "../../MarkerFactory";
-import {PoiService} from "../../../poi/poi.service";
+import {PoiService, PoiWithDistance} from "../../../poi/poi.service";
 import {dto} from "../../../../../habarta/dto";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
+import {VehicleService, VehicleWithDistanceDTO} from "../../../vehicle/vehicle.service";
 
 @Component({
   selector: 'app-map-popup',
   template: `
-    <div>
-      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
-      <h4>Adresse : {{ address }}</h4>
-      <button (click)="addPOI()">Ajouter un POI</button>
-      <button (click)="showNearbyVehicles()">Afficher les véhicules les plus proches</button><br>
-      <button (click)="showNearbyPOIs()">Afficher les POI les plus proches</button><br>
-      <button (click)="showNearbyObjects()">Afficher les objets les plus proches</button>
-      <div *ngIf="highlightedVehicleNames.length > 0">
-        <h5>Véhicules à proximité :</h5>
-        <ul>
-          <li *ngFor="let name of highlightedVehicleNames">{{ name }}</li>
+    <div class="tabs">
+      <button
+        [class.active]="activeTab === 'vehicule'"
+        (click)="selectTab('vehicule')"
+      >
+        Véhicule
+      </button>
+      <button
+        [class.active]="activeTab === 'poi'"
+        (click)="selectTab('poi')"
+      >
+        POI
+      </button>
+      <button
+        [class.active]="activeTab === 'creation'"
+        (click)="selectTab('creation')"
+      >
+        Création
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }} / Adresse : {{ address }}</h4>
+      <div *ngIf="activeTab === 'vehicule'">
+        <h4>Véhicules les Plus Proches</h4>
+        <div *ngIf="loadingVehicles">
+          Chargement des véhicules proches...
+        </div>
+        <div *ngIf="!loadingVehicles && nearbyVehicles.length === 0">
+          Aucun véhicule trouvé à proximité.
+        </div>
+        <ul *ngIf="!loadingVehicles && nearbyVehicles.length > 0">
+          <li *ngFor="let vehicle of nearbyVehicles">
+            <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
+            <span> ({{ vehicle.first | number:'1.2-2' }} m)</span>
+            <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
+            <button (click)="highlightMarker('vehicle-'+vehicle.second.id)">Mettre en surbrillance</button>
+          </li>
         </ul>
       </div>
-      <div *ngIf="showForm">
-        <label for="poiName">Nom du POI:</label>
-        <input type="text" id="poiName" placeholder="Nom du POI" [(ngModel)]="poiName"><br>
 
-        <label for="poiCategory">Type de POI:</label>
-        <select id="poiCategory" [(ngModel)]="selectedCategoryId" name="poiCategory">
-          <option *ngFor="let category of categories" [value]="category.id">
-            {{ category.label }}
-          </option>
-        </select><br>
+      <div *ngIf="activeTab === 'poi'">
+        <div *ngIf="activeTab === 'poi'">
+          <h4>POIs les Plus Proches</h4>
+          <div *ngIf="loadingPOIs">
+            Chargement des POIs proches...
+          </div>
+          <div *ngIf="!loadingPOIs && nearbyPOIs.length === 0">
+            Aucun POI trouvé à proximité.
+          </div>
+          <ul *ngIf="!loadingPOIs && nearbyPOIs.length > 0">
+            <li *ngFor="let poi of nearbyPOIs">
+              <strong>{{ poi.second.label }}</strong> - {{ poi.second.category.label }}
+              <span> ({{ poi.first | number:'1.2-2' }} m)</span>
+              <button (click)="centerMapOnPOI(poi.second)">Zoom</button>
+              <button (click)="highlightMarker( 'poi-'+poi.second.id)">Mettre en surbrillance</button>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-        <label for="poiRadius">Rayon (mètres):</label>
-        <input type="number" id="poiRadius" placeholder="Rayon en mètres" [(ngModel)]="poiRadius" (ngModelChange)="onRadiusChange($event)"><br>
-        <button (click)="submitPOI()">Soumettre</button>
+      <div *ngIf="activeTab === 'creation'">
+        <h4>Créer un POI</h4>
+        <form (ngSubmit)="submitPOI()">
+          <label for="poiName">Nom du POI:</label>
+          <input type="text" id="poiName" placeholder="Nom du POI" [(ngModel)]="poiName" name="poiName" required><br/>
+
+          <label for="poiCategory">Type de POI:</label>
+          <select id="poiCategory" [(ngModel)]="selectedCategoryId" name="poiCategory" required>
+            <option *ngFor="let category of categories" [value]="category.id">
+              {{ category.label }}
+            </option>
+          </select><br/>
+
+          <label for="poiRadius">Rayon (mètres):</label>
+          <input type="number" id="poiRadius" placeholder="Rayon en mètres" [(ngModel)]="poiRadius" name="poiRadius" (ngModelChange)="onRadiusChange($event)" required><br/>
+          <button type="submit">Soumettre</button>
+        </form>
       </div>
     </div>
   `,
@@ -41,7 +93,8 @@ import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 export class MapPopupComponent implements OnInit,OnDestroy {
   constructor(
     private markerFactory : MarkerFactory,
-    private poiService : PoiService) {}
+    private poiService : PoiService,
+    private vehicleService : VehicleService) {}
   @Input() latitude!: number;
   @Input() longitude!: number;
   @Output() addPOIRequest = new EventEmitter<{ lat: number, lng: number }>();
@@ -55,8 +108,15 @@ export class MapPopupComponent implements OnInit,OnDestroy {
   selectedCategoryId: number = -1;
   poiName: string = '';
   poiRadius : number = 1;
-  showForm: boolean = false;
+  activeTab: string = 'vehicule';
+  nearbyVehicles: VehicleWithDistanceDTO[] = [];
+  loadingVehicles: boolean = false;
+  nearbyPOIs: any[] = [];
+  loadingPOIs: boolean = false;
+
+  highlightedPOINames: string[] = [];
   highlightedVehicleNames: string[] = [];
+
 
   ngOnInit() {
     this.poiService.getAddressFromCoordinates(this.latitude, this.longitude).subscribe({
@@ -78,10 +138,11 @@ export class MapPopupComponent implements OnInit,OnDestroy {
         console.error('Erreur lors de la récupération des catégories:', error);
       }
     });
+    this.selectTab('vehicle');
   }
 
   ngOnDestroy() {
-    this.resetHighlights();
+    this.markerFactory.resetAllHighlights();
   }
 
   onRadiusChange(newRadius: number) {
@@ -92,61 +153,11 @@ export class MapPopupComponent implements OnInit,OnDestroy {
     this.buttonClick.emit(); // Émet un événement pour réinitialiser la croix
   }
 
-  private simulateProximityRequest(entityType: string): string[] {
-    if (entityType === 'vehicle') return ['vehicle-1', 'vehicle-2'];
-    if (entityType === 'poi') return ['poi-3', 'poi-4'];
-    return ['vehicle-1', 'poi-3'];
-  }
-
-  addPOI() {
-    this.highlightedVehicleNames = [];
-    this.addPOIRequest.emit({ lat: this.latitude, lng: this.longitude });
-    this.showForm = true;
-  }
-
-  showNearbyVehicles() {
-    this.showForm = false;
-    this.onButtonClick()
-    this.resetHighlights();
-    const nearbyIds = this.simulateProximityRequest('vehicle');
-    this.highlightMarkers(nearbyIds, 'vehicle');
-  }
-
-  showNearbyPOIs() {
-    this.showForm = false;
-    this.onButtonClick()
-    this.resetHighlights();
-    const nearbyIds = this.simulateProximityRequest('poi');
-    this.highlightMarkers(nearbyIds, 'poi');
-  }
-
-  showNearbyObjects() {
-    this.showForm = false;
-    this.onButtonClick()
-    this.resetHighlights();
-    const nearbyIds = this.simulateProximityRequest('all');
-    this.highlightMarkers(nearbyIds, 'all');
-  }
-
-  private highlightMarkers(ids: string[], type: string) {
-    this.highlightedVehicleNames = []; // Réinitialise la liste des noms
-    ids.forEach(id => {
-      const marker = this.markerFactory.markersMap.get(id);
-      if (marker) {
-        marker.highlight();
-        if (type === 'vehicle') {
-          this.highlightedVehicleNames.push(`Véhicule ID: ${id}`); // Ajoute le nom du véhicule
-        }
-        else if (type === 'all')
-        {
-          this.highlightedVehicleNames.push(`Objet ID: ${id}`);
-        }
-        else if ( type === 'poi')
-        {
-          this.highlightedVehicleNames.push(`POI ID: ${id}`);
-        }
-      }
-    });
+  highlightMarker(markerId: string) {
+    this.markerFactory.resetAllHighlights()
+    // Ajoutez également le nom du marker à la liste si nécessaire
+    const marker = this.markerFactory.markersMap.get(markerId);
+    marker?.highlight()
   }
 
   submitPOI() {
@@ -164,7 +175,6 @@ export class MapPopupComponent implements OnInit,OnDestroy {
 
     this.poiService.createPOI(poiData).subscribe({
       next: (response) => {
-        console.log('POI ajouté avec succès', response);
         this.poiCreated.emit({ ...response, coordinates: [this.latitude, this.longitude] });
         this.closePopup.emit();
       },
@@ -172,16 +182,74 @@ export class MapPopupComponent implements OnInit,OnDestroy {
     });
   }
 
-  private resetHighlights() {
-    this.markerFactory.resetAllHighlights();
+  selectTab(tab: string) {
+    this.onButtonClick()
+    this.activeTab = tab;
+
+    if (tab === 'vehicule' && this.highlightedVehicleNames.length === 0 && !this.loadingVehicles) {
+      this.loadNearbyVehicles();
+    }
+
+    if (tab === 'poi' && this.highlightedPOINames.length === 0 && !this.loadingPOIs) {
+      this.loadNearbyPOIs();
+    }
+
+    if (tab === 'creation')
+    {
+      this.markerFactory.resetAllHighlights()
+      this.addPOI()
+    }
+  }
+
+  loadNearbyVehicles() {
+    this.loadingVehicles = true;
+    this.vehicleService.getNearestVehiclesWithDistance(this.latitude, this.longitude, 3).subscribe({
+      next: (vehicles) => {
+        this.nearbyVehicles = vehicles;
+        this.loadingVehicles = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des véhicules proches:', error);
+        this.loadingVehicles = false;
+      }
+    });
+  }
+
+  loadNearbyPOIs() {
+    this.loadingPOIs = true;
+    // Appel au service pour récupérer les POIs proches
+    this.poiService.getNearestPOIsWithDistance(this.latitude, this.longitude, 3).subscribe({
+      next: (pois) => {
+        this.nearbyPOIs = pois;
+        console.log(pois)
+        this.loadingPOIs = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des POIs proches:', error);
+        this.loadingPOIs = false;
+      }
+    });
+  }
+
+  @Output() zoomRequest = new EventEmitter<[number, number]>();
+
+  centerMapOnVehicle(vehicle: dto.VehicleSummaryDTO) {
+    const coordinates = vehicle.device?.coordinate?.coordinates;
+    if (coordinates && coordinates.length === 2) {
+      // Émettre les coordonnées sous forme de [latitude, longitude]
+      this.zoomRequest.emit([coordinates[1], coordinates[0]]);
+    }
+  }
+
+  centerMapOnPOI(poi: dto.PointOfInterestEntity) {
+    const coordinates = poi.coordinate?.coordinates;
+    if (coordinates && coordinates.length === 2) {
+      // Émettre les coordonnées sous forme de [latitude, longitude]
+      this.zoomRequest.emit([coordinates[1], coordinates[0]]);
+    }
+  }
+
+  addPOI() {
+    this.addPOIRequest.emit({ lat: this.latitude, lng: this.longitude });
   }
 }
-
-// TODO(trouver un endroit ou tester cette méthode)
-
-/*const francePolygonWKT = 'POLYGON((-5.1406 51.1242, 9.5593 51.1242, 9.5593 41.3337, -5.1406 41.3337, -5.1406 51.1242))';
-
-this.poiService.getPOIsInPolygon(francePolygonWKT).subscribe({
-  next: (pois) => console.log('POI dans le polygone couvrant la France :', pois),
-  error: (error) => console.error('Erreur lors de la récupération des POI :', error)
-});*/

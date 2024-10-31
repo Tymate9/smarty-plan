@@ -1,10 +1,11 @@
 package net.enovea.service
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.domain.vehicle.VehicleMapper
 import net.enovea.domain.vehicle.VehicleSummaryMapper
 import net.enovea.dto.VehicleDTO
-import net.enovea.dto.VehicleDTOsummary
+import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.repository.DriverUntrackedPeriodRepository
 import net.enovea.repository.VehicleRepository
 import net.enovea.repository.VehicleUntrackedPeriodRepository
@@ -13,7 +14,7 @@ import net.enovea.repository.VehicleUntrackedPeriodRepository
 @ApplicationScoped
 class VehicleService (
     private val vehicleMapper: VehicleMapper = VehicleMapper.INSTANCE,
-    private val vehicleSummaryMapper: VehicleSummaryMapper =VehicleSummaryMapper.INSTANCE,
+    private val vehicleSummaryMapper: VehicleSummaryMapper = VehicleSummaryMapper.INSTANCE,
 ){
 
     @Inject
@@ -31,20 +32,26 @@ class VehicleService (
     }
 
     //function returns all vehicles summaries (tracked and untracked)
-    fun getAllVehiclesSummaries(): List<VehicleDTOsummary> {
+    fun getAllVehiclesSummaries(): List<VehicleSummaryDTO> {
         val vehicles = vehicleRepository.listAll()
         return vehicles.map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
     }
 
     //function returns only the tracked vehicles(details)
     fun getTrackedVehiclesDetails(): List<VehicleDTO> {
+        val allVehicles = vehicleRepository.listAll()
 
+        val trackedVehicles = filterVehicle(allVehicles)
+
+        return trackedVehicles.map { vehicleMapper.toVehicleDTO(it) }
+    }
+
+    fun filterVehicle(
+        allVehicles: List<VehicleEntity>
+    ): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = vehicleUntrackedRepository.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = driverUntrackedRepository.findDriverIdsWithUntrackedPeriod()
-
-        val allVehicles = vehicleRepository.listAll()
-
         val trackedVehicles = allVehicles.filter { vehicle ->
             val isVehicleTracked = vehicle.id !in untrackedVehicleIds
 
@@ -59,12 +66,11 @@ class VehicleService (
             // Only keep vehicles that are tracked along with their most recent driver
             isVehicleTracked && isDriverTracked
         }
-
-        return trackedVehicles.map { vehicleMapper.toVehicleDTO(it) }
+        return trackedVehicles
     }
 
     //function returns tracked and untracked vehicles(summary) with replacing the last position by null for untracked vehicles/drivers
-    fun getVehiclesSummary(): List<VehicleDTOsummary> {
+    fun getVehiclesSummary(): List<VehicleSummaryDTO> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = vehicleUntrackedRepository.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = driverUntrackedRepository.findDriverIdsWithUntrackedPeriod()
@@ -82,8 +88,7 @@ class VehicleService (
             val isDriverTracked = vehicleDTOsummary.driver?.id == null || vehicleDTOsummary.driver.id !in untrackedDriverIds
 
             if (!isVehicleTracked || !isDriverTracked) {
-                vehicleDTOsummary.device.lastCommunicationLongitude = null
-                vehicleDTOsummary.device.lastCommunicationLatitude = null
+                vehicleDTOsummary.device.coordinate = null
 
             }
         }
@@ -121,8 +126,7 @@ class VehicleService (
                     ?.filter { it.key.end == null }
                     ?.maxByOrNull { it.key.start }
                     ?.let { recentDevice ->
-                        recentDevice.value.lastCommunicationLongitude = null
-                        recentDevice.value.lastCommunicationLatitude = null
+                        recentDevice.value.coordinate = null
                     }
             }
         }

@@ -1,0 +1,34 @@
+package net.enovea
+
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
+import jakarta.ws.rs.core.UriInfo
+
+/**
+ * Controller for the web pages.
+ */
+@Path("/")
+class WebPagesManager {
+
+    /**
+     * Redirects the requests associated to a page of the application to the index.html resource.
+     * This is required to support the browser history, refresh and direct access to a page.
+     */
+    fun index(
+        @Context uriInfo: UriInfo,
+    ): Response {
+        println("Méthode index invoquée")
+        val indexHtmlAsStream =
+            Thread.currentThread().contextClassLoader.getResourceAsStream("/META-INF/resources/index.html")
+        return if (indexHtmlAsStream == null) {
+            Response.status(Response.Status.NOT_FOUND).build()
+        } else {
+            Response.ok(
+                indexHtmlAsStream.reader().readText(),
+                MediaType.TEXT_HTML_TYPE.withCharset(Charsets.UTF_8.name()),
+            ).build()
+        }
+    }
+}

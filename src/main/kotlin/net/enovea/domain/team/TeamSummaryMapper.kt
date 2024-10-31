@@ -1,7 +1,7 @@
 package net.enovea.domain.team
 
 import net.enovea.domain.vehicle_category.VehicleCategoryMapper
-import net.enovea.dto.TeamDTOsummary
+import net.enovea.dto.TeamSummaryDTO
 
 
 import org.mapstruct.Mapper
@@ -11,10 +11,10 @@ import org.mapstruct.factory.Mappers
 interface TeamSummaryMapper {
 
     // Map 'TeamEntity' to 'TeamDTOsummary'
-    fun toDto(entity: TeamEntity): TeamDTOsummary
+    fun toDto(entity: TeamEntity): TeamSummaryDTO
 
     // Map 'TeamDTOsummary' back to 'TeamEntity'
-    fun toEntity(dto: TeamDTOsummary): TeamEntity
+    fun toEntity(dto: TeamSummaryDTO): TeamEntity
 
     companion object {
         val INSTANCE: TeamSummaryMapper = Mappers.getMapper(TeamSummaryMapper::class.java)

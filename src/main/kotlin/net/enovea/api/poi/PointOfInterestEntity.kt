@@ -2,52 +2,55 @@ package net.enovea.api.poi
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.SequenceGenerator
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
+import org.locationtech.jts.geom.*
+import org.locationtech.jts.geom.impl.CoordinateArraySequence
 
 
-@Entity(name=PointOfInterestEntity.ENTITY_NAME)
-@Table(name=PointOfInterestEntity.TABLE_NAME)
+@Entity(name = PointOfInterestEntity.ENTITY_NAME)
+@Table(name = PointOfInterestEntity.TABLE_NAME)
 data class PointOfInterestEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
     @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
     var id: Int = -1,
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "type", nullable = false)
+    var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
+
     var label: String = "",
 
-    @Enumerated(EnumType.STRING)
-    var type: PointOfInterestType = PointOfInterestType.PMU,
-    var latitude: Double = 0.0,
-    var longitude: Double = 0.0,
-    var radius: Int = 0,
+    @Column(name = "coordinate")
+    var coordinate: Point = Point(
+        CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
+        GeometryFactory()
+    ),
 
-): PanacheEntityBase {
+    var area: Polygon = run {
+        val coordinates = arrayOf(
+            Coordinate(0.0, 0.0),
+            Coordinate(1.0, 0.0),
+            Coordinate(1.0, 1.0),
+            Coordinate(0.0, 1.0),
+            Coordinate(0.0, 0.0) // Fermer le polygone
+        )
+        val linearRing = LinearRing(
+            CoordinateArraySequence(coordinates),
+            GeometryFactory()
+        )
+        Polygon(linearRing, null, GeometryFactory())
+    }
 
-    companion object: PanacheCompanionBase<PointOfInterestEntity, Int> {
+) : PanacheEntityBase {
+    companion object : PanacheCompanionBase<PointOfInterestEntity, Int> {
         const val ID_SEQUENCE = "point_of_interest_id_seq"
         const val ENTITY_NAME = "PointOfInterest"
         const val TABLE_NAME = "point_of_interest"
 
-        fun getAllWithLittleRadius(): List<PointOfInterestEntity> {
-            return listAll().filter { it.radius < 100 }
+        fun getAll(): List<PointOfInterestEntity> {
+            return listAll()
         }
     }
-}
-
-enum class PointOfInterestType {
-    DOMICILE,
-    FOURNISSEUR,
-    CLIENT,
-    BUREAU,
-    CHANTIER,
-    PROSPECT,
-    AUTRE,
-    PMU,
 }

@@ -161,8 +161,7 @@ create table device
     comment                 text,
     last_communication_date timestamp,
     active                  boolean default true NOT NULL,
-    last_communication_latitude double precision,
-    last_communication_longitude double precision
+    coordinate              GEOGRAPHY(Point, 4326) NOT NULL
 );
 
 /* =================================
@@ -185,17 +184,27 @@ create table device_vehicle_install
 
 /* ============================
      Table: Point of Interest
+
    ============================ */
-drop type if exists POIType;
-create type POIType as enum ('Domicile', 'Fournisseur', 'Client', 'Bureau', 'Chantier', 'Prospect', 'Autre', 'PMU 🐟');
-create table point_of_interest
+create table point_of_interest_category
 (
-    id        serial primary key,
-    label     varchar(255)     NOT NULL,
-    type      POIType          NOT NULL,
-    latitude  double precision NOT NULL,
-    longitude double precision NOT NULL,
-    radius    integer          NOT NULL
+    id    serial primary key,
+    label varchar(255) NOT NULL,
+    color varchar(7),
+    CONSTRAINT color_hex_constraint CHECK ( color is null or color ~* '^#[a-f0-9]{6}$' )
+);
+
+/* ============================
+     Table: Point of Interest
+   ============================ */
+
+CREATE TABLE point_of_interest
+(
+    id         SERIAL PRIMARY KEY,
+    label      VARCHAR(255)     NOT NULL,
+    type       INTEGER          NOT NULL REFERENCES point_of_interest_category,
+    coordinate GEOGRAPHY(Point, 4326) NOT NULL,
+    area       GEOGRAPHY(Polygon, 4326) NOT NULL
 );
 
 /* ========================

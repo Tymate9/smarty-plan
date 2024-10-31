@@ -1,5 +1,6 @@
 package net.enovea.dto
 
+import org.locationtech.jts.geom.Point
 import java.sql.Timestamp
 
 data class DeviceDTO (
@@ -15,6 +16,5 @@ data class DeviceDTO (
     var comment: String?,
     var lastCommunicationDate: Timestamp?,
     var active : Boolean,
-    var lastCommunicationLatitude: Double?,
-    var lastCommunicationLongitude : Double?
+    var coordinate: Point?
 )

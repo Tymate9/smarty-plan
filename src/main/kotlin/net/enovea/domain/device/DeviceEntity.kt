@@ -4,11 +4,14 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
+import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.impl.CoordinateArraySequence
 import java.sql.Timestamp
 
 @Entity(name = DeviceEntity.ENTITY_NAME )
 @Table(name = DeviceEntity.TABLE_NAME)
-
 data class DeviceEntity (
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
@@ -48,11 +51,11 @@ data class DeviceEntity (
     @Column(name = "active", nullable = false)
     var active: Boolean? = true,
 
-    @Column(name = "last_communication_latitude", nullable = true)
-    var lastCommunicationLatitude: Double? = 0.0,
-
-    @Column(name = "last_communication_longitude", nullable = true)
-    var lastCommunicationLongitude: Double? = 0.0
+    @Column(name = "coordinate")
+    var coordinate: Point = Point(
+        CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
+        GeometryFactory()
+    )
 
     ): PanacheEntityBase {
 

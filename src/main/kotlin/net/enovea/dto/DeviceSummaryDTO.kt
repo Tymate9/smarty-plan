@@ -1,0 +1,11 @@
+package net.enovea.dto
+
+import org.locationtech.jts.geom.Point
+import java.sql.Timestamp
+
+data class DeviceSummaryDTO (
+    var id : Int,
+    var lastCommunicationDate: Timestamp?,
+    var active : Boolean,
+    var coordinate: Point?
+)

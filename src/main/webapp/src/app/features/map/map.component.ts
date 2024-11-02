@@ -24,7 +24,8 @@ import 'leaflet.markercluster';
 export class MapComponent implements OnInit {
 
   private map!: L.Map;
-  clusterGroup: L.MarkerClusterGroup;
+  clusterPOIGroup: L.MarkerClusterGroup;
+  clusterVehicleGroup : L.MarkerClusterGroup
   private crossMarker?: L.Marker;
   protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
 
@@ -38,13 +39,34 @@ export class MapComponent implements OnInit {
     this.initMap();
     this.loadPOIs();
     this.loadVehicles();
-/*    this.clusterGroup = L.markerClusterGroup();
-    this.map.addLayer(this.clusterGroup);*/
+    this.clusterPOIGroup = L.markerClusterGroup({
+      iconCreateFunction: () => {return L.icon({
+        iconUrl: `../../assets/icon/poiCluster.svg`,
+        iconSize: [30, 45],
+        iconAnchor: [15, 45],
+      })},
+      animate: true,
+      zoomToBoundsOnClick: true,
+    });
+    this.clusterPOIGroup.on('clustermouseover', function (cluster){
+      console.log(cluster.layer.getAllChildMarkers().length)
+    })
+    this.map.addLayer(this.clusterPOIGroup);
+    this.clusterVehicleGroup = L.markerClusterGroup({
+      iconCreateFunction: () => {return L.icon({
+        iconUrl: `../../assets/icon/vehicleCluster.svg`,
+        iconSize: [30, 45],
+        iconAnchor: [15, 45],
+      })},
+      animate: true,
+      zoomToBoundsOnClick: true,
+    });
+    this.map.addLayer(this.clusterVehicleGroup);
   }
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map').setView(normandyCoordinates, 8);
+    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 8);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -139,10 +161,11 @@ export class MapComponent implements OnInit {
     this.poiService.getAllPOIs().subscribe({
       next: (pois) => {
         pois.forEach(poi =>
-          { const marker = this.markerFactory.createMarker(EntityType.POI, poi, this.map, this.viewContainerRef)
-/*            if (marker !== null) {
-              this.clusterGroup.addLayer(marker);
-            }*/
+          {
+            const marker = this.markerFactory.createMarker(EntityType.POI, poi, this.map, this.viewContainerRef)
+            if (marker !== null) {
+              this.clusterPOIGroup.addLayer(marker);
+            }
           }
         );
       },
@@ -159,12 +182,12 @@ export class MapComponent implements OnInit {
           if (vehicle.device && vehicle.device.coordinate) {
             // Ajouter le véhicule à la carte
             const marker = this.markerFactory.createMarker(EntityType.VEHICLE, vehicle, this.map, this.viewContainerRef);
-/*            if (marker !== null) {
-              this.clusterGroup.addLayer(marker);
-            }*/
+            if (marker !== null) {
+              this.clusterVehicleGroup.addLayer(marker);
+            }
           }
           else {
-              this.unTrackedVehicle += `${vehicle.licenseplate}     `
+              this.unTrackedVehicle += `${vehicle.licenseplate} /// `
           }
         });
       },

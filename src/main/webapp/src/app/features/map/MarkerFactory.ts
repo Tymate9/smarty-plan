@@ -48,7 +48,7 @@ export class MarkerFactory {
     }
 
     this.markersMap.set(marker.id, marker);
-    marker.addTo(map);
+/*    marker.addTo(map);*/
     this.bindMarkerEvents(marker, type);
 
     return marker;

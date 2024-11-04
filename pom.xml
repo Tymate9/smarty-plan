@@ -270,20 +270,20 @@
                         <id>default-testCompile</id>
                         <phase>none</phase>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>java-compile</id>-->
-<!--                        <phase>compile</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>compile</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>java-test-compile</id>-->
-<!--                        <phase>test-compile</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>testCompile</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
+                    <execution>
+                        <id>java-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>java-test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -365,7 +365,7 @@
                     <nodeVersion>${node.version}</nodeVersion>
                     <npmVersion>${npm.version}</npmVersion>
                     <workingDirectory>src/main/webapp</workingDirectory>
-                    <installDirectory>target</installDirectory>
+                    <installDirectory>.</installDirectory>
                 </configuration>
             </plugin>
 
@@ -433,6 +433,12 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>src/main/kotlin</sourceDir>
+                                <sourceDir>target/generated-sources/kapt/compile</sourceDir>
+                            </sourceDirs>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
@@ -468,6 +474,7 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <compileSourceRoots>${project.basedir}/target/generated-sources/kapt/compile</compileSourceRoots>
                 </configuration>
             </plugin>
         </plugins>

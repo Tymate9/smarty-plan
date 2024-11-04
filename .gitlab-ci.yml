@@ -38,7 +38,7 @@ stages:
 
 build:
   stage: build
-  image: maven:3.9.9-eclipse-temurin-23
+  image: maven:3.9.9-eclipse-temurin-21
   script:
     - DOCKER_TAG=$(echo "${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHORT_SHA}" | sed "s|\/|-|g")
     - mvn $MAVEN_CLI_OPTS -Dquarkus.container-image.additional-tags=${DOCKER_TAG} deploy

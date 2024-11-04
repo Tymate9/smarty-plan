@@ -63,10 +63,10 @@ class SpatialService<T : PanacheEntityBase>(
         val idFieldName = idField.name
 
         val query = """
-        SELECT e.$idFieldName, ST_Distance(
+        SELECT e.$idFieldName, ROUND(ST_Distance(
             e.$coordinateColumnName::geography,
             ST_GeomFromText(:pointWKT, 4326)::geography
-        ) / 1000.0 AS distance
+        ) ::numeric / 1000.0 , 2) AS distance
         FROM $tableName e
         ORDER BY distance
         LIMIT :limit

@@ -3,7 +3,7 @@
 import { KeycloakConfig } from "keycloak-js";
 
 const keycloakConfig: KeycloakConfig = {
-  url: 'http://localhost:45180/',
+  url: 'https://keycloak.nm.enovea.org/',
   realm:'NormandieManutention',
   clientId: 'smarty-plan-front'
 }

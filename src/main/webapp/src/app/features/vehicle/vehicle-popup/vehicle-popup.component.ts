@@ -33,26 +33,59 @@ import {dto} from "../../../../habarta/dto";
       <!-- Onglet POI -->
       <div *ngIf="activeTab === 'poi'">
         <p>Liste des POIs les plus proches :</p>
+        <button (click)="showAllHighlightedMarkers()">Afficher tous les marqueurs mis en évidence</button>
         <ul>
           <li *ngFor="let poi of nearbyPOIs">
             {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} m
             <button type="button" (click)="centerMapOnPOI(poi.poi)">Centrer sur ce POI</button>
+            <button
+              (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
+              [class.active]="isMarkerHighlighted('poi-' + poi.poi.id)"
+            >
+              {{ isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+            </button>
           </li>
         </ul>
       </div>
     </div>
   `,
+  styles: [`
+    /* Styles pour les boutons toggle */
+    .active {
+      background-color: #007bff;
+      color: white;
+    }
+  `]
 })
 export class VehiclePopupComponent implements OnInit {
   @Input() vehicle: dto.VehicleSummaryDTO;
   @Output() centerOnPOI = new EventEmitter<[number, number]>();
+  @Output() viewAllHighlightedMarkers = new EventEmitter<[number, number]>();
+  @Output() highlightMarkerRequest = new EventEmitter<string>();
+  @Output() zoomToHighlightedMarkers = new EventEmitter<void>();
 
-  showVehicleInfo = true;
   nearbyPOIs: any[] = [];
   activeTab: string = 'information'; // Onglet par défaut
+  highlightedStates: { [markerId: string]: boolean } = {};
 
 
   constructor(private poiService: PoiService) {}
+
+  showAllHighlightedMarkers() {
+    this.viewAllHighlightedMarkers.emit([this.vehicle.device.coordinate?.coordinates[1] ?? 0.0, this.vehicle.device.coordinate?.coordinates[0] ?? 0.0]);
+  }
+
+  toggleHighlightMarker(markerId: string) {
+    // Basculer l'état de surbrillance dans highlightedStates
+    this.highlightedStates[markerId] = !this.highlightedStates[markerId];
+
+    // Émettre l'événement pour que MapManager gère la surbrillance
+    this.highlightMarkerRequest.emit(markerId);
+  }
+
+  isMarkerHighlighted(markerId: string): boolean {
+    return this.highlightedStates[markerId] || false;
+  }
 
   ngOnInit() {
     this.loadNearbyPOIs()

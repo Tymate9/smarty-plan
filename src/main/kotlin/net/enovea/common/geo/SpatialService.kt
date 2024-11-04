@@ -6,6 +6,7 @@ import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import kotlin.reflect.KClass
 
+// TODO(Ajouter l'interface geoEntity)
 class SpatialService<T : PanacheEntityBase>(
     private val entityClass: KClass<T>,
     private val entityManager: EntityManager,

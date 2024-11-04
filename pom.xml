@@ -7,21 +7,26 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <compiler-plugin.version>3.13.0</compiler-plugin.version>
-        <kotlin.version>2.0.21</kotlin.version>
-        <maven.compiler.release>17</maven.compiler.release>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <node.version>v20.17.0</node.version>
+        <npm.version>10.8.2</npm.version>
+
+        <skipITs>true</skipITs>
+
+        <compiler-plugin.version>3.13.0</compiler-plugin.version>
+        <surefire-plugin.version>3.3.1</surefire-plugin.version>
+
+        <kotlin.version>2.0.21</kotlin.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.15.1</quarkus.platform.version>
-        <skipITs>true</skipITs>
-        <surefire-plugin.version>3.3.1</surefire-plugin.version>
         <kotest.version>5.9.1</kotest.version>
         <mockk.version>1.13.12</mockk.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <distributionManagement>
@@ -175,6 +180,7 @@
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
 
+
             <!-- - - - - - - - - - - - - - - - - - - - - - - -->
             <!--            Compilation                      -->
             <!-- - - - - - - - - - - - - - - - - - - - - - - -->
@@ -280,6 +286,90 @@
 <!--                    </execution>-->
                 </executions>
             </plugin>
+
+
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>3.2.1263</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <classPatterns>
+                        <pattern>net.enovea.api.*.*Entity</pattern>
+                        <pattern>net.enovea.dto.*DTO</pattern>
+                    </classPatterns>
+                    <customTypeMappings>
+                        <mapping>org.locationtech.jts.geom.Point:custom.GeoPoint</mapping>
+                        <mapping>org.locationtech.jts.geom.Polygon:custom.GeoPolygon</mapping>
+                    </customTypeMappings>
+                    <importDeclarations>
+                        <import>import * as custom from "../habarta/custom"</import>
+                    </importDeclarations>
+                    <outputKind>module</outputKind>
+                    <outputFile>src/main/webapp/src/habarta/dto.ts</outputFile>
+                    <namespace>dto</namespace>
+                    <nullabilityDefinition>nullInlineUnion</nullabilityDefinition>
+                    <optionalPropertiesDeclaration>questionMarkAndNullableType</optionalPropertiesDeclaration>
+                    <mapClasses>asClasses</mapClasses>
+                    <outputFileType>implementationFile</outputFileType>
+                    <mapEnum>asEnum</mapEnum>
+                    <nonConstEnums>true</nonConstEnums>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.14.0</version>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>
+                    <npmDownloadRoot>https://registry.npmjs.org/npm/-/</npmDownloadRoot>
+                    <nodeVersion>${node.version}</nodeVersion>
+                    <npmVersion>${npm.version}</npmVersion>
+                    <workingDirectory>src/main/webapp</workingDirectory>
+                    <installDirectory>target</installDirectory>
+                </configuration>
+            </plugin>
+
+
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
@@ -370,43 +460,6 @@
                         <option>all-open:annotation=jakarta.persistence.Entity</option>
                         <option>all-open:annotation=io.quarkus.test.junit.QuarkusTest</option>
                     </pluginOptions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>cz.habarta.typescript-generator</groupId>
-                <artifactId>typescript-generator-maven-plugin</artifactId>
-                <version>3.2.1263</version>
-                <executions>
-                    <execution>
-                        <id>generate</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jsonLibrary>jackson2</jsonLibrary>
-                    <classPatterns>
-                        <pattern>net.enovea.api.*.*Entity</pattern>
-                        <pattern>net.enovea.dto.*DTO</pattern>
-                    </classPatterns>
-                    <customTypeMappings>
-                        <mapping>org.locationtech.jts.geom.Point:custom.GeoPoint</mapping>
-                        <mapping>org.locationtech.jts.geom.Polygon:custom.GeoPolygon</mapping>
-                    </customTypeMappings>
-                    <importDeclarations>
-                        <import>import * as custom from "../habarta/custom"</import>
-                    </importDeclarations>
-                    <outputKind>module</outputKind>
-                    <outputFile>src/main/webapp/src/habarta/dto.ts</outputFile>
-                    <namespace>dto</namespace>
-                    <nullabilityDefinition>nullInlineUnion</nullabilityDefinition>
-                    <optionalPropertiesDeclaration>questionMarkAndNullableType</optionalPropertiesDeclaration>
-                    <mapClasses>asClasses</mapClasses>
-                    <outputFileType>implementationFile</outputFileType>
-                    <mapEnum>asEnum</mapEnum>
-                    <nonConstEnums>true</nonConstEnums>
                 </configuration>
             </plugin>
             <plugin>

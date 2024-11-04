@@ -58,7 +58,7 @@ import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.serv
               <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
               <li *ngFor="let vehicle of proximityVehicles">
                 <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
-                <span> ({{ vehicle.first | number:'1.2-2' }} m)</span>
+                <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
                 <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
                 <button
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"

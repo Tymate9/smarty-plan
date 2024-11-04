@@ -36,7 +36,7 @@ import {dto} from "../../../../habarta/dto";
         <button (click)="showAllHighlightedMarkers()">Afficher tous les marqueurs mis en évidence</button>
         <ul>
           <li *ngFor="let poi of nearbyPOIs">
-            {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} m
+            {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
             <button type="button" (click)="centerMapOnPOI(poi.poi)">Centrer sur ce POI</button>
             <button
               (click)="toggleHighlightMarker('poi-' + poi.poi.id)"

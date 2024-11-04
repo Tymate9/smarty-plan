@@ -66,7 +66,7 @@ class SpatialService<T : PanacheEntityBase>(
         SELECT e.$idFieldName, ST_Distance(
             e.$coordinateColumnName::geography,
             ST_GeomFromText(:pointWKT, 4326)::geography
-        ) AS distance
+        ) / 1000.0 AS distance
         FROM $tableName e
         ORDER BY distance
         LIMIT :limit

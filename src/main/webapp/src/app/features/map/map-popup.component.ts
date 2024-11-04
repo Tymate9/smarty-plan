@@ -49,7 +49,7 @@ import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service
         <ul *ngIf="!loadingVehicles && nearbyVehicles.length > 0">
           <li *ngFor="let vehicle of nearbyVehicles">
             <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
-            <span> ({{ vehicle.first | number:'1.2-2' }} m)</span>
+            <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
             <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
             <button
               (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
@@ -73,7 +73,7 @@ import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service
         <ul *ngIf="!loadingPOIs && nearbyPOIs.length > 0">
           <li *ngFor="let poi of nearbyPOIs">
             <strong>{{ poi.second.label }}</strong> - {{ poi.second.category.label }}
-            <span> ({{ poi.first | number:'1.2-2' }} m)</span>
+            <span> ({{ poi.first | number:'1.2-2' }} km)</span>
             <button (click)="centerMapOnPOI(poi.second)">Zoom</button>
             <button
               (click)="toggleHighlightMarker('poi-' + poi.second.id)"

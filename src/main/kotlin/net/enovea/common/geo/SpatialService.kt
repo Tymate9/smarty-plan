@@ -6,6 +6,7 @@ import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import kotlin.reflect.KClass
 
+// TODO(Ajouter l'interface geoEntity)
 class SpatialService<T : PanacheEntityBase>(
     private val entityClass: KClass<T>,
     private val entityManager: EntityManager,
@@ -62,10 +63,10 @@ class SpatialService<T : PanacheEntityBase>(
         val idFieldName = idField.name
 
         val query = """
-        SELECT e.$idFieldName, ST_Distance(
+        SELECT e.$idFieldName, ROUND(ST_Distance(
             e.$coordinateColumnName::geography,
             ST_GeomFromText(:pointWKT, 4326)::geography
-        ) AS distance
+        ) ::numeric / 1000.0 , 2) AS distance
         FROM $tableName e
         ORDER BY distance
         LIMIT :limit

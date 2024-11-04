@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="59.116" height="40.924" viewBox="0 0 59.116 40.924">
+  <g id="camionette-vert" transform="translate(1 1)">
+    <path id="Tracé_503" data-name="Tracé 503" d="M25.981,5.324H3.11L-.111,7.215l-.966,3.624V39.347H3.916L4.882,42l3.463,1.933h2.9l3.866-4.027,2.174-.564H40.154l2.174,4.107,4.026.886L49.9,43.051l.886-3.141,5.234-.564V27.428L53.6,24.771l-6.12-.483L38.7,12.047H32.987V7.215L29.846,5.324Z" transform="translate(1.198 -5.324)" fill="#00b49c"/>
+    <path id="Tracé_20" data-name="Tracé 20" d="M15.23,35.646m-5.021,0a5.021,5.021,0,1,0,5.021-5.021,5.021,5.021,0,0,0-5.021,5.021" transform="translate(-4.561 -1.743)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path id="Tracé_21" data-name="Tracé 21" d="M35.646,35.646m-5.021,0a5.021,5.021,0,1,0,5.021-5.021,5.021,5.021,0,0,0-5.021,5.021" transform="translate(11.427 -1.743)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path id="Tracé_506" data-name="Tracé 506" d="M23.7,22.423c.148-.314,0-11.1,0-11.1l2.033-1.78h3.036l9.946,12.877Z" transform="translate(10.813 -3.685)" fill="#fff"/>
+    <path id="Tracé_22" data-name="Tracé 22" d="M2.588,39.867H-2.4V24.8s34.115.111,34.425,0V12.25h5.021L47.092,24.8H49.6a5.021,5.021,0,0,1,5.021,5.021V39.867H49.6m-10.043,0H13.44M-1.672,24.8H47.092m-15.064,0V12.25" transform="translate(2.492 -5.964)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path id="Tracé_499" data-name="Tracé 499" d="M5.468,30.207s-.086-13.428-.086-13.653c.128-5.994,5.275-5.723,6.148-5.725h23.4c5.29,0,4.956,5.725,4.956,5.725" transform="translate(-5.382 -10.828)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-width="2"/>
+  </g>
+</svg>

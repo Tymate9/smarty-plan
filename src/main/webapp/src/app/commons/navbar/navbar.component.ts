@@ -9,7 +9,7 @@ import {KeycloakProfile} from "keycloak-js";
   template: `
     <nav class="navbar">
       <div class="nav-buttons">
-        <button class="transparent-blur-bg" (click)="navigateTo('dashboard')">Dashboard</button>
+        <button class="transparent-blur-bg" (click)="navigateTo('dashboard')">État de parc</button>
         <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
       </div>
       <div class="filters">

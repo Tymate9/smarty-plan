@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="47.191" height="34.677" viewBox="0 0 47.191 34.677">
+  <g id="voiture-vert" transform="translate(0.992 0.811)">
+    <g id="Groupe_855" data-name="Groupe 855" transform="translate(0 0.284)">
+      <path id="Tracé_502" data-name="Tracé 502" d="M313.32,154v-6.2l10.39-11.112,17.715.8,6.523,6.926,1.772,4.188,5.557,1.208,2.819,2.658s.08,12.482,0,12.482-4.51.564-4.51.564l-4.832,4.107-6.765-5.234H327.977l-1.384,4.04h-6.034l-4.018-4.765H313.32Z" transform="translate(-313.32 -136.689)" fill="#00b49c"/>
+      <path id="Tracé_505" data-name="Tracé 505" d="M345.135,148.58h-13V136.81h4.7Z" transform="translate(-309.122 -136.641)" fill="#fff"/>
+    </g>
+    <path id="Tracé_496" data-name="Tracé 496" d="M15.23,35.646m-5.021,0a5.021,5.021,0,1,0,5.021-5.021,5.021,5.021,0,0,0-5.021,5.021" transform="translate(-5.18 -7.801)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path id="Tracé_497" data-name="Tracé 497" d="M35.646,35.646m-5.021,0a5.021,5.021,0,1,0,5.021-5.021,5.021,5.021,0,0,0-5.021,5.021" transform="translate(-0.49 -7.801)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path id="Tracé_498" data-name="Tracé 498" d="M10.974,39.867H6.125V24.8L16.054,12.25H33.642c.052-.091,10.253,12.535,10.253,12.535h2.15l.25.018a5.021,5.021,0,0,1,5.021,5.021V39.867H46.3m-10.043,0H21.189M6.125,24.8H46.3" transform="translate(-6.117 -12.022)" fill="none" stroke="#016b5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <line id="Ligne_153" data-name="Ligne 153" y2="12.493" transform="translate(22.246)" fill="none" stroke="#016b5d" stroke-width="2"/>
+  </g>
+</svg>

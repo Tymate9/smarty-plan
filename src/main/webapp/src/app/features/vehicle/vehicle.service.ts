@@ -13,7 +13,7 @@ export interface VehicleWithDistanceDTO {
   providedIn: 'root',
 })
 export class VehicleService {
-  private readonly baseUrl = 'http://localhost:8080/vehicles';
+  private readonly baseUrl = 'vehicles';
 
   constructor(private readonly http: HttpClient) {}
 

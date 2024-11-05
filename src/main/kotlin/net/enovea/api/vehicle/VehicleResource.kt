@@ -18,7 +18,7 @@ import org.locationtech.jts.io.WKTReader
 
 
 // TODO(A refactoriser et à améliorer avec le VehicleService et travailler sur le nombre de résultat retourner après le filtre)
-@Path("/vehicles")
+@Path("/api/vehicles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 class VehicleResource(

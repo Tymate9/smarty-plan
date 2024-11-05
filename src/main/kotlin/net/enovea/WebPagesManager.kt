@@ -1,6 +1,9 @@
 package net.enovea
 
+import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
+import jakarta.ws.rs.PathParam
+import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -16,7 +19,11 @@ class WebPagesManager {
      * Redirects the requests associated to a page of the application to the index.html resource.
      * This is required to support the browser history, refresh and direct access to a page.
      */
+    @GET
+    @Path("{path: (^(?!/?api/)(?!.*\\.\\w+$).*)}")
+    @Produces(MediaType.TEXT_HTML)
     fun index(
+        @PathParam("path") path: String,
         @Context uriInfo: UriInfo,
     ): Response {
         println("Méthode index invoquée")

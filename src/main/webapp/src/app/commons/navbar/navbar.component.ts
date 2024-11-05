@@ -109,7 +109,7 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
-    this.keycloakService.logout("http://localhost:8080/")
+    this.keycloakService.logout("https://smartyplan.staging.nm.enovea.org/")
 
   }
 }

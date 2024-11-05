@@ -13,7 +13,7 @@ export interface PoiWithDistance {
 })
 export class PoiService {
 
-  private readonly baseUrl = 'poi';
+  private readonly baseUrl = '/api/poi';
 
   constructor(private http: HttpClient) {}
 

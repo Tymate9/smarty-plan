@@ -13,7 +13,7 @@ export interface VehicleWithDistanceDTO {
   providedIn: 'root',
 })
 export class VehicleService {
-  private readonly baseUrl = 'vehicles';
+  private readonly baseUrl = '/api/vehicles';
 
   constructor(private readonly http: HttpClient) {}
 

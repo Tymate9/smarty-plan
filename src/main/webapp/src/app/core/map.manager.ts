@@ -253,7 +253,10 @@ export class MapManager {
         componentRef.instance.poi = updatedPoi;
 
         componentRef.instance.poiDeleted.subscribe((poiId: number) => this.onPOIDeleted(marker));
-        componentRef.instance.poiUpdated.subscribe((newPoi: any) => this.updateMarker(newPoi));
+        componentRef.instance.poiUpdated.subscribe((updatedPoi: any) => {
+          this.updateMarker(updatedPoi);
+          this.map.closePopup();
+        });
         componentRef.instance.zoomToVehicleMarker.subscribe((coordinates: [number, number]) =>
         {
           this.zoomToCoordinates(coordinates, this.map.getMaxZoom())

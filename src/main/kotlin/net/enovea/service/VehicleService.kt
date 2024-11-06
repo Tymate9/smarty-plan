@@ -1,9 +1,10 @@
 package net.enovea.service
-import net.enovea.domain.vehicle.VehicleEntity
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import net.enovea.domain.vehicle.VehicleMapper
-import net.enovea.domain.vehicle.VehicleSummaryMapper
+import net.enovea.domain.driver.DriverEntity
+import net.enovea.domain.vehicle.*
+import net.enovea.domain.team.TeamEntity
+import net.enovea.domain.vehicle.*
 import net.enovea.dto.VehicleDTO
 import net.enovea.repository.*
 import net.enovea.dto.VehicleSummaryDTO
@@ -13,33 +14,29 @@ import net.enovea.repository.VehicleUntrackedPeriodRepository
 
 
 
-class VehicleService (
-    private val teamRepository: TeamRepository,
-    private val driverRepository: DriverRepository,
-    private val vehicleRepository: VehicleRepository,
-    private val vehicleSummaryMapper: VehicleSummaryMapper,
-    private val vehicleUntrackedRepository: VehicleUntrackedPeriodRepository,
-    private val driverUntrackedRepository: DriverUntrackedPeriodRepository,
-    private val vehicleMapper: VehicleMapper,
 
+class VehicleService (
+   //private val vehicleRepository: VehicleRepository,
+    private val vehicleSummaryMapper: VehicleSummaryMapper,
+    private val vehicleMapper: VehicleMapper,
 ){
 
 
     //function returns all vehicles details (tracked and untracked)
     fun getAllVehiclesDetails(): List<VehicleDTO> {
-        val vehicles = vehicleRepository.listAll()
+        val vehicles = VehicleEntity.listAll()
         return vehicles.map { vehicleMapper.toVehicleDTO(it) }
     }
 
     //function returns all vehicles summaries (tracked and untracked)
     fun getAllVehiclesSummaries(): List<VehicleSummaryDTO> {
-        val vehicles = vehicleRepository.listAll()
+        val vehicles = VehicleEntity.listAll()
         return vehicles.map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
     }
 
     //function returns only the tracked vehicles(details)
     fun getTrackedVehiclesDetails(): List<VehicleDTO> {
-        val allVehicles = vehicleRepository.listAll()
+        val allVehicles = VehicleEntity.listAll()
 
         val trackedVehicles = filterVehicle(allVehicles)
 
@@ -50,8 +47,11 @@ class VehicleService (
         allVehicles: List<VehicleEntity>
     ): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
-        val untrackedVehicleIds = vehicleUntrackedRepository.findVehicleIdsWithUntrackedPeriod()
-        val untrackedDriverIds = driverUntrackedRepository.findDriverIdsWithUntrackedPeriod()
+        val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
+        val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
+
+        val allVehicles = VehicleEntity.listAll()
+
         val trackedVehicles = allVehicles.filter { vehicle ->
             val isVehicleTracked = vehicle.id !in untrackedVehicleIds
 
@@ -72,11 +72,11 @@ class VehicleService (
     //function returns tracked and untracked vehicles(summary) with replacing the last position by null for untracked vehicles/drivers
     fun getVehiclesSummary(): List<VehicleSummaryDTO> {
         //Get the IDs of untracked vehicles/drivers
-        val untrackedVehicleIds = vehicleUntrackedRepository.findVehicleIdsWithUntrackedPeriod()
-        val untrackedDriverIds = driverUntrackedRepository.findDriverIdsWithUntrackedPeriod()
+        val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
+        val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
         //Fetch and map all Vehicles entities to VehicleDTOsummary
-        val allVehicles = vehicleRepository.listAll()
+        val allVehicles = VehicleEntity.listAll()
         val allVehicleDTOsummary = allVehicles.map { vehicle ->
             vehicleSummaryMapper.toVehicleDTOsummary(vehicle)
         }
@@ -100,11 +100,11 @@ class VehicleService (
     fun getVehiclesDetails(): List<VehicleDTO> {
 
         //Get the IDs of untracked vehicles/drivers
-        val untrackedVehicleIds = vehicleUntrackedRepository.findVehicleIdsWithUntrackedPeriod()
-        val untrackedDriverIds = driverUntrackedRepository.findDriverIdsWithUntrackedPeriod()
+        val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
+        val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
         //Fetch and map all Vehicles entities to VehicleDTOs
-        val allVehicles = vehicleRepository.listAll()
+        val allVehicles = VehicleEntity.listAll()
         val allVehicleDTOs = allVehicles.map { vehicle ->
             vehicleMapper.toVehicleDTO(vehicle)
         }
@@ -220,14 +220,17 @@ class VehicleService (
     ): List<VehicleEntity> {
 
         // Fetch all vehicles and apply filters if provided
-        var vehicles = vehicleRepository.listAll()
+        var vehicles = VehicleEntity.listAll()
 
         // Filter by team labels
         if (!teamLabels.isNullOrEmpty()) {
-            val teamIds = teamRepository.findByLabels(teamLabels).map { it.id }
+            val teamIds = TeamEntity.findByLabels(teamLabels).map { it.id }
+        if (teamIds.isNotEmpty()) {
             vehicles = vehicles.filter { vehicle ->
                 vehicle.vehicleTeams.any { it.team?.id in teamIds }
             }
+        }
+
         }
 
         // Filter by vehicle IDs
@@ -237,7 +240,7 @@ class VehicleService (
 
         // Filter by driver names
         if (!driverNames.isNullOrEmpty()) {
-            val driverIds = driverRepository.findByFullNames(driverNames).map { it.id }
+            val driverIds = DriverEntity.findByFullNames(driverNames).map { it.id }
             vehicles = vehicles.filter { vehicle ->
                 vehicle.vehicleDrivers.any { it.driver?.id in driverIds }
             }

@@ -3,6 +3,7 @@ package net.enovea.domain.vehicle
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import jakarta.transaction.Transactional
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -20,6 +21,13 @@ class VehicleUntrackedPeriodEntity(
     companion object : PanacheCompanionBase<VehicleUntrackedPeriodEntity, VehicleUntrackedPeriodId> {
         const val ENTITY_NAME = "VehicleUntrackedPeriodEntity"
         const val TABLE_NAME = "vehicle_untracked_period"
+
+        // Method to find IDs of vehicles with untracked periods
+        @Transactional
+        fun findVehicleIdsWithUntrackedPeriod(): List<String> {
+            return find("endDate IS NULL").list().map { it.id.vehicleId }
+        }
+
     }
 }
 

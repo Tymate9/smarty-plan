@@ -3,6 +3,7 @@ package net.enovea.domain.vehicle
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle_category.VehicleCategoryEntity
 
@@ -66,5 +67,21 @@ data class VehicleEntity(
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"
+
+        // Method to find by ID as String
+        @Transactional
+        fun findByIdString(id: String): VehicleEntity? {
+            return find("id = ?1", id).firstResult()
+        }
+
+        // Query to fetch vehicles with drivers
+        @Transactional
+        fun findAllWithDrivers(): List<VehicleEntity> {
+            return find(
+                query = "SELECT v FROM VehicleEntity v " +
+                        "JOIN FETCH v.VehicleDriverEntity vd " +
+                        "JOIN FETCH vd.DriverEntity"
+            ).list()
+        }
     }
 }

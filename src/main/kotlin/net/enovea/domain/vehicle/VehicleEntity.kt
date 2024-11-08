@@ -83,5 +83,10 @@ data class VehicleEntity(
                         "JOIN FETCH vd.DriverEntity"
             ).list()
         }
+
+
+
+
+
     }
 }

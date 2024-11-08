@@ -34,6 +34,20 @@ class VehicleResource(
     }
 
     @GET
+    @Path("/filtered")
+    fun getFilteredVehicles(
+        @QueryParam("teamLabels") teamLabels: List<String>?,
+        @QueryParam("vehicleIds") vehicleIds: List<String>?,
+        @QueryParam("driverNames") driverNames: List<String>?
+    ): Response {
+        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
+        val vehicleSummaries = vehicleService.getVehiclesSummary(filteredVehicles)
+        return Response.ok(vehicleSummaries).build()
+    }
+    ///vehicles/filtered?teamLabels=team1,team2&vehicleIds=MM,NN&driverNames=John Doe,Jane Doe
+
+
+    @GET
     @Path("/nearest")
     @Produces(MediaType.APPLICATION_JSON)
     fun getNearestVehiclesDetails(
@@ -151,5 +165,7 @@ class VehicleResource(
 
         return vehicles
     }
+
+
 
 }

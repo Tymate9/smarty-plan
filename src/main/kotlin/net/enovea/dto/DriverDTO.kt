@@ -5,6 +5,6 @@ data class DriverDTO (
     val firstName: String,
     val lastName: String,
     val phoneNumber: String?,
-    val team: TeamDTOsummary,
+    val team: TeamSummaryDTO,
     //val driverTeams: Map<TimestampRange, TeamDTO>? = null
 )

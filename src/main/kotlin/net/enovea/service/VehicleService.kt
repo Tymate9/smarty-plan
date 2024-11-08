@@ -1,26 +1,14 @@
 package net.enovea.service
-import jakarta.enterprise.context.ApplicationScoped
-import jakarta.inject.Inject
-import net.enovea.domain.driver.DriverEntity
-import net.enovea.domain.vehicle.*
-import net.enovea.domain.team.TeamEntity
+import jakarta.transaction.Transactional
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.VehicleDTO
-import net.enovea.repository.*
 import net.enovea.dto.VehicleSummaryDTO
-import net.enovea.repository.DriverUntrackedPeriodRepository
-import net.enovea.repository.VehicleRepository
-import net.enovea.repository.VehicleUntrackedPeriodRepository
-
-
 
 
 class VehicleService (
-   //private val vehicleRepository: VehicleRepository,
     private val vehicleSummaryMapper: VehicleSummaryMapper,
     private val vehicleMapper: VehicleMapper,
 ){
-
 
     //function returns all vehicles details (tracked and untracked)
     fun getAllVehiclesDetails(): List<VehicleDTO> {
@@ -37,9 +25,7 @@ class VehicleService (
     //function returns only the tracked vehicles(details)
     fun getTrackedVehiclesDetails(): List<VehicleDTO> {
         val allVehicles = VehicleEntity.listAll()
-
         val trackedVehicles = filterVehicle(allVehicles)
-
         return trackedVehicles.map { vehicleMapper.toVehicleDTO(it) }
     }
 
@@ -70,13 +56,12 @@ class VehicleService (
     }
 
     //function returns tracked and untracked vehicles(summary) with replacing the last position by null for untracked vehicles/drivers
-    fun getVehiclesSummary(): List<VehicleSummaryDTO> {
+    fun getVehiclesSummary(vehicles: List<VehicleEntity>? = null): List<VehicleSummaryDTO> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
-        //Fetch and map all Vehicles entities to VehicleDTOsummary
-        val allVehicles = VehicleEntity.listAll()
+        val allVehicles = vehicles ?: VehicleEntity.listAll()
         val allVehicleDTOsummary = allVehicles.map { vehicle ->
             vehicleSummaryMapper.toVehicleDTOsummary(vehicle)
         }
@@ -84,8 +69,9 @@ class VehicleService (
         //Replace the last position for the untracked vehicles/drivers by null
         allVehicleDTOsummary.forEach { vehicleDTOsummary ->
 
+            val driver = vehicleDTOsummary.driver
             val isVehicleTracked = vehicleDTOsummary.id !in untrackedVehicleIds
-            val isDriverTracked = vehicleDTOsummary.driver?.id == null || vehicleDTOsummary.driver.id !in untrackedDriverIds
+            val isDriverTracked = driver == null || driver.id !in untrackedDriverIds
 
             if (!isVehicleTracked || !isDriverTracked) {
                 vehicleDTOsummary.device.coordinate = null
@@ -133,122 +119,59 @@ class VehicleService (
         return allVehicleDTOs
     }
 
-    // Connection setup (replace with actual connection details)
-//    private fun getConnection(): Connection {
-//        val url = "jdbc:postgresql://localhost:5432/your_database"
-//        val user = "your_user"
-//        val password = "your_password"
-//        return DriverManager.getConnection(url, user, password)
-//    }
 
-    // Updated function to accept lists for teamLabels and vehicleIds, return list of Vehicle entities
-//    fun getFilteredVehiclesPostgis(
-//        teamLabels: List<String>? = null,
-//        vehicleIds: List<String>? = null,
-//        driverNames: List<String>? = null
-//    ): List<VehicleEntity> {
-//
-//        val vehicles = mutableListOf<VehicleEntity>()
-//
-//
-//        // Base SQL query with joins to connect the relational tables
-//        var query = """
-//            SELECT v.id, v.energy, v.engine, v.externalid, v.licenseplate
-//            FROM vehicle v
-//            JOIN vehicle_team vt ON v.id = vt.vehicle_id
-//            JOIN team t ON vt.team_id = t.id
-//            JOIN vehicle_driver vd ON v.id = vd.vehicle_id
-//            JOIN driver d ON vd.driver_id = d.id
-//            WHERE 1=1
-//        """
-//
-//        // Parameters for the prepared statement
-//        val params = mutableListOf<Any>()
-//
-//        // Add dynamic filtering for team labels
-//        if (!teamLabels.isNullOrEmpty()) {
-//            val placeholders = teamLabels.joinToString(", ") { "?" }
-//            query += " AND t.label IN ($placeholders)"
-//            params.addAll(teamLabels)
-//        }
-//
-//        // Add dynamic filtering for vehicle IDs
-//        if (!vehicleIds.isNullOrEmpty()) {
-//            val placeholders = vehicleIds.joinToString(", ") { "?" }
-//            query += " AND v.id IN ($placeholders)"
-//            params.addAll(vehicleIds)
-//        }
-//
-//        // Add dynamic filtering for driver names
-//        if (!driverNames.isNullOrEmpty()) {
-//            val placeholders = driverNames.joinToString(", ") { "?" }
-//            query += " AND (d.first_name || ' ' || d.last_name) IN ($placeholders)"
-//            params.addAll(driverNames)
-//        }
-//
-//        // Execute the query and fetch results as Vehicle entities
-//        getConnection().use { connection ->
-//            val preparedStatement: PreparedStatement = connection.prepareStatement(query)
-//
-//            // Set parameters dynamically
-//            for ((index, param) in params.withIndex()) {
-//                preparedStatement.setObject(index + 1, param)
-//            }
-//
-//            // Execute the query and populate the vehicle list
-//            val resultSet = preparedStatement.executeQuery()
-//            while (resultSet.next()) {
-//                val vehicle = VehicleEntity(
-//                    id = resultSet.getString("id"),
-//                    energy = resultSet.getString("energy"),
-//                    engine = resultSet.getString("engine"),
-//                    externalid = resultSet.getString("externalid"),
-//                    licenseplate = resultSet.getString("licenseplate")
-//                    validated=resultSet.get
-//                )
-//                vehicles.add(vehicle)
-//            }
-//        }
-//
-//        return vehicles
-//    }
-
+    //Function returns the list of vehicles based on the filters provided
+    @Transactional
     fun getFilteredVehicles(
         teamLabels: List<String>? = null,
         vehicleIds: List<String>? = null,
         driverNames: List<String>? = null
     ): List<VehicleEntity> {
 
-        // Fetch all vehicles and apply filters if provided
-        var vehicles = VehicleEntity.listAll()
+        val params = mutableMapOf<String, Any>()
 
-        // Filter by team labels
-        if (!teamLabels.isNullOrEmpty()) {
-            val teamIds = TeamEntity.findByLabels(teamLabels).map { it.id }
-        if (teamIds.isNotEmpty()) {
-            vehicles = vehicles.filter { vehicle ->
-                vehicle.vehicleTeams.any { it.team?.id in teamIds }
+        var query =
+            """
+            SELECT v
+            FROM VehicleEntity v
+            JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
+            JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
+            JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
+            JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
+            WHERE 1=1
+            AND vt.endDate IS NULL
+            AND vd.endDate IS NULL
+        """
+
+        if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
+
+            query += " AND t.label IN :teamLabels" +
+                    " AND (v.id IN :vehicleIds OR CONCAT(d.firstName, ' ', d.lastName) IN :driverNames)"
+            params["teamLabels"] = teamLabels
+            params["vehicleIds"] = vehicleIds
+            params["driverNames"] = driverNames
+        } else {
+            if (!teamLabels.isNullOrEmpty()) {
+                query += " AND t.label IN :teamLabels"
+                params["teamLabels"] = teamLabels
+            }
+            if (!vehicleIds.isNullOrEmpty()) {
+                query += " AND v.id IN :vehicleIds"
+                params["vehicleIds"] = vehicleIds
+            }
+            if (!driverNames.isNullOrEmpty()) {
+                query += " AND (d.firstName || ' ' || d.lastName) IN :driverNames"
+                params["driverNames"] = driverNames
             }
         }
 
-        }
+        val panacheQuery = VehicleEntity.find(query, params)
 
-        // Filter by vehicle IDs
-        if (!vehicleIds.isNullOrEmpty()) {
-            vehicles = vehicles.filter { it.id in vehicleIds }
-        }
-
-        // Filter by driver names
-        if (!driverNames.isNullOrEmpty()) {
-            val driverIds = DriverEntity.findByFullNames(driverNames).map { it.id }
-            vehicles = vehicles.filter { vehicle ->
-                vehicle.vehicleDrivers.any { it.driver?.id in driverIds }
-            }
-        }
-
-        return vehicles
+        return panacheQuery.list()
     }
+
 }
+
 
 
 

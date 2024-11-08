@@ -57,7 +57,6 @@ class TeamEntity(
         fun findByLabels(labels: List<String>): List<TeamEntity> {
             val query = TeamEntity.find(
                 """SELECT t FROM TeamEntity t WHERE t.label IN :labels"""
-
             .trimIndent(),
             Parameters.with("labels",labels )
             )

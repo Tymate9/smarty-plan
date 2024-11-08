@@ -1,10 +1,10 @@
 import * as L from 'leaflet';
 import {ComponentRef, Injectable, ViewContainerRef} from '@angular/core';
-import {PoiService} from "../features/poi/poi.service";
-import {PoiPopupComponent} from "../features/poi/poi-popup/poi-popup.component";
-import {VehiclePopupComponent} from "../features/vehicle/vehicle-popup/vehicle-popup.component";
-import {dto} from "../../habarta/dto";
-import {VehicleService} from "../features/vehicle/vehicle.service";
+import {PoiService} from "../../features/poi/poi.service";
+import {PoiPopupComponent} from "../../features/poi/poi-popup/poi-popup.component";
+import {VehiclePopupComponent} from "../../features/vehicle/vehicle-popup/vehicle-popup.component";
+import {dto} from "../../../habarta/dto";
+import {VehicleService} from "../../features/vehicle/vehicle.service";
 
 export enum EntityType {
   POI = 'poi',
@@ -15,12 +15,14 @@ export interface CustomMarker extends L.Marker {
   id: string;
   areaPolygon?: L.Polygon;
   isHighlighted: boolean;
+  entity: any;
 }
 
 export class CustomMarkerImpl extends L.Marker implements CustomMarker {
   id: string;
   isHighlighted: boolean = false;
   areaPolygon?: L.Polygon;
+  public entity : any
   private forceZIndex: number | null = null; // Stockage du zIndex forcé
 
 
@@ -57,11 +59,13 @@ export class MarkerFactory {
         marker = MarkerFactory.createPOIMarker(entity);
         marker.setIcon(MarkerFactory.getPOIIcon(entity));
         marker.id = `poi-${entity.id}`;
+        marker.entity = entity;
         break;
       case EntityType.VEHICLE:
         marker = MarkerFactory.createVehicleMarker(entity);
         marker.setIcon(MarkerFactory.getVehicleIcon(entity));
         marker.id = `vehicle-${entity.id}`;
+        marker.entity = entity;
         break;
       default:
         console.error("Type d'entité inconnu");

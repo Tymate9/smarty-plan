@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import {PoiService} from "../../poi/poi.service";
 import {dto} from "../../../../habarta/dto";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
 
 @Component({
   selector: 'app-vehicle-popup',
@@ -59,10 +60,11 @@ import {dto} from "../../../../habarta/dto";
 })
 export class VehiclePopupComponent implements OnInit {
   @Input() vehicle: dto.VehicleSummaryDTO;
-  @Output() centerOnPOI = new EventEmitter<[number, number]>();
+  @Output() layerEvent = new EventEmitter<LayerEvent>();
+  /*@Output() centerOnPOI = new EventEmitter<[number, number]>();
   @Output() viewAllHighlightedMarkers = new EventEmitter<[number, number]>();
   @Output() highlightMarkerRequest = new EventEmitter<string>();
-  @Output() zoomToHighlightedMarkers = new EventEmitter<void>();
+  @Output() zoomToHighlightedMarkers = new EventEmitter<void>();*/
 
   nearbyPOIs: any[] = [];
   activeTab: string = 'information'; // Onglet par défaut
@@ -72,15 +74,29 @@ export class VehiclePopupComponent implements OnInit {
   constructor(private poiService: PoiService) {}
 
   showAllHighlightedMarkers() {
-    this.viewAllHighlightedMarkers.emit([this.vehicle.device.coordinate?.coordinates[1] ?? 0.0, this.vehicle.device.coordinate?.coordinates[0] ?? 0.0]);
+    this.layerEvent.emit({
+      type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
+      payload: {
+        lat: this.vehicle.device.coordinate?.coordinates[1] ?? 0.0,
+        lng: this.vehicle.device.coordinate?.coordinates[0] ?? 0.0,
+      }
+    });
   }
 
   toggleHighlightMarker(markerId: string) {
-    // Basculer l'état de surbrillance dans highlightedStates
+    // Basculer l'état de surbrillance
     this.highlightedStates[markerId] = !this.highlightedStates[markerId];
 
-    // Émettre l'événement pour que MapManager gère la surbrillance
-    this.highlightMarkerRequest.emit(markerId);
+    // Déterminer le type d'événement en fonction de l'état
+    const eventType = this.highlightedStates[markerId]
+      ? LayerEventType.HighlightMarker
+      : LayerEventType.RemoveHighlightMarker;
+
+    // Émettre l'événement
+    this.layerEvent.emit({
+      type: eventType,
+      payload: { markerID: markerId }
+    });
   }
 
   isMarkerHighlighted(markerId: string): boolean {
@@ -124,6 +140,9 @@ export class VehiclePopupComponent implements OnInit {
 
   centerMapOnPOI(poi: any) {
     const coordinates = poi.coordinate.coordinates;
-    this.centerOnPOI.emit(coordinates);
+    this.layerEvent.emit({
+      type: LayerEventType.ZoomToCoordinates,
+      payload: { coordinates }
+    });
   }
 }

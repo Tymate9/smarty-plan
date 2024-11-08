@@ -4,6 +4,7 @@ import {PoiService} from "../poi.service";
 import * as turf from '@turf/turf';
 import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
 
 
 @Component({
@@ -197,11 +198,7 @@ import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.serv
 })
 export class PoiPopupComponent implements OnInit {
   @Input() poi: any;
-  @Output() poiDeleted = new EventEmitter<number>();
-  @Output() poiUpdated = new EventEmitter<any>();
-  @Output() viewAllHighlightedMarkers = new EventEmitter<[number, number]>();
-  @Output() highlightMarkerRequest = new EventEmitter<string>();
-  @Output() zoomToVehicleMarker = new EventEmitter<number[]>();
+  @Output() layerEvent = new EventEmitter<LayerEvent>();
 
   highlightedStates: { [markerId: string]: boolean } = {};
 
@@ -275,7 +272,10 @@ export class PoiPopupComponent implements OnInit {
       this.poiService.deletePOI(this.poi.id).subscribe({
         next: () => {
           alert('POI supprimé avec succès.');
-          this.poiDeleted.emit(this.poi.id);
+          this.layerEvent.emit({
+            type: LayerEventType.POIDeleted,
+            payload: { poiId: this.poi.id }
+          });
         },
         error: (error) => {
           console.error('Erreur lors de la suppression du POI:', error);
@@ -302,7 +302,10 @@ export class PoiPopupComponent implements OnInit {
       next: (updatedPoi) => {
         alert('POI mis à jour avec succès.');
         this.poi = updatedPoi
-        this.poiUpdated.emit(updatedPoi);
+        this.layerEvent.emit({
+          type: LayerEventType.POIUpdated,
+          payload: { updatedPoi }
+        });
       },
       error: (error) => {
         console.error('Erreur lors de la mise à jour du POI:', error);
@@ -312,7 +315,13 @@ export class PoiPopupComponent implements OnInit {
   }
 
   centerMapAroundAllMarkers() {
-    this.viewAllHighlightedMarkers.emit([this.poi.coordinate.coordinates[1], this.poi.coordinate.coordinates[0]]);
+    this.layerEvent.emit({
+      type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
+      payload: {
+        lat: this.poi.coordinate.coordinates[1],
+        lng: this.poi.coordinate.coordinates[0]
+      }
+    });
   }
 
   proximityVehicles: VehicleWithDistanceDTO[] = [];
@@ -339,7 +348,12 @@ export class PoiPopupComponent implements OnInit {
   centerMapOnVehicle(vehicle: dto.VehicleSummaryDTO) {
     const coordinates = vehicle.device?.coordinate?.coordinates;
     if (coordinates && coordinates.length === 2) {
-      this.zoomToVehicleMarker.emit([coordinates[1], coordinates[0]]);
+      this.layerEvent.emit({
+        type: LayerEventType.ZoomToCoordinates,
+        payload: {
+          coordinates: [coordinates[0], coordinates[1]]
+        }
+      });
     }
   }
 
@@ -381,11 +395,14 @@ export class PoiPopupComponent implements OnInit {
   }
 
   toggleHighlightMarker(markerId: string) {
-    // Basculer l'état de surbrillance dans highlightedStates
     this.highlightedStates[markerId] = !this.highlightedStates[markerId];
-
-    // Émettre l'événement pour que MapManager gère la surbrillance
-    this.highlightMarkerRequest.emit(markerId);
+    const eventType = this.highlightedStates[markerId]
+      ? LayerEventType.HighlightMarker
+      : LayerEventType.RemoveHighlightMarker;
+    this.layerEvent.emit({
+      type: eventType,
+      payload: { markerID: markerId }
+    });
   }
 
   isMarkerHighlighted(markerId: string): boolean {

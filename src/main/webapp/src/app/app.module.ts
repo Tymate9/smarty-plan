@@ -12,7 +12,7 @@ import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
 import { HttpClientModule } from '@angular/common/http';
 import { LandingPageComponent } from './features/auth/landing-page/landing-page.component';
 import {AdminComponent} from './features/auth/admin/admin.component';
-import { MapComponent } from './features/map/popUp/map.component';
+import { MapComponent } from './features/map/map.component';
 import { NavbarComponent } from './commons/navbar/navbar.component';
 import { SearchAutocompleteComponent } from './commons/searchAutocomplete/search-autocomplete.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
@@ -21,7 +21,7 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
 
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { CacheInterceptor } from "./core/cache/cache.interceptor";
-import { MapPopupComponent } from './features/map/map-popup.component';
+import { MapPopupComponent } from './features/map/popUp/map-popup.component';
 import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
 import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
 

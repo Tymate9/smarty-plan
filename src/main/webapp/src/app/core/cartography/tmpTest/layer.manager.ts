@@ -118,10 +118,8 @@ export class LayerManager {
 
       // Vérifier si un autre popup est en train de s'ouvrir
       setTimeout(() => {
-        if (!this.popupIsOpening) {
           // Aucun autre popup ne s'ouvre, on peut retirer les highlights
           this.emitEvent({ type: LayerEventType.RemoveAllHighlights });
-        }
       }, 0);
     });
     // Ajouter l'événement 'click' pour gérer le transfert du marqueur
@@ -156,10 +154,7 @@ export class LayerManager {
 
       // Vérifier si un autre popup est en train de s'ouvrir
       setTimeout(() => {
-        if (!this.popupIsOpening) {
-          // Aucun autre popup ne s'ouvre, on peut retirer les highlights
           this.emitEvent({ type: LayerEventType.RemoveAllHighlights });
-        }
       }, 0);
     });
     // Ajouter l'événement 'click' pour gérer le transfert du marqueur
@@ -285,11 +280,11 @@ export class LayerManager {
   removeHighlightMarker(markerID: string): void {
     const marker = this.markersMap.get(markerID);
     if (marker && this.highlightedMarkers.has(markerID)) {
-      // Retirer le marqueur de la carte
-      this.map.removeLayer(marker);
-      // Réinsérer le marqueur dans le cluster group
-      this.clusterGroup.addLayer(marker);
-      this.configureMarkerEvents(marker)
+      if (!marker.isPopupOpen()){
+        this.map.removeLayer(marker);
+        this.clusterGroup.addLayer(marker);
+        this.configureMarkerEvents(marker)
+      }
       // Retirer la classe CSS de surbrillance
       const element = marker.getElement();
       if (element) {

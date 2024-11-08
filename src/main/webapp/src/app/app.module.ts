@@ -24,6 +24,7 @@ import { CacheInterceptor } from "./core/cache/cache.interceptor";
 import { MapPopupComponent } from './features/map/popUp/map-popup.component';
 import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
 import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
+import { AdvancePOIEditComponent } from './core/cartography/tmpTest/advance-poiedit.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-
     MapPopupComponent,
     PoiPopupComponent,
     VehiclePopupComponent,
+    AdvancePOIEditComponent,
   ],
   imports: [
     BrowserModule,

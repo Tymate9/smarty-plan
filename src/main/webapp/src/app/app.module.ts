@@ -24,6 +24,7 @@ import { CacheInterceptor } from "./commons/api/cache.interceptor";
 import { MapPopupComponent } from './features/map/popUp/map-popup/map-popup.component';
 import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
 import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
+import {TripsComponent} from "./features/trips/trips.component";
 
 @NgModule({
   declarations: [

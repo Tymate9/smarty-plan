@@ -20,6 +20,9 @@
         <surefire-plugin.version>3.3.1</surefire-plugin.version>
         <kotest.version>5.9.1</kotest.version>
         <mockk.version>1.13.12</mockk.version>
+        <jdbi.version>3.34.0</jdbi.version>
+        <mysql-connector-j.version>8.2.0</mysql-connector-j.version>
+        <kotlin-logging.version>3.0.5</kotlin-logging.version>
     </properties>
 
     <dependencyManagement>
@@ -70,6 +73,23 @@
             <artifactId>kotlin-extensions</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.microutils</groupId>
+            <artifactId>kotlin-logging-jvm</artifactId>
+            <version>${kotlin-logging.version}</version>
+        </dependency>
+
+        <!-- Mysql Connector -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+
+        </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-core</artifactId>
+            <version>${jdbi.version}</version>
+        </dependency>
 
         <!-- Quarkus DB -->
         <dependency>
@@ -87,6 +107,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-mysql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -372,6 +396,7 @@
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
                         <pattern>net.enovea.api.*.*Entity</pattern>
+                        <pattern>net.enovea.api.*.*DTO</pattern>
                         <pattern>net.enovea.dto.*DTO</pattern>
                     </classPatterns>
                     <customTypeMappings>

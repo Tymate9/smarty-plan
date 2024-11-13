@@ -4,6 +4,7 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
 import {TripsComponent} from "./features/trips/trips.component";
+import {TripComponent} from "./features/trips/trip.component";
 
 const routes: Routes = [
   {
@@ -12,7 +13,8 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
-      { path: 'trips', loadChildren: () => import('./app-routing.module').then(m => m.TripsModule), pathMatch: 'full' },
+      { path: 'trips/:vehicleId', component: TripsComponent },
+      { path: 'trip/:tripId', component: TripComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },
@@ -20,17 +22,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { bindToComponentInputs: true })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-
-@NgModule({
-  declarations: [TripsComponent],
-  imports: [
-    RouterModule.forRoot([
-      {path: ':vehicleId', component: TripsComponent}
-    ])
-  ]
-})
-export class TripsModule { }

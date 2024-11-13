@@ -15,4 +15,8 @@ export class TripsService {
   getTripsByVehicle(vehicleId: string): Observable<TripDTO[]> {
     return this.http.get<TripDTO[]>(`${this.apiUrl}/vehicle/${vehicleId}`);
   }
+
+  getTripById(tripId: string): Observable<TripDTO> {
+    return this.http.get<TripDTO>(`${this.apiUrl}/${tripId}`);
+  }
 }

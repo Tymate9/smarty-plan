@@ -1,10 +1,16 @@
 package net.enovea
 
+import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.Path
+import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.UriInfo
+import jakarta.ws.rs.ext.ExceptionMapper
+import jakarta.ws.rs.ext.Provider
+import java.io.InputStream
+import kotlin.io.reader
 
 /**
  * Controller for the web pages.
@@ -23,6 +29,25 @@ class WebPagesManager {
         val indexHtmlAsStream =
             Thread.currentThread().contextClassLoader.getResourceAsStream("/META-INF/resources/index.html")
         return if (indexHtmlAsStream == null) {
+            Response.status(Response.Status.NOT_FOUND).build()
+        } else {
+            Response.ok(
+                indexHtmlAsStream.reader().readText(),
+                MediaType.TEXT_HTML_TYPE.withCharset(Charsets.UTF_8.name()),
+            ).build()
+        }
+    }
+}
+
+
+@Provider
+class NotFoundExceptionMapper: ExceptionMapper<NotFoundException> {
+    @Override
+    @Produces(MediaType.TEXT_HTML)
+    override fun toResponse(exception: NotFoundException): Response {
+        val indexHtmlAsStream =
+            Thread.currentThread().contextClassLoader.getResourceAsStream("/META-INF/resources/index.html")
+        return if (null == indexHtmlAsStream) {
             Response.status(Response.Status.NOT_FOUND).build()
         } else {
             Response.ok(

@@ -25,6 +25,7 @@ import { MapPopupComponent } from './features/map/popUp/map-popup/map-popup.comp
 import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
 import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
 import {TripsComponent} from "./features/trips/trips.component";
+import {TripComponent} from "./features/trips/trip.component";
 
 @NgModule({
   declarations: [
@@ -41,6 +42,8 @@ import {TripsComponent} from "./features/trips/trips.component";
     MapPopupComponent,
     PoiPopupComponent,
     VehiclePopupComponent,
+    TripsComponent,
+    TripComponent
   ],
   imports: [
     BrowserModule,

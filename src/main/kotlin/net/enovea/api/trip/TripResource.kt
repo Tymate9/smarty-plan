@@ -7,7 +7,7 @@ import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 import net.enovea.repository.TripRepository
 
-@Path("/trips")
+@Path("/api/trips")
 class TripResource(private val tripRepository: TripRepository) {
 
     @GET

@@ -1,4 +1,6 @@
 package net.enovea.service
+import io.quarkus.hibernate.orm.panache.Panache
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.VehicleDTO
@@ -119,6 +121,18 @@ class VehicleService (
         return allVehicleDTOs
     }
 
+    @Transactional
+    fun getVehiclesList(): List<String> {
+        val entityManager: EntityManager = Panache.getEntityManager()
+        val query = entityManager.createQuery(
+            """
+            SELECT v.licenseplate 
+            FROM VehicleEntity v
+            """.trimIndent(),
+            String::class.java
+        )
+        return query.resultList
+    }
 
     //Function returns the list of vehicles based on the filters provided
     @Transactional
@@ -146,7 +160,7 @@ class VehicleService (
         if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
 
             query += " AND t.label IN :teamLabels" +
-                    " AND (v.id IN :vehicleIds OR CONCAT(d.firstName, ' ', d.lastName) IN :driverNames)"
+                    " AND (v.licenseplate IN :vehicleIds OR CONCAT(d.lastName, ' ', d.firstName) IN :driverNames)"
             params["teamLabels"] = teamLabels
             params["vehicleIds"] = vehicleIds
             params["driverNames"] = driverNames
@@ -156,11 +170,11 @@ class VehicleService (
                 params["teamLabels"] = teamLabels
             }
             if (!vehicleIds.isNullOrEmpty()) {
-                query += " AND v.id IN :vehicleIds"
+                query += " AND v.licenseplate IN :vehicleIds"
                 params["vehicleIds"] = vehicleIds
             }
             if (!driverNames.isNullOrEmpty()) {
-                query += " AND (d.firstName || ' ' || d.lastName) IN :driverNames"
+                query += " AND (d.lastName || ' ' || d.firstName) IN :driverNames"
                 params["driverNames"] = driverNames
             }
         }

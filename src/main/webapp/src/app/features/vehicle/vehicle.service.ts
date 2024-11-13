@@ -22,6 +22,11 @@ export class VehicleService {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
   }
 
+  //Méthode pour récupérer la liste de plaque d'immatriculationde
+  getVehiclesList(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/list`);
+  }
+
   // Méthode pour récupérer les véhicules les plus proches avec leur distance
   getNearestVehiclesWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<VehicleWithDistanceDTO[]> {
     const params = { latitude: latitude.toString(), longitude: longitude.toString(), limit: limit.toString() }
@@ -42,6 +47,19 @@ export class VehicleService {
   getVehicleInPolygon(polygonWKT: string): Observable<dto.VehicleSummaryDTO[]> {
     const params = { polygonWKT };
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}/inPolygon`, { params });
+  }
+
+  getFilteredVehicles(
+    teamLabels: string[]=[],
+    vehicleIds: string[]=[],
+    driverNames: string[]=[]
+  ): Observable<dto.VehicleSummaryDTO[]> {
+    const params={
+      teamLabels: teamLabels.length ? teamLabels : [],
+      vehicleIds: vehicleIds.length ? vehicleIds : [],
+      driverNames: driverNames.length ? driverNames : []
+    }
+    return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
 
 }

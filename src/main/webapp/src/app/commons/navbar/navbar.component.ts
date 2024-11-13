@@ -3,6 +3,10 @@ import { Router } from '@angular/router';
 import { FilterService } from './filter.service';
 import {KeycloakService} from "keycloak-angular";
 import {KeycloakProfile} from "keycloak-js";
+import {VehicleService} from "../../features/vehicle/vehicle.service";
+import {TeamService} from "../../features/vehicle/team.service";
+import {DriverService} from "../../features/vehicle/driver.service";
+
 
 @Component({
   selector: 'app-navbar',
@@ -13,7 +17,7 @@ import {KeycloakProfile} from "keycloak-js";
         <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
       </div>
       <div class="filters">
-        <app-search-autocomplete [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"></app-search-autocomplete>
+        <app-search-autocomplete [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-search-autocomplete>
         <app-search-autocomplete [label]="'Véhicules'" [options]="vehicleOptions" (selectedTagsChange)="updateVehicles($event)"></app-search-autocomplete>
         <app-search-autocomplete [label]="'Conducteurs'" [options]="driverOptions" (selectedTagsChange)="updateDrivers($event)"></app-search-autocomplete>
       </div>
@@ -50,15 +54,24 @@ import {KeycloakProfile} from "keycloak-js";
   `]
 })
 export class NavbarComponent implements OnInit {
-  constructor(private filterService: FilterService, private keycloakService: KeycloakService,  private router: Router) {}
+  constructor(private filterService: FilterService,
+              private keycloakService: KeycloakService,
+              private router: Router,
+              private  vehicleService:VehicleService,
+              private teamService: TeamService,
+              private driverService: DriverService) {}
 
   userName: string = '';
   userRole: string = '';
   userProfile: KeycloakProfile | null = null;
 
-  agencyOptions = ['Normandie Manutention', 'Le Havre', 'Paris'];
-  vehicleOptions = ['Véhicule 1', 'Véhicule 2', 'Véhicule 3'];
-  driverOptions = ['Conducteur 1', 'Conducteur 2', 'Conducteur 3', 'Conducteur 4'];
+  agencyOptions:string[] = [];
+  driverOptions:string[]=[];
+  vehicleOptions:string[]=[]
+
+  //agencyOptions = ['Service Technique Rouen', 'Service Commercial Rouen', 'Service Technique Caen'];
+  //vehicleOptions = ['1', '2', '3'];
+  //driverOptions = ['Conducteur 1', 'Conducteur 2', 'Conducteur 3', 'Conducteur 4'];
 
   agencySelected: string[] = [];
   vehicleSelected: string[] = [];
@@ -86,12 +99,23 @@ export class NavbarComponent implements OnInit {
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
     });
+
   }
 
   async ngOnInit() {
     try {
       this.userProfile = await this.keycloakService.loadUserProfile();
       this.userName = `${this.userProfile.firstName} ${this.userProfile.lastName}`;
+
+      this.teamService.getAgencies().subscribe((agencies) => {
+        this.agencyOptions = agencies;
+      });
+      this.driverService.getDrivers().subscribe((drivers) => {
+        this.driverOptions = drivers;
+      });
+      this.vehicleService.getVehiclesList().subscribe((vehicles) => {
+        this.vehicleOptions = vehicles;
+      });
 
       // Si les rôles sont dans le token, les récupérer
       const roles = this.keycloakService.getUserRoles();

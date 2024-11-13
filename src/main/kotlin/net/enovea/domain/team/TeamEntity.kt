@@ -1,11 +1,14 @@
 package net.enovea.domain.team
 
+import io.quarkus.hibernate.orm.panache.Panache
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Parameters
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
+import net.enovea.domain.vehicle.VehicleEntity
+import net.enovea.domain.vehicle.VehicleEntity.Companion
 import net.enovea.domain.vehicle.VehicleTeamEntity
 import java.io.Serializable
 
@@ -48,10 +51,6 @@ class TeamEntity(
         const val ENTITY_NAME = "TeamEntity"
         const val TABLE_NAME = "team"
 
-//        @Transactional()
-//        fun findByLabels1(labels: List<String>): List<TeamEntity> {
-//            return list("label IN ?1", labels)
-//        }
 
         @Transactional
         fun findByLabels(labels: List<String>): List<TeamEntity> {
@@ -62,6 +61,23 @@ class TeamEntity(
             )
             return query.list()
         }
+
+            @Transactional
+            fun getAgencies(): List<String> {
+                val entityManager: EntityManager = Panache.getEntityManager()
+                val query = entityManager.createQuery(
+                    """
+                        SELECT t.label 
+                        FROM TeamEntity t
+                        JOIN t.category c 
+                        WHERE c.label = :categoryLabel
+                    """.trimIndent(),
+                    String::class.java
+                )
+                query.setParameter("categoryLabel", "Service")
+                return query.resultList
+            }
+
    }
 
 }

@@ -28,21 +28,30 @@ class VehicleResource(
 ) {
     private val vehicleSummaryMapper: VehicleSummaryMapper = VehicleSummaryMapper.INSTANCE
 
+//    @GET
+//    fun getAllVehiclesDetails(): List<VehicleSummaryDTO> {
+//        return vehicleService.getVehiclesSummary()
+//    }
+
     @GET
-    fun getAllVehiclesDetails(): List<VehicleSummaryDTO> {
-        return vehicleService.getVehiclesSummary()
+    @Path("/list")
+    fun getAllVehiclesList(): List<String> {
+        return vehicleService.getVehiclesList()
     }
 
     @GET
-    @Path("/filtered")
+    //@Path("/filtered")
+    //@Produces(MediaType.APPLICATION_JSON)
     fun getFilteredVehicles(
         @QueryParam("teamLabels") teamLabels: List<String>?,
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
         @QueryParam("driverNames") driverNames: List<String>?
-    ): Response {
+    ): //Response
+            List<VehicleSummaryDTO> {
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
         val vehicleSummaries = vehicleService.getVehiclesSummary(filteredVehicles)
-        return Response.ok(vehicleSummaries).build()
+       // return Response.ok(vehicleSummaries).build()
+        return vehicleSummaries
     }
     ///vehicles/filtered?teamLabels=team1,team2&vehicleIds=MM,NN&driverNames=John Doe,Jane Doe
 

@@ -38,7 +38,7 @@ data class DriverTeamEntity (
 @Embeddable
 data class DriverTeamId(
     @Column(name = "driver_id", nullable = false)
-    val vehicleId: String="",
+    val driverId: Int=0,
 
     @Column(name = "team_id", nullable = false)
     val teamId: Int=0,

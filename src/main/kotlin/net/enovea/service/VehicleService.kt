@@ -1,6 +1,7 @@
 package net.enovea.service
 import io.quarkus.hibernate.orm.panache.Panache
 import jakarta.persistence.EntityManager
+import jakarta.persistence.TypedQuery
 import jakarta.transaction.Transactional
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.VehicleDTO
@@ -121,17 +122,50 @@ class VehicleService (
         return allVehicleDTOs
     }
 
+//    @Transactional
+//    fun getVehiclesList(): List<String> {
+//        val entityManager: EntityManager = Panache.getEntityManager()
+//        val query = entityManager.createQuery(
+//            """
+//            SELECT v.licenseplate
+//            FROM VehicleEntity v
+//            """.trimIndent(),
+//            String::class.java
+//        )
+//        return query.resultList
+//    }
+
     @Transactional
-    fun getVehiclesList(): List<String> {
+    fun getVehiclesList(agencyIds: List<String>?): List<String> {
         val entityManager: EntityManager = Panache.getEntityManager()
-        val query = entityManager.createQuery(
-            """
-            SELECT v.licenseplate 
-            FROM VehicleEntity v
-            """.trimIndent(),
-            String::class.java
-        )
-        return query.resultList
+
+        // Start the query
+        val baseQuery = """
+        SELECT v.licenseplate
+        FROM VehicleEntity v
+    """
+
+        // Extend the query only if agencyIds are provided
+        val finalQuery = if (!agencyIds.isNullOrEmpty()) {
+            baseQuery + """
+            JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
+            JOIN TeamEntity t ON vt.id.teamId = t.id
+            WHERE vt.endDate IS NULL AND t.label IN :agencyIds
+        """
+        } else {
+            baseQuery
+        }
+
+
+        val typedQuery: TypedQuery<String> = entityManager.createQuery(finalQuery, String::class.java)
+
+
+        if (!agencyIds.isNullOrEmpty()) {
+            typedQuery.setParameter("agencyIds", agencyIds)
+        }
+
+        // Execute the query and return the list of names
+        return typedQuery.resultList
     }
 
     //Function returns the list of vehicles based on the filters provided
@@ -183,6 +217,32 @@ class VehicleService (
 
         return panacheQuery.list()
     }
+
+//    @Transactional
+//    fun getVehiclesByAgencies(agencyIds: List<String>): List<String> {
+//        val entityManager: EntityManager = Panache.getEntityManager()
+//
+//
+//        val query: TypedQuery<String> = entityManager.createQuery(
+//            """
+//        SELECT v.licenseplate
+//        FROM VehicleEntity v
+//        JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
+//        JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
+//        WHERE vt.endDate IS NULL
+//        AND t.label IN :agencyIds
+//        """.trimIndent(),
+//            String::class.java
+//        )
+//        // Set the parameter for agency IDs
+//        query.setParameter("agencyIds", agencyIds)
+//
+//        return query.resultList
+//    }
+
+
+
+
 
 }
 

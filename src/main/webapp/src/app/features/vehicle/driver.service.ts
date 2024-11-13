@@ -1,7 +1,7 @@
 
 
 import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 
 @Injectable({
@@ -9,12 +9,35 @@ import {Observable} from "rxjs";
 })
 export class DriverService {
 
-  private apiUrl = '/api/drivers';  // URL to the backend API
+  private baseUrl = '/api/drivers';  // URL to the backend API
 
   constructor(private http: HttpClient) {}
 
-  // Fetch agencies from the backend
-  getDrivers(): Observable<string[]> {
-    return this.http.get<string[]>(this.apiUrl);
+  getDrivers(agencyIds: string[] | null = null ): Observable<string[]> {
+    const params = {
+      agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
+    };
+    return this.http.get<string[]>(`${this.baseUrl}`, { params });
+
   }
+
+
+  // Fetch agencies from the backend
+  // getDrivers(): Observable<string[]> {
+  //   return this.http.get<string[]>(this.baseUrl);
+  // }
+  //
+  //
+  // // New method to get drivers by agency IDs
+  // getDriversByAgencies(agencyIds: string[]): Observable<string[]> {
+  //   const params ={
+  //     agencyIds: agencyIds.length ? agencyIds : []
+  //   }
+  //   return this.http.get<string[]>(`${this.baseUrl}/byAgencies`, { params });
+  //
+  // }
+
+
+
+
 }

@@ -21,11 +21,28 @@ export class VehicleService {
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
   }
+  //
+  // //Méthode pour récupérer la liste de plaque d'immatriculationde
+  // getVehiclesList(): Observable<string[]> {
+  //   return this.http.get<string[]>(`${this.baseUrl}/list`);
+  // }
+  //
+  // // New method to get vehicles by agency IDs
+  // getVehiclesByAgencies(agencyIds: string[]): Observable<string[]> {
+  //   const params ={
+  //     agencyIds: agencyIds.length ? agencyIds : []
+  //   }
+  //   return this.http.get<string[]>(`${this.baseUrl}/byAgencies`, { params });
+  // }
 
-  //Méthode pour récupérer la liste de plaque d'immatriculationde
-  getVehiclesList(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.baseUrl}/list`);
+  getVehiclesList(agencyIds: string[] | null = null ): Observable<string[]> {
+    const params = {
+      agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
+    };
+    return this.http.get<string[]>(`${this.baseUrl}/list`, { params });
+
   }
+
 
   // Méthode pour récupérer les véhicules les plus proches avec leur distance
   getNearestVehiclesWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<VehicleWithDistanceDTO[]> {
@@ -61,5 +78,8 @@ export class VehicleService {
     }
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
+
+
+
 
 }

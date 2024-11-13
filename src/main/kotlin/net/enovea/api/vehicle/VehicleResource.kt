@@ -33,27 +33,36 @@ class VehicleResource(
 //        return vehicleService.getVehiclesSummary()
 //    }
 
+//    @GET
+//    @Path("/list")
+//    fun getAllVehiclesList(): List<String> {
+//        return vehicleService.getVehiclesList()
+//    }
+//
+//    @GET
+//    @Path("/byAgencies")
+//    fun getVehiclesByAgencies(@QueryParam("agencyIds") agencyIds: List<String>): List<String> {
+//        return vehicleService.getVehiclesList(agencyIds)
+//    }
+
     @GET
     @Path("/list")
-    fun getAllVehiclesList(): List<String> {
-        return vehicleService.getVehiclesList()
+    fun getVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<String> {
+        return vehicleService.getVehiclesList(agencyIds)
     }
 
     @GET
-    //@Path("/filtered")
-    //@Produces(MediaType.APPLICATION_JSON)
     fun getFilteredVehicles(
         @QueryParam("teamLabels") teamLabels: List<String>?,
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
         @QueryParam("driverNames") driverNames: List<String>?
-    ): //Response
+    ):
             List<VehicleSummaryDTO> {
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
         val vehicleSummaries = vehicleService.getVehiclesSummary(filteredVehicles)
-       // return Response.ok(vehicleSummaries).build()
         return vehicleSummaries
     }
-    ///vehicles/filtered?teamLabels=team1,team2&vehicleIds=MM,NN&driverNames=John Doe,Jane Doe
+
 
 
     @GET
@@ -174,6 +183,8 @@ class VehicleResource(
 
         return vehicles
     }
+
+
 
 
 

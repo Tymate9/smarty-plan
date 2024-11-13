@@ -18,8 +18,8 @@ import {DriverService} from "../../features/vehicle/driver.service";
       </div>
       <div class="filters">
         <app-search-autocomplete [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-search-autocomplete>
-        <app-search-autocomplete [label]="'Véhicules'" [options]="vehicleOptions" (selectedTagsChange)="updateVehicles($event)"></app-search-autocomplete>
-        <app-search-autocomplete [label]="'Conducteurs'" [options]="driverOptions" (selectedTagsChange)="updateDrivers($event)"></app-search-autocomplete>
+        <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)"></app-search-autocomplete>
+        <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)"></app-search-autocomplete>
       </div>
       <div class="user-info">
         <span>{{ userName }}</span>
@@ -67,7 +67,11 @@ export class NavbarComponent implements OnInit {
 
   agencyOptions:string[] = [];
   driverOptions:string[]=[];
-  vehicleOptions:string[]=[]
+  vehicleOptions:string[]=[];
+
+  // These will hold the filtered options based on selected agencies
+  filteredVehicleOptions: string[] = [];
+  filteredDriverOptions: string[] = [];
 
   //agencyOptions = ['Service Technique Rouen', 'Service Commercial Rouen', 'Service Technique Caen'];
   //vehicleOptions = ['1', '2', '3'];
@@ -80,6 +84,7 @@ export class NavbarComponent implements OnInit {
   updateAgencies(tags: string[]) {
     this.agencySelected = tags;
     this.emitSelectedTags();
+    this.filterVehiclesAndDrivers();
   }
 
   updateVehicles(tags: string[]) {
@@ -110,12 +115,15 @@ export class NavbarComponent implements OnInit {
       this.teamService.getAgencies().subscribe((agencies) => {
         this.agencyOptions = agencies;
       });
-      this.driverService.getDrivers().subscribe((drivers) => {
-        this.driverOptions = drivers;
-      });
       this.vehicleService.getVehiclesList().subscribe((vehicles) => {
         this.vehicleOptions = vehicles;
+        this.filteredVehicleOptions = vehicles;
       });
+      this.driverService.getDrivers().subscribe((drivers) => {
+        this.driverOptions = drivers;
+        this.filteredDriverOptions = drivers;
+      });
+
 
       // Si les rôles sont dans le token, les récupérer
       const roles = this.keycloakService.getUserRoles();
@@ -125,6 +133,28 @@ export class NavbarComponent implements OnInit {
 
     } catch (error) {
       console.error('Failed to load user profile', error);
+    }
+  }
+
+  //filter vehicles and drivers based on selected agencies
+  filterVehiclesAndDrivers() {
+    if (this.agencySelected.length > 0) {
+
+      this.vehicleService.getVehiclesList(this.agencySelected).subscribe((filteredVehicles) => {
+        this.filteredVehicleOptions = filteredVehicles;
+        console.log("Vehiclessssss   "+filteredVehicles);
+      });
+
+      this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
+        this.filteredDriverOptions = filteredDrivers;
+        console.log("heeeeeeeeeeeeeeeer"+this.agencySelected)
+        console.log("driversssss   "+ filteredDrivers);
+      });
+    } else {
+      // If no agency is selected, reset to the original options
+      this.filteredVehicleOptions = this.vehicleOptions;
+      this.filteredDriverOptions = this.driverOptions;
+
     }
   }
 

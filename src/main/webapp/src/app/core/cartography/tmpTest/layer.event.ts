@@ -20,4 +20,5 @@ export enum LayerEventType {
   ButtonClicked = 'BUTTON_CLICKED',
   AddPOIRequest = 'ADD_POI_REQUEST',
   PopupClosed = 'POPUP_CLOSED',
+  RemoveMarker = 'REMOVE_MARKER'
 }

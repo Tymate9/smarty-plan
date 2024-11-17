@@ -2,14 +2,15 @@ import {CustomMarker, CustomMarkerImpl, EntityType, MarkerFactory} from "../Mark
 import {Subject} from "rxjs";
 import {LayerEvent, LayerEventType} from "./layer.event"
 import * as L from "leaflet";
-import {ComponentRef, ViewContainerRef} from "@angular/core";
+import {Type, ViewContainerRef} from "@angular/core";
 import {PoiPopupComponent} from "../../../features/poi/poi-popup/poi-popup.component";
 import {VehiclePopupComponent} from "../../../features/vehicle/vehicle-popup/vehicle-popup.component";
 
 export class LayerManager {
-  private readonly markersMap: Map<string, CustomMarker> = new Map();
+  readonly markersMap: Map<string, CustomMarker> = new Map();
   private readonly highlightedMarkers: Set<string> = new Set();
   private readonly clusterGroup: L.MarkerClusterGroup;
+  private readonly unclusteredGroup: L.FeatureGroup;
   private readonly layerEvent: Subject<LayerEvent> = new Subject<LayerEvent>();
 
   // Observable pour le MapManager
@@ -18,36 +19,115 @@ export class LayerManager {
   constructor(
     private readonly map: L.Map,
     private readonly viewContainerRef: ViewContainerRef,
-    private readonly entityType: EntityType
+    readonly entityType: EntityType
   ) {
-    // Initialisation du cluster group en fonction du type d'entité
     this.clusterGroup = L.markerClusterGroup({
-      iconCreateFunction: () => {
-        return L.icon({
-          iconUrl:
-            entityType === EntityType.POI
-              ? '../../assets/icon/poiCluster.svg'
-              : '../../assets/icon/vehicleCluster.svg',
-          iconSize: [30, 45],
-          iconAnchor: [15, 45],
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount(); // Récupérer le nombre de marqueurs dans le cluster
+        const clusterColor = this.entityType === EntityType.POI ? 'rgba(66, 135, 245, 0.6)' : 'rgba(255, 99, 132, 0.6)';
+
+        // Définir le contenu HTML de l'icône du cluster
+        const iconHtml = `
+      <div style="background-color: ${clusterColor}; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+        <img src="${this.entityType === EntityType.POI ? '../../assets/icon/poiCluster.svg' : '../../assets/icon/vehicleCluster.svg'}" style="width: 24px; height: 24px;" />
+        <span style="margin-left: 8px; font-weight: bold; color: #fff;">${count}</span>
+      </div>`;
+
+        // Retourner un L.divIcon avec le contenu défini
+        return L.divIcon({
+          html: iconHtml,
+          className: 'custom-cluster-icon',
+          iconSize: [50, 50],
         });
       },
       animate: true,
       zoomToBoundsOnClick: true,
     });
-
     this.map.addLayer(this.clusterGroup);
+    this.unclusteredGroup = L.featureGroup();
+    this.map.addLayer(this.unclusteredGroup);
 
-    this.map.on('popupopen', () => {
-      this.popupIsOpening = true;
-      setTimeout(() => {
-        this.popupIsOpening = false;
-      }, 50); // Ajustez le délai si nécessaire
+    this.clusterGroup.on('popupopen', (e: L.PopupEvent) => {
+      const marker = e.propagatedFrom as CustomMarker;
+      this.onPopupOpen(marker);
+    });
+
+    this.unclusteredGroup.on('popupopen', (e: L.PopupEvent) => {
+      const marker = e.propagatedFrom as CustomMarker;
+      this.onPopupOpen(marker);
+    });
+
+    this.unclusteredGroup.on('popupclose', (e: L.PopupEvent) => {
+      console.log("Je suis dans le unClustered popupclose")
+      const marker = e.propagatedFrom as CustomMarker;
+      this.onPopupClose(marker);
     });
   }
 
+  private onPopupOpen(marker: CustomMarker): void {
+    if (marker.entity.id < 0)
+    {
+      marker.setPopupContent("Veuillez ajouter le marqueur afin d'ouvrir sa pop up.")
+      return
+    }
+    // Supprimer la surbrillance du marqueur s'il est en surbrillance
+    if (marker.isHighlighted) {
+      this.removeHighlightMarker(marker.id);
+    }
 
-  private popupIsOpening: boolean = false;
+    const entity = marker.entity;
+    let componentType : Type<any>
+    if ( this.entityType === EntityType.POI ) {
+      componentType = PoiPopupComponent
+    }else{
+      componentType = VehiclePopupComponent;
+    }
+
+    const container = L.DomUtil.create('div');
+    const componentRef = this.viewContainerRef.createComponent(componentType);
+    componentRef.instance.entity = entity;
+
+    // S'abonner aux événements du composant
+    componentRef.instance.layerEvent.subscribe((event: LayerEvent) => {
+      this.emitEvent(event);
+    });
+
+    container.appendChild((componentRef.hostView as any).rootNodes[0]);
+    marker.setPopupContent(container);
+
+    // Stocker la référence du composant pour le détruire plus tard
+    (marker as any)._popupComponentRef = componentRef;
+  }
+
+  private onPopupClose(marker: CustomMarker): void {
+    // Détruire le composant de la popup
+    const componentRef = (marker as any)._popupComponentRef;
+    if (componentRef) {
+      componentRef.destroy();
+      (marker as any)._popupComponentRef = null;
+    }
+
+    // Après avoir retiré les surbrillances, réintégrer le marqueur dans le cluster group si nécessaire
+    setTimeout(() => {
+      // Émettre l'événement pour retirer les surbrillances
+      this.emitEvent({ type: LayerEventType.RemoveAllHighlights });
+
+      // Si le marqueur n'est pas en surbrillance, le déplacer vers le cluster group
+      if (!marker.isHighlighted) {
+        this.moveMarkerToClusterGroup(marker);
+      }
+    }, 0);
+  }
+
+  private attachClickEvent(marker: CustomMarker): void {
+    marker.on('click', () => {
+      // Déplacer le marqueur vers le groupe non clusterisé
+      this.moveMarkerToUnclusteredGroup(marker);
+
+      // Ouvrir la popup manuellement
+      marker.openPopup();
+    });
+  }
 
   // Méthode pour ajouter un marqueur
   addMarker(entity: any): void {
@@ -60,123 +140,22 @@ export class LayerManager {
 
   // Méthode pour ajouter le marqueur au layer
   private addMarkerToLayer(marker: CustomMarker, entity: any): void {
-    switch (this.entityType) {
-      case EntityType.POI:
-        this.configurePOIPopup(marker, entity);
-        this.addPOIArea(marker, entity);
-        this.bindPOITooltip(marker, entity);
-        break;
-      case EntityType.VEHICLE:
-        this.configureVehiclePopup(marker, entity);
-        this.bindVehicleTooltip(marker, entity);
-        break;
+    this.attachMarkerEvents(marker, entity);
+
+    if (this.entityType === EntityType.POI) {
+      this.addPOIArea(marker, entity);
+      this.bindTooltip(marker, `${entity.label} - ${entity.category.label}`);
+    } else if (this.entityType === EntityType.VEHICLE) {
+      this.bindTooltip(marker, `${entity.licenseplate} - ${entity.driver ? entity.driver.firstName + ' ' + entity.driver.lastName : 'Aucun conducteur'}`);
     }
+
     // Ajouter le marqueur au cluster group
     this.clusterGroup.addLayer(marker);
   }
 
-  private attachClickEvent(marker: CustomMarker): void {
-    marker.on('click', () => {
-      console.log("je clique dans un marker")
-      // Vérifier si le marqueur est déjà sur la carte
-      if (this.map.hasLayer(marker)) {
-        // Le marqueur est déjà sur la carte, ne rien faire
-        return;
-      }
-      // Retirer le marqueur du cluster group
-      this.clusterGroup.removeLayer(marker);
-      // Ajouter le marqueur directement à la carte
-      marker.addTo(this.map);
-      // Ouvrir la popup
-      marker.openPopup();
-    });
-  }
-
-  // Méthodes pour configurer la pop up POI
-  private configurePOIPopup(marker: CustomMarker, entity: any): void {
-    let componentRef: ComponentRef<PoiPopupComponent> | null = null;
-
-    marker.on('popupopen', () => {
-      const container = L.DomUtil.create('div');
-      componentRef = this.viewContainerRef.createComponent(PoiPopupComponent);
-      componentRef.instance.poi = entity;
-      // S'abonner à l'événement unique
-      componentRef.instance.layerEvent.subscribe((event: LayerEvent) => {
-        // Émettre l'événement vers le MapManager
-        this.emitEvent(event);
-      });
-
-      container.appendChild((componentRef.hostView as any).rootNodes[0]);
-      marker.setPopupContent(container);
-    });
-
-    marker.on('popupclose', () => {
-      if (componentRef) {
-        componentRef.destroy();
-        componentRef = null;
-      }
-
-      // Vérifier si un autre popup est en train de s'ouvrir
-      setTimeout(() => {
-          // Aucun autre popup ne s'ouvre, on peut retirer les highlights
-          this.emitEvent({ type: LayerEventType.RemoveAllHighlights });
-      }, 0);
-    });
-    // Ajouter l'événement 'click' pour gérer le transfert du marqueur
-    this.attachClickEvent(marker);
-    marker.bindPopup('Chargement...');
-  }
-
-  // Méthodes pour configurer la pop up Véhicule
-  private configureVehiclePopup(marker: CustomMarker, entity: any): void {
-    let componentRef: ComponentRef<VehiclePopupComponent> | null = null;
-
-    marker.on('popupopen', () => {
-      const container = L.DomUtil.create('div');
-      componentRef = this.viewContainerRef.createComponent(VehiclePopupComponent);
-      componentRef.instance.vehicle = entity;
-
-      // S'abonner à l'événement unique
-      componentRef.instance.layerEvent.subscribe((event: LayerEvent) => {
-        // Émettre l'événement vers le MapManager
-        this.emitEvent(event);
-      });
-
-      container.appendChild((componentRef.hostView as any).rootNodes[0]);
-      marker.setPopupContent(container);
-    });
-
-    marker.on('popupclose', () => {
-      if (componentRef) {
-        componentRef.destroy();
-        componentRef = null;
-      }
-
-      // Vérifier si un autre popup est en train de s'ouvrir
-      setTimeout(() => {
-          this.emitEvent({ type: LayerEventType.RemoveAllHighlights });
-      }, 0);
-    });
-    // Ajouter l'événement 'click' pour gérer le transfert du marqueur
-    this.attachClickEvent(marker);
-    marker.bindPopup('Chargement...');
-  }
-
-  // Méthodes pour ajouter un tooltips au marqueur POI
-  private bindPOITooltip(marker: CustomMarker, entity: any): void {
-    marker.bindTooltip(`${entity.label} - ${entity.category.label}`, {
-      permanent: false,
-      direction: 'bottom',
-      opacity: 0.9,
-    });
-  }
-
-  // Méthode pour ajouter un tooltips au marqueur véhicle
-  private bindVehicleTooltip(marker: CustomMarker, entity: any): void {
-    const driverName = entity.driver
-      ? `${entity.driver.firstName} ${entity.driver.lastName}`
-      : 'Aucun conducteur';
-    marker.bindTooltip(`${entity.licenseplate} - ${driverName}`, {
+  // Méthode pour ajouter un tooltips au marqueur
+  private bindTooltip(marker: CustomMarker, content: string): void {
+    marker.bindTooltip(content, {
       permanent: false,
       direction: 'bottom',
       opacity: 0.9,
@@ -213,89 +192,50 @@ export class LayerManager {
     this.map.closePopup();
   }
 
-  // Méthode pour mettre à jours un marqueur
-  private updateMarker(updatedPoi: any): void {
-    const markerId = `poi-${updatedPoi.id}`;
-    const marker = this.markersMap.get(markerId);
-    marker?.closePopup()
-    if (marker) {
-      // Mettre à jour l'icône si nécessaire
-      marker.setIcon(MarkerFactory.getPOIIcon(updatedPoi));
-
-      // Mettre à jour la position
-      const newCoords: [number, number] = [
-        updatedPoi.coordinate.coordinates[1],
-        updatedPoi.coordinate.coordinates[0],
-      ];
-      marker.setLatLng(newCoords);
-
-      // Mettre à jour l'aire du POI
-      if (marker.areaPolygon) {
-        this.map.removeLayer(marker.areaPolygon);
-        marker.areaPolygon = undefined;
-      }
-      if (updatedPoi.area && updatedPoi.area.type === 'Polygon') {
-        marker.areaPolygon = L.polygon(
-          this.convertAreaCoordinates(updatedPoi.area.coordinates[0]),
-          {
-            color: updatedPoi.category.color,
-            fillColor: updatedPoi.category.color,
-            fillOpacity: 0.2,
-          }
-        ).addTo(this.map);
-      }
-
-      // Réattacher l'événement 'popupopen' avec les nouvelles données
-      marker.off('popupopen');
-      this.configurePOIPopup(marker, updatedPoi);
-
-      // Mettre à jour le tooltip
-      marker.setTooltipContent(`${updatedPoi.label} - ${updatedPoi.category.label}`);
-    } else {
-      console.error(`Marqueur avec ID ${markerId} non trouvé dans markersMap.`);
-    }
+  // Méthode pour mettre à jour un marqueur génériquement
+  private updateMarker(updatedEntity: any): void {
+    const markerId = `${this.entityType.toLowerCase()}-${updatedEntity.id}`;
+    this.removeMarker(markerId)
+    // Créer un nouveau marqueur avec les nouvelles données
+    this.addMarker(updatedEntity)
   }
 
   // Méthodes pour gérer les surbrillances
   highlightMarker(markerID: string): void {
-    const marker = this.markersMap.get(markerID);
+    const marker = this.markersMap.get(markerID) as CustomMarkerImpl;
     if (marker && !this.highlightedMarkers.has(markerID)) {
-      // Retirer le marqueur du cluster group
-      this.clusterGroup.removeLayer(marker);
-      // Ajouter le marqueur directement à la carte
-      marker.addTo(this.map);
-      this.configureMarkerEvents(marker)
+      // Déplacer le marqueur vers le groupe non clusterisé
+      this.moveMarkerToUnclusteredGroup(marker);
+
       // Appliquer la classe CSS pour la surbrillance
       const element = marker.getElement();
       if (element) {
         element.classList.add('highlighted-marker');
       }
-      (marker as CustomMarkerImpl).isHighlighted = true;
-      (marker as CustomMarkerImpl).setForceZIndex(1000);
+      marker.isHighlighted = true;
+      marker.setForceZIndex(1000);
       this.highlightedMarkers.add(markerID);
     }
   }
-
   // Méthode pour gérer la mise en surbrillance d'un marqueur
   removeHighlightMarker(markerID: string): void {
-    const marker = this.markersMap.get(markerID);
+    const marker = this.markersMap.get(markerID) as CustomMarkerImpl;
     if (marker && this.highlightedMarkers.has(markerID)) {
-      if (!marker.isPopupOpen()){
-        this.map.removeLayer(marker);
-        this.clusterGroup.addLayer(marker);
-        this.configureMarkerEvents(marker)
-      }
       // Retirer la classe CSS de surbrillance
       const element = marker.getElement();
       if (element) {
         element.classList.remove('highlighted-marker');
       }
-      (marker as CustomMarkerImpl).isHighlighted = false;
-      (marker as CustomMarkerImpl).setForceZIndex(null);
+      marker.isHighlighted = false;
+      marker.setForceZIndex(null);
       this.highlightedMarkers.delete(markerID);
+
+      // Si la popup du marqueur est fermée, le déplacer vers le cluster group
+      if (!marker.isPopupOpen()) {
+        this.moveMarkerToClusterGroup(marker);
+      }
     }
   }
-
   // Méthode pour supprimer la mise en surbrillance de tout les marqueurs
   removeAllHighlights(): void {
     this.highlightedMarkers.forEach((markerID) => {
@@ -327,6 +267,9 @@ export class LayerManager {
       case LayerEventType.POIUpdated:
         this.updateMarker(event.payload.updatedPoi);
         break;
+      case LayerEventType.RemoveMarker:
+        this.removeMarker(event.payload.markerId);
+        break;
       case LayerEventType.ShowDistanceToMarker:
         // Implémentation manquante
         break;
@@ -345,18 +288,67 @@ export class LayerManager {
   }
 
   // Méthode pour récupérer tout les marqueur en surbrillance
-  public getHighlightedMarkers(): CustomMarker[]{
+  public getHighlightedMarkers(): CustomMarker[] {
     return Array.from(this.highlightedMarkers)
-      .map(markerID => this.markersMap.get(markerID))
-      .filter(marker => marker !== undefined) as CustomMarker[];
+      .map((markerID) => this.markersMap.get(markerID))
+      .filter((marker) => marker !== undefined) as CustomMarker[];
   }
 
-  private configureMarkerEvents(marker: CustomMarker): void {
-    // Réattacher les événements
-    if (this.entityType === EntityType.POI) {
-      this.configurePOIPopup(marker, marker.entity);
-    } else if (this.entityType === EntityType.VEHICLE) {
-      this.configureVehiclePopup(marker, marker.entity);
+  private attachMarkerEvents(marker: CustomMarker, entity: any): void {
+    // Attacher la popup au marqueur
+    marker.bindPopup('Chargement...');
+
+    // Attacher l'événement de clic
+    this.attachClickEvent(marker);
+  }
+
+  // Méthode pour supprimer un marqueur
+  public removeMarker(markerId: string): void {
+    const marker = this.markersMap.get(markerId);
+    if (marker) {
+      // Supprimer l'aire du POI si elle existe
+      if (marker.areaPolygon) {
+        this.map.removeLayer(marker.areaPolygon);
+        marker.areaPolygon = undefined;
+      }
+
+      // Retirer le marqueur des deux groupes
+      if (this.clusterGroup.hasLayer(marker)) {
+        this.clusterGroup.removeLayer(marker);
+      }
+      if (this.unclusteredGroup.hasLayer(marker)) {
+        this.unclusteredGroup.removeLayer(marker);
+      }
+
+      // Retirer le marqueur de la collection
+      this.markersMap.delete(markerId);
+
+      // Fermer la popup si elle est ouverte
+      if (marker.isPopupOpen()) {
+        marker.closePopup();
+      }
+    }
+  }
+
+  private moveMarkerToUnclusteredGroup(marker: CustomMarker): void {
+    // Retirer le marqueur du cluster group s'il y est
+    if (this.clusterGroup.hasLayer(marker)) {
+      this.clusterGroup.removeLayer(marker);
+    }
+    // Ajouter le marqueur au groupe non clusterisé s'il n'y est pas déjà
+    if (!this.unclusteredGroup.hasLayer(marker)) {
+      this.unclusteredGroup.addLayer(marker);
+    }
+  }
+
+  private moveMarkerToClusterGroup(marker: CustomMarker): void {
+    // Retirer le marqueur du groupe non clusterisé s'il y est
+    if (this.unclusteredGroup.hasLayer(marker)) {
+      this.unclusteredGroup.removeLayer(marker);
+    }
+    // Ajouter le marqueur au cluster group s'il n'y est pas déjà
+    if (!this.clusterGroup.hasLayer(marker)) {
+      this.clusterGroup.addLayer(marker);
     }
   }
 }

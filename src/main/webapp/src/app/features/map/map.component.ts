@@ -6,6 +6,7 @@ import {VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import 'leaflet.markercluster';
 import {MapManager} from "../../core/cartography/map.manager";
+import {GeocodingService} from "../../commons/GeoCode/geo-coding.service";
 
 
 @Component({
@@ -29,7 +30,8 @@ export class MapComponent implements OnInit {
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
-              private readonly vehicleService: VehicleService) {}
+              private readonly vehicleService: VehicleService,
+              private readonly geoCodingService: GeocodingService) {}
 
   ngOnInit(): void {
     this.initMap();
@@ -42,7 +44,7 @@ export class MapComponent implements OnInit {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
     this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 8);
     this.map.setMaxZoom(18);
-    this.mapManager = new MapManager(this.map, this.viewContainerRef);
+    this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
 
     //Todo(Ajouter au mapmgm)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

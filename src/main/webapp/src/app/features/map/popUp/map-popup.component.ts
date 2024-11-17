@@ -1,10 +1,12 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {MarkerFactory} from "../../../core/cartography/MarkerFactory";
-import {PoiService, PoiWithDistance} from "../../poi/poi.service";
+import * as turf from '@turf/turf';
+import * as wellknown from 'wellknown'
+import {PointOfInterestForm, PoiService, PoiWithDistance} from "../../poi/poi.service";
 import {dto} from "../../../../habarta/dto";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
+import {GeoJSONGeometry} from "wellknown";
 
 @Component({
   selector: 'app-map-popup',
@@ -115,7 +117,7 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
     }
   `]
 })
-export class MapPopupComponent implements OnInit, OnDestroy {
+export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
   constructor(
     private poiService: PoiService,
     private vehicleService: VehicleService
@@ -166,9 +168,9 @@ export class MapPopupComponent implements OnInit, OnDestroy {
     this.selectTab('vehicule');
   }
 
-  ngOnDestroy() {
+/*  ngOnDestroy() {
     this.layerEvent.emit({ type: LayerEventType.PopupClosed });
-  }
+  }*/
 
   onRadiusChange(newRadius: number) {
     this.layerEvent.emit({
@@ -197,22 +199,53 @@ export class MapPopupComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const poiData = {
+    // Vérifier que les coordonnées sont valides
+    if (this.longitude === null || this.latitude === null || isNaN(this.longitude) || isNaN(this.latitude)) {
+      alert("Veuillez fournir des coordonnées valides pour le POI.");
+      return;
+    }
+
+    // Générer le WKTPoint
+    const wktPoint = `POINT(${this.longitude} ${this.latitude})`;
+
+    // Créer un objet GeoJSON pour le point
+    const pointGeoJSON = turf.point([this.longitude, this.latitude]);
+
+    // Créer un buffer de 50 mètres autour du point pour générer un polygone approximant un cercle
+    const buffered = turf.buffer(pointGeoJSON, this.poiRadius, { units: 'meters' });
+
+    // Convertir le GeoJSON du polygone en chaîne WKT
+    const wktPolygon = wellknown.stringify(buffered!.geometry as GeoJSONGeometry);
+
+    // Vérifier que la conversion a réussi
+    if (!wktPolygon) {
+      alert("Erreur lors de la génération du polygone.");
+      return;
+    }
+
+    // Construire l'objet poiData avec WKTPoint et WKTPolygon
+    const poiData: PointOfInterestForm = {
       label: this.poiName,
       type: this.selectedCategoryId,
-      WKTPoint: `POINT(${this.longitude} ${this.latitude})`,
-      radius: this.poiRadius
+      WKTPoint: wktPoint,
+      WKTPolygon: wktPolygon
     };
 
+    // Appeler le service pour créer le POI
     this.poiService.createPOI(poiData).subscribe({
       next: (response) => {
+        // Émettre l'événement POICreated avec les données reçues du backend
         this.layerEvent.emit({
           type: LayerEventType.POICreated,
           payload: { poi: { ...response, coordinates: [this.latitude, this.longitude] } }
         });
+        // Fermer le popup ou effectuer d'autres actions nécessaires
         this.layerEvent.emit({ type: LayerEventType.ClosePopup });
       },
-      error: (error) => console.error("Erreur lors de l'ajout du POI:", error)
+      error: (error) => {
+        console.error("Erreur lors de l'ajout du POI:", error);
+        alert("Une erreur s'est produite lors de l'ajout du POI. Veuillez réessayer.");
+      }
     });
   }
 

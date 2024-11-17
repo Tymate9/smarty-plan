@@ -5,11 +5,42 @@ import {EntityType, MarkerFactory, CustomMarker, CustomMarkerImpl} from "./Marke
 import {LayerManager} from "./tmpTest/layer.manager";
 import {LayerEventType} from "./tmpTest/layer.event";
 import {LayerEvent} from "./tmpTest/layer.event";
+import {dto} from "../../../habarta/dto";
+import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import {catchError, forkJoin, of} from "rxjs";
+import {GeocodingService} from "../../commons/GeoCode/geo-coding.service";
 
+export class MapManagerConfig {
+  canExtract: boolean;
+
+  constructor(canExtract: boolean = true) {
+    this.canExtract = canExtract;
+  }
+}
 
 export class MapManager {
 
-  private layerManagers: LayerManager[] = [];
+  private readonly layerManagers: LayerManager[] = [];
+  private circleLayer: L.Circle | null = null;
+  private crossMarker?: L.Marker;
+
+  constructor(
+    public map: L.Map,
+    public mapCViewContainerRef: ViewContainerRef,
+    private readonly geocodingService: GeocodingService,
+    private readonly config: MapManagerConfig = new MapManagerConfig()
+  ) {
+    const poiLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.POI);
+    const vehicleLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.VEHICLE);
+    this.layerManagers.push(poiLayerManager, vehicleLayerManager);
+    this.setupLayerCommunication();
+
+    // Appeler addExportButton seulement si canExtract est true
+    if (this.config.canExtract) {
+      this.addExportButton();
+    }
+  }
+
 
   private setupLayerCommunication(): void {
     this.layerManagers.forEach((layerManager) => {
@@ -19,7 +50,7 @@ export class MapManager {
     });
   }
 
-  private handleLayerEvent(event: LayerEvent, sourceLayer: LayerManager | null): void {
+  handleLayerEvent(event: LayerEvent, sourceLayer: LayerManager | null): void {
     switch (event.type) {
       case LayerEventType.HighlightMarker:
       case LayerEventType.RemoveHighlightMarker:
@@ -91,40 +122,30 @@ export class MapManager {
         }
         break;
 
+      case LayerEventType.RemoveMarker:
+        const { entityType, markerId } = event.payload;
+        const layerManager = this.getLayerManagerByType(entityType);
+        if (layerManager) {
+          layerManager.handleEvent(event);
+        }
+        break;
 
-      // Gérer d'autres types d'événements si nécessaire
       default:
         console.warn(`Type d'événement inconnu : ${event.type}`);
         break;
     }
   }
 
-  constructor(
-    public map: L.Map,
-    public mapCViewContainerRef: ViewContainerRef
-  ) {
-    const poiLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.POI);
-    const vehicleLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.VEHICLE);
-    this.layerManagers.push(poiLayerManager, vehicleLayerManager);
-    this.setupLayerCommunication();
-  }
-
-  public markersMap: Map<string, CustomMarker> = new Map();
-  private highlightedMarkers: Set<string> = new Set();
-  private circleLayer: L.Circle | null = null;
-  private crossMarker?: L.Marker;
-
   // Marker Region
   // Ajout d'un marqueur
   addMarker(type: EntityType, entity: any) {
     const marker = MarkerFactory.createMarker(type, entity);
     if (marker) {
-      this.markersMap.set(marker.id, marker);
-      this.addMarkerToMap(marker, type, entity);
+      this.addMarkerToMap(type, entity);
     }
   }
 
-  private addMarkerToMap(marker: CustomMarker, type: EntityType, entity: any) {
+  private addMarkerToMap(type: EntityType, entity: any) {
     // Configurer la popup en fonction du type
     switch (type) {
       case EntityType.POI:
@@ -134,18 +155,6 @@ export class MapManager {
         this.layerManagers[1].addMarker(entity);
         break;
     }
-  }
-
-  private resetHighlightMarker(marker: CustomMarkerImpl): void {
-    const element = marker.getElement();
-    if (element) {
-      element.classList.remove('highlighted-marker'); // Supprimer l'animation de saut
-    }
-
-    marker.isHighlighted = false;
-
-    // Réinitialiser le zIndex en supprimant la mise en avant
-    marker.setForceZIndex(null); // Réinitialiser le zIndex
   }
 
   private resetAllHighlights(): void {
@@ -206,6 +215,7 @@ export class MapManager {
 
     // Nettoie le composant et réinitialise la croix quand la popup est fermée
     this.map.on('popupclose', () => {
+      console.log("Je suis dans le map popupclose")
       contextMenuPopUpComponentRef.destroy();
       this.resetCrossMarker()
 
@@ -214,6 +224,10 @@ export class MapManager {
         this.map.removeLayer(this.circleLayer);
         this.circleLayer = null;
       }
+      setTimeout(() => {
+        // Émettre l'événement pour retirer les surbrillances
+        this.handleLayerEvent({ type: LayerEventType.RemoveAllHighlights }, null);
+      }, 0);
     });
   }
 
@@ -260,5 +274,191 @@ export class MapManager {
       this.crossMarker = undefined;
     }
   }
+
+  // Méthode pour récupérer le LayerManager correspondant au type d'entité
+  private getLayerManagerByType(type: EntityType): LayerManager | undefined {
+    return this.layerManagers.find(layerManager => layerManager.entityType === type);
+  }
+
+  /**
+   * Récupère tous les véhicules actuellement sur la carte.
+   * @returns Un tableau contenant tous les objets véhicule.
+   */
+  public getAllVehicles(): any[] {
+    const vehicleLayer = this.layerManagers.find(layer => layer.entityType === EntityType.VEHICLE);
+    if (!vehicleLayer) {
+      console.warn('Aucun LayerManager trouvé pour les véhicules.');
+      return [];
+    }
+
+    const vehicles: any[] = [];
+    vehicleLayer.markersMap.forEach((marker: CustomMarker) => {
+      if (marker.entity) {
+        vehicles.push(marker.entity);
+      }
+    });
+
+    return vehicles;
+  }
+
+  /**
+   * Ajoute un bouton d'exportation CSV à la carte.
+   */
+  public addExportButton(): void {
+    const exportButton = new L.Control({ position: 'topright' });
+
+    exportButton.onAdd = () => {
+      const button = L.DomUtil.create('button', 'export-csv-button');
+      button.innerText = 'Exporter CSV';
+      button.style.backgroundColor = '#4CAF50';
+      button.style.color = 'white';
+      button.style.border = 'none';
+      button.style.padding = '10px';
+      button.style.cursor = 'pointer';
+      button.style.borderRadius = '5px';
+      button.title = 'Exporter tous les véhicules au format CSV';
+
+      // Empêcher les événements de clic de se propager à la carte
+      L.DomEvent.disableClickPropagation(button);
+
+      L.DomEvent.on(button, 'click', () => {
+        const vehicles = this.getAllVehicles();
+        if (vehicles.length === 0) {
+          alert('Aucun véhicule à exporter.');
+          return;
+        }
+        this.exportVehiclesToCSV(vehicles);
+      });
+
+      return button;
+    };
+
+    exportButton.addTo(this.map);
+  }
+
+  /**
+   * Génère et télécharge un fichier CSV à partir des données des véhicules.
+   * @param vehicles Tableau contenant les objets véhicule.
+   */
+  private exportVehiclesToCSV(vehicles: any[]): void {
+    if (vehicles.length === 0) {
+      alert('Aucun véhicule à exporter.');
+      return;
+    }
+
+    // Définir les en-têtes spécifiques avec la nouvelle colonne "Adresse"
+    const headers = [
+      'id',
+      'Plaque d\'immatriculation',
+      'Propriétaire du véhicule',
+      'Type de véhicule',
+      'Nom Prénom du conducteur',
+      'numéro de téléphone du véhicule',
+      'Date de dernière communication',
+      'coordonnée GPS',
+      'Adresse' // Nouvelle colonne
+    ];
+
+    // Préparer les Observables de géocodage inverse pour chaque véhicule
+    const geocodeObservables = vehicles.map(vehicle => {
+      if (vehicle.device?.coordinate && vehicle.device.coordinate.coordinates.length === 2) {
+        const [lng, lat] = vehicle.device.coordinate.coordinates;
+        return this.geocodingService.reverseGeocode(lat, lng).pipe(
+          // Transformer le résultat en adresse
+          // Supposons que GeocodeResult contient une propriété 'adresse'
+          // Ajustez en fonction de votre structure réelle de GeocodeResult
+          catchError(err => {
+            if (err.status === 400) {
+              return of({ adresse: 'erreur introuvable' });
+            } else {
+              console.error('Erreur de géocodage inverse:', err);
+              return of({ adresse: 'erreur lors du géocodage' });
+            }
+          })
+        );
+      } else {
+        // Si les coordonnées sont absentes ou invalides, renvoyer une adresse par défaut
+        return of({ adresse: 'coordonnées absentes' });
+      }
+    });
+
+    // Utiliser forkJoin pour attendre tous les géocodages inverses
+    forkJoin(geocodeObservables).subscribe(addressResults => {
+      // Construire les lignes CSV avec les adresses obtenues
+      const csvRows = vehicles.map((vehicle, index) => {
+        const address = addressResults[index].adresse;
+        return this.convertVehicleToCSVRow(vehicle, address);
+      });
+
+      // Combiner les en-têtes et les lignes
+      const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+      // Créer un blob à partir du contenu CSV
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+      // Générer un lien temporaire pour le téléchargement
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, "-");
+      link.setAttribute('download', `export_vehicles_${timestamp}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, error => {
+      console.error('Erreur lors de l\'exportation CSV:', error);
+      alert('Une erreur est survenue lors de l\'exportation CSV.');
+    });
+  }
+
+  /**
+   * Convertit un objet véhicule en une ligne CSV avec les champs spécifiés.
+   * @param vehicle L'objet véhicule à convertir.
+   * @param address L'adresse obtenue via le géocodage inverse.
+   * @returns Une chaîne représentant une ligne CSV.
+   */
+  private convertVehicleToCSVRow(vehicle: any, address: string): string {
+    // Extraire les champs requis
+    const id = vehicle.id ?? 'vehicle id is null';
+    const licenceplate = vehicle.licenseplate ?? 'licenseplate is null';
+    const teamsLabel = vehicle.team?.label ?? 'vehicle team label is null'; // Propriétaire du véhicule
+    const categoryLabel = vehicle.category?.label ?? 'category label is null';
+    const driverFullName = `${vehicle.driver?.firstName ?? ''} ${vehicle.driver?.lastName ?? 'name is null'}`.trim();
+    const driverPhoneNumber = vehicle.driver?.phoneNumber ?? 'vehicle phone number is null';
+    const deviceLastCommunicationDate = vehicle.device?.lastCommunicationDate ?? 'vehicule last communication date is null';
+    const deviceCoordinates = vehicle.device?.coordinate ? `[${vehicle.device.coordinate.coordinates[1]}, ${vehicle.device.coordinate.coordinates[0]}]` : 'vehicle coordinate is null';
+    const addressValue = address ?? 'adresse non disponible';
+
+    // Créer un objet pour faciliter l'exportation
+    const row = {
+      id,
+      licenceplate,
+      'Propriétaire du véhicule': teamsLabel, // Aligné avec le nouvel en-tête
+      'Type de véhicule': categoryLabel,       // Aligné avec le nouvel en-tête
+      'Nom Prénom du conducteur': driverFullName,
+      'numéro de téléphone du véhicule': driverPhoneNumber,
+      'Date de dernière communication': deviceLastCommunicationDate,
+      'coordonnée GPS': deviceCoordinates,
+      'Adresse': addressValue // Nouvelle colonne
+    };
+
+    // Convertir l'objet en une ligne CSV
+    return Object.values(row).map(value => {
+      if (value === null || value === undefined) {
+        value = '';
+      } else if (typeof value === 'object') {
+        // Convertir les objets en JSON string si nécessaire
+        value = JSON.stringify(value);
+      }
+      // Échapper les guillemets et les virgules
+      value = value.toString().replace(/"/g, '""');
+      if (value.search(/("|,|\n)/g) >= 0) {
+        value = `"${value}"`;
+      }
+      return value;
+    }).join(',');
+  }
+
 
 }

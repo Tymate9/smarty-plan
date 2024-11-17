@@ -1,15 +1,18 @@
 // src/app/components/poi-popup/poi-popup.component.ts
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {PoiService} from "../poi.service";
+import {PointOfInterestForm, PoiService} from "../poi.service";
 import * as turf from '@turf/turf';
+import * as wellknown from 'wellknown'
 import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
+import {GeoJSONGeometry} from "wellknown";
 
 
 @Component({
   selector: 'app-poi-popup',
   template: `
+    <div>{{entity.id}}</div>
     <div class="poi-popup">
       <div class="tabs">
         <button
@@ -41,40 +44,40 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
       <div class="tab-content">
         <div *ngIf="activeTab === 'information'">
           <!-- Contenu de l'onglet Information -->
-          <p>Label : {{ poi.label }}</p>
+          <p>Label : {{ entity.label }}</p>
           <p>Adresse : {{ address }}</p>
-          <p>Category : {{ poi.category.label }}</p>
+          <p>Category : {{ entity.category.label }}</p>
         </div>
 
         <div *ngIf="activeTab === 'proximite'">
-            <!-- Contenu de l'onglet Proximité -->
-            <h4>Véhicules les Plus Proches</h4>
-            <div *ngIf="loadingProximity">
-              Chargement des véhicules proches...
-            </div>
-            <div *ngIf="!loadingProximity && proximityVehicles.length === 0">
-              Aucun véhicule trouvé à proximité.
-            </div>
-            <ul *ngIf="!loadingProximity && proximityVehicles.length > 0">
-              <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
-              <li *ngFor="let vehicle of proximityVehicles">
-                <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
-                <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
-                <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
-                <button
-                  (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-                  [class.active]="isMarkerHighlighted('vehicle-' + vehicle.second.id)"
-                >
-                  {{ isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
-                </button>
-<!--                <div>
-                  Équipe: {{ vehicle.second.team.label }} ({{ vehicle.second.team.category.label }})
-                </div>-->
-<!--                <div>
-                  Dernière communication: {{ vehicle.second.device.lastCommunicationDate | date:'short' }}
-                </div>-->
-              </li>
-            </ul>
+          <!-- Contenu de l'onglet Proximité -->
+          <h4>Véhicules les Plus Proches</h4>
+          <div *ngIf="loadingProximity">
+            Chargement des véhicules proches...
+          </div>
+          <div *ngIf="!loadingProximity && proximityVehicles.length === 0">
+            Aucun véhicule trouvé à proximité.
+          </div>
+          <ul *ngIf="!loadingProximity && proximityVehicles.length > 0">
+            <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
+            <li *ngFor="let vehicle of proximityVehicles">
+              <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
+              <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
+              <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
+              <button
+                (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+                [class.active]="isMarkerHighlighted('vehicle-' + vehicle.second.id)"
+              >
+                {{ isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+              </button>
+              <!--                <div>
+                                Équipe: {{ vehicle.second.team.label }} ({{ vehicle.second.team.category.label }})
+                              </div>-->
+              <!--                <div>
+                                Dernière communication: {{ vehicle.second.device.lastCommunicationDate | date:'short' }}
+                              </div>-->
+            </li>
+          </ul>
         </div>
 
         <div *ngIf="activeTab === 'dessus'">
@@ -197,7 +200,7 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
   `]
 })
 export class PoiPopupComponent implements OnInit {
-  @Input() poi: any;
+  @Input() entity: any;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
 
   highlightedStates: { [markerId: string]: boolean } = {};
@@ -229,7 +232,7 @@ export class PoiPopupComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.poiService.getAddressFromCoordinates(this.poi.coordinate.coordinates[1],this.poi.coordinate.coordinates[0]).subscribe({
+    this.poiService.getAddressFromCoordinates(this.entity.coordinate.coordinates[1],this.entity.coordinate.coordinates[0]).subscribe({
       next: (response) => {
         this.address = response.adresse; // Assurez-vous que 'address' est la bonne clé
       },
@@ -237,14 +240,14 @@ export class PoiPopupComponent implements OnInit {
     });
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {
-      label: this.poi.label,
+      label: this.entity.label,
       radius: 50, // Valeur par défaut si le calcul échoue
     };
 
     // Calculer le radius à partir de l'area
-    if (this.poi.area && this.poi.area.coordinates && this.poi.area.coordinates[0]) {
-      const center = turf.point([this.poi.coordinate.coordinates[0], this.poi.coordinate.coordinates[1]]);
-      const edgePointCoord = this.poi.area.coordinates[0][0]; // Premier point du polygone
+    if (this.entity.area && this.entity.area.coordinates && this.entity.area.coordinates[0]) {
+      const center = turf.point([this.entity.coordinate.coordinates[0], this.entity.coordinate.coordinates[1]]);
+      const edgePointCoord = this.entity.area.coordinates[0][0]; // Premier point du polygone
       const edgePoint = turf.point(edgePointCoord);
       const distance = turf.distance(center, edgePoint, { units: 'meters' });
       this.updatedPoi.radius = Math.round(distance);
@@ -259,7 +262,7 @@ export class PoiPopupComponent implements OnInit {
         this.categories = categories;
 
         // Initialiser selectedCategoryId avec l'ID de la catégorie actuelle du POI
-        this.selectedCategoryId = this.poi.category.id;
+        this.selectedCategoryId = this.entity.category.id;
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des catégories:', error);
@@ -269,12 +272,12 @@ export class PoiPopupComponent implements OnInit {
 
   deletePOI() {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce POI ?')) {
-      this.poiService.deletePOI(this.poi.id).subscribe({
+      this.poiService.deletePOI(this.entity.id).subscribe({
         next: () => {
           alert('POI supprimé avec succès.');
           this.layerEvent.emit({
             type: LayerEventType.POIDeleted,
-            payload: { poiId: this.poi.id }
+            payload: { poiId: this.entity.id }
           });
         },
         error: (error) => {
@@ -291,17 +294,47 @@ export class PoiPopupComponent implements OnInit {
       return;
     }
 
-    const updatedData = {
+    // Vérifier que les coordonnées sont valides
+    if (
+      this.entity.coordinate.coordinates[0] === null ||
+      this.entity.coordinate.coordinates[1] === null ||
+      isNaN(this.entity.coordinate.coordinates[0]) ||
+      isNaN(this.entity.coordinate.coordinates[1])
+    ) {
+      alert("Veuillez fournir des coordonnées valides pour le POI.");
+      return;
+    }
+
+    // Générer le WKTPoint
+    const wktPoint = `POINT(${this.entity.coordinate.coordinates[0]} ${this.entity.coordinate.coordinates[1]})`;
+
+    // Générer le WKTPolygon (cercle approximé par un polygone de 50m de rayon)
+    const wktPolygon = this.generateWKTPolygon(
+      this.entity.coordinate.coordinates[0],
+      this.entity.coordinate.coordinates[1],
+      this.updatedPoi.radius, // Rayon en mètres
+      16  // Nombre de côtés pour l'approximation
+    );
+
+    // Vérifier que la conversion a réussi
+    if (!wktPolygon) {
+      alert("Erreur lors de la génération du polygone.");
+      return;
+    }
+
+    // Construire l'objet updatedData avec WKTPoint et WKTPolygon
+    const updatedData: PointOfInterestForm = {
       label: this.updatedPoi.label,
       type: this.selectedCategoryId,
-      WKTPoint: `POINT(${this.poi.coordinate.coordinates[0]} ${this.poi.coordinate.coordinates[1]})`,
-      radius: this.updatedPoi.radius,
+      WKTPoint: wktPoint,
+      WKTPolygon: wktPolygon
     };
 
-    this.poiService.updatePOI(this.poi.id, updatedData).subscribe({
+    // Appeler le service pour mettre à jour le POI
+    this.poiService.updatePOI(this.entity.id, updatedData).subscribe({
       next: (updatedPoi) => {
         alert('POI mis à jour avec succès.');
-        this.poi = updatedPoi
+        this.entity = updatedPoi;
         this.layerEvent.emit({
           type: LayerEventType.POIUpdated,
           payload: { updatedPoi }
@@ -318,8 +351,8 @@ export class PoiPopupComponent implements OnInit {
     this.layerEvent.emit({
       type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
       payload: {
-        lat: this.poi.coordinate.coordinates[1],
-        lng: this.poi.coordinate.coordinates[0]
+        lat: this.entity.coordinate.coordinates[1],
+        lng: this.entity.coordinate.coordinates[0]
       }
     });
   }
@@ -329,8 +362,8 @@ export class PoiPopupComponent implements OnInit {
 
   loadProximityVehicles() {
     this.loadingProximity = true;
-    const latitude = this.poi.coordinate.coordinates[1];
-    const longitude = this.poi.coordinate.coordinates[0];
+    const latitude = this.entity.coordinate.coordinates[1];
+    const longitude = this.entity.coordinate.coordinates[0];
     const limit = 5;
 
     this.vehicleService.getNearestVehiclesWithDistance(latitude, longitude, limit).subscribe({
@@ -363,8 +396,8 @@ export class PoiPopupComponent implements OnInit {
   loadDessusVehicles() {
     this.loadingDessus = true;
     // Convertir le polygone en WKT
-    const polygon = turf.polygon(this.poi.area.coordinates);
-    const wkt = this.convertToWktPolygon(this.poi.area.coordinates);
+    const polygon = turf.polygon(this.entity.area.coordinates);
+    const wkt = this.convertToWktPolygon(this.entity.area.coordinates);
 
     this.vehicleService.getVehicleInPolygon(wkt).subscribe({
       next: (data) => {
@@ -407,6 +440,12 @@ export class PoiPopupComponent implements OnInit {
 
   isMarkerHighlighted(markerId: string): boolean {
     return this.highlightedStates[markerId] || false;
+  }
+
+  generateWKTPolygon(longitude: number, latitude: number, radius: number, sides: number = 16): string {
+    const point = turf.point([longitude, latitude]);
+    const buffered = turf.buffer(point, radius, { units: 'meters' });
+    return wellknown.stringify(buffered!.geometry as GeoJSONGeometry);
   }
 
 }

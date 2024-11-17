@@ -24,11 +24,13 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
     <div class="tab-content">
       <!-- Onglet Information -->
       <div *ngIf="activeTab === 'information'">
-        <h4>{{ vehicle.licenseplate }}</h4>
-        <p><strong>Conducteur:</strong> {{ vehicle.driver?.firstName + ' ' + (vehicle.driver?.lastName || 'Aucun conducteur') }}</p>
-        <p><strong>Équipe:</strong> {{ vehicle.team.label }}</p>
-        <p><strong>Catégorie:</strong> {{ vehicle.category.label }}</p>
-        <p><strong>Dernière communication:</strong> {{ vehicle.device.lastCommunicationDate | date:'short' }}</p>
+        <h4>{{ entity.licenseplate }}</h4>
+        <p>
+          <strong>Conducteur:</strong> {{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}
+        </p>
+        <p><strong>Équipe:</strong> {{ entity.team.label }}</p>
+        <p><strong>Catégorie:</strong> {{ entity.category.label }}</p>
+        <p><strong>Dernière communication:</strong> {{ entity.device.lastCommunicationDate | date:'short' }}</p>
       </div>
 
       <!-- Onglet POI -->
@@ -59,14 +61,11 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
   `]
 })
 export class VehiclePopupComponent implements OnInit {
-  @Input() vehicle: dto.VehicleSummaryDTO;
+  @Input() entity: dto.VehicleSummaryDTO;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
-  /*@Output() centerOnPOI = new EventEmitter<[number, number]>();
-  @Output() viewAllHighlightedMarkers = new EventEmitter<[number, number]>();
-  @Output() highlightMarkerRequest = new EventEmitter<string>();
-  @Output() zoomToHighlightedMarkers = new EventEmitter<void>();*/
 
   nearbyPOIs: any[] = [];
+
   activeTab: string = 'information'; // Onglet par défaut
   highlightedStates: { [markerId: string]: boolean } = {};
 
@@ -77,8 +76,8 @@ export class VehiclePopupComponent implements OnInit {
     this.layerEvent.emit({
       type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
       payload: {
-        lat: this.vehicle.device.coordinate?.coordinates[1] ?? 0.0,
-        lng: this.vehicle.device.coordinate?.coordinates[0] ?? 0.0,
+        lat: this.entity.device.coordinate?.coordinates[1] ?? 0.0,
+        lng: this.entity.device.coordinate?.coordinates[0] ?? 0.0,
       }
     });
   }
@@ -120,8 +119,8 @@ export class VehiclePopupComponent implements OnInit {
   }
 
   loadNearbyPOIs() {
-    const latitude = this.vehicle.device.coordinate?.coordinates[1] ?? 0.0;
-    const longitude = this.vehicle.device.coordinate?.coordinates[0] ?? 0.0;
+    const latitude = this.entity.device.coordinate?.coordinates[1] ?? 0.0;
+    const longitude = this.entity.device.coordinate?.coordinates[0] ?? 0.0;
 
     this.poiService.getNearestPOIsWithDistance(latitude, longitude, 3).subscribe({
       next: (response) => {

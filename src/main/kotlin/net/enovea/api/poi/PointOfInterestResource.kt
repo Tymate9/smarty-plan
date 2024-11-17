@@ -331,29 +331,4 @@ class PointOfInterestResource (
         }
     }
 
-    // Utils region
-    private fun calculateBufferPolygon(lon: Double, lat: Double, radius: Double): Polygon {
-        val bufferQuery = """
-        SELECT ST_AsText(
-            ST_Buffer(
-                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
-                :radius
-            )
-        ) AS buffer
-    """.trimIndent()
-
-        val result = entityManager.createNativeQuery(bufferQuery)
-            .setParameter("lon", lon)
-            .setParameter("lat", lat)
-            .setParameter("radius", radius)
-            .singleResult as String
-
-        val wktReader = WKTReader()
-        val geometry = wktReader.read(result)
-        if (geometry is Polygon) {
-            return geometry
-        } else {
-            throw IllegalArgumentException("Le buffer généré n'est pas un Polygon valide.")
-        }
-    }
 }

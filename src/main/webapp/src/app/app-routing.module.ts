@@ -12,7 +12,8 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
-      { path: 'workInProgress', component: PoiManagerComponent},
+      { path: 'poiedit/:label', component: PoiManagerComponent},
+      { path: 'poiedit', component: PoiManagerComponent},
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

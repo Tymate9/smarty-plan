@@ -9,6 +9,7 @@ import {dto} from "../../../habarta/dto";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {catchError, forkJoin, of} from "rxjs";
 import {GeocodingService} from "../../commons/GeoCode/geo-coding.service";
+import {PopUpConfig} from "../../pop-up-config";
 
 export class MapManagerConfig {
   canExtract: boolean;
@@ -77,8 +78,8 @@ export class MapManager {
         break;
 
       case LayerEventType.POICreated:
-        const { poi } = event.payload;
-        this.onPoiCreated(poi);
+        const { poi, popUpConfig } = event.payload;
+        this.onPoiCreated(poi, popUpConfig);
         break;
 
       case LayerEventType.ClosePopup:
@@ -138,21 +139,21 @@ export class MapManager {
 
   // Marker Region
   // Ajout d'un marqueur
-  addMarker(type: EntityType, entity: any) {
+  addMarker(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
     const marker = MarkerFactory.createMarker(type, entity);
     if (marker) {
-      this.addMarkerToMap(type, entity);
+      this.addMarkerToMap(type, entity, popUpConfig);
     }
   }
 
-  private addMarkerToMap(type: EntityType, entity: any) {
+  private addMarkerToMap(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
     // Configurer la popup en fonction du type
     switch (type) {
       case EntityType.POI:
-        this.layerManagers[0].addMarker(entity);
+        this.layerManagers[0].addMarker(entity, popUpConfig);
         break;
       case EntityType.VEHICLE:
-        this.layerManagers[1].addMarker(entity);
+        this.layerManagers[1].addMarker(entity, popUpConfig);
         break;
     }
   }
@@ -215,7 +216,6 @@ export class MapManager {
 
     // Nettoie le composant et réinitialise la croix quand la popup est fermée
     this.map.on('popupclose', () => {
-      console.log("Je suis dans le map popupclose")
       contextMenuPopUpComponentRef.destroy();
       this.resetCrossMarker()
 
@@ -248,8 +248,8 @@ export class MapManager {
     this.circleLayer.setLatLng([lat, lng]);
   }
 
-  private onPoiCreated(poi: any): void {
-    this.addMarker(EntityType.POI, poi);
+  private onPoiCreated(poi: any, popUpConfig? : PopUpConfig): void {
+    this.addMarker(EntityType.POI, poi, popUpConfig);
   }
 
   private createCrossMark(lat: number, lng: number): void {
@@ -275,15 +275,10 @@ export class MapManager {
     }
   }
 
-  // Méthode pour récupérer le LayerManager correspondant au type d'entité
   private getLayerManagerByType(type: EntityType): LayerManager | undefined {
     return this.layerManagers.find(layerManager => layerManager.entityType === type);
   }
 
-  /**
-   * Récupère tous les véhicules actuellement sur la carte.
-   * @returns Un tableau contenant tous les objets véhicule.
-   */
   public getAllVehicles(): any[] {
     const vehicleLayer = this.layerManagers.find(layer => layer.entityType === EntityType.VEHICLE);
     if (!vehicleLayer) {
@@ -301,9 +296,6 @@ export class MapManager {
     return vehicles;
   }
 
-  /**
-   * Ajoute un bouton d'exportation CSV à la carte.
-   */
   public addExportButton(): void {
     const exportButton = new L.Control({ position: 'topright' });
 
@@ -336,10 +328,6 @@ export class MapManager {
     exportButton.addTo(this.map);
   }
 
-  /**
-   * Génère et télécharge un fichier CSV à partir des données des véhicules.
-   * @param vehicles Tableau contenant les objets véhicule.
-   */
   private exportVehiclesToCSV(vehicles: any[]): void {
     if (vehicles.length === 0) {
       alert('Aucun véhicule à exporter.');
@@ -412,12 +400,6 @@ export class MapManager {
     });
   }
 
-  /**
-   * Convertit un objet véhicule en une ligne CSV avec les champs spécifiés.
-   * @param vehicle L'objet véhicule à convertir.
-   * @param address L'adresse obtenue via le géocodage inverse.
-   * @returns Une chaîne représentant une ligne CSV.
-   */
   private convertVehicleToCSVRow(vehicle: any, address: string): string {
     // Extraire les champs requis
     const id = vehicle.id ?? 'vehicle id is null';

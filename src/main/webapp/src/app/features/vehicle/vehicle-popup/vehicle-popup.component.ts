@@ -2,18 +2,22 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import {PoiService} from "../../poi/poi.service";
 import {dto} from "../../../../habarta/dto";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
+import {PopUpConfig} from "../../../pop-up-config";
+import {EntityType} from "../../../core/cartography/MarkerFactory";
 
 @Component({
   selector: 'app-vehicle-popup',
   template: `
     <div class="tabs">
       <button
+        *ngIf="popUpConfig.isTabEnabled(entityType, 'information')"
         [class.active]="activeTab === 'information'"
         (click)="selectTab('information')"
       >
         Information
       </button>
       <button
+        *ngIf="popUpConfig.isTabEnabled(entityType, 'poi')"
         [class.active]="activeTab === 'poi'"
         (click)="selectTab('poi')"
       >
@@ -23,7 +27,7 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
 
     <div class="tab-content">
       <!-- Onglet Information -->
-      <div *ngIf="activeTab === 'information'">
+      <div *ngIf="activeTab === 'information' && popUpConfig.isTabEnabled(entityType, 'information')">
         <h4>{{ entity.licenseplate }}</h4>
         <p>
           <strong>Conducteur:</strong> {{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}
@@ -34,7 +38,7 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
       </div>
 
       <!-- Onglet POI -->
-      <div *ngIf="activeTab === 'poi'">
+      <div *ngIf="activeTab === 'poi' && popUpConfig.isTabEnabled(entityType, 'poi')">
         <p>Liste des POIs les plus proches :</p>
         <button (click)="showAllHighlightedMarkers()">Afficher tous les marqueurs mis en évidence</button>
         <ul>
@@ -61,6 +65,10 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/laye
   `]
 })
 export class VehiclePopupComponent implements OnInit {
+  //TODO(retravailler sur le système de config)
+  @Input() popUpConfig: PopUpConfig;
+  entityType: EntityType = EntityType.VEHICLE;
+
   @Input() entity: dto.VehicleSummaryDTO;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
 

@@ -5,6 +5,7 @@ import * as L from "leaflet";
 import {Type, ViewContainerRef} from "@angular/core";
 import {PoiPopupComponent} from "../../../features/poi/poi-popup/poi-popup.component";
 import {VehiclePopupComponent} from "../../../features/vehicle/vehicle-popup/vehicle-popup.component";
+import {PopUpConfig} from "../../../pop-up-config";
 
 export class LayerManager {
   readonly markersMap: Map<string, CustomMarker> = new Map();
@@ -49,6 +50,8 @@ export class LayerManager {
 
     this.clusterGroup.on('popupopen', (e: L.PopupEvent) => {
       const marker = e.propagatedFrom as CustomMarker;
+      console.log("je suis juste avant la récupération de ce truc de e")
+      console.log(marker)
       this.onPopupOpen(marker);
     });
 
@@ -86,6 +89,7 @@ export class LayerManager {
     const container = L.DomUtil.create('div');
     const componentRef = this.viewContainerRef.createComponent(componentType);
     componentRef.instance.entity = entity;
+    componentRef.instance.popUpConfig = marker.popUpConfig;
 
     // S'abonner aux événements du composant
     componentRef.instance.layerEvent.subscribe((event: LayerEvent) => {
@@ -130,9 +134,15 @@ export class LayerManager {
   }
 
   // Méthode pour ajouter un marqueur
-  addMarker(entity: any): void {
+  addMarker(entity: any, popUpConfig?: PopUpConfig): void {
     const marker = MarkerFactory.createMarker(this.entityType, entity);
     if (marker) {
+      console.log(popUpConfig)
+      if(popUpConfig)
+      {
+        console.log("je modifie le popUpConfig au sein du layer")
+        marker.popUpConfig = popUpConfig
+      }
       this.markersMap.set(marker.id, marker);
       this.addMarkerToLayer(marker, entity);
     }
@@ -149,6 +159,8 @@ export class LayerManager {
       this.bindTooltip(marker, `${entity.licenseplate} - ${entity.driver ? entity.driver.firstName + ' ' + entity.driver.lastName : 'Aucun conducteur'}`);
     }
 
+    console.log("Je suis juste avant l'ajout du marker")
+    console.log(marker)
     // Ajouter le marqueur au cluster group
     this.clusterGroup.addLayer(marker);
   }
@@ -236,7 +248,7 @@ export class LayerManager {
       }
     }
   }
-  // Méthode pour supprimer la mise en surbrillance de tout les marqueurs
+  // Méthode pour supprimer la mise en surbrillance de tous les marqueurs
   removeAllHighlights(): void {
     this.highlightedMarkers.forEach((markerID) => {
       this.removeHighlightMarker(markerID);
@@ -287,7 +299,7 @@ export class LayerManager {
     return coords.map((coord) => [coord[1], coord[0]]);
   }
 
-  // Méthode pour récupérer tout les marqueur en surbrillance
+  // Méthode pour récupérer tout le marqueur en surbrillance
   public getHighlightedMarkers(): CustomMarker[] {
     return Array.from(this.highlightedMarkers)
       .map((markerID) => this.markersMap.get(markerID))

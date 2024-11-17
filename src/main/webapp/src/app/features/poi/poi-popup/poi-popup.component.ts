@@ -7,145 +7,145 @@ import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
 import {GeoJSONGeometry} from "wellknown";
+import {PopUpConfig} from "../../../pop-up-config";
+import {EntityType} from "../../../core/cartography/MarkerFactory";
+import {Router} from "@angular/router";
 
 
 @Component({
   selector: 'app-poi-popup',
   template: `
-    <div>{{entity.id}}</div>
-    <div class="poi-popup">
-      <div class="tabs">
-        <button
-          [class.active]="activeTab === 'information'"
-          (click)="selectTab('information')"
-        >
-          Information
-        </button>
-        <button
-          [class.active]="activeTab === 'proximite'"
-          (click)="selectTab('proximite')"
-        >
-          Proximité
-        </button>
-        <button
-          [class.active]="activeTab === 'dessus'"
-          (click)="selectTab('dessus')"
-        >
-          Dessus
-        </button>
-        <button
-          [class.active]="activeTab === 'editer'"
-          (click)="selectTab('editer')"
-        >
-          Editer
-        </button>
+  <div class="poi-popup">
+    <div class="tabs">
+      <button
+        *ngIf="popUpConfig.isTabEnabled(entityType, 'information')"
+        [class.active]="activeTab === 'information'"
+        (click)="selectTab('information')"
+      >
+        Information
+      </button>
+      <button
+        *ngIf="popUpConfig.isTabEnabled(entityType, 'proximite')"
+        [class.active]="activeTab === 'proximite'"
+        (click)="selectTab('proximite')"
+      >
+        Proximité
+      </button>
+      <button
+        *ngIf="popUpConfig.isTabEnabled(entityType, 'dessus')"
+        [class.active]="activeTab === 'dessus'"
+        (click)="selectTab('dessus')"
+      >
+        Dessus
+      </button>
+      <button
+        *ngIf="popUpConfig.isTabEnabled(entityType, 'editer')"
+        [class.active]="activeTab === 'editer'"
+        (click)="selectTab('editer')"
+      >
+        Editer
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <div *ngIf="activeTab === 'information' && popUpConfig.isTabEnabled(entityType, 'information')">
+        <!-- Contenu de l'onglet Information -->
+        <p>Label : {{ entity.label }}</p>
+        <p>Adresse : {{ address }}</p>
+        <p>Category : {{ entity.category.label }}</p>
       </div>
 
-      <div class="tab-content">
-        <div *ngIf="activeTab === 'information'">
-          <!-- Contenu de l'onglet Information -->
-          <p>Label : {{ entity.label }}</p>
-          <p>Adresse : {{ address }}</p>
-          <p>Category : {{ entity.category.label }}</p>
+      <div *ngIf="activeTab === 'proximite' && popUpConfig.isTabEnabled(entityType, 'proximite')">
+        <!-- Contenu de l'onglet Proximité -->
+        <h4>Véhicules les Plus Proches</h4>
+        <div *ngIf="loadingProximity">
+          Chargement des véhicules proches...
         </div>
-
-        <div *ngIf="activeTab === 'proximite'">
-          <!-- Contenu de l'onglet Proximité -->
-          <h4>Véhicules les Plus Proches</h4>
-          <div *ngIf="loadingProximity">
-            Chargement des véhicules proches...
-          </div>
-          <div *ngIf="!loadingProximity && proximityVehicles.length === 0">
-            Aucun véhicule trouvé à proximité.
-          </div>
-          <ul *ngIf="!loadingProximity && proximityVehicles.length > 0">
-            <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
-            <li *ngFor="let vehicle of proximityVehicles">
-              <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
-              <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
-              <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
-              <button
-                (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-                [class.active]="isMarkerHighlighted('vehicle-' + vehicle.second.id)"
-              >
-                {{ isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
-              </button>
-              <!--                <div>
-                                Équipe: {{ vehicle.second.team.label }} ({{ vehicle.second.team.category.label }})
-                              </div>-->
-              <!--                <div>
-                                Dernière communication: {{ vehicle.second.device.lastCommunicationDate | date:'short' }}
-                              </div>-->
-            </li>
-          </ul>
+        <div *ngIf="!loadingProximity && proximityVehicles.length === 0">
+          Aucun véhicule trouvé à proximité.
         </div>
-
-        <div *ngIf="activeTab === 'dessus'">
-          <!-- Contenu de l'onglet Dessus -->
-          <h4>Véhicules dans le Polygone</h4>
-          <div *ngIf="loadingDessus">
-            Chargement des véhicules dans le polygone...
-          </div>
-          <div *ngIf="!loadingDessus && dessusVehicles.length === 0">
-            Aucun véhicule trouvé dans ce polygone.
-          </div>
-          <ul *ngIf="!loadingDessus && dessusVehicles.length > 0">
-            <li *ngFor="let vehicle of dessusVehicles">
-              <strong>{{ vehicle.licenseplate }}</strong> - {{ vehicle.category.label }}
-              <div>
-                Conducteur: {{ vehicle.driver?.firstName || 'Aucun conducteur' }}
-              </div>
-              <div>
-                Équipe: {{ vehicle.team.label }} ({{ vehicle.team.category.label }})
-              </div>
-              <div>
-                Dernière communication: {{ vehicle.device.lastCommunicationDate | date:'short' }}
-              </div>
-            </li>
-          </ul>
-        </div>
-
-
-        <div *ngIf="activeTab === 'editer'">
-          <!-- Contenu de l'onglet Editer -->
-          <h4>Modifier le POI</h4>
-          <form (ngSubmit)="submitUpdate()">
-            <label for="label">Nom :</label>
-            <input
-              type="text"
-              id="label"
-              [(ngModel)]="updatedPoi.label"
-              name="label"
-              required
-            /><br/>
-
-            <label for="category">Type :</label>
-            <select
-              id="category"
-              [(ngModel)]="selectedCategoryId"
-              name="category"
-              required
+        <ul *ngIf="!loadingProximity && proximityVehicles.length > 0">
+          <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
+          <li *ngFor="let vehicle of proximityVehicles">
+            <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
+            <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
+            <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
+            <button
+              (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+              [class.active]="isMarkerHighlighted('vehicle-' + vehicle.second.id)"
             >
-              <option *ngFor="let category of categories" [value]="category.id">
-                {{ category.label }}
-              </option>
-            </select><br/>
+              {{ isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+            </button>
+          </li>
+        </ul>
+      </div>
 
-            <label for="radius">Rayon (mètres) :</label>
-            <input
-              type="number"
-              id="radius"
-              [(ngModel)]="updatedPoi.radius"
-              name="radius"
-              required
-            /><br/>
-
-            <button type="submit">Mettre à jour</button>
-          </form>
-          <button (click)="deletePOI()">Supprimer le POI</button>
+      <div *ngIf="activeTab === 'dessus' && popUpConfig.isTabEnabled(entityType, 'dessus')">
+        <!-- Contenu de l'onglet Dessus -->
+        <h4>Véhicules dans le Polygone</h4>
+        <div *ngIf="loadingDessus">
+          Chargement des véhicules dans le polygone...
         </div>
+        <div *ngIf="!loadingDessus && dessusVehicles.length === 0">
+          Aucun véhicule trouvé dans ce polygone.
+        </div>
+        <ul *ngIf="!loadingDessus && dessusVehicles.length > 0">
+          <li *ngFor="let vehicle of dessusVehicles">
+            <strong>{{ vehicle.licenseplate }}</strong> - {{ vehicle.category.label }}
+            <div>
+              Conducteur: {{ vehicle.driver?.firstName || 'Aucun conducteur' }}
+            </div>
+            <div>
+              Équipe: {{ vehicle.team.label }} ({{ vehicle.team.category.label }})
+            </div>
+            <div>
+              Dernière communication: {{ vehicle.device.lastCommunicationDate | date:'short' }}
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="activeTab === 'editer' && popUpConfig.isTabEnabled(entityType, 'editer')">
+        <!-- Contenu de l'onglet Editer -->
+        <h4>Modifier le POI</h4>
+        <form (ngSubmit)="submitUpdate()">
+          <label for="label">Nom :</label>
+          <input
+            type="text"
+            id="label"
+            [(ngModel)]="updatedPoi.label"
+            name="label"
+            required
+          /><br/>
+
+          <label for="category">Type :</label>
+          <select
+            id="category"
+            [(ngModel)]="selectedCategoryId"
+            name="category"
+            required
+          >
+            <option *ngFor="let category of categories" [value]="category.id">
+              {{ category.label }}
+            </option>
+          </select><br/>
+
+          <!--<label for="radius">Rayon (mètres) :</label>
+          <input
+            type="number"
+            id="radius"
+            [(ngModel)]="updatedPoi.radius"
+            name="radius"
+            required
+          /><br/>-->
+
+          <button type="submit">Mettre à jour</button>
+        </form>
+        <button (click)="deletePOI()">Supprimer le POI</button>
+        <button (click)="navigateToPoiEdit()">Aller à l'Édition POI</button>
       </div>
     </div>
+  </div>
   `,
   styles: [`
     .active {
@@ -200,7 +200,11 @@ import {GeoJSONGeometry} from "wellknown";
   `]
 })
 export class PoiPopupComponent implements OnInit {
-  @Input() entity: any;
+  //TODO(améliorer la configuration des popUp)
+  @Input() popUpConfig: PopUpConfig;
+  entityType: EntityType = EntityType.POI;
+
+  @Input() entity: dto.PointOfInterestEntity;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
 
   highlightedStates: { [markerId: string]: boolean } = {};
@@ -216,7 +220,12 @@ export class PoiPopupComponent implements OnInit {
   constructor(
     private readonly poiService: PoiService,
     private readonly vehicleService: VehicleService,
+    private router: Router
   ) {}
+
+  navigateToPoiEdit() {
+    this.router.navigate(['/poiedit', this.entity.label]);
+  }
 
   selectTab(tab: string) {
     this.activeTab = tab;
@@ -229,6 +238,10 @@ export class PoiPopupComponent implements OnInit {
     if (tab === 'dessus' && this.dessusVehicles.length === 0 && !this.loadingDessus) {
       this.loadDessusVehicles();
     }
+
+    console.log("Me Saoule")
+    console.log(this.popUpConfig.isTabEnabled(this.entityType, 'information'))
+    console.log(this.popUpConfig)
   }
 
   ngOnInit() {
@@ -308,7 +321,7 @@ export class PoiPopupComponent implements OnInit {
     // Générer le WKTPoint
     const wktPoint = `POINT(${this.entity.coordinate.coordinates[0]} ${this.entity.coordinate.coordinates[1]})`;
 
-    // Générer le WKTPolygon (cercle approximé par un polygone de 50m de rayon)
+/*    // Générer le WKTPolygon (cercle approximé par un polygone de 50m de rayon)
     const wktPolygon = this.generateWKTPolygon(
       this.entity.coordinate.coordinates[0],
       this.entity.coordinate.coordinates[1],
@@ -320,14 +333,14 @@ export class PoiPopupComponent implements OnInit {
     if (!wktPolygon) {
       alert("Erreur lors de la génération du polygone.");
       return;
-    }
+    }*/
 
     // Construire l'objet updatedData avec WKTPoint et WKTPolygon
     const updatedData: PointOfInterestForm = {
       label: this.updatedPoi.label,
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
-      WKTPolygon: wktPolygon
+      WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry)
     };
 
     // Appeler le service pour mettre à jour le POI

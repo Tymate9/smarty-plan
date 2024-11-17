@@ -5,6 +5,7 @@ import {PoiPopupComponent} from "../../features/poi/poi-popup/poi-popup.componen
 import {VehiclePopupComponent} from "../../features/vehicle/vehicle-popup/vehicle-popup.component";
 import {dto} from "../../../habarta/dto";
 import {VehicleService} from "../../features/vehicle/vehicle.service";
+import {PopUpConfig} from "../../pop-up-config";
 
 export enum EntityType {
   POI = 'poi',
@@ -16,19 +17,21 @@ export interface CustomMarker extends L.Marker {
   areaPolygon?: L.Polygon;
   isHighlighted: boolean;
   entity: any;
+  popUpConfig: PopUpConfig;
 }
 
 export class CustomMarkerImpl extends L.Marker implements CustomMarker {
   id: string;
   isHighlighted: boolean = false;
   areaPolygon?: L.Polygon;
-  public entity : any
+  public entity: any;
+  public popUpConfig: PopUpConfig;
   private forceZIndex: number | null = null; // Stockage du zIndex forcé
 
-
-  constructor(latlng: L.LatLngExpression, options?: L.MarkerOptions) {
+  constructor(latlng: L.LatLngExpression, options?: L.MarkerOptions, popUpConfig?: PopUpConfig) {
     super(latlng, options);
     this.id = '';
+    this.popUpConfig = popUpConfig || new PopUpConfig(); // Initialiser avec PopUpConfig ou une valeur par défaut
   }
 
   // Méthode pour forcer le zIndex

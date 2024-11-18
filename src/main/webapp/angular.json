@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "./../resources/META-INF/resources",
+            "outputPath": "./../../../target/classes/META-INF/resources",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [

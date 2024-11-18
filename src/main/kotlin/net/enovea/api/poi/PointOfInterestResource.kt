@@ -10,7 +10,7 @@ import net.enovea.common.geo.SpatialService
 import org.locationtech.jts.geom.*
 import org.locationtech.jts.io.WKTReader
 
-@Path("/poi")
+@Path("/api/poi")
 class PointOfInterestResource (
     val pointOfInterestSpatialService: SpatialService<PointOfInterestEntity>,
     val entityManager: EntityManager

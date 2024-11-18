@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.SecurityContext
 import org.eclipse.microprofile.jwt.JsonWebToken
 
-@Path("/admin")
+@Path("/api/admin")
 class AdminResource {
 
     @Inject

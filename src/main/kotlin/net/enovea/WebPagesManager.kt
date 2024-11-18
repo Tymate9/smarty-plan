@@ -1,7 +1,9 @@
 package net.enovea
 
+import jakarta.ws.rs.GET
 import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.Path
+import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
@@ -22,7 +24,11 @@ class WebPagesManager {
      * Redirects the requests associated to a page of the application to the index.html resource.
      * This is required to support the browser history, refresh and direct access to a page.
      */
+    @GET
+    @Path("{path: (^(?!/?api/)(?!.*\\.\\w+$).*)}")
+    @Produces(MediaType.TEXT_HTML)
     fun index(
+        @PathParam("path") path: String,
         @Context uriInfo: UriInfo,
     ): Response {
         println("Méthode index invoquée")
@@ -50,10 +56,12 @@ class NotFoundExceptionMapper: ExceptionMapper<NotFoundException> {
         return if (null == indexHtmlAsStream) {
             Response.status(Response.Status.NOT_FOUND).build()
         } else {
-            Response.ok(
-                indexHtmlAsStream.reader().readText(),
-                MediaType.TEXT_HTML_TYPE.withCharset(Charsets.UTF_8.name()),
-            ).build()
+            Response.status(Response.Status.NOT_FOUND).build()
+            // todo : redirect to 404
+//            Response.ok(
+//                indexHtmlAsStream.reader().readText(),
+//                MediaType.TEXT_HTML_TYPE.withCharset(Charsets.UTF_8.name()),
+//            ).build()
         }
     }
 }

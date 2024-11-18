@@ -55,14 +55,17 @@ import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.serv
               Aucun véhicule trouvé à proximité.
             </div>
             <ul *ngIf="!loadingProximity && proximityVehicles.length > 0">
-              <button (click)="zoomToHighlighted()">Afficher tous les marqueurs mis en évidence</button>
+              <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
               <li *ngFor="let vehicle of proximityVehicles">
                 <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
-                <span> ({{ vehicle.first | number:'1.2-2' }} m)</span>
+                <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
                 <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
-                <div>
-                  Conducteur: {{ vehicle.second.driver?.firstName + ' ' + vehicle.second.driver?.lastName || 'Aucun conducteur' }}
-                </div>
+                <button
+                  (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+                  [class.active]="isMarkerHighlighted('vehicle-' + vehicle.second.id)"
+                >
+                  {{ isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+                </button>
 <!--                <div>
                   Équipe: {{ vehicle.second.team.label }} ({{ vehicle.second.team.category.label }})
                 </div>-->
@@ -141,6 +144,10 @@ import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.serv
     </div>
   `,
   styles: [`
+    .active {
+      background-color: #007bff;
+      color: white;
+    }
     .poi-popup {
       width: 300px;
     }
@@ -192,7 +199,11 @@ export class PoiPopupComponent implements OnInit {
   @Input() poi: any;
   @Output() poiDeleted = new EventEmitter<number>();
   @Output() poiUpdated = new EventEmitter<any>();
-  @Output() zoomToHighlightedMarkers = new EventEmitter<void>();
+  @Output() viewAllHighlightedMarkers = new EventEmitter<[number, number]>();
+  @Output() highlightMarkerRequest = new EventEmitter<string>();
+  @Output() zoomToVehicleMarker = new EventEmitter<number[]>();
+
+  highlightedStates: { [markerId: string]: boolean } = {};
 
   activeTab: string = 'information';
 
@@ -300,8 +311,8 @@ export class PoiPopupComponent implements OnInit {
     });
   }
 
-  zoomToHighlighted() {
-    this.zoomToHighlightedMarkers.emit();
+  centerMapAroundAllMarkers() {
+    this.viewAllHighlightedMarkers.emit([this.poi.coordinate.coordinates[1], this.poi.coordinate.coordinates[0]]);
   }
 
   proximityVehicles: VehicleWithDistanceDTO[] = [];
@@ -311,7 +322,7 @@ export class PoiPopupComponent implements OnInit {
     this.loadingProximity = true;
     const latitude = this.poi.coordinate.coordinates[1];
     const longitude = this.poi.coordinate.coordinates[0];
-    const limit = 5; // Vous pouvez ajuster cette valeur ou la rendre configurable
+    const limit = 5;
 
     this.vehicleService.getNearestVehiclesWithDistance(latitude, longitude, limit).subscribe({
       next: (data) => {
@@ -325,12 +336,10 @@ export class PoiPopupComponent implements OnInit {
     });
   }
 
-  @Output() zoomToVehicleMarker = new EventEmitter<number[]>();
-
   centerMapOnVehicle(vehicle: dto.VehicleSummaryDTO) {
     const coordinates = vehicle.device?.coordinate?.coordinates;
     if (coordinates && coordinates.length === 2) {
-      this.zoomToVehicleMarker.emit(coordinates);
+      this.zoomToVehicleMarker.emit([coordinates[1], coordinates[0]]);
     }
   }
 
@@ -354,6 +363,7 @@ export class PoiPopupComponent implements OnInit {
       }
     });
   }
+
   convertToWktPolygon(coordinates: number[][][]): string {
     if (!coordinates || coordinates.length === 0) {
       throw new Error('Les coordonnées du polygone sont manquantes ou invalides.');
@@ -368,6 +378,18 @@ export class PoiPopupComponent implements OnInit {
 
     const pointsWkt = closedLinearRing.map(point => `${point[0]} ${point[1]}`).join(', ');
     return `POLYGON((${pointsWkt}))`;
+  }
+
+  toggleHighlightMarker(markerId: string) {
+    // Basculer l'état de surbrillance dans highlightedStates
+    this.highlightedStates[markerId] = !this.highlightedStates[markerId];
+
+    // Émettre l'événement pour que MapManager gère la surbrillance
+    this.highlightMarkerRequest.emit(markerId);
+  }
+
+  isMarkerHighlighted(markerId: string): boolean {
+    return this.highlightedStates[markerId] || false;
   }
 
 }

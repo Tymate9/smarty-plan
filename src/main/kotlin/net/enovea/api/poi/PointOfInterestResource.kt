@@ -141,36 +141,35 @@ class PointOfInterestResource (
                     .entity(mapOf("error" to "La catégorie spécifiée n'existe pas."))
                     .build()
 
-            // 2. Convertir WKTPoint en Point
+            // 2. Convertir WKTPolygon en Polygon
             val wktReader = WKTReader()
-            val geometry = wktReader.read(poiForm.WKTPoint)
-            if (geometry !is Point) {
+            val polygonGeometry = wktReader.read(poiForm.WKTPolygon)
+            if (polygonGeometry !is Polygon) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(mapOf("error" to "Le WKTPolygon fourni n'est pas un polygone valide."))
+                    .build()
+            }
+
+            // 3. Convertir WKTPoint en Point
+            val pointGeometry = wktReader.read(poiForm.WKTPoint)
+            if (pointGeometry !is Point) {
                 return Response.status(Response.Status.BAD_REQUEST)
                     .entity(mapOf("error" to "Le WKTPoint fourni n'est pas un point valide."))
                     .build()
             }
 
-            // 3. Extraire longitude et latitude
-            val longitude = geometry.x
-            val latitude = geometry.y
-
-            // 4. Calculer le buffer Polygon via PostGIS
-            val bufferRadius = poiForm.radius.toDouble() // en mètres
-            val areaPolygon = calculateBufferPolygon(longitude, latitude, bufferRadius)
-
-            // 5. Créer l'entité POI avec le Polygon
+            // 4. Créer l'entité POI avec le Polygon et le Point
             val poiEntity = PointOfInterestEntity(
                 label = poiForm.label,
                 category = category,
-                coordinate = geometry,
-                area = areaPolygon
+                coordinate = pointGeometry, // Coordonnées indépendantes de la zone
+                area = polygonGeometry
             )
 
-            // 6. Persister l'entité
+            // 5. Persister l'entité
             PointOfInterestEntity.persist(poiEntity)
 
-
-            // 7. Retourner la réponse avec le POI créé
+            // 6. Retourner la réponse avec le POI créé
             return Response.status(Response.Status.CREATED)
                 .entity(poiEntity)
                 .build()
@@ -183,7 +182,7 @@ class PointOfInterestResource (
     }
 
     /**
-     * Méthode PUT pour mettre à jour un POI existant avec un area circulaire précis.
+     * Méthode PUT pour mettre à jour un POI existant avec une zone polygonale et une coordonnée définies par WKT.
      */
     @PUT
     @Path("/{id}")
@@ -208,35 +207,35 @@ class PointOfInterestResource (
                     .entity(mapOf("error" to "La catégorie spécifiée n'existe pas."))
                     .build()
 
-            // 3. Convertir WKTPoint en Point
+            // 3. Convertir WKTPolygon en Polygon
             val wktReader = WKTReader()
-            val geometry = wktReader.read(poiForm.WKTPoint)
-            if (geometry !is Point) {
+            val polygonGeometry = wktReader.read(poiForm.WKTPolygon)
+            if (polygonGeometry !is Polygon) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(mapOf("error" to "Le WKTPolygon fourni n'est pas un polygone valide."))
+                    .build()
+            }
+            val areaPolygon: Polygon = polygonGeometry
+
+            // 4. Convertir WKTPoint en Point
+            val pointGeometry = wktReader.read(poiForm.WKTPoint)
+            if (pointGeometry !is Point) {
                 return Response.status(Response.Status.BAD_REQUEST)
                     .entity(mapOf("error" to "Le WKTPoint fourni n'est pas un point valide."))
                     .build()
             }
-            val coordinate = geometry
+            val coordinatePoint: Point = pointGeometry
 
-            // 4. Extraire longitude et latitude
-            val longitude = coordinate.x
-            val latitude = coordinate.y
-
-            // 5. Calculer le buffer Polygon via PostGIS
-            val bufferRadius = poiForm.radius.toDouble() // en mètres
-            val areaPolygon = calculateBufferPolygon(longitude, latitude, bufferRadius)
-
-            // 6. Mettre à jour les champs de l'entité POI
+            // 5. Mettre à jour les champs de l'entité POI
             existingPOI.label = poiForm.label
             existingPOI.category = category
-            existingPOI.coordinate = coordinate
+            existingPOI.coordinate = coordinatePoint
             existingPOI.area = areaPolygon
 
-            // 7. Persister les changements
+            // 6. Persister les changements
             existingPOI.persist()
 
-
-            // 8. Retourner la réponse avec le POI mis à jour
+            // 7. Retourner la réponse avec le POI mis à jour
             return Response.ok(existingPOI).build()
 
         } catch (e: Exception) {
@@ -312,29 +311,24 @@ class PointOfInterestResource (
         }
     }
 
-    // Utils region
-    private fun calculateBufferPolygon(lon: Double, lat: Double, radius: Double): Polygon {
-        val bufferQuery = """
-        SELECT ST_AsText(
-            ST_Buffer(
-                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
-                :radius
-            )
-        ) AS buffer
-    """.trimIndent()
+    @GET
+    @Path("/label")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun getPOIByLabel(@QueryParam("label") label: String?): Response {
+        if (label.isNullOrBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Le paramètre 'label' est requis."))
+                .build()
+        }
 
-        val result = entityManager.createNativeQuery(bufferQuery)
-            .setParameter("lon", lon)
-            .setParameter("lat", lat)
-            .setParameter("radius", radius)
-            .singleResult as String
-
-        val wktReader = WKTReader()
-        val geometry = wktReader.read(result)
-        if (geometry is Polygon) {
-            return geometry
-        } else {
-            throw IllegalArgumentException("Le buffer généré n'est pas un Polygon valide.")
+        return try {
+            val pois = PointOfInterestEntity.find("label ILIKE ?1", "%$label%").list()
+            Response.ok(pois).build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Erreur lors de la récupération des POIs: ${e.message}"))
+                .build()
         }
     }
+
 }

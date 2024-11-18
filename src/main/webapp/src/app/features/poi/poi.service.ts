@@ -8,6 +8,13 @@ export interface PoiWithDistance {
   poi: dto.PointOfInterestEntity;
 }
 
+export interface PointOfInterestForm {
+  label: string;
+  type: number;
+  WKTPoint: string;
+  WKTPolygon: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -55,11 +62,11 @@ export class PoiService {
     return this.http.get<any>(`${this.baseUrl}/fromAdresse`, { params });
   }
 
-  createPOI(poiData: { label: string; type: number; WKTPoint: string; radius: number }): Observable<any> {
+  createPOI(poiData: PointOfInterestForm): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}`, poiData);
   }
 
-  updatePOI(id: number, poiData: { label: string; type: number; WKTPoint: string; radius: number }): Observable<any> {
+  updatePOI(id: number, poiData: PointOfInterestForm): Observable<any> {
     return this.http.put<any>(`${this.baseUrl}/${id}`, poiData);
   }
 
@@ -67,4 +74,10 @@ export class PoiService {
     return this.http.delete<any>(`${this.baseUrl}/${id}`);
   }
 
+  //TODO(workInPogress)
+
+  getPOIByLabel(label: string): Observable<any[]> {
+    const params = { label };
+    return this.http.get<any[]>(`${this.baseUrl}/label`, { params });
+  }
 }

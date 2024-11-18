@@ -1,7 +1,6 @@
 package net.enovea.domain.driver
 
 import net.enovea.domain.team.TeamSummaryMapper
-import net.enovea.domain.vehicle.VehicleTeamEntity
 import net.enovea.dto.DriverDTO
 import net.enovea.dto.TeamSummaryDTO
 import org.mapstruct.Mapper

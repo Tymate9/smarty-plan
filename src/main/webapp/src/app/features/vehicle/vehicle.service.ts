@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { dto} from "../../../habarta/dto";
+import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -21,21 +22,9 @@ export class VehicleService {
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
   }
-  //
-  // //Méthode pour récupérer la liste de plaque d'immatriculationde
-  // getVehiclesList(): Observable<string[]> {
-  //   return this.http.get<string[]>(`${this.baseUrl}/list`);
-  // }
-  //
-  // // New method to get vehicles by agency IDs
-  // getVehiclesByAgencies(agencyIds: string[]): Observable<string[]> {
-  //   const params ={
-  //     agencyIds: agencyIds.length ? agencyIds : []
-  //   }
-  //   return this.http.get<string[]>(`${this.baseUrl}/byAgencies`, { params });
-  // }
 
-  getVehiclesList(agencyIds: string[] | null = null ): Observable<string[]> {
+  //Méthode pour récupérer la liste de plaque d'immatriculationde
+  getVehiclesListOriginal(agencyIds: string[] | null = null ): Observable<string[]> {
     const params = {
       agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
     };
@@ -43,6 +32,16 @@ export class VehicleService {
 
   }
 
+
+
+  //Méthode pour récupérer la liste de plaque d'immatriculationde
+  getVehiclesList(agencyIds: string[] | null = null ): Observable<VehicleSummaryDTO[]> {
+    const params = {
+      agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
+    };
+    return this.http.get<VehicleSummaryDTO[]>(`${this.baseUrl}/list`, { params });
+
+  }
 
   // Méthode pour récupérer les véhicules les plus proches avec leur distance
   getNearestVehiclesWithDistance(latitude: number, longitude: number, limit: number = 10): Observable<VehicleWithDistanceDTO[]> {
@@ -78,8 +77,5 @@ export class VehicleService {
     }
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
-
-
-
 
 }

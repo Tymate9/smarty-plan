@@ -1,0 +1,229 @@
+// import {Component, EventEmitter, Input, Output} from "@angular/core";
+//
+// @Component({
+//   selector: 'app-team-tree',
+//   template: `
+//     <ul>
+//       <ng-container *ngFor="let team of teamTree">
+//         <li>
+//           <input type="checkbox" [value]="team.label" (change)="onSelectTeam(team)">
+//           {{ team.label }}
+//           <app-team-tree *ngIf="team.children?.length" [teamTree]="team.children"
+//                          (selectedTeamsChange)="onSelectTeam($event)"></app-team-tree>
+//         </li>
+//       </ng-container>
+//     </ul>
+//   `
+// })
+// export class TeamTreeComponent {
+//   @Input() teamTree: any[] = [];
+//   @Output() selectedTeamsChange = new EventEmitter<string[]>();
+//
+//   private selectedTeams: string[] = [];
+//
+//   onSelectTeam(team: any) {
+//     const index = this.selectedTeams.indexOf(team.label);
+//     if (index === -1) {
+//       this.selectedTeams.push(team.label);
+//     } else {
+//       this.selectedTeams.splice(index, 1);
+//     }
+//     this.selectedTeamsChange.emit(this.selectedTeams);
+//   }
+// }
+//
+//
+
+
+import {Component, EventEmitter, Input, Output, SimpleChanges} from "@angular/core";
+
+export interface Option {
+  label: string;
+  children?: Option[];  // Nested structure for child options
+}
+@Component({
+  selector: 'app-team-tree',
+  template: `
+    <div class="search-autocomplete">
+      <div class="input-container">
+        <div class="tags">
+          <span *ngFor="let tag of selectedTags" class="tag">
+            {{ tag }} <button (click)="removeTag(tag)">x</button>
+          </span>
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            (input)="onSearch()"
+            placeholder="Filtrer {{ label }}..."
+            [ngStyle]="{'background-color': 'white'}"
+          />
+          <button class="dropdown-button" (click)="toggleDropdown()">&#9662;</button> <!-- Bouton pour afficher les options -->
+        </div>
+      </div>
+
+      <!-- Display a flat list or hierarchical list based on data structure -->
+      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
+        <ng-container *ngFor="let option of filteredOptions">
+          <li>
+            <div (click)="selectOption(option.label)" [class.selected]="isSelected(option.label)">
+              {{ option.label }}
+            </div>
+
+            <!-- Check if option has children, if so display them -->
+            <ul *ngIf="option.children && option.children.length > 0">
+              <ng-container *ngFor="let child of option.children">
+                <li>
+                  <div (click)="selectOption(child.label)" [class.selected]="isSelected(child.label)">
+                    {{ child.label }}
+                  </div>
+                  <ul *ngIf="child.children && child.children.length > 0">
+                    <ng-container *ngFor="let subChild of child.children">
+                      <li>
+                        <div (click)="selectOption(subChild.label)" [class.selected]="isSelected(subChild.label)">
+                          {{ subChild.label }}
+                        </div>
+                      </li>
+                    </ng-container>
+                  </ul>
+                </li>
+              </ng-container>
+            </ul>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+  `,
+  styles: [`
+    .search-autocomplete {
+      position: relative;
+      width: 300px;
+    }
+
+    .input-container {
+      border: 1px solid #ccc;
+      padding: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      background-color: white;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      flex-grow: 1;
+      background-color: white;
+    }
+
+    .tag {
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      padding: 5px;
+      margin-right: 5px;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-container input {
+      border: none;
+      outline: none;
+      flex-grow: 1;
+      min-width: 150px;
+      background-color: white;
+    }
+
+    .dropdown-button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 5px;
+    }
+
+    .autocomplete-list {
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .autocomplete-list li {
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .autocomplete-list li:hover {
+      background-color: #f0f0f0;
+    }
+  `]
+})
+export class TeamTreeComponent {
+  @Input() label: string = '';
+  @Input() options: Option[] = [];
+  //@Input() options: any[] = [];  // Allow any structure: flat or hierarchical
+  @Input() selectedItems: string[] = [];
+  @Output() selectedTagsChange = new EventEmitter<string[]>();  // Emit selected tags
+
+  searchText = '';
+  selectedTags: string[] = [];
+  filteredOptions: Option[] = [];
+  dropdownVisible: boolean = false;
+
+  // Filtrer les options et exclure celles déjà sélectionnées
+  onSearch() {
+    this.filterOptions();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedItems'] && changes['selectedItems'].currentValue !== this.selectedTags) {
+      this.selectedTags = [...this.selectedItems]; // Reset selectedTags from parent
+      this.filterOptions(); // Reapply filter to exclude selected items
+    }
+  }
+
+  filterOptions() {
+    if (this.searchText) {
+      this.filteredOptions = this.options.filter(option =>
+        option.label.toLowerCase().includes(this.searchText.toLowerCase()) &&
+        !this.selectedTags.includes(option.label)
+      );
+    } else {
+      this.filteredOptions = this.options.filter(option => !this.selectedTags.includes(option.label));
+    }
+  }
+
+  // Add selected option to tags
+  selectOption(option: string) {
+    if (!this.selectedTags.includes(option)) {
+      this.selectedTags.push(option);
+      this.selectedTagsChange.emit(this.selectedTags);  // Emit selected tags
+    }
+    this.searchText = '';
+    this.dropdownVisible = false;
+    this.filterOptions();
+  }
+
+  // Remove selected tag
+  removeTag(tag: string) {
+    this.selectedTags = this.selectedTags.filter(t => t !== tag);
+    this.selectedTagsChange.emit(this.selectedTags);  // Re-emit after removal
+    this.filterOptions();
+  }
+
+  // Toggle dropdown visibility
+  toggleDropdown() {
+    this.dropdownVisible = !this.dropdownVisible;
+    if (this.dropdownVisible) {
+      this.filterOptions();
+    }
+  }
+
+  // Check if option is selected
+  isSelected(option: string): boolean {
+    return this.selectedTags.includes(option);
+  }
+}

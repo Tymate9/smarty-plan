@@ -14,7 +14,6 @@ export class FilterService {
     drivers: []
   });
 
-
   // Observable pour suivre les changements
   filters$ = this.selectedFilters.asObservable();
 

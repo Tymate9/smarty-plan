@@ -2,6 +2,7 @@ package net.enovea.api.team
 
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
+import net.enovea.dto.TeamDTO
 import net.enovea.service.TeamService
 
 @Path("/api/teams")
@@ -9,8 +10,13 @@ import net.enovea.service.TeamService
 @Consumes(MediaType.APPLICATION_JSON)
 class TeamResource(private val teamService: TeamService) {
 
+//    @GET
+//    fun getAgencies(): List<String> {
+//        return teamService.getAllAgencies()
+//    }
+
     @GET
-    fun getAgencies(): List<String> {
+    fun getAgencies(): List<TeamDTO> {
         return teamService.getAllAgencies()
     }
 }

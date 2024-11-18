@@ -122,21 +122,8 @@ class VehicleService (
         return allVehicleDTOs
     }
 
-//    @Transactional
-//    fun getVehiclesList(): List<String> {
-//        val entityManager: EntityManager = Panache.getEntityManager()
-//        val query = entityManager.createQuery(
-//            """
-//            SELECT v.licenseplate
-//            FROM VehicleEntity v
-//            """.trimIndent(),
-//            String::class.java
-//        )
-//        return query.resultList
-//    }
-
     @Transactional
-    fun getVehiclesList(agencyIds: List<String>?): List<String> {
+    fun getVehiclesListOriginal(agencyIds: List<String>?): List<String> {
         val entityManager: EntityManager = Panache.getEntityManager()
 
         // Start the query
@@ -147,18 +134,38 @@ class VehicleService (
 
         // Extend the query only if agencyIds are provided
         val finalQuery = if (!agencyIds.isNullOrEmpty()) {
+//            baseQuery + """
+//            JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
+//            JOIN TeamEntity t ON vt.id.teamId = t.id
+//            WHERE vt.endDate IS NULL AND t.label IN :agencyIds
+//        """
+
+//            baseQuery + """
+//        JOIN v.VehicleTeamEntity vt
+//        JOIN vt.team t
+//        LEFT JOIN t.parentTeam parent_team
+//        WHERE vt.endDate IS NULL
+//        AND (
+//            t.label IN :agencyIds
+//            OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds)
+//        )
+//        """
+
             baseQuery + """
             JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
             JOIN TeamEntity t ON vt.id.teamId = t.id
-            WHERE vt.endDate IS NULL AND t.label IN :agencyIds
-        """
+            LEFT JOIN t.parentTeam parent_team
+                    WHERE vt.endDate IS NULL
+                    AND (t.label IN :agencyIds
+                    OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds)
+                    )
+            """
         } else {
             baseQuery
         }
 
 
         val typedQuery: TypedQuery<String> = entityManager.createQuery(finalQuery, String::class.java)
-
 
         if (!agencyIds.isNullOrEmpty()) {
             typedQuery.setParameter("agencyIds", agencyIds)
@@ -167,6 +174,39 @@ class VehicleService (
         // Execute the query and return the list of names
         return typedQuery.resultList
     }
+
+
+    @Transactional
+    fun getVehiclesList(agencyIds: List<String>?): List<VehicleSummaryDTO> {
+
+        val params = mutableMapOf<String, Any>()
+        // Start the query
+        var baseQuery = """
+        SELECT v
+        FROM VehicleEntity v
+    """
+
+        // Extend the query only if agencyIds are provided
+       if (!agencyIds.isNullOrEmpty()) {
+
+            baseQuery += """
+            JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
+            JOIN TeamEntity t ON vt.id.teamId = t.id
+            LEFT JOIN t.parentTeam parent_team
+                    WHERE vt.endDate IS NULL
+                    AND (t.label IN :agencyIds
+                    OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds)
+                    )
+            """
+           params["agencyIds"] = agencyIds
+        }
+
+
+        val panacheQuery = VehicleEntity.find(baseQuery, params)
+
+        return panacheQuery.list().map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
+    }
+
 
     //Function returns the list of vehicles based on the filters provided
     @Transactional
@@ -184,6 +224,7 @@ class VehicleService (
             FROM VehicleEntity v
             JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
             JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
+            LEFT JOIN t.parentTeam parent_team
             JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
             JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
             WHERE 1=1
@@ -193,14 +234,15 @@ class VehicleService (
 
         if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
 
-            query += " AND t.label IN :teamLabels" +
+            query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))"+
                     " AND (v.licenseplate IN :vehicleIds OR CONCAT(d.lastName, ' ', d.firstName) IN :driverNames)"
+
             params["teamLabels"] = teamLabels
             params["vehicleIds"] = vehicleIds
             params["driverNames"] = driverNames
         } else {
             if (!teamLabels.isNullOrEmpty()) {
-                query += " AND t.label IN :teamLabels"
+                query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))"
                 params["teamLabels"] = teamLabels
             }
             if (!vehicleIds.isNullOrEmpty()) {
@@ -217,31 +259,6 @@ class VehicleService (
 
         return panacheQuery.list()
     }
-
-//    @Transactional
-//    fun getVehiclesByAgencies(agencyIds: List<String>): List<String> {
-//        val entityManager: EntityManager = Panache.getEntityManager()
-//
-//
-//        val query: TypedQuery<String> = entityManager.createQuery(
-//            """
-//        SELECT v.licenseplate
-//        FROM VehicleEntity v
-//        JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
-//        JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
-//        WHERE vt.endDate IS NULL
-//        AND t.label IN :agencyIds
-//        """.trimIndent(),
-//            String::class.java
-//        )
-//        // Set the parameter for agency IDs
-//        query.setParameter("agencyIds", agencyIds)
-//
-//        return query.resultList
-//    }
-
-
-
 
 
 }

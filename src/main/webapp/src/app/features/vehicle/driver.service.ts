@@ -22,22 +22,4 @@ export class DriverService {
   }
 
 
-  // Fetch agencies from the backend
-  // getDrivers(): Observable<string[]> {
-  //   return this.http.get<string[]>(this.baseUrl);
-  // }
-  //
-  //
-  // // New method to get drivers by agency IDs
-  // getDriversByAgencies(agencyIds: string[]): Observable<string[]> {
-  //   const params ={
-  //     agencyIds: agencyIds.length ? agencyIds : []
-  //   }
-  //   return this.http.get<string[]>(`${this.baseUrl}/byAgencies`, { params });
-  //
-  // }
-
-
-
-
 }

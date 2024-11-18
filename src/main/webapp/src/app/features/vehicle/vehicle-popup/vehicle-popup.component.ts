@@ -40,7 +40,7 @@ import {EntityType} from "../../../core/cartography/MarkerFactory";
       <!-- Onglet POI -->
       <div *ngIf="activeTab === 'poi' && popUpConfig.isTabEnabled(entityType, 'poi')">
         <p>Liste des POIs les plus proches :</p>
-        <button (click)="showAllHighlightedMarkers()">Afficher tous les marqueurs mis en évidence</button>
+        <button (click)="showAllHighlightedMarkers()">Recentrer sur les POI Mis en surbrillance</button>
         <ul>
           <li *ngFor="let poi of nearbyPOIs">
             {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km

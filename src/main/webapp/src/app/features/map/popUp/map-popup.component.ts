@@ -38,7 +38,8 @@ import {GeoJSONGeometry} from "wellknown";
     </div>
 
     <div class="tab-content">
-      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }} / Adresse : {{ address }}</h4>
+      <h4>Adresse : {{ address }}</h4>
+      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
 
       <!-- Onglet Véhicule -->
       <div *ngIf="activeTab === 'vehicule'">

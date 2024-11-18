@@ -203,24 +203,27 @@ export class PoiPopupComponent implements OnInit {
   //TODO(améliorer la configuration des popUp)
   @Input() popUpConfig: PopUpConfig;
   entityType: EntityType = EntityType.POI;
-
   @Input() entity: dto.PointOfInterestEntity;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
 
   highlightedStates: { [markerId: string]: boolean } = {};
-
   activeTab: string = 'information';
-
   address: string = 'Chargement...';
-  updatedPoi: { label: string; radius: number };
+  updatedPoi: { label: string; /*radius: number*/ };
   categories: dto.PointOfInterestCategoryEntity[] = [];
 
   selectedCategoryId: number | null = null;
 
+  proximityVehicles: VehicleWithDistanceDTO[] = [];
+  loadingProximity: boolean = false;
+
+  dessusVehicles: dto.VehicleSummaryDTO[] = [];
+  loadingDessus: boolean = false;
+
   constructor(
     private readonly poiService: PoiService,
     private readonly vehicleService: VehicleService,
-    private router: Router
+    private readonly router: Router
   ) {}
 
   navigateToPoiEdit() {
@@ -238,26 +241,22 @@ export class PoiPopupComponent implements OnInit {
     if (tab === 'dessus' && this.dessusVehicles.length === 0 && !this.loadingDessus) {
       this.loadDessusVehicles();
     }
-
-    console.log("Me Saoule")
-    console.log(this.popUpConfig.isTabEnabled(this.entityType, 'information'))
-    console.log(this.popUpConfig)
   }
 
   ngOnInit() {
     this.poiService.getAddressFromCoordinates(this.entity.coordinate.coordinates[1],this.entity.coordinate.coordinates[0]).subscribe({
       next: (response) => {
-        this.address = response.adresse; // Assurez-vous que 'address' est la bonne clé
+        this.address = response.adresse;
       },
       error: () => this.address = 'Adresse non disponible',
     });
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {
       label: this.entity.label,
-      radius: 50, // Valeur par défaut si le calcul échoue
+      /*radius: 50,*/ // Valeur par défaut si le calcul échoue
     };
 
-    // Calculer le radius à partir de l'area
+/*    // Calculer le radius à partir de l'area
     if (this.entity.area && this.entity.area.coordinates && this.entity.area.coordinates[0]) {
       const center = turf.point([this.entity.coordinate.coordinates[0], this.entity.coordinate.coordinates[1]]);
       const edgePointCoord = this.entity.area.coordinates[0][0]; // Premier point du polygone
@@ -267,7 +266,7 @@ export class PoiPopupComponent implements OnInit {
     } else {
       // Si le calcul du radius échoue, utilisez une valeur par défaut
       this.updatedPoi.radius = 50;
-    }
+    }*/
 
     // Récupérer les catégories
     this.poiService.getAllPOICategory().subscribe({
@@ -306,7 +305,6 @@ export class PoiPopupComponent implements OnInit {
       alert('Veuillez sélectionner une catégorie pour le POI.');
       return;
     }
-
     // Vérifier que les coordonnées sont valides
     if (
       this.entity.coordinate.coordinates[0] === null ||
@@ -370,9 +368,6 @@ export class PoiPopupComponent implements OnInit {
     });
   }
 
-  proximityVehicles: VehicleWithDistanceDTO[] = [];
-  loadingProximity: boolean = false;
-
   loadProximityVehicles() {
     this.loadingProximity = true;
     const latitude = this.entity.coordinate.coordinates[1];
@@ -403,13 +398,12 @@ export class PoiPopupComponent implements OnInit {
     }
   }
 
-  dessusVehicles: dto.VehicleSummaryDTO[] = [];
-  loadingDessus: boolean = false;
-
   loadDessusVehicles() {
     this.loadingDessus = true;
     // Convertir le polygone en WKT
+/*
     const polygon = turf.polygon(this.entity.area.coordinates);
+*/
     const wkt = this.convertToWktPolygon(this.entity.area.coordinates);
 
     this.vehicleService.getVehicleInPolygon(wkt).subscribe({
@@ -455,10 +449,10 @@ export class PoiPopupComponent implements OnInit {
     return this.highlightedStates[markerId] || false;
   }
 
-  generateWKTPolygon(longitude: number, latitude: number, radius: number, sides: number = 16): string {
+/*  generateWKTPolygon(longitude: number, latitude: number, radius: number, sides: number = 16): string {
     const point = turf.point([longitude, latitude]);
     const buffered = turf.buffer(point, radius, { units: 'meters' });
     return wellknown.stringify(buffered!.geometry as GeoJSONGeometry);
-  }
+  }*/
 
 }

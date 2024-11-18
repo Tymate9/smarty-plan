@@ -15,7 +15,7 @@ import * as wellknown from 'wellknown'
 import {GeoJSONGeometry} from "wellknown";
 import {GeoUtils} from "./geo-utils";
 import { PopUpConfig } from 'src/app/pop-up-config';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 
 
 export class PoiPanel {
@@ -408,7 +408,9 @@ export class PoiManagerComponent implements OnInit {
   newPoiLatitude: number | null = null;
   newPoiLongitude: number | null = null;
   mapManager: MapManager;
-  private temporaryPoiId = -1;
+  temporaryPoiId = -1;
+  drawControl: L.Control.Draw = new L.Control.Draw();
+  currentPoiPanel: PoiPanel | null = null;
 
   constructor(
     private readonly poiService: PoiService,
@@ -416,10 +418,6 @@ export class PoiManagerComponent implements OnInit {
     private readonly viewContainerRef: ViewContainerRef,
     private readonly route: ActivatedRoute
   ) {}
-
-  // WorkInProgress
-  drawControl: L.Control.Draw = new L.Control.Draw();
-  currentPoiPanel: PoiPanel | null = null;
 
   // Methods Related to Map Initialization and Control
   ngOnInit() {
@@ -433,23 +431,16 @@ export class PoiManagerComponent implements OnInit {
               this.onPoiSelected(poi)
             }
           );
-          this.showSuggestions = this.filteredPois.length > 0;
         });
-        // Vous pouvez ajouter ici une logique supplémentaire pour charger ou éditer le POI basé sur cet ID
       } else {
-        console.log('Aucun ID POI transmis dans l\'URL.');
+        console.log('Aucun Label de POI transmis dans l\'URL.');
       }
     });
     // Coordonnées approximatives du centre de la Normandie
     const normandyCenter: L.LatLngExpression = [49.1817, 0.3714];
-    const zoomLevel = 9;
-
     // Initialiser la carte
-    this.map = L.map('map', {
-      center: normandyCenter,
-      zoom: zoomLevel,
-    });
-
+    this.map = L.map('map', {attributionControl: false}).setView(normandyCenter, 8);
+    this.map.setMaxZoom(19);
     // Ajouter une couche de tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
@@ -491,7 +482,6 @@ export class PoiManagerComponent implements OnInit {
   // Methods Related to Drawing Controls on the Map
   startPolygonDrawing(poiPanel: PoiPanel) {
     this.currentPoiPanel = poiPanel;
-
     this.drawControl.setDrawingOptions({
       polygon: {
         shapeOptions: {
@@ -504,14 +494,12 @@ export class PoiManagerComponent implements OnInit {
       marker: false,
       polyline: false,
     });
-
     this.drawControl.addTo(this.map);
     this.addDrawControlMessage(`Cliquez ici pour commencer le dessin du polygone du POI ${poiPanel.poi.label}`);
   }
 
   startCircleDrawing(poiPanel: PoiPanel) {
     this.currentPoiPanel = poiPanel;
-
     this.drawControl.setDrawingOptions({
       circle: {
         shapeOptions: {
@@ -525,9 +513,8 @@ export class PoiManagerComponent implements OnInit {
       marker: false,
       polyline: false,
     });
-
     this.drawControl.addTo(this.map);
-    this.addDrawControlMessage('Cliquez ici pour commencer le dessin du cercle');
+    this.addDrawControlMessage(`Cliquez ici pour commencer le dessin du polygone du POI ${poiPanel.poi.label}`);
   }
 
   onDrawCreated(e: any) {
@@ -605,7 +592,6 @@ export class PoiManagerComponent implements OnInit {
   removeDrawControlMessage() {
     const drawControlContainer = this.drawControl.getContainer();
     if (!drawControlContainer) return;
-
     const messageDiv = drawControlContainer.querySelector('.draw-control-message') as HTMLElement;
     if (messageDiv) {
       messageDiv.remove();
@@ -623,7 +609,6 @@ export class PoiManagerComponent implements OnInit {
       },
     };
     this.mapManager.handleLayerEvent(removeEvent, null);
-
     // Ajouter le nouveau marqueur
     this.addMarkerToMap(poi);
   }
@@ -696,13 +681,10 @@ export class PoiManagerComponent implements OnInit {
         this.mapManager.handleLayerEvent(event, null);
       }
     );
-
     // Réinitialiser le champ de recherche
     this.searchQuery = '';
-
     // Fermer la liste des suggestions
     this.showSuggestions = false;
-
     // Réinitialiser les résultats filtrés
     this.filteredPois = [];
   }
@@ -760,12 +742,10 @@ export class PoiManagerComponent implements OnInit {
   createPoi(label: string, address: string | null, latitude: number, longitude: number, isTemporary: boolean = true) {
     // Assigner une copie de la catégorie par défaut
     const defaultCategory = { ...this.poiCategories[0] };
-
     // Créer un cercle Leaflet temporaire pour générer le polygone
     const circle = L.circle([latitude, longitude], { radius: 50 }); // Rayon de 50 mètres
     const polygon = GeoUtils.convertCircleToPolygon(circle, 32); // Utiliser 32 côtés pour un cercle plus lisse
     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-
     // Créer le nouvel objet POI avec un polygone valide
     const newPoi: PointOfInterestEntity = {
       id: isTemporary ? this.temporaryPoiId-- : -1,
@@ -777,12 +757,9 @@ export class PoiManagerComponent implements OnInit {
       },
       area: geoJsonPolygon, // Assignation du polygone valide
     };
-
-
     // Créer et ajouter le PoiPanel
     const poiPanel = new PoiPanel(newPoi, true, address || 'Adresse inconnue');
     this.poiPanels.push(poiPanel);
-
     // Ajouter le marqueur à la carte
     this.addMarkerToMap(newPoi);
     // Réinitialiser les champs du formulaire
@@ -812,9 +789,7 @@ export class PoiManagerComponent implements OnInit {
   }
 
   onCategoryChange(categoryId: number, poiPanel: PoiPanel) {
-
     const selectedCategory = this.poiCategories.find(cat => cat.id === categoryId);
-
     if (selectedCategory) {
       // Assigner une copie de la catégorie pour éviter la mutation de poiCategories
       poiPanel.poi.category = { ...selectedCategory };
@@ -825,7 +800,6 @@ export class PoiManagerComponent implements OnInit {
 
   removePanel(poiPanel: PoiPanel) {
     this.poiPanels = this.poiPanels.filter((panel) => panel !== poiPanel);
-
     const event: LayerEvent = {
       type: LayerEventType.RemoveMarker,
       payload: {
@@ -834,7 +808,6 @@ export class PoiManagerComponent implements OnInit {
       },
     };
     this.mapManager.handleLayerEvent(event, null);
-
     // Rechercher à nouveau si le champ de recherche n'est pas vide
     if (this.searchQuery.trim().length >= 2) {
       this.onSearchChange();
@@ -843,18 +816,15 @@ export class PoiManagerComponent implements OnInit {
 
   onSubmit(poiPanel: PoiPanel) {
     const poi = poiPanel.poi;
-
     // Initialiser les coordonnées à partir des valeurs modifiées
     let longitude: number;
     let latitude: number;
-
     if (poiPanel.inputType === 'adresse' && poiPanel.modifiedAddress && poiPanel.modifiedAddress.trim() !== '') {
       // Géocoder l'adresse pour obtenir les coordonnées
       this.geocodingService.geocodeAddress(poiPanel.modifiedAddress).subscribe(
         (result) => {
           latitude = result.latitude;
           longitude = result.longitude;
-
           // Procéder à la création ou mise à jour du POI
           this.createOrUpdatePoi(poiPanel, poi, longitude, latitude);
         },
@@ -867,7 +837,6 @@ export class PoiManagerComponent implements OnInit {
       // Utiliser les coordonnées modifiées
       latitude = poiPanel.modifiedLatitude!;
       longitude = poiPanel.modifiedLongitude!;
-
       // Procéder à la création ou mise à jour du POI
       this.createOrUpdatePoi(poiPanel, poi, longitude, latitude);
     } else {
@@ -875,8 +844,8 @@ export class PoiManagerComponent implements OnInit {
     }
   }
 
-  private createOrUpdatePoi(poiPanel: PoiPanel, poi: PointOfInterestEntity, longitude: number, latitude: number) {
-    // Convertir poi.coordinate en chaîne WKT
+  createOrUpdatePoi(poiPanel: PoiPanel, poi: PointOfInterestEntity, longitude: number, latitude: number) {
+    // Convertir La nouvelle latitude et longitude en un wkt string
     const wktPoint = wellknown.stringify({type: 'Point', coordinates: [longitude, latitude]} as GeoJSONGeometry);
     if (!wktPoint) {
       alert('Erreur lors de la conversion des coordonnées en WKT.');
@@ -913,6 +882,7 @@ export class PoiManagerComponent implements OnInit {
           // Mettre à jour le marqueur sur la carte
           this.updateMarkerOnMap(poi, oldMarkerId);
           poiPanel.isModified = false;
+          alert("POI ajouté à la base de donnée.")
         },
         (error) => {
           console.error('Erreur lors de la création du POI :', error);
@@ -938,6 +908,7 @@ export class PoiManagerComponent implements OnInit {
                 // Réinitialiser les valeurs modifiées
                 poiPanel.resetModifiedValues();
                 poiPanel.isModified = false;
+                alert("Modification sauvegardé.")
               },
               (error) => {
                 console.error('Erreur lors du géocodage inverse :', error);
@@ -953,6 +924,7 @@ export class PoiManagerComponent implements OnInit {
             // Réinitialiser les valeurs modifiées
             poiPanel.resetModifiedValues();
             poiPanel.isModified = false;
+            alert("Modification sauvegardé.")
           }
         },
         (error) => {
@@ -997,6 +969,7 @@ export class PoiManagerComponent implements OnInit {
             },
           };
           this.mapManager.handleLayerEvent(event, null);
+          alert("POI supprimé.")
         },
         (error) => {
           console.error('Erreur lors de la suppression du POI :', error);
@@ -1015,6 +988,8 @@ export class PoiManagerComponent implements OnInit {
         },
       };
       this.mapManager.handleLayerEvent(event, null);
+      alert("Création du POI annulé.")
     }
   }
+
 }

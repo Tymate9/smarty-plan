@@ -160,7 +160,7 @@ create table device
     last_data_date          timestamp,
     comment                 text,
     last_communication_date timestamp,
-    active                  boolean default true NOT NULL,
+    enabled                  boolean default true NOT NULL,
     coordinate              GEOGRAPHY(Point, 4326) NOT NULL
 );
 
@@ -240,4 +240,20 @@ CREATE TABLE driver_untracked_period (
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP,
     primary key (driver_id, start_date)
+);
+
+-- ===================================================
+-- ==            Device state table
+-- ===================================================
+
+CREATE TABLE IF NOT EXISTS device_data_state
+(
+    device_id INTEGER PRIMARY KEY,
+    state  VARCHAR(128) NULL,
+    first_comm_time TIMESTAMP WITH TIME ZONE NULL,
+    last_comm_time TIMESTAMP WITH TIME ZONE NULL,
+    last_received_data_time TIMESTAMP WITH TIME ZONE NULL,
+    last_position GEOMETRY NULL,
+    last_position_time TIMESTAMP WITH TIME ZONE NULL,
+    FOREIGN KEY (device_id) REFERENCES device(id)
 );

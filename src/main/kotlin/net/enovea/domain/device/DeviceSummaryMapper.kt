@@ -11,7 +11,7 @@ interface DeviceSummaryMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "lastCommunicationDate", source = "lastCommunicationDate")
-    @Mapping(target = "active", source = "active")
+    @Mapping(target = "enabled", source = "enabled")
     @Mapping(target = "coordinate", source = "coordinate")
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
 

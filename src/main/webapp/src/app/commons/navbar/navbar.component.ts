@@ -108,9 +108,11 @@ export class NavbarComponent implements OnInit {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
-  // stagingVariable : https://smartyplan.staging.nm.enovea.org/
   logout() {
+  this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
+  }
+/*  logout() {
     this.keycloakService.logout("http://localhost:8080/")
 
-  }
+  }*/
 }

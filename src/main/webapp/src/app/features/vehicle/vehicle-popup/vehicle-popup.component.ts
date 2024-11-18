@@ -44,7 +44,7 @@ import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
           <button (click)="showAllHighlightedMarkers()">Recentrer sur les POI Mis en surbrillance</button>
           <ul>
             <li *ngFor="let poi of nearbyPOIs">
-              {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
+              <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
               <button type="button" (click)="centerMapOnPOI(poi.poi)">Centrer sur ce POI</button>
               <button
                 (click)="toggleHighlightMarker('poi-' + poi.poi.id)"

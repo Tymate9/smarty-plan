@@ -42,7 +42,7 @@ export class MapComponent implements OnInit {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 8);
+    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
     //Todo(Ajouter au mapmgm)

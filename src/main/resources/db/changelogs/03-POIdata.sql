@@ -1,6 +1,6 @@
 -- Insertion des catégories dans point_of_interest_category
 INSERT INTO point_of_interest_category (label, color)
-VALUES ('Bureau', '#FF5733'),
+VALUES ('Agence NM', '#FF5733'),
        ('Domicile', '#33FF57'),
        ('Fournisseur', '#3357FF'),
        ('Chantier', '#FF33A8'),
@@ -15,23 +15,23 @@ VALUES ('Bureau', '#FF5733'),
 
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
-VALUES ('Bureau HYDRECO',
+VALUES ('Agence NM HYDRECO',
         1,
         ST_SetSRID(ST_MakePoint(-0.7307, 49.2694), 4326),
         ST_Buffer(ST_SetSRID(ST_MakePoint(-0.7307,49.2694 ), 4326)::geography, 50)),
-       ('Bureau ID MARKET',
+       ('Agence NM ID MARKET',
         1,
         ST_SetSRID(ST_MakePoint(-0.302, 49.1359), 4326),
         ST_Buffer(ST_SetSRID(ST_MakePoint(-0.302,49.1359), 4326)::geography, 60)),
-       ('Bureau GIFI',
+       ('Agence NM GIFI',
         1,
         ST_SetSRID(ST_MakePoint(-0.6903,49.283 ), 4326),
         ST_Buffer(ST_SetSRID(ST_MakePoint(-0.6903,49.283 ), 4326)::geography, 70)),
-       ('Bureau SAINT ETIENNE',
+       ('Agence NM SAINT ETIENNE',
         1,
         ST_SetSRID(ST_MakePoint(1.0936, 49.369), 4326),
         ST_Buffer(ST_SetSRID(ST_MakePoint(1.0936,49.369), 4326)::geography, 80)),
-       ('Bureau LE HAVRE',
+       ('Agence NM LE HAVRE',
         1,
         ST_SetSRID(ST_MakePoint(0.3551,49.5401 ), 4326),
         ST_Buffer(ST_SetSRID(ST_MakePoint(0.3551,49.5401), 4326)::geography, 90));

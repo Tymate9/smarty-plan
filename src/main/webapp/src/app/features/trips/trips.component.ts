@@ -54,7 +54,7 @@ import TripDTO = dto.TripDTO;
 })
 export class TripsComponent implements OnInit {
   @Input()
-  vehicleId = '1'; // Exemple d'ID de véhicule, remplacer par la logique réelle pour obtenir l'ID du véhicule
+  vehicleId = '1';
   trips: TripDTO[] = [];
 
   constructor(private tripsService: TripsService) {}

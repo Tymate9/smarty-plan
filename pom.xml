@@ -329,6 +329,7 @@
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
                         <pattern>net.enovea.api.*.*Entity</pattern>
+                        <pattern>net.enovea.api.*.*DTO</pattern>
                         <pattern>net.enovea.dto.*DTO</pattern>
                     </classPatterns>
                     <customTypeMappings>
@@ -490,44 +491,6 @@
                         <option>all-open:annotation=jakarta.persistence.Entity</option>
                         <option>all-open:annotation=io.quarkus.test.junit.QuarkusTest</option>
                     </pluginOptions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>cz.habarta.typescript-generator</groupId>
-                <artifactId>typescript-generator-maven-plugin</artifactId>
-                <version>3.2.1263</version>
-                <executions>
-                    <execution>
-                        <id>generate</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jsonLibrary>jackson2</jsonLibrary>
-                    <classPatterns>
-                        <pattern>net.enovea.api.*.*Entity</pattern>
-                        <pattern>net.enovea.api.*.*DTO</pattern>
-                        <pattern>net.enovea.dto.*DTO</pattern>
-                    </classPatterns>
-                    <customTypeMappings>
-                        <mapping>org.locationtech.jts.geom.Point:custom.GeoPoint</mapping>
-                        <mapping>org.locationtech.jts.geom.Polygon:custom.GeoPolygon</mapping>
-                    </customTypeMappings>
-                    <importDeclarations>
-                        <import>import * as custom from "../habarta/custom"</import>
-                    </importDeclarations>
-                    <outputKind>module</outputKind>
-                    <outputFile>src/main/webapp/src/habarta/dto.ts</outputFile>
-                    <namespace>dto</namespace>
-                    <nullabilityDefinition>nullInlineUnion</nullabilityDefinition>
-                    <optionalPropertiesDeclaration>questionMarkAndNullableType</optionalPropertiesDeclaration>
-                    <mapClasses>asClasses</mapClasses>
-                    <outputFileType>implementationFile</outputFileType>
-                    <mapEnum>asEnum</mapEnum>
-                    <nonConstEnums>true</nonConstEnums>
                 </configuration>
             </plugin>
             <plugin>

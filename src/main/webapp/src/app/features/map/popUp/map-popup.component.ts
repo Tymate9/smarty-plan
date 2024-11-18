@@ -1,11 +1,11 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import * as turf from '@turf/turf';
 import * as wellknown from 'wellknown'
-import {PointOfInterestForm, PoiService, PoiWithDistance} from "../../poi/poi.service";
+import {PointOfInterestForm, PoiService} from "../../poi/poi.service";
 import {dto} from "../../../../habarta/dto";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
-import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import {GeoJSONGeometry} from "wellknown";
 
 @Component({
@@ -111,24 +111,16 @@ import {GeoJSONGeometry} from "wellknown";
     </div>
   `,
   styles: [`
-    /* Styles pour les boutons toggle */
     .active {
       background-color: #007bff;
       color: white;
     }
   `]
 })
-export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
-  constructor(
-    private poiService: PoiService,
-    private vehicleService: VehicleService
-  ) {}
-
+export class MapPopupComponent implements OnInit {
   @Input() latitude!: number;
   @Input() longitude!: number;
-
   @Output() layerEvent = new EventEmitter<LayerEvent>();
-
 
 
   address: string = 'Chargement...';
@@ -141,9 +133,13 @@ export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
   loadingVehicles: boolean = false;
   nearbyPOIs: any[] = [];
   loadingPOIs: boolean = false;
-
   // Gestion des états de surbrillance des marqueurs
   highlightedStates: { [markerId: string]: boolean } = {};
+
+  constructor(
+    private poiService: PoiService,
+    private vehicleService: VehicleService
+  ) {}
 
   ngOnInit() {
     this.poiService.getAddressFromCoordinates(this.latitude, this.longitude).subscribe({
@@ -168,10 +164,6 @@ export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
 
     this.selectTab('vehicule');
   }
-
-/*  ngOnDestroy() {
-    this.layerEvent.emit({ type: LayerEventType.PopupClosed });
-  }*/
 
   onRadiusChange(newRadius: number) {
     this.layerEvent.emit({
@@ -199,31 +191,24 @@ export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
       alert("Veuillez sélectionner une catégorie pour le POI.");
       return;
     }
-
     // Vérifier que les coordonnées sont valides
     if (this.longitude === null || this.latitude === null || isNaN(this.longitude) || isNaN(this.latitude)) {
       alert("Veuillez fournir des coordonnées valides pour le POI.");
       return;
     }
-
     // Générer le WKTPoint
     const wktPoint = `POINT(${this.longitude} ${this.latitude})`;
-
     // Créer un objet GeoJSON pour le point
     const pointGeoJSON = turf.point([this.longitude, this.latitude]);
-
     // Créer un buffer de 50 mètres autour du point pour générer un polygone approximant un cercle
     const buffered = turf.buffer(pointGeoJSON, this.poiRadius, { units: 'meters' });
-
     // Convertir le GeoJSON du polygone en chaîne WKT
     const wktPolygon = wellknown.stringify(buffered!.geometry as GeoJSONGeometry);
-
     // Vérifier que la conversion a réussi
     if (!wktPolygon) {
       alert("Erreur lors de la génération du polygone.");
       return;
     }
-
     // Construire l'objet poiData avec WKTPoint et WKTPolygon
     const poiData: PointOfInterestForm = {
       label: this.poiName,
@@ -231,7 +216,6 @@ export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
       WKTPoint: wktPoint,
       WKTPolygon: wktPolygon
     };
-
     // Appeler le service pour créer le POI
     this.poiService.createPOI(poiData).subscribe({
       next: (response) => {
@@ -253,15 +237,12 @@ export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
   selectTab(tab: string) {
     this.onButtonClick();
     this.activeTab = tab;
-
     if (tab === 'vehicule' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
       this.loadNearbyVehicles();
     }
-
     if (tab === 'poi' && this.nearbyPOIs.length === 0 && !this.loadingPOIs) {
       this.loadNearbyPOIs();
     }
-
     if (tab === 'creation') {
       this.addPOI();
     }
@@ -287,7 +268,6 @@ export class MapPopupComponent implements OnInit/*, OnDestroy*/ {
     this.poiService.getNearestPOIsWithDistance(this.latitude, this.longitude, 3).subscribe({
       next: (pois) => {
         this.nearbyPOIs = pois;
-        console.log(pois)
         this.loadingPOIs = false;
       },
       error: (error) => {

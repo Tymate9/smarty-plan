@@ -1,66 +1,113 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import {PoiService} from "../../poi/poi.service";
 import {dto} from "../../../../habarta/dto";
-import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
-import {PopUpConfig} from "../../../pop-up-config";
-import {EntityType} from "../../../core/cartography/MarkerFactory";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
+import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
+import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 
 @Component({
   selector: 'app-vehicle-popup',
   template: `
-    <div class="tabs">
-      <button
-        *ngIf="popUpConfig.isTabEnabled(entityType, 'information')"
-        [class.active]="activeTab === 'information'"
-        (click)="selectTab('information')"
-      >
-        Information
-      </button>
-      <button
-        *ngIf="popUpConfig.isTabEnabled(entityType, 'poi')"
-        [class.active]="activeTab === 'poi'"
-        (click)="selectTab('poi')"
-      >
-        POI
-      </button>
-    </div>
-
-    <div class="tab-content">
-      <!-- Onglet Information -->
-      <div *ngIf="activeTab === 'information' && popUpConfig.isTabEnabled(entityType, 'information')">
-        <h4>{{ entity.licenseplate }}</h4>
-        <p>
-          <strong>Conducteur:</strong> {{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}
-        </p>
-        <p><strong>Équipe:</strong> {{ entity.team.label }}</p>
-        <p><strong>Catégorie:</strong> {{ entity.category.label }}</p>
-        <p><strong>Dernière communication:</strong> {{ entity.device.lastCommunicationDate | date:'short' }}</p>
+    <div class="vehicle-popup">
+      <div class="tabs">
+        <button
+          *ngIf="popUpConfig.isTabEnabled(entityType, 'information')"
+          [class.active]="activeTab === 'information'"
+          (click)="selectTab('information')"
+        >
+          Information
+        </button>
+        <button
+          *ngIf="popUpConfig.isTabEnabled(entityType, 'poi')"
+          [class.active]="activeTab === 'poi'"
+          (click)="selectTab('poi')"
+        >
+          POI
+        </button>
       </div>
 
-      <!-- Onglet POI -->
-      <div *ngIf="activeTab === 'poi' && popUpConfig.isTabEnabled(entityType, 'poi')">
-        <p>Liste des POIs les plus proches :</p>
-        <button (click)="showAllHighlightedMarkers()">Recentrer sur les POI Mis en surbrillance</button>
-        <ul>
-          <li *ngFor="let poi of nearbyPOIs">
-            {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
-            <button type="button" (click)="centerMapOnPOI(poi.poi)">Centrer sur ce POI</button>
-            <button
-              (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
-              [class.active]="isMarkerHighlighted('poi-' + poi.poi.id)"
-            >
-              {{ isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
-            </button>
-          </li>
-        </ul>
+      <div class="tab-content">
+        <!-- Onglet Information -->
+        <div *ngIf="activeTab === 'information' && popUpConfig.isTabEnabled(entityType, 'information')">
+          <h4>{{ entity.licenseplate }}</h4>
+          <p>
+            <strong>Conducteur:</strong> {{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}
+          </p>
+          <p><strong>Équipe:</strong> {{ entity.team.label }}</p>
+          <p><strong>Catégorie:</strong> {{ entity.category.label }}</p>
+          <p><strong>Dernière communication:</strong> {{ entity.device.lastCommunicationDate | date:'short' }}</p>
+        </div>
+
+        <!-- Onglet POI -->
+        <div *ngIf="activeTab === 'poi' && popUpConfig.isTabEnabled(entityType, 'poi')">
+          <p>Liste des POIs les plus proches :</p>
+          <button (click)="showAllHighlightedMarkers()">Recentrer sur les POI Mis en surbrillance</button>
+          <ul>
+            <li *ngFor="let poi of nearbyPOIs">
+              {{ poi.poi.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
+              <button type="button" (click)="centerMapOnPOI(poi.poi)">Centrer sur ce POI</button>
+              <button
+                (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
+                [class.active]="isMarkerHighlighted('poi-' + poi.poi.id)"
+              >
+                {{ isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
+
   `,
   styles: [`
-    /* Styles pour les boutons toggle */
     .active {
       background-color: #007bff;
       color: white;
+    }
+    .vehicle-popup {
+      width: 300px;
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 10px;
+      cursor: pointer;
+      background-color: #f1f1f1;
+      border: none;
+      outline: none;
+      transition: background-color 0.3s;
+    }
+    .tabs button:not(:last-child) {
+      border-right: 1px solid #ccc;
+    }
+    .tabs button.active {
+      background-color: #ccc;
+      font-weight: bold;
+    }
+    .tabs button:hover {
+      background-color: #ddd;
+    }
+    .tab-content {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 5px;
     }
   `]
 })
@@ -68,12 +115,9 @@ export class VehiclePopupComponent implements OnInit {
   //TODO(retravailler sur le système de config)
   @Input() popUpConfig: PopUpConfig;
   entityType: EntityType = EntityType.VEHICLE;
-
   @Input() entity: dto.VehicleSummaryDTO;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
-
   nearbyPOIs: any[] = [];
-
   activeTab: string = 'information'; // Onglet par défaut
   highlightedStates: { [markerId: string]: boolean } = {};
 
@@ -93,12 +137,10 @@ export class VehiclePopupComponent implements OnInit {
   toggleHighlightMarker(markerId: string) {
     // Basculer l'état de surbrillance
     this.highlightedStates[markerId] = !this.highlightedStates[markerId];
-
     // Déterminer le type d'événement en fonction de l'état
     const eventType = this.highlightedStates[markerId]
       ? LayerEventType.HighlightMarker
       : LayerEventType.RemoveHighlightMarker;
-
     // Émettre l'événement
     this.layerEvent.emit({
       type: eventType,
@@ -116,11 +158,9 @@ export class VehiclePopupComponent implements OnInit {
 
   selectTab(tab: string) {
     this.activeTab = tab;
-
     if (tab === 'information') {
       // Aucune action supplémentaire nécessaire pour l'onglet Information
     }
-
     if (tab === 'poi' && this.nearbyPOIs.length === 0) {
       this.loadNearbyPOIs();
     }
@@ -129,7 +169,6 @@ export class VehiclePopupComponent implements OnInit {
   loadNearbyPOIs() {
     const latitude = this.entity.device.coordinate?.coordinates[1] ?? 0.0;
     const longitude = this.entity.device.coordinate?.coordinates[0] ?? 0.0;
-
     this.poiService.getNearestPOIsWithDistance(latitude, longitude, 3).subscribe({
       next: (response) => {
         this.nearbyPOIs = response.map((pair: any) => {

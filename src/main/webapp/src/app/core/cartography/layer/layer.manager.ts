@@ -1,11 +1,11 @@
-import {CustomMarker, CustomMarkerImpl, EntityType, MarkerFactory} from "../MarkerFactory";
+import {CustomMarker, CustomMarkerImpl, EntityType, MarkerFactory} from "../marker/MarkerFactory";
 import {Subject} from "rxjs";
 import {LayerEvent, LayerEventType} from "./layer.event"
 import * as L from "leaflet";
 import {Type, ViewContainerRef} from "@angular/core";
 import {PoiPopupComponent} from "../../../features/poi/poi-popup/poi-popup.component";
 import {VehiclePopupComponent} from "../../../features/vehicle/vehicle-popup/vehicle-popup.component";
-import {PopUpConfig} from "../../../pop-up-config";
+import {PopUpConfig} from "../marker/pop-up-config";
 
 export class LayerManager {
   readonly markersMap: Map<string, CustomMarker> = new Map();
@@ -13,7 +13,6 @@ export class LayerManager {
   private readonly clusterGroup: L.MarkerClusterGroup;
   private readonly unclusteredGroup: L.FeatureGroup;
   private readonly layerEvent: Subject<LayerEvent> = new Subject<LayerEvent>();
-
   // Observable pour le MapManager
   public layerEvent$ = this.layerEvent.asObservable();
 
@@ -50,8 +49,6 @@ export class LayerManager {
 
     this.clusterGroup.on('popupopen', (e: L.PopupEvent) => {
       const marker = e.propagatedFrom as CustomMarker;
-      console.log("je suis juste avant la récupération de ce truc de e")
-      console.log(marker)
       this.onPopupOpen(marker);
     });
 
@@ -61,7 +58,6 @@ export class LayerManager {
     });
 
     this.unclusteredGroup.on('popupclose', (e: L.PopupEvent) => {
-      console.log("Je suis dans le unClustered popupclose")
       const marker = e.propagatedFrom as CustomMarker;
       this.onPopupClose(marker);
     });
@@ -137,10 +133,8 @@ export class LayerManager {
   addMarker(entity: any, popUpConfig?: PopUpConfig): void {
     const marker = MarkerFactory.createMarker(this.entityType, entity);
     if (marker) {
-      console.log(popUpConfig)
       if(popUpConfig)
       {
-        console.log("je modifie le popUpConfig au sein du layer")
         marker.popUpConfig = popUpConfig
       }
       this.markersMap.set(marker.id, marker);
@@ -158,9 +152,6 @@ export class LayerManager {
     } else if (this.entityType === EntityType.VEHICLE) {
       this.bindTooltip(marker, `${entity.licenseplate} - ${entity.driver ? entity.driver.firstName + ' ' + entity.driver.lastName : 'Aucun conducteur'}`);
     }
-
-    console.log("Je suis juste avant l'ajout du marker")
-    console.log(marker)
     // Ajouter le marqueur au cluster group
     this.clusterGroup.addLayer(marker);
   }
@@ -195,13 +186,15 @@ export class LayerManager {
 
   // Méthodes pour gérer les événements des popups
   private onPOIDeleted(marker: CustomMarker): void {
-    if (marker.areaPolygon) {
+/*    if (marker.areaPolygon) {
       this.map.removeLayer(marker.areaPolygon);
       marker.areaPolygon = undefined;
-    }
-    this.clusterGroup.removeLayer(marker);
-    this.markersMap.delete(marker.id);
+    }*/
+/*    this.clusterGroup.removeLayer(marker);
+    this.map.removeLayer(marker)*/
+/*    this.markersMap.delete(marker.id);*/
     this.map.closePopup();
+    this.removeMarker(marker.id)
   }
 
   // Méthode pour mettre à jour un marqueur génériquement

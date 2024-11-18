@@ -5,16 +5,16 @@ import {PointOfInterestForm, PoiService} from "../poi.service";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import * as L from 'leaflet';
 import 'leaflet-draw';
-import {GeocodingService} from "../../../commons/GeoCode/geo-coding.service";
+import {GeocodingService} from "../../../commons/geo/geo-coding.service";
 import {Subject} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
-import {MapManager, MapManagerConfig} from "../../../core/cartography/map.manager";
-import {EntityType} from "../../../core/cartography/MarkerFactory";
-import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
+import {MapManager, MapManagerConfig} from "../../../core/cartography/map/map.manager";
+import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import * as wellknown from 'wellknown'
 import {GeoJSONGeometry} from "wellknown";
-import {GeoUtils} from "./geo-utils";
-import { PopUpConfig } from 'src/app/pop-up-config';
+import {GeoUtils} from "../../../commons/geo/geo-utils";
+import { PopUpConfig } from 'src/app/core/cartography/marker/pop-up-config';
 import {ActivatedRoute} from '@angular/router';
 
 
@@ -447,7 +447,6 @@ export class PoiManagerComponent implements OnInit {
     }).addTo(this.map);
 
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geocodingService, new MapManagerConfig(false));
-
     // Charger les catégories de POI au démarrage
     this.poiService.getAllPOICategory().subscribe(
       (categories) => {
@@ -457,11 +456,9 @@ export class PoiManagerComponent implements OnInit {
         console.error('Erreur lors du chargement des catégories de POI:', error);
       }
     );
-
     this.searchSubject.pipe(debounceTime(300)).subscribe((query) => {
       this.performSearch(query);
     });
-
     this.initializeDrawControls();
   }
 

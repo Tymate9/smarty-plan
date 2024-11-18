@@ -1,11 +1,11 @@
 import * as L from 'leaflet';
 import {ComponentRef, Injectable, ViewContainerRef} from '@angular/core';
-import {PoiService} from "../../features/poi/poi.service";
-import {PoiPopupComponent} from "../../features/poi/poi-popup/poi-popup.component";
-import {VehiclePopupComponent} from "../../features/vehicle/vehicle-popup/vehicle-popup.component";
-import {dto} from "../../../habarta/dto";
-import {VehicleService} from "../../features/vehicle/vehicle.service";
-import {PopUpConfig} from "../../pop-up-config";
+import {PoiService} from "../../../features/poi/poi.service";
+import {PoiPopupComponent} from "../../../features/poi/poi-popup/poi-popup.component";
+import {VehiclePopupComponent} from "../../../features/vehicle/vehicle-popup/vehicle-popup.component";
+import {dto} from "../../../../habarta/dto";
+import {VehicleService} from "../../../features/vehicle/vehicle.service";
+import {PopUpConfig} from "./pop-up-config";
 
 export enum EntityType {
   POI = 'poi',

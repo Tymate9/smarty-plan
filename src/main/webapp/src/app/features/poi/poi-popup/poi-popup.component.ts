@@ -1,14 +1,13 @@
 // src/app/components/poi-popup/poi-popup.component.ts
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {PointOfInterestForm, PoiService} from "../poi.service";
-import * as turf from '@turf/turf';
 import * as wellknown from 'wellknown'
 import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
-import {LayerEvent, LayerEventType} from "../../../core/cartography/tmpTest/layer.event";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import {GeoJSONGeometry} from "wellknown";
-import {PopUpConfig} from "../../../pop-up-config";
-import {EntityType} from "../../../core/cartography/MarkerFactory";
+import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
+import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 import {Router} from "@angular/router";
 
 
@@ -36,7 +35,7 @@ import {Router} from "@angular/router";
         [class.active]="activeTab === 'dessus'"
         (click)="selectTab('dessus')"
       >
-        Dessus
+        Dans POI
       </button>
       <button
         *ngIf="popUpConfig.isTabEnabled(entityType, 'editer')"
@@ -129,16 +128,6 @@ import {Router} from "@angular/router";
               {{ category.label }}
             </option>
           </select><br/>
-
-          <!--<label for="radius">Rayon (mètres) :</label>
-          <input
-            type="number"
-            id="radius"
-            [(ngModel)]="updatedPoi.radius"
-            name="radius"
-            required
-          /><br/>-->
-
           <button type="submit">Mettre à jour</button>
         </form>
         <button (click)="deletePOI()">Supprimer le POI</button>
@@ -209,7 +198,7 @@ export class PoiPopupComponent implements OnInit {
   highlightedStates: { [markerId: string]: boolean } = {};
   activeTab: string = 'information';
   address: string = 'Chargement...';
-  updatedPoi: { label: string; /*radius: number*/ };
+  updatedPoi: { label: string;};
   categories: dto.PointOfInterestCategoryEntity[] = [];
 
   selectedCategoryId: number | null = null;
@@ -236,7 +225,6 @@ export class PoiPopupComponent implements OnInit {
     if (tab === 'proximite' && this.proximityVehicles.length === 0 && !this.loadingProximity) {
       this.loadProximityVehicles();
     }
-
     // Si l'onglet Dessus est sélectionné, charger les véhicules dans le polygone
     if (tab === 'dessus' && this.dessusVehicles.length === 0 && !this.loadingDessus) {
       this.loadDessusVehicles();
@@ -253,21 +241,7 @@ export class PoiPopupComponent implements OnInit {
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {
       label: this.entity.label,
-      /*radius: 50,*/ // Valeur par défaut si le calcul échoue
     };
-
-/*    // Calculer le radius à partir de l'area
-    if (this.entity.area && this.entity.area.coordinates && this.entity.area.coordinates[0]) {
-      const center = turf.point([this.entity.coordinate.coordinates[0], this.entity.coordinate.coordinates[1]]);
-      const edgePointCoord = this.entity.area.coordinates[0][0]; // Premier point du polygone
-      const edgePoint = turf.point(edgePointCoord);
-      const distance = turf.distance(center, edgePoint, { units: 'meters' });
-      this.updatedPoi.radius = Math.round(distance);
-    } else {
-      // Si le calcul du radius échoue, utilisez une valeur par défaut
-      this.updatedPoi.radius = 50;
-    }*/
-
     // Récupérer les catégories
     this.poiService.getAllPOICategory().subscribe({
       next: (categories) => {
@@ -288,9 +262,12 @@ export class PoiPopupComponent implements OnInit {
         next: () => {
           alert('POI supprimé avec succès.');
           this.layerEvent.emit({
-            type: LayerEventType.POIDeleted,
-            payload: { poiId: this.entity.id }
-          });
+            type: LayerEventType.RemoveMarker,
+            payload: {
+              entityType: EntityType.POI,
+              markerId: 'poi-' + this.entity.id, // Utiliser l'ID du POI
+            }
+          })
         },
         error: (error) => {
           console.error('Erreur lors de la suppression du POI:', error);
@@ -315,24 +292,8 @@ export class PoiPopupComponent implements OnInit {
       alert("Veuillez fournir des coordonnées valides pour le POI.");
       return;
     }
-
     // Générer le WKTPoint
     const wktPoint = `POINT(${this.entity.coordinate.coordinates[0]} ${this.entity.coordinate.coordinates[1]})`;
-
-/*    // Générer le WKTPolygon (cercle approximé par un polygone de 50m de rayon)
-    const wktPolygon = this.generateWKTPolygon(
-      this.entity.coordinate.coordinates[0],
-      this.entity.coordinate.coordinates[1],
-      this.updatedPoi.radius, // Rayon en mètres
-      16  // Nombre de côtés pour l'approximation
-    );
-
-    // Vérifier que la conversion a réussi
-    if (!wktPolygon) {
-      alert("Erreur lors de la génération du polygone.");
-      return;
-    }*/
-
     // Construire l'objet updatedData avec WKTPoint et WKTPolygon
     const updatedData: PointOfInterestForm = {
       label: this.updatedPoi.label,
@@ -340,7 +301,6 @@ export class PoiPopupComponent implements OnInit {
       WKTPoint: wktPoint,
       WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry)
     };
-
     // Appeler le service pour mettre à jour le POI
     this.poiService.updatePOI(this.entity.id, updatedData).subscribe({
       next: (updatedPoi) => {
@@ -401,11 +361,7 @@ export class PoiPopupComponent implements OnInit {
   loadDessusVehicles() {
     this.loadingDessus = true;
     // Convertir le polygone en WKT
-/*
-    const polygon = turf.polygon(this.entity.area.coordinates);
-*/
     const wkt = this.convertToWktPolygon(this.entity.area.coordinates);
-
     this.vehicleService.getVehicleInPolygon(wkt).subscribe({
       next: (data) => {
         this.dessusVehicles = data;
@@ -448,11 +404,4 @@ export class PoiPopupComponent implements OnInit {
   isMarkerHighlighted(markerId: string): boolean {
     return this.highlightedStates[markerId] || false;
   }
-
-/*  generateWKTPolygon(longitude: number, latitude: number, radius: number, sides: number = 16): string {
-    const point = turf.point([longitude, latitude]);
-    const buffered = turf.buffer(point, radius, { units: 'meters' });
-    return wellknown.stringify(buffered!.geometry as GeoJSONGeometry);
-  }*/
-
 }

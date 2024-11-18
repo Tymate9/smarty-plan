@@ -1,4 +1,4 @@
-import {EntityType} from "./core/cartography/MarkerFactory";
+import {EntityType} from "./MarkerFactory";
 
 export type PoiPopupTab = 'information' | 'proximite' | 'dessus' | 'editer';
 export type VehiclePopupTab = 'information' | 'poi';

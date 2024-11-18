@@ -1,12 +1,12 @@
 import {Component,OnInit,ViewContainerRef} from '@angular/core';
 import * as L from 'leaflet';
-import {EntityType} from '../../core/cartography/MarkerFactory';
+import {EntityType} from '../../core/cartography/marker/MarkerFactory';
 import {PoiService} from "../poi/poi.service";
 import {VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import 'leaflet.markercluster';
-import {MapManager} from "../../core/cartography/map.manager";
-import {GeocodingService} from "../../commons/GeoCode/geo-coding.service";
+import {MapManager} from "../../core/cartography/map/map.manager";
+import {GeocodingService} from "../../commons/geo/geo-coding.service";
 
 
 @Component({
@@ -45,7 +45,6 @@ export class MapComponent implements OnInit {
     this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 8);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
-
     //Todo(Ajouter au mapmgm)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

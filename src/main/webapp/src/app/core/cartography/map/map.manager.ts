@@ -1,15 +1,15 @@
 import {ViewContainerRef} from '@angular/core';
 import * as L from "leaflet";
-import {MapPopupComponent} from "../../features/map/popUp/map-popup.component";
-import {EntityType, MarkerFactory, CustomMarker, CustomMarkerImpl} from "./MarkerFactory";
-import {LayerManager} from "./tmpTest/layer.manager";
-import {LayerEventType} from "./tmpTest/layer.event";
-import {LayerEvent} from "./tmpTest/layer.event";
-import {dto} from "../../../habarta/dto";
+import {MapPopupComponent} from "../../../features/map/popUp/map-popup.component";
+import {EntityType, MarkerFactory, CustomMarker, CustomMarkerImpl} from "../marker/MarkerFactory";
+import {LayerManager} from "../layer/layer.manager";
+import {LayerEventType} from "../layer/layer.event";
+import {LayerEvent} from "../layer/layer.event";
+import {dto} from "../../../../habarta/dto";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {catchError, forkJoin, of} from "rxjs";
-import {GeocodingService} from "../../commons/GeoCode/geo-coding.service";
-import {PopUpConfig} from "../../pop-up-config";
+import {GeocodingService} from "../../../commons/geo/geo-coding.service";
+import {PopUpConfig} from "../marker/pop-up-config";
 
 export class MapManagerConfig {
   canExtract: boolean;
@@ -35,7 +35,6 @@ export class MapManager {
     const vehicleLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.VEHICLE);
     this.layerManagers.push(poiLayerManager, vehicleLayerManager);
     this.setupLayerCommunication();
-
     // Appeler addExportButton seulement si canExtract est true
     if (this.config.canExtract) {
       this.addExportButton();
@@ -124,7 +123,7 @@ export class MapManager {
         break;
 
       case LayerEventType.RemoveMarker:
-        const { entityType, markerId } = event.payload;
+        const { entityType } = event.payload;
         const layerManager = this.getLayerManagerByType(entityType);
         if (layerManager) {
           layerManager.handleEvent(event);
@@ -353,8 +352,6 @@ export class MapManager {
         const [lng, lat] = vehicle.device.coordinate.coordinates;
         return this.geocodingService.reverseGeocode(lat, lng).pipe(
           // Transformer le résultat en adresse
-          // Supposons que GeocodeResult contient une propriété 'adresse'
-          // Ajustez en fonction de votre structure réelle de GeocodeResult
           catchError(err => {
             if (err.status === 400) {
               return of({ adresse: 'erreur introuvable' });
@@ -416,8 +413,8 @@ export class MapManager {
     const row = {
       id,
       licenceplate,
-      'Propriétaire du véhicule': teamsLabel, // Aligné avec le nouvel en-tête
-      'Type de véhicule': categoryLabel,       // Aligné avec le nouvel en-tête
+      'Propriétaire du véhicule': teamsLabel,
+      'Type de véhicule': categoryLabel,
       'Nom Prénom du conducteur': driverFullName,
       'numéro de téléphone du véhicule': driverPhoneNumber,
       'Date de dernière communication': deviceLastCommunicationDate,
@@ -441,6 +438,4 @@ export class MapManager {
       return value;
     }).join(',');
   }
-
-
 }

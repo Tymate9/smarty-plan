@@ -115,9 +115,7 @@ INSERT INTO driver (first_name, last_name, phone_number) VALUES
 ('Taylor', 'Lewis', '0600000022'),
 ('Uma', 'Lee', '0600000023'),
 ('Victor', 'Walker', '0600000024'),
-('Wendy', 'Hall', '0600000025'),
-('Xavier', 'Allen', '0600000026'),
-('Yasmine', 'Young', '0600000027');
+('Wendy', 'Hall', '0600000025');
 
 INSERT INTO vehicle_driver (vehicle_id, driver_id, start_date) VALUES
 ('1', 1, '2023-11-21'),
@@ -203,6 +201,7 @@ INSERT INTO driver_team (driver_id, team_id, start_date) VALUES
 ('23', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
 ('24', (SELECT id FROM team WHERE label = 'Service Commercial Dieppe'), '2023-11-21'),
 ('25', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21');
+
 
 
 

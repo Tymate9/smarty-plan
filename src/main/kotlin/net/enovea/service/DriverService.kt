@@ -4,45 +4,49 @@ import io.quarkus.hibernate.orm.panache.Panache
 import jakarta.persistence.EntityManager
 import jakarta.persistence.TypedQuery
 import jakarta.transaction.Transactional
+import net.enovea.domain.driver.DriverEntity
+import net.enovea.domain.driver.DriverMapper
+import net.enovea.domain.team.TeamEntity
+import net.enovea.domain.team.TeamMapper
+import net.enovea.domain.vehicle.VehicleEntity
+import net.enovea.dto.DriverDTO
+import net.enovea.dto.TeamDTO
 
-class DriverService {
+class DriverService (
+    private val driverMapper: DriverMapper,
+) {
 
 
     @Transactional
-    fun getDrivers(agencyIds: List<String>?): List<String> {
-        val entityManager: EntityManager = Panache.getEntityManager()
+    fun getDrivers(agencyIds: List<String>?): List<DriverDTO> {
 
-        // Start the query
-        val baseQuery = """
-        SELECT CONCAT(d.lastName, ' ', d.firstName)
+        val params = mutableMapOf<String, Any>()
+
+
+        var baseQuery = """
+        SELECT d
         FROM DriverEntity d
     """
 
         // Extend the query only if agencyIds are provided
-        val finalQuery = if (!agencyIds.isNullOrEmpty()) {
-            baseQuery + """
+        if (!agencyIds.isNullOrEmpty()) {
+            baseQuery += """
             JOIN DriverTeamEntity dt ON d.id = dt.id.driverId
             JOIN TeamEntity t ON dt.id.teamId = t.id
             LEFT JOIN t.parentTeam parent_team
             WHERE dt.endDate IS NULL 
             AND (t.label IN :agencyIds OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds))
         """
-        } else {
-            baseQuery
+            params["agencyIds"] = agencyIds
+
         }
 
+        val panacheQuery = DriverEntity.find(baseQuery, params)
 
-        // Create the TypedQuery for a list of Strings
-        val typedQuery: TypedQuery<String> = entityManager.createQuery(finalQuery, String::class.java)
+        return panacheQuery.list().map { driverMapper.toDto(it) }
 
-
-        // Set the parameter for agency IDs if provided
-        if (!agencyIds.isNullOrEmpty()) {
-            typedQuery.setParameter("agencyIds", agencyIds)
-        }
-
-        // Execute the query and return the list of names
-        return typedQuery.resultList
     }
+
+
 
 }

@@ -122,59 +122,6 @@ class VehicleService (
         return allVehicleDTOs
     }
 
-    @Transactional
-    fun getVehiclesListOriginal(agencyIds: List<String>?): List<String> {
-        val entityManager: EntityManager = Panache.getEntityManager()
-
-        // Start the query
-        val baseQuery = """
-        SELECT v.licenseplate
-        FROM VehicleEntity v
-    """
-
-        // Extend the query only if agencyIds are provided
-        val finalQuery = if (!agencyIds.isNullOrEmpty()) {
-//            baseQuery + """
-//            JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
-//            JOIN TeamEntity t ON vt.id.teamId = t.id
-//            WHERE vt.endDate IS NULL AND t.label IN :agencyIds
-//        """
-
-//            baseQuery + """
-//        JOIN v.VehicleTeamEntity vt
-//        JOIN vt.team t
-//        LEFT JOIN t.parentTeam parent_team
-//        WHERE vt.endDate IS NULL
-//        AND (
-//            t.label IN :agencyIds
-//            OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds)
-//        )
-//        """
-
-            baseQuery + """
-            JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
-            JOIN TeamEntity t ON vt.id.teamId = t.id
-            LEFT JOIN t.parentTeam parent_team
-                    WHERE vt.endDate IS NULL
-                    AND (t.label IN :agencyIds
-                    OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds)
-                    )
-            """
-        } else {
-            baseQuery
-        }
-
-
-        val typedQuery: TypedQuery<String> = entityManager.createQuery(finalQuery, String::class.java)
-
-        if (!agencyIds.isNullOrEmpty()) {
-            typedQuery.setParameter("agencyIds", agencyIds)
-        }
-
-        // Execute the query and return the list of names
-        return typedQuery.resultList
-    }
-
 
     @Transactional
     fun getVehiclesList(agencyIds: List<String>?): List<VehicleSummaryDTO> {

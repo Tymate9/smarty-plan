@@ -5,7 +5,6 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
-import net.enovea.domain.vehicle.VehicleUntrackedPeriodEntity.Companion
 import java.io.Serializable
 import java.time.LocalDateTime
 

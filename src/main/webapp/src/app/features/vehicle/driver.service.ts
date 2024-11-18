@@ -3,6 +3,8 @@
 import {Injectable} from "@angular/core";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
+import {dto} from "../../../habarta/dto";
+import DriverDTO = dto.DriverDTO;
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +15,11 @@ export class DriverService {
 
   constructor(private http: HttpClient) {}
 
-  getDrivers(agencyIds: string[] | null = null ): Observable<string[]> {
+  getDrivers(agencyIds: string[] | null = null ): Observable<DriverDTO[]> {
     const params = {
       agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
     };
-    return this.http.get<string[]>(`${this.baseUrl}`, { params });
-
+    return this.http.get<DriverDTO[]>(`${this.baseUrl}`, { params });
   }
 
 

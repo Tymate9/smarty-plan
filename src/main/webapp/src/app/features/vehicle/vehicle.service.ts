@@ -23,18 +23,9 @@ export class VehicleService {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
   }
 
-  //Méthode pour récupérer la liste de plaque d'immatriculationde
-  getVehiclesListOriginal(agencyIds: string[] | null = null ): Observable<string[]> {
-    const params = {
-      agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
-    };
-    return this.http.get<string[]>(`${this.baseUrl}/list`, { params });
-
-  }
 
 
-
-  //Méthode pour récupérer la liste de plaque d'immatriculationde
+  //Méthode pour récupérer la liste de vehiclesDTO
   getVehiclesList(agencyIds: string[] | null = null ): Observable<VehicleSummaryDTO[]> {
     const params = {
       agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []

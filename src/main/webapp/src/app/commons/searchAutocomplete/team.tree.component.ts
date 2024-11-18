@@ -1,40 +1,3 @@
-// import {Component, EventEmitter, Input, Output} from "@angular/core";
-//
-// @Component({
-//   selector: 'app-team-tree',
-//   template: `
-//     <ul>
-//       <ng-container *ngFor="let team of teamTree">
-//         <li>
-//           <input type="checkbox" [value]="team.label" (change)="onSelectTeam(team)">
-//           {{ team.label }}
-//           <app-team-tree *ngIf="team.children?.length" [teamTree]="team.children"
-//                          (selectedTeamsChange)="onSelectTeam($event)"></app-team-tree>
-//         </li>
-//       </ng-container>
-//     </ul>
-//   `
-// })
-// export class TeamTreeComponent {
-//   @Input() teamTree: any[] = [];
-//   @Output() selectedTeamsChange = new EventEmitter<string[]>();
-//
-//   private selectedTeams: string[] = [];
-//
-//   onSelectTeam(team: any) {
-//     const index = this.selectedTeams.indexOf(team.label);
-//     if (index === -1) {
-//       this.selectedTeams.push(team.label);
-//     } else {
-//       this.selectedTeams.splice(index, 1);
-//     }
-//     this.selectedTeamsChange.emit(this.selectedTeams);
-//   }
-// }
-//
-//
-
-
 import {Component, EventEmitter, Input, Output, SimpleChanges} from "@angular/core";
 
 export interface Option {
@@ -164,7 +127,6 @@ export interface Option {
 export class TeamTreeComponent {
   @Input() label: string = '';
   @Input() options: Option[] = [];
-  //@Input() options: any[] = [];  // Allow any structure: flat or hierarchical
   @Input() selectedItems: string[] = [];
   @Output() selectedTagsChange = new EventEmitter<string[]>();  // Emit selected tags
 

@@ -5,7 +5,6 @@ import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle.VehicleDriverEntity
-import net.enovea.domain.vehicle.VehicleTeamEntity
 
 
 @Entity(name = DriverEntity.ENTITY_NAME )

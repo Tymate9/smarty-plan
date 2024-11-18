@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
 import net.enovea.domain.team.TeamMapper
-import net.enovea.domain.vehicle.VehicleMapper
 import net.enovea.service.TeamService
 
 

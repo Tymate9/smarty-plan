@@ -10,11 +10,6 @@ import net.enovea.service.TeamService
 @Consumes(MediaType.APPLICATION_JSON)
 class TeamResource(private val teamService: TeamService) {
 
-//    @GET
-//    fun getAgencies(): List<String> {
-//        return teamService.getAllAgencies()
-//    }
-
     @GET
     fun getAgencies(): List<TeamDTO> {
         return teamService.getAllAgencies()

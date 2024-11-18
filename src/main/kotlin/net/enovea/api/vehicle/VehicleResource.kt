@@ -28,12 +28,6 @@ class VehicleResource(
 ) {
     private val vehicleSummaryMapper: VehicleSummaryMapper = VehicleSummaryMapper.INSTANCE
 
-//    @GET
-//    @Path("/list")
-//    fun getVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<String> {
-//        return vehicleService.getVehiclesList(agencyIds)
-//    }
-
     @GET
     @Path("/list")
     fun getVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<VehicleSummaryDTO> {

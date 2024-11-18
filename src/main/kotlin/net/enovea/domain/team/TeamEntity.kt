@@ -7,8 +7,6 @@ import io.quarkus.panache.common.Parameters
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.vehicle.VehicleEntity
-import net.enovea.domain.vehicle.VehicleEntity.Companion
 import net.enovea.domain.vehicle.VehicleTeamEntity
 import java.io.Serializable
 

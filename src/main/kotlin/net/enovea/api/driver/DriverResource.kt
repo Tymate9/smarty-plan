@@ -3,6 +3,7 @@ package net.enovea.api.driver
 
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
+import net.enovea.dto.DriverDTO
 import net.enovea.service.DriverService
 
 @Path("/api/drivers")
@@ -11,8 +12,7 @@ import net.enovea.service.DriverService
 class DriverResource(private val driverService: DriverService) {
 
     @GET
-    // @Path("/drivers")
-    fun getDrivers(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<String> {
+    fun getDrivers(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<DriverDTO> {
         return driverService.getDrivers(agencyIds)
     }
 

@@ -6,10 +6,11 @@ import {KeycloakProfile} from "keycloak-js";
 import {VehicleService} from "../../features/vehicle/vehicle.service";
 import {TeamService} from "../../features/vehicle/team.service";
 import {DriverService} from "../../features/vehicle/driver.service";
-import {Option, TeamTreeComponent} from './team.tree.component';
+import {Option, TeamTreeComponent} from '../searchAutocomplete/team.tree.component';
 import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import DriverDTO = dto.DriverDTO;
 
 
 @Component({
@@ -21,9 +22,8 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
         <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
       </div>
       <div class="filters">
-<!--        <app-team-tree [teamTree]="agencyOptions" (selectedTeamsChange)="updateAgencies($event)"></app-team-tree>-->
+
         <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-team-tree>
-<!--        <app-search-autocomplete [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-search-autocomplete>-->
         <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
         <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)"  [selectedItems]="driverSelected"></app-search-autocomplete>
       </div>
@@ -72,7 +72,8 @@ export class NavbarComponent implements OnInit {
   userProfile: KeycloakProfile | null = null;
 
   agencyOptions:Option[] = [];
-  driverOptions:string[]=[];
+  agencyTree:Option[]=[];
+  driverOptions:DriverDTO[]=[];
   vehicleOptions:VehicleSummaryDTO[]=[];
 
   // These will hold the filtered options based on selected agencies
@@ -83,41 +84,27 @@ export class NavbarComponent implements OnInit {
   vehicleSelected: string[] = [];
   driverSelected: string[] = [];
 
+
   updateAgencies(tags: string[]) {
+    const previouslySelectedAgencies = [...this.agencySelected];
     this.agencySelected = tags;
 
-    // Reset selected vehicles and drivers
-    //this.vehicleSelected = [];
-    //this.driverSelected = [];
+    // Handle only agency removals
+    if (this.agencySelected.length < previouslySelectedAgencies.length) {
+      const removedAgencies = previouslySelectedAgencies.filter(
+        agency => !this.agencySelected.includes(agency)
+      );
+
+      removedAgencies.forEach(agency => {
+        this.removeVehiclesAndDriversForAgency(agency);
+      });
+    }
+
     this.emitSelectedTags();
     this.filterVehiclesAndDrivers();
-
-    // const previouslySelectedAgencies = [...this.agencySelected];
-    //
-    // this.agencySelected = tags;
-    //
-    // // Keep previously selected vehicles and drivers intact when adding new agencies
-    // if (this.agencySelected.length > previouslySelectedAgencies.length) {
-    //   // Newly selected agency was added
-    //   this.emitSelectedTags();
-    //   this.filterVehiclesAndDrivers();
-    //   return;
-    // }
-    //
-    // // An agency has been removed, delete the vehicles and drivers associated with that agency
-    // previouslySelectedAgencies.forEach(agency => {
-    //   if (!this.agencySelected.includes(agency)) {
-    //     this.removeVehiclesAndDriversForAgency(agency);
-    //   }
-    // });
-    //
-    // this.emitSelectedTags();
-    // this.filterVehiclesAndDrivers();
-
   }
 
-  ////////////////////////
-  // Example Transformation Logic
+
   transformToHierarchy(teams: TeamDTO[]): any[] {
     const teamMap = new Map<number, any>();
     const roots: any[] = [];
@@ -139,12 +126,10 @@ export class NavbarComponent implements OnInit {
         roots.push(teamMap.get(team.id));
       }
     });
-    //console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh',roots);
     return roots;
 
   }
 
-  ////////////////////////
 
   updateVehicles(tags: string[]) {
     this.vehicleSelected = tags;
@@ -173,17 +158,15 @@ export class NavbarComponent implements OnInit {
 
       this.teamService.getAgencies().subscribe(teams => {
         this.agencyOptions = this.transformToHierarchy(teams);
-      // this.teamService.getAgencies().subscribe((agencies) => {
-      //   this.agencyOptions = agencies;
+        this.agencyTree=this.agencyOptions;
       });
-     // this.teamService.getTeamTree().subscribe(agencies => this.agencyOptions = agencies);
       this.vehicleService.getVehiclesList().subscribe((vehicles) => {
         this.vehicleOptions = vehicles;
         this.filteredVehicleOptions = vehicles.map(vehicle => vehicle.licenseplate);
       });
       this.driverService.getDrivers().subscribe((drivers) => {
         this.driverOptions = drivers;
-        this.filteredDriverOptions = drivers;
+        this.filteredDriverOptions = drivers.map(driver=>  `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
       });
 
 
@@ -203,60 +186,76 @@ export class NavbarComponent implements OnInit {
     if (this.agencySelected.length > 0) {
 
       this.vehicleService.getVehiclesList(this.agencySelected).subscribe((filteredVehicles) => {
-        this.filteredVehicleOptions = filteredVehicles.map(vehicle => vehicle.licenseplate);;
+        this.vehicleOptions=filteredVehicles;
+        this.filteredVehicleOptions = filteredVehicles.map(vehicle => vehicle.licenseplate);
       });
 
       this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
-        this.filteredDriverOptions = filteredDrivers;
+        this.filteredDriverOptions = filteredDrivers.map(driver=>  `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
 
       });
     } else {
       // If no agency is selected, reset to the original options
-      this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);;
-      this.filteredDriverOptions = this.driverOptions;
+      this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
+      this.filteredDriverOptions = this.driverOptions.map(driver=>  `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
 
     }
 
-    // this.filteredVehicleOptions = this.getFilteredVehicles(this.agencySelected);
-    // this.filteredDriverOptions = this.getFilteredDrivers(this.agencySelected);
+
+  }
+
+  removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
+    // Get all agency IDs to remove (including children)
+    let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
+
+    console.log('agenciesToRemove', agenciesToRemove)
+
+    const vehiclesToRemove = this.vehicleOptions
+      .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
+      .map(vehicle => vehicle.licenseplate);
+
+    this.vehicleSelected = this.vehicleSelected.filter(
+      vehicleId => !vehiclesToRemove.includes(vehicleId)
+    );
+
+
+    const driversToRemove = this.driverOptions
+      .filter(driver => agenciesToRemove.includes(driver.team.label))
+      .map(driver => `${driver.lastName} ${driver.firstName}`);
+
+    this.driverSelected = this.driverSelected
+      .filter(driverName => !driversToRemove.includes(driverName));
   }
 
 
-  // getFilteredVehicles(selectedAgencies: string[]): string[] {
-  //   // Return filtered vehicles based on the selected agencies
-  //   return this.vehicleOptions.filter(vehicle => {
-  //     // Implement the logic to filter vehicles based on selected agencies
-  //     return selectedAgencies.includes(vehicle);  // Example filter, update with actual logic
-  //   });
-  // }
-  //
-  // getFilteredDrivers(selectedAgencies: string[]): string[] {
-  //   // Return filtered drivers based on the selected agencies
-  //   return this.driverOptions.filter(driver => {
-  //     // Implement the logic to filter drivers based on selected agencies
-  //     return selectedAgencies.includes(driver);  // Example filter, update with actual logic
-  //   });
-  // }
+  getAllAgencyIdsToRemove(agencyId: string): string[] {
+    // Recursive function to find an agency anywhere in the tree
+    const findAgencyInTree = (tree: any[], agencyId: string): any | null => {
+      for (const agency of tree) {
+        if (agency.label === agencyId) {
+          return agency; // Found the agency
+        }
+        if (agency.children) {
+          const found = findAgencyInTree(agency.children, agencyId);
+          if (found) return found; // Found in a child branch
+        }
+      }
+      return null; // Not found
+    };
+    const agency = findAgencyInTree(this.agencyTree, agencyId);
+    if (!agency) return [];
 
-  // This method will remove vehicles and drivers associated with the deleted agency
-  removeVehiclesAndDriversForAgency(agency: string) {
-    // Filter out the vehicles and drivers associated with the removed agency
-    this.vehicleSelected = this.vehicleSelected.filter(vehicle => !this.isVehicleForAgency(vehicle, agency));
-    this.driverSelected = this.driverSelected.filter(driver => !this.isDriverForAgency(driver, agency));
+    // Start with the current agency's ID
+    let idsToRemove = [agencyId];
 
-    // Emit the new selected values
-    this.emitSelectedTags();
-  }
+    // Recursively collect IDs of all child agencies
+    if (agency.children) {
+      for (const child of agency.children) {
+        idsToRemove = idsToRemove.concat(this.getAllAgencyIdsToRemove(child.label));
+      }
+    }
 
-  // Helper methods to check if a vehicle or driver belongs to an agency
-  isVehicleForAgency(vehicle: string, agency: string): boolean {
-    // Replace this logic with your actual logic to check if the vehicle belongs to the agency
-    return vehicle.includes(agency);  // Example condition
-  }
-
-  isDriverForAgency(driver: string, agency: string): boolean {
-    // Replace this logic with your actual logic to check if the driver belongs to the agency
-    return driver.includes(agency);  // Example condition
+    return idsToRemove;
   }
 
   navigateTo(page: string) {

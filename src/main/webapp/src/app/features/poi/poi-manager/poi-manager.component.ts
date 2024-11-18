@@ -19,13 +19,14 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 
 export class PoiPanel {
-  public selectedCategoryId: number; // Nouvelle propriété
+  public selectedCategoryId: number;
+  public isModified: boolean = false;
 
   constructor(
     public poi: PointOfInterestEntity,
     public expanded: boolean = false,
     public address?: string,
-    private _inputType: string = 'adresse', // Valeur par défaut
+    private _inputType: string = 'adresse',
     public modifiedAddress?: string,
     public modifiedLatitude?: number,
     public modifiedLongitude?: number
@@ -43,8 +44,8 @@ export class PoiPanel {
 
   set inputType(value: string) {
     this._inputType = value;
-    // Réinitialiser les valeurs modifiées lorsque l'inputType change
     this.resetModifiedValues();
+/*    this.isModified = true;*/
   }
 
   // Méthode pour réinitialiser les valeurs modifiées
@@ -52,6 +53,7 @@ export class PoiPanel {
     this.modifiedAddress = this.address || '';
     this.modifiedLatitude = this.poi.coordinate.coordinates[1];
     this.modifiedLongitude = this.poi.coordinate.coordinates[0];
+    this.isModified = false;
   }
 }
 @Component({
@@ -132,7 +134,7 @@ export class PoiPanel {
         <div class="poi-list">
           <div class="poi-panel" *ngFor="let poiPanel of poiPanels">
             <!-- En-tête du panneau -->
-            <div class="poi-header" (click)="togglePanel(poiPanel)">
+            <div class="poi-header" (click)="togglePanel(poiPanel)" [ngClass]="{'modified': poiPanel.isModified}">
               <span>{{ poiPanel.poi.label }}</span>
               <span>{{ poiPanel.address }}</span>
               <button
@@ -144,8 +146,9 @@ export class PoiPanel {
             </div>
             <!-- Corps du panneau -->
             <div class="poi-body" [hidden]="!poiPanel.expanded">
+              <!-- Dans le formulaire du template -->
               <form (ngSubmit)="onSubmit(poiPanel)">
-                <!-- Champs du formulaire -->
+                <!-- Champ Label -->
                 <label>
                   Label:
                   <input
@@ -153,48 +156,48 @@ export class PoiPanel {
                     [(ngModel)]="poiPanel.poi.label"
                     name="label{{poiPanel.poi.id}}"
                     required
+                    (ngModelChange)="poiPanel.isModified = true"
                   />
                 </label>
+
+                <!-- Champ Catégorie -->
                 <label>
                   Catégorie:
                   <select
                     [(ngModel)]="poiPanel.selectedCategoryId"
-                    (ngModelChange)="onCategoryChange($event, poiPanel)"
+                    (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"
                     name="category{{poiPanel.poi.id}}"
                     required
                   >
-                    <option
-                      *ngFor="let category of poiCategories"
-                      [ngValue]="category.id"
-                    >
+                    <option *ngFor="let category of poiCategories" [ngValue]="category.id">
                       {{ category.label }}
                     </option>
                   </select>
                 </label>
-                <!-- Liste déroulante pour choisir entre Adresse et Coordonnées -->
+
+                <!-- Liste déroulante Modifier -->
                 <label>
                   Modifier :
-                  <select [(ngModel)]="poiPanel.inputType" name="inputType{{poiPanel.poi.id}}">
+                  <select [(ngModel)]="poiPanel.inputType" name="inputType{{poiPanel.poi.id}}" (ngModelChange)="poiPanel.isModified = true">
                     <option value="adresse">Adresse</option>
                     <option value="coordonnees">Coordonnées</option>
                   </select>
                 </label>
 
-                <!-- Champs dynamiques en fonction de la sélection -->
+                <!-- Champs dynamiques -->
                 <div *ngIf="poiPanel.inputType === 'adresse'">
-                  <!-- Champ pour l'adresse -->
                   <label>
                     Adresse:
                     <input
                       type="text"
                       [(ngModel)]="poiPanel.modifiedAddress"
                       name="address{{poiPanel.poi.id}}"
+                      (ngModelChange)="poiPanel.isModified = true"
                     />
                   </label>
                 </div>
 
                 <div *ngIf="poiPanel.inputType === 'coordonnees'">
-                  <!-- Champs pour la latitude et la longitude -->
                   <label>
                     Latitude:
                     <input
@@ -202,6 +205,7 @@ export class PoiPanel {
                       [(ngModel)]="poiPanel.modifiedLatitude"
                       name="latitude{{poiPanel.poi.id}}"
                       step="any"
+                      (ngModelChange)="poiPanel.isModified = true"
                     />
                   </label>
                   <label>
@@ -211,9 +215,11 @@ export class PoiPanel {
                       [(ngModel)]="poiPanel.modifiedLongitude"
                       name="longitude{{poiPanel.poi.id}}"
                       step="any"
+                      (ngModelChange)="poiPanel.isModified = true"
                     />
                   </label>
                 </div>
+
                 <!-- Boutons pour ajouter une zone -->
                 <div class="zone-buttons">
                   <button type="button" (click)="startPolygonDrawing(poiPanel)">
@@ -223,23 +229,22 @@ export class PoiPanel {
                     Dessiner un Cercle
                   </button>
                 </div>
-                <!-- Boutons en fonction de l'ID du POI -->
+
+                <!-- Boutons de soumission -->
                 <div *ngIf="poiPanel.poi.id < 0">
-                  <!-- Si le POI n'est pas encore enregistré -->
                   <button
                     type="submit"
                     [disabled]="!isFormValid(poiPanel)"
                   >
-                    {{ poiPanel.poi.id < 0 ? 'Ajouter POI' : 'Mettre à jour' }}
+                    Ajouter POI
                   </button>
                 </div>
                 <div *ngIf="poiPanel.poi.id >= 0">
-                  <!-- Si le POI est déjà enregistré -->
                   <button
                     type="submit"
                     [disabled]="!isFormValid(poiPanel)"
                   >
-                    {{ poiPanel.poi.id < 0 ? 'Ajouter POI' : 'Mettre à jour' }}
+                    Mettre à jour
                   </button>
                   <button
                     type="button"
@@ -255,6 +260,10 @@ export class PoiPanel {
       </div>
     </div>`,
   styles: [`
+    .modified {
+      background-color: #f69b9b !important;
+    }
+
     .draw-control-message {
     }
 
@@ -263,10 +272,12 @@ export class PoiPanel {
       max-height: calc(100vh - 200px);
       flex: 1;
     }
+
     .poi-panel {
       border: 1px solid #ccc;
       margin-bottom: 10px;
     }
+
     .poi-header {
       background-color: #e0e0e0;
       padding: 10px;
@@ -275,9 +286,11 @@ export class PoiPanel {
       justify-content: space-between;
       align-items: center;
     }
+
     .poi-header span {
       flex: 1;
     }
+
     .delete-button {
       background: none;
       border: none;
@@ -285,43 +298,53 @@ export class PoiPanel {
       cursor: pointer;
       color: #ff0000;
     }
+
     .poi-body {
       padding: 10px;
     }
+
     .poi-body form label {
       display: block;
       margin-bottom: 10px;
     }
+
     .poi-body form input,
     .poi-body form select {
       width: 100%;
       padding: 5px;
       margin-top: 5px;
     }
+
     .poi-body form button {
       margin-right: 10px;
     }
+
     .poi-manager-container {
       display: flex;
       height: 100vh;
     }
+
     .map-container {
       flex: 2;
       position: relative;
     }
+
     .side-panel {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: 10px;
     }
+
     .search-section {
       margin-bottom: 20px;
     }
+
     .search-section input {
       width: 100%;
       margin-bottom: 5px;
     }
+
     .search-section ul {
       list-style-type: none;
       padding: 0;
@@ -334,17 +357,21 @@ export class PoiPanel {
       width: calc(100% - 20px);
       z-index: 1000;
     }
+
     .search-section li {
       padding: 5px;
       cursor: pointer;
     }
+
     .search-section li:hover {
       background-color: #f0f0f0;
     }
+
     button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
     }
+
     .suggestions-list {
       list-style-type: none;
       padding: 0;
@@ -357,10 +384,12 @@ export class PoiPanel {
       width: calc(100% - 20px);
       z-index: 1000;
     }
+
     .suggestions-list li {
       padding: 5px;
       cursor: pointer;
     }
+
     .suggestions-list li:hover {
       background-color: #f0f0f0;
     }
@@ -528,8 +557,7 @@ export class PoiManagerComponent implements OnInit {
 
         // Appeler updateMarkerOnMap avec le POI mis à jour
         this.updateMarkerOnMap(poi, poi.id);
-        // Afficher un message de confirmation
-        alert(`POI "${poi.label}" mis à jour avec une nouvelle zone.`);
+        this.currentPoiPanel.isModified = true
       }
     }
     this.removeDrawControlMessage();
@@ -884,6 +912,7 @@ export class PoiManagerComponent implements OnInit {
 
           // Mettre à jour le marqueur sur la carte
           this.updateMarkerOnMap(poi, oldMarkerId);
+          poiPanel.isModified = false;
         },
         (error) => {
           console.error('Erreur lors de la création du POI :', error);
@@ -895,8 +924,6 @@ export class PoiManagerComponent implements OnInit {
       // Mise à jour du POI existant
       this.poiService.updatePOI(poi.id, poiData).subscribe(
         (updatedPoi) => {
-          console.log('je suis la pour lupdate')
-          console.log(poiData)
           poiPanel.poi = updatedPoi;
 
           // Mettre à jour le marqueur sur la carte
@@ -910,10 +937,12 @@ export class PoiManagerComponent implements OnInit {
                 poiPanel.address = result.adresse;
                 // Réinitialiser les valeurs modifiées
                 poiPanel.resetModifiedValues();
+                poiPanel.isModified = false;
               },
               (error) => {
                 console.error('Erreur lors du géocodage inverse :', error);
                 poiPanel.address = 'Adresse inconnue';
+                poiPanel.isModified = false;
               }
             );
           } else {
@@ -923,6 +952,7 @@ export class PoiManagerComponent implements OnInit {
             poi.coordinate.coordinates = [longitude, latitude];
             // Réinitialiser les valeurs modifiées
             poiPanel.resetModifiedValues();
+            poiPanel.isModified = false;
           }
         },
         (error) => {

@@ -186,7 +186,6 @@ export class NavbarComponent implements OnInit {
     if (this.agencySelected.length > 0) {
 
       this.vehicleService.getVehiclesList(this.agencySelected).subscribe((filteredVehicles) => {
-        this.vehicleOptions=filteredVehicles;
         this.filteredVehicleOptions = filteredVehicles.map(vehicle => vehicle.licenseplate);
       });
 

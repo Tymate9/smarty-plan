@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
+import {PoiManagerComponent} from "./features/poi/poi-manager/poi-manager.component";
 
 const routes: Routes = [
   {
@@ -11,6 +12,8 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
+      { path: 'poiedit/:label', component: PoiManagerComponent},
+      { path: 'poiedit', component: PoiManagerComponent},
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

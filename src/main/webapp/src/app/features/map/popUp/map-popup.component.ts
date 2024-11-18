@@ -1,9 +1,12 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {MarkerFactory} from "../../core/MarkerFactory";
-import {PoiService, PoiWithDistance} from "../poi/poi.service";
-import {dto} from "../../../habarta/dto";
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import * as turf from '@turf/turf';
+import * as wellknown from 'wellknown'
+import {PointOfInterestForm, PoiService} from "../../poi/poi.service";
+import {dto} from "../../../../habarta/dto";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
-import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service";
+import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
+import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
+import {GeoJSONGeometry} from "wellknown";
 
 @Component({
   selector: 'app-map-popup',
@@ -35,7 +38,8 @@ import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service
     </div>
 
     <div class="tab-content">
-      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }} / Adresse : {{ address }}</h4>
+      <h4>Adresse : {{ address }}</h4>
+      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
 
       <!-- Onglet Véhicule -->
       <div *ngIf="activeTab === 'vehicule'">
@@ -53,9 +57,9 @@ import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service
             <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>
             <button
               (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-              [class.active]="highlightStates['vehicle-' + vehicle.second.id]"
+              [class.active]="highlightedStates['vehicle-' + vehicle.second.id]"
             >
-              {{ highlightStates['vehicle-' + vehicle.second.id] ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+              {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
             </button>
           </li>
         </ul>
@@ -77,9 +81,9 @@ import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service
             <button (click)="centerMapOnPOI(poi.second)">Zoom</button>
             <button
               (click)="toggleHighlightMarker('poi-' + poi.second.id)"
-              [class.active]="highlightStates['poi-' + poi.second.id]"
+              [class.active]="highlightedStates['poi-' + poi.second.id]"
             >
-              {{ highlightStates['poi-' + poi.second.id] ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
+              {{ highlightedStates['poi-' + poi.second.id] ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
             </button>
           </li>
         </ul>
@@ -107,29 +111,16 @@ import {VehicleService, VehicleWithDistanceDTO} from "../vehicle/vehicle.service
     </div>
   `,
   styles: [`
-    /* Styles pour les boutons toggle */
     .active {
       background-color: #007bff;
       color: white;
     }
   `]
 })
-export class MapPopupComponent implements OnInit, OnDestroy {
-  constructor(
-    private poiService: PoiService,
-    private vehicleService: VehicleService
-  ) {}
-
+export class MapPopupComponent implements OnInit {
   @Input() latitude!: number;
   @Input() longitude!: number;
-
-  @Output() addPOIRequest = new EventEmitter<{ lat: number, lng: number }>();
-  @Output() buttonClick = new EventEmitter<void>();
-  @Output() poiCreated = new EventEmitter<any>();
-  @Output() closePopup = new EventEmitter<void>();
-  @Output() radiusChanged = new EventEmitter<number>();
-  @Output() highlightMarkerRequest = new EventEmitter<string>();
-  @Output() viewAllHighlightedMarkers = new EventEmitter<[number, number]>(); // Nouvel Output avec coordonnées
+  @Output() layerEvent = new EventEmitter<LayerEvent>();
 
 
   address: string = 'Chargement...';
@@ -142,9 +133,13 @@ export class MapPopupComponent implements OnInit, OnDestroy {
   loadingVehicles: boolean = false;
   nearbyPOIs: any[] = [];
   loadingPOIs: boolean = false;
-
   // Gestion des états de surbrillance des marqueurs
-  highlightStates: { [key: string]: boolean } = {};
+  highlightedStates: { [markerId: string]: boolean } = {};
+
+  constructor(
+    private poiService: PoiService,
+    private vehicleService: VehicleService
+  ) {}
 
   ngOnInit() {
     this.poiService.getAddressFromCoordinates(this.latitude, this.longitude).subscribe({
@@ -170,65 +165,84 @@ export class MapPopupComponent implements OnInit, OnDestroy {
     this.selectTab('vehicule');
   }
 
-  ngOnDestroy() {
-    this.buttonClick.emit(); // Émettre un événement pour réinitialiser les surbrillances
-  }
-
   onRadiusChange(newRadius: number) {
-    this.radiusChanged.emit(newRadius);
-  }
+    this.layerEvent.emit({
+      type: LayerEventType.RadiusChanged,
+      payload: { lat: this.latitude, lng: this.longitude, radius: newRadius }
+    });  }
 
   onButtonClick() {
-    this.buttonClick.emit(); // Émettre un événement pour réinitialiser les surbrillances
+    this.layerEvent.emit({ type: LayerEventType.ButtonClicked });
   }
 
   toggleHighlightMarker(markerId: string) {
-    // Basculer l'état local du bouton
-    this.highlightStates[markerId] = !this.highlightStates[markerId];
-
-    // Émettre l'événement pour que MapManager gère la surbrillance
-    if (this.highlightStates[markerId]) {
-      this.highlightMarkerRequest.emit(markerId);
-    } else {
-      this.highlightMarkerRequest.emit(markerId);
-    }
+    this.highlightedStates[markerId] = !this.highlightedStates[markerId];
+    const eventType = this.highlightedStates[markerId]
+      ? LayerEventType.HighlightMarker
+      : LayerEventType.RemoveHighlightMarker;
+    this.layerEvent.emit({
+      type: eventType,
+      payload: { markerID: markerId }
+    });
   }
-
 
   submitPOI() {
     if (this.selectedCategoryId === -1) {
       alert("Veuillez sélectionner une catégorie pour le POI.");
       return;
     }
-
-    const poiData = {
+    // Vérifier que les coordonnées sont valides
+    if (this.longitude === null || this.latitude === null || isNaN(this.longitude) || isNaN(this.latitude)) {
+      alert("Veuillez fournir des coordonnées valides pour le POI.");
+      return;
+    }
+    // Générer le WKTPoint
+    const wktPoint = `POINT(${this.longitude} ${this.latitude})`;
+    // Créer un objet GeoJSON pour le point
+    const pointGeoJSON = turf.point([this.longitude, this.latitude]);
+    // Créer un buffer de 50 mètres autour du point pour générer un polygone approximant un cercle
+    const buffered = turf.buffer(pointGeoJSON, this.poiRadius, { units: 'meters' });
+    // Convertir le GeoJSON du polygone en chaîne WKT
+    const wktPolygon = wellknown.stringify(buffered!.geometry as GeoJSONGeometry);
+    // Vérifier que la conversion a réussi
+    if (!wktPolygon) {
+      alert("Erreur lors de la génération du polygone.");
+      return;
+    }
+    // Construire l'objet poiData avec WKTPoint et WKTPolygon
+    const poiData: PointOfInterestForm = {
       label: this.poiName,
       type: this.selectedCategoryId,
-      WKTPoint: `POINT(${this.longitude} ${this.latitude})`,
-      radius: this.poiRadius
+      WKTPoint: wktPoint,
+      WKTPolygon: wktPolygon
     };
-
+    // Appeler le service pour créer le POI
     this.poiService.createPOI(poiData).subscribe({
       next: (response) => {
-        this.poiCreated.emit({ ...response, coordinates: [this.latitude, this.longitude] });
-        this.closePopup.emit();
+        // Émettre l'événement POICreated avec les données reçues du backend
+        this.layerEvent.emit({
+          type: LayerEventType.POICreated,
+          payload: { poi: { ...response, coordinates: [this.latitude, this.longitude] } }
+        });
+        // Fermer le popup ou effectuer d'autres actions nécessaires
+        this.layerEvent.emit({ type: LayerEventType.ClosePopup });
       },
-      error: (error) => console.error("Erreur lors de l'ajout du POI:", error)
+      error: (error) => {
+        console.error("Erreur lors de l'ajout du POI:", error);
+        alert("Une erreur s'est produite lors de l'ajout du POI. Veuillez réessayer.");
+      }
     });
   }
 
   selectTab(tab: string) {
     this.onButtonClick();
     this.activeTab = tab;
-
     if (tab === 'vehicule' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
       this.loadNearbyVehicles();
     }
-
     if (tab === 'poi' && this.nearbyPOIs.length === 0 && !this.loadingPOIs) {
       this.loadNearbyPOIs();
     }
-
     if (tab === 'creation') {
       this.addPOI();
     }
@@ -254,7 +268,6 @@ export class MapPopupComponent implements OnInit, OnDestroy {
     this.poiService.getNearestPOIsWithDistance(this.latitude, this.longitude, 3).subscribe({
       next: (pois) => {
         this.nearbyPOIs = pois;
-        console.log(pois)
         this.loadingPOIs = false;
       },
       error: (error) => {
@@ -265,31 +278,38 @@ export class MapPopupComponent implements OnInit, OnDestroy {
   }
 
   onViewAllHighlightedMarkers() {
-    this.viewAllHighlightedMarkers.emit([this.latitude, this.longitude]); // Émettre les coordonnées
-  }
-
-
-  @Output() zoomRequest = new EventEmitter<[number, number]>();
+    this.layerEvent.emit({
+      type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
+      payload: { lat: this.latitude, lng: this.longitude }
+    });  }
 
   centerMapOnVehicle(vehicle: dto.VehicleSummaryDTO) {
     const coordinates = vehicle.device?.coordinate?.coordinates;
     if (coordinates && coordinates.length === 2) {
       // Émettre les coordonnées sous forme de [latitude, longitude]
-      this.zoomRequest.emit([coordinates[0], coordinates[1]]);
-    }
+      this.layerEvent.emit({
+        type: LayerEventType.ZoomToCoordinates,
+        payload: { coordinates: [coordinates[0], coordinates[1]] }
+      });    }
   }
 
   centerMapOnPOI(poi: dto.PointOfInterestEntity) {
     const coordinates = poi.coordinate?.coordinates;
     if (coordinates && coordinates.length === 2) {
       // Émettre les coordonnées sous forme de [latitude, longitude]
-      this.zoomRequest.emit([coordinates[0], coordinates[1]]);
-    }
+      this.layerEvent.emit({
+        type: LayerEventType.ZoomToCoordinates,
+        payload: { coordinates: [coordinates[0], coordinates[1]] }
+      });    }
   }
 
   addPOI() {
-    this.addPOIRequest.emit({ lat: this.latitude, lng: this.longitude });
+    this.layerEvent.emit({
+      type: LayerEventType.AddPOIRequest,
+      payload: { lat: this.latitude, lng: this.longitude }
+    });
+    this.poiRadius = 50;
+    this.onRadiusChange(50);
     this.poiRadius = 50
-    this.onRadiusChange(50)
   }
 }

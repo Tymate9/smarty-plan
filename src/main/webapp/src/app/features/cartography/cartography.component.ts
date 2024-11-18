@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FilterService} from "../../commons/navbar/filter.service";
+import {Component, OnInit} from '@angular/core';
+import {FilterService} from "../../commons/navbar/filter.service";
 
 @Component({
   selector: 'app-cartography',
@@ -21,7 +21,8 @@ import { FilterService} from "../../commons/navbar/filter.service";
 export class CartographyComponent implements OnInit {
   selectedTags: { [key: string]: string[] } = {};
 
-  constructor(private filterService: FilterService) {}
+  constructor(private filterService: FilterService) {
+  }
 
   ngOnInit() {
     // S'abonner aux filtres partagés

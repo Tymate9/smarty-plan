@@ -209,6 +209,9 @@ export class NavbarComponent implements OnInit {
   removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
     // Get all agency IDs to remove (including children)
     let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
+
+    console.log('agenciesToRemove', agenciesToRemove)
+
     const vehiclesToRemove = this.vehicleOptions
       .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
       .map(vehicle => vehicle.licenseplate);
@@ -261,12 +264,11 @@ export class NavbarComponent implements OnInit {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
+  // logout() {
+  // this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
+  // }
   logout() {
-    this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
-  }
-
-/*  logout() {
     this.keycloakService.logout("http://localhost:8080/")
 
-  }*/
+  }
 }

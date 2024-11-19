@@ -115,9 +115,7 @@ INSERT INTO driver (first_name, last_name, phone_number) VALUES
 ('Taylor', 'Lewis', '0600000022'),
 ('Uma', 'Lee', '0600000023'),
 ('Victor', 'Walker', '0600000024'),
-('Wendy', 'Hall', '0600000025'),
-('Xavier', 'Allen', '0600000026'),
-('Yasmine', 'Young', '0600000027');
+('Wendy', 'Hall', '0600000025');
 
 INSERT INTO vehicle_driver (vehicle_id, driver_id, start_date) VALUES
 ('1', 1, '2023-11-21'),
@@ -176,6 +174,40 @@ INSERT INTO vehicle_team (vehicle_id, team_id, start_date) VALUES
 ('25', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21');
 
 
+/* Seed pour la table driver_team - 25 associations conducteur/équipe */
+INSERT INTO driver_team (driver_id, team_id, start_date) VALUES
+('1', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21'),
+('2', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+('3', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+('4', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+('5', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
+('6', (SELECT id FROM team WHERE label = 'Service Commercial Rouen'), '2023-11-21'),
+('7', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+('8', (SELECT id FROM team WHERE label = 'Service Commercial Caen'), '2023-11-21'),
+('9', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+('10', (SELECT id FROM team WHERE label = 'Service Commercial Le Havre'), '2023-11-21'),
+('11', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+('12', (SELECT id FROM team WHERE label = 'Service Commercial Cherbourg'), '2023-11-21'),
+('13', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
+('14', (SELECT id FROM team WHERE label = 'Service Commercial Dieppe'), '2023-11-21'),
+('15', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21'),
+('16', (SELECT id FROM team WHERE label = 'Service Commercial Rouen'), '2023-11-21'),
+('17', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+('18', (SELECT id FROM team WHERE label = 'Service Commercial Caen'), '2023-11-21'),
+('19', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+('20', (SELECT id FROM team WHERE label = 'Service Commercial Le Havre'), '2023-11-21'),
+('21', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+('22', (SELECT id FROM team WHERE label = 'Service Commercial Cherbourg'), '2023-11-21'),
+('23', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
+('24', (SELECT id FROM team WHERE label = 'Service Commercial Dieppe'), '2023-11-21'),
+('25', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21');
+
+
+
+
+
+
+
 /* Seed pour la table device_vehicle_install - 25 associations dispositif/véhicule */
 INSERT INTO device_vehicle_install (device_id, vehicle_id, start_date) VALUES
 (1, '1', '2023-11-21'),
@@ -214,6 +246,11 @@ INSERT INTO vehicle_untracked_period (vehicle_id, start_date, end_date) VALUES
 INSERT INTO driver_untracked_period (driver_id, start_date, end_date) VALUES
 (5, '2023-11-01', NULL),
 (12, '2023-11-01', NULL);
+
+
+-- INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (1, 3 ,'01/01/2024' );
+-- INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (2, 4 ,'01/01/2024' );
+-- INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (3, 6 ,'01/01/2024' );
 
 
 

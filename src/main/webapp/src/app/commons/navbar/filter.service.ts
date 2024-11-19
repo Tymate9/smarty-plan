@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {HttpClient, HttpParams} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FilterService {
+
   // Utilisation de BehaviorSubject pour stocker les filtres
   private selectedFilters = new BehaviorSubject<{ [key: string]: string[] }>({
     agencies: [],
@@ -24,4 +26,6 @@ export class FilterService {
   getCurrentFilters() {
     return this.selectedFilters.getValue();
   }
+
+
 }

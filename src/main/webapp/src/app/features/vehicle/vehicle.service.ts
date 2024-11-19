@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { dto} from "../../../habarta/dto";
+import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -20,6 +21,17 @@ export class VehicleService {
   // Méthode pour récupérer tous les véhicules
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
+  }
+
+
+
+  //Méthode pour récupérer la liste de vehiclesDTO
+  getVehiclesList(agencyIds: string[] | null = null ): Observable<VehicleSummaryDTO[]> {
+    const params = {
+      agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
+    };
+    return this.http.get<VehicleSummaryDTO[]>(`${this.baseUrl}/list`, { params });
+
   }
 
   // Méthode pour récupérer les véhicules les plus proches avec leur distance
@@ -42,6 +54,19 @@ export class VehicleService {
   getVehicleInPolygon(polygonWKT: string): Observable<dto.VehicleSummaryDTO[]> {
     const params = { polygonWKT };
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}/inPolygon`, { params });
+  }
+
+  getFilteredVehicles(
+    teamLabels: string[]=[],
+    vehicleIds: string[]=[],
+    driverNames: string[]=[]
+  ): Observable<dto.VehicleSummaryDTO[]> {
+    const params={
+      teamLabels: teamLabels.length ? teamLabels : [],
+      vehicleIds: vehicleIds.length ? vehicleIds : [],
+      driverNames: driverNames.length ? driverNames : []
+    }
+    return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
 
 }

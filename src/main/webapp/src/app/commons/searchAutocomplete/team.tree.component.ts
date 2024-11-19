@@ -1,7 +1,11 @@
- import {Component, Input, Output, EventEmitter, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, Output, SimpleChanges} from "@angular/core";
 
+export interface Option {
+  label: string;
+  children?: Option[];  // Nested structure for child options
+}
 @Component({
-  selector: 'app-search-autocomplete',
+  selector: 'app-team-tree',
   template: `
     <div class="search-autocomplete">
       <div class="input-container">
@@ -19,10 +23,36 @@
           <button class="dropdown-button" (click)="toggleDropdown()">&#9662;</button> <!-- Bouton pour afficher les options -->
         </div>
       </div>
+
+      <!-- Display a flat list or hierarchical list based on data structure -->
       <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
-        <li *ngFor="let option of filteredOptions" (click)="selectOption(option)">
-          {{ option }}
-        </li>
+        <ng-container *ngFor="let option of filteredOptions">
+          <li>
+            <div (click)="selectOption(option.label)" [class.selected]="isSelected(option.label)">
+              {{ option.label }}
+            </div>
+
+            <!-- Check if option has children, if so display them -->
+            <ul *ngIf="option.children && option.children.length > 0">
+              <ng-container *ngFor="let child of option.children">
+                <li>
+                  <div (click)="selectOption(child.label)" [class.selected]="isSelected(child.label)">
+                    {{ child.label }}
+                  </div>
+                  <ul *ngIf="child.children && child.children.length > 0">
+                    <ng-container *ngFor="let subChild of child.children">
+                      <li>
+                        <div (click)="selectOption(subChild.label)" [class.selected]="isSelected(subChild.label)">
+                          {{ subChild.label }}
+                        </div>
+                      </li>
+                    </ng-container>
+                  </ul>
+                </li>
+              </ng-container>
+            </ul>
+          </li>
+        </ng-container>
       </ul>
     </div>
   `,
@@ -94,25 +124,23 @@
     }
   `]
 })
-export class SearchAutocompleteComponent {
+export class TeamTreeComponent {
   @Input() label: string = '';
-  @Input() options: string[] = [];
+  @Input() options: Option[] = [];
   @Input() selectedItems: string[] = [];
-  @Output() selectedTagsChange = new EventEmitter<string[]>();  // Émet les étiquettes sélectionnées
+  @Output() selectedTagsChange = new EventEmitter<string[]>();  // Emit selected tags
 
   searchText = '';
   selectedTags: string[] = [];
-  filteredOptions: string[] = [];
+  filteredOptions: Option[] = [];
   dropdownVisible: boolean = false;
 
-  // Filtre les options et exclut celles déjà sélectionnées
+  // Filtrer les options et exclure celles déjà sélectionnées
   onSearch() {
     this.filterOptions();
   }
 
-
   ngOnChanges(changes: SimpleChanges) {
-    // Detect changes in selectedItems and update selectedTags accordingly
     if (changes['selectedItems'] && changes['selectedItems'].currentValue !== this.selectedTags) {
       this.selectedTags = [...this.selectedItems]; // Reset selectedTags from parent
       this.filterOptions(); // Reapply filter to exclude selected items
@@ -122,40 +150,42 @@ export class SearchAutocompleteComponent {
   filterOptions() {
     if (this.searchText) {
       this.filteredOptions = this.options.filter(option =>
-        option.toLowerCase().includes(this.searchText.toLowerCase()) &&
-        !this.selectedTags.includes(option)
+        option.label.toLowerCase().includes(this.searchText.toLowerCase()) &&
+        !this.selectedTags.includes(option.label)
       );
     } else {
-      this.filteredOptions = this.options.filter(option => !this.selectedTags.includes(option));
+      this.filteredOptions = this.options.filter(option => !this.selectedTags.includes(option.label));
     }
   }
 
-  // Ajoute une option aux tags sélectionnés
+  // Add selected option to tags
   selectOption(option: string) {
     if (!this.selectedTags.includes(option)) {
       this.selectedTags.push(option);
-      this.selectedTagsChange.emit(this.selectedTags);  // Émet les tags sélectionnés
+      this.selectedTagsChange.emit(this.selectedTags);  // Emit selected tags
     }
     this.searchText = '';
     this.dropdownVisible = false;
     this.filterOptions();
   }
 
-  // Retire une étiquette
+  // Remove selected tag
   removeTag(tag: string) {
     this.selectedTags = this.selectedTags.filter(t => t !== tag);
-    this.selectedTagsChange.emit(this.selectedTags);  // Réémission après suppression
+    this.selectedTagsChange.emit(this.selectedTags);  // Re-emit after removal
     this.filterOptions();
   }
 
-  // Bascule l'affichage de la liste déroulante
+  // Toggle dropdown visibility
   toggleDropdown() {
     this.dropdownVisible = !this.dropdownVisible;
     if (this.dropdownVisible) {
       this.filterOptions();
     }
   }
+
+  // Check if option is selected
+  isSelected(option: string): boolean {
+    return this.selectedTags.includes(option);
+  }
 }
-
-
-

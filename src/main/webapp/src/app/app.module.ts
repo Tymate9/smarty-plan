@@ -24,6 +24,8 @@ import { CacheInterceptor } from "./core/cache/cache.interceptor";
 import { MapPopupComponent } from './features/map/popUp/map-popup.component';
 import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
 import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
+import {TeamTreeComponent} from "./commons/searchAutocomplete/team.tree.component";
+
 import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.component';
 
 @NgModule({
@@ -41,7 +43,8 @@ import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.comp
     MapPopupComponent,
     PoiPopupComponent,
     VehiclePopupComponent,
-    PoiManagerComponent
+    PoiManagerComponent,
+    TeamTreeComponent,
   ],
   imports: [
     BrowserModule,

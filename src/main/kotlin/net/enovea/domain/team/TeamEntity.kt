@@ -1,8 +1,11 @@
 package net.enovea.domain.team
 
+import io.quarkus.hibernate.orm.panache.Panache
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+import io.quarkus.panache.common.Parameters
 import jakarta.persistence.*
+import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle.VehicleTeamEntity
 import java.io.Serializable
@@ -45,5 +48,34 @@ class TeamEntity(
         companion object : PanacheCompanionBase<TeamEntity, Int> {
         const val ENTITY_NAME = "TeamEntity"
         const val TABLE_NAME = "team"
-    }
+
+
+        @Transactional
+        fun findByLabels(labels: List<String>): List<TeamEntity> {
+            val query = TeamEntity.find(
+                """SELECT t FROM TeamEntity t WHERE t.label IN :labels"""
+            .trimIndent(),
+            Parameters.with("labels",labels )
+            )
+            return query.list()
+        }
+
+            @Transactional
+            fun getAgencies(): List<String> {
+                val entityManager: EntityManager = Panache.getEntityManager()
+                val query = entityManager.createQuery(
+                    """
+                        SELECT t.label 
+                        FROM TeamEntity t
+                        JOIN t.category c 
+                        WHERE c.label = :categoryLabel
+                    """.trimIndent(),
+                    String::class.java
+                )
+                query.setParameter("categoryLabel", "Service")
+                return query.resultList
+            }
+
+   }
+
 }

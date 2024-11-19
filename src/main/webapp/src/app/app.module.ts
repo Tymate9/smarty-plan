@@ -43,7 +43,7 @@ import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.comp
     MapPopupComponent,
     PoiPopupComponent,
     VehiclePopupComponent,
-    PoiManagerComponent
+    PoiManagerComponent,
     TeamTreeComponent,
   ],
   imports: [

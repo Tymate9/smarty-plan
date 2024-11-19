@@ -284,6 +284,9 @@ export class LayerManager {
       case LayerEventType.RemoveAllDistances:
         // Implémentation manquante
         break;
+      case LayerEventType.DeleteAllMarkers:
+        this.deleteMarkers(event.payload.markerType);
+        break;
     }
   }
 
@@ -355,5 +358,20 @@ export class LayerManager {
     if (!this.clusterGroup.hasLayer(marker)) {
       this.clusterGroup.addLayer(marker);
     }
+  }
+
+
+  deleteMarkers(markerType: string): void {
+    // Remove only the markers with IDs starting with 'vehicle-' from the map
+   console.log('helloooooooooooooooo  ');
+    console.log(markerType);
+    console.log(this.markersMap)
+
+    this.markersMap.forEach((marker, id) => {
+      if (id.startsWith(markerType+'-')) {
+        this.removeMarker(id);
+        this.markersMap.delete(id);
+      }
+    });
   }
 }

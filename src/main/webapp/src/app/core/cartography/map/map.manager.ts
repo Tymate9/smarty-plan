@@ -122,12 +122,17 @@ export class MapManager {
         }
         break;
 
+
       case LayerEventType.RemoveMarker:
         const { entityType } = event.payload;
         const layerManager = this.getLayerManagerByType(entityType);
         if (layerManager) {
           layerManager.handleEvent(event);
         }
+        break;
+
+      case LayerEventType.DeleteAllMarkers:
+        this.layerManagers.forEach((layer)=>{layer.handleEvent(event)});
         break;
 
       default:
@@ -156,6 +161,7 @@ export class MapManager {
         break;
     }
   }
+
 
   private resetAllHighlights(): void {
     this.layerManagers.forEach((layer) => {

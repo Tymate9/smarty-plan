@@ -5,10 +5,11 @@ import {PoiService} from "../poi/poi.service";
 import {VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import 'leaflet.markercluster';
-import {MapManager} from "../../../core/map.manager";
-import {FilterService} from "../../../commons/navbar/filter.service";
+
 import {MapManager} from "../../core/cartography/map/map.manager";
 import {GeocodingService} from "../../commons/geo/geo-coding.service";
+import {FilterService} from "../../commons/navbar/filter.service";
+import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
 
 
 @Component({
@@ -34,7 +35,6 @@ export class MapComponent implements OnInit {
               private readonly poiService: PoiService,
               private readonly vehicleService: VehicleService,
               private readonly geoCodingService: GeocodingService,
-              private readonly vehicleService: VehicleService,
               private readonly filterService:FilterService) {}
 
   ngOnInit(): void {
@@ -132,7 +132,14 @@ export class MapComponent implements OnInit {
 
   private displayFilteredVehiclesOnMap(vehicles: dto.VehicleSummaryDTO[]): void {
 
-    this.mapManager.deleteMarkers();
+   // this.mapManager.deleteMarkers();
+    const event : LayerEvent = {
+      type : LayerEventType.DeleteAllMarkers,
+        payload: {
+          markerType :'vehicle'
+        }
+    }
+    this.mapManager.handleLayerEvent(event,null)
 
     // Reset unTrackedVehicle list for each filter change
     this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";

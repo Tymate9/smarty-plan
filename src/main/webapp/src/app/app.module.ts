@@ -27,6 +27,7 @@ import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-
 import {TeamTreeComponent} from "./commons/searchAutocomplete/team.tree.component";
 
 import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.component';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.comp
     AppRoutingModule,
     KeycloakAngularModule,
     HttpClientModule,
+    ButtonModule,
   ],
   providers: [{
     provide: APP_INITIALIZER,

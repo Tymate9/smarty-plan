@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@angular/cdk": "^18.2.14",
+    "@angular/material": "^18.2.14",
+    "@angular/router": "^18.2.12",
+    "primeflex": "^3.3.1",
+    "primeicons": "^7.0.0",
+    "primeng": "^17.18.12"
+  }
+}

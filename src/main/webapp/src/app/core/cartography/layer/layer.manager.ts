@@ -7,6 +7,40 @@ import {PoiPopupComponent} from "../../../features/poi/poi-popup/poi-popup.compo
 import {VehiclePopupComponent} from "../../../features/vehicle/vehicle-popup/vehicle-popup.component";
 import {PopUpConfig} from "../marker/pop-up-config";
 
+
+export class CustomPopup extends L.Popup {
+  constructor(options?: L.PopupOptions, source?: L.Layer) {
+    super(options, source);
+    this.options.autoPan = false; // Disable auto panning
+    this.options.closeButton = true;
+    this.options.className = 'fixed-popup';
+  }
+
+  _updatePosition() {
+    if (!this._map) {
+      return;
+    }
+
+    const mapSize = this._map.getSize();
+
+    // Accessing _container via type casting
+    const container = (this as any)._container as HTMLElement;
+    if (!container) {
+      return;
+    }
+
+    const popupWidth = container.offsetWidth;
+    const popupHeight = container.offsetHeight;
+
+    // Calculate the position for the top-right corner with a 10px margin
+    const topRightPoint = this._map.containerPointToLayerPoint([mapSize.x - popupWidth - 10, 10]);
+
+    // Apply the position
+    L.DomUtil.setPosition(container, topRightPoint);
+  }
+}
+
+
 export class LayerManager {
   readonly markersMap: Map<string, CustomMarker> = new Map();
   private readonly highlightedMarkers: Set<string> = new Set();

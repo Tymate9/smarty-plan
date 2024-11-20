@@ -41,7 +41,6 @@ import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
         <!-- Onglet POI -->
         <div *ngIf="activeTab === 'poi' && popUpConfig.isTabEnabled(entityType, 'poi')">
           <p>Liste des POIs les plus proches :</p>
-          <button (click)="showAllHighlightedMarkers()">Recentrer sur les POI Mis en surbrillance</button>
           <ul>
             <li *ngFor="let poi of nearbyPOIs">
               <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
@@ -146,6 +145,7 @@ export class VehiclePopupComponent implements OnInit {
       type: eventType,
       payload: { markerID: markerId }
     });
+    this.showAllHighlightedMarkers()
   }
 
   isMarkerHighlighted(markerId: string): boolean {

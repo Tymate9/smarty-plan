@@ -64,7 +64,6 @@ import {Router} from "@angular/router";
           Aucun véhicule trouvé à proximité.
         </div>
         <ul *ngIf="!loadingProximity && proximityVehicles.length > 0">
-          <button (click)="centerMapAroundAllMarkers()">Afficher tous les marqueurs mis en évidence</button>
           <li *ngFor="let vehicle of proximityVehicles">
             <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
             <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
@@ -399,6 +398,7 @@ export class PoiPopupComponent implements OnInit {
       type: eventType,
       payload: { markerID: markerId }
     });
+    this.centerMapAroundAllMarkers()
   }
 
   isMarkerHighlighted(markerId: string): boolean {

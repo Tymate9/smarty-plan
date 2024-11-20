@@ -21,6 +21,7 @@ import DriverDTO = dto.DriverDTO;
       <div class="nav-buttons">
         <button class="transparent-blur-bg" (click)="navigateTo('dashboard')">État de parc</button>
         <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
+        <button class="transparent-blur-bg" (click)="navigateTo('poiedit')">Créer un POI</button>
       </div>
 
       <div class="filters">
@@ -263,11 +264,13 @@ export class NavbarComponent implements OnInit {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
-
-  logout() {
+/*logout() {
   this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
   }
-  // logout() {
-  //   this.keycloakService.logout("http://localhost:8080/")
-  // }
+  */
+
+  logout() {
+    this.keycloakService.logout("http://localhost:8080/")
+
+  }
 }

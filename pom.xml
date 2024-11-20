@@ -477,7 +477,9 @@
                     <compileSourceRoots>${project.basedir}/target/generated-sources/kapt/compile</compileSourceRoots>
                 </configuration>
             </plugin>
+
         </plugins>
+
     </build>
 
     <profiles>

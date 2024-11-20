@@ -13,6 +13,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import DriverDTO = dto.DriverDTO;
 
 
+
 @Component({
   selector: 'app-navbar',
   template: `
@@ -21,6 +22,7 @@ import DriverDTO = dto.DriverDTO;
         <button class="transparent-blur-bg" (click)="navigateTo('dashboard')">État de parc</button>
         <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
       </div>
+
       <div class="filters">
 
         <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-team-tree>
@@ -261,11 +263,11 @@ export class NavbarComponent implements OnInit {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
+
   logout() {
   this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
   }
-/*  logout() {
-    this.keycloakService.logout("http://localhost:8080/")
-
-  }*/
+  // logout() {
+  //   this.keycloakService.logout("http://localhost:8080/")
+  // }
 }

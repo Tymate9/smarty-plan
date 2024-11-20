@@ -363,7 +363,6 @@ export class LayerManager {
 
   deleteMarkers(markerType: string): void {
     // Remove only the markers with IDs starting with 'vehicle-' from the map
-   console.log('helloooooooooooooooo  ');
     console.log(markerType);
     console.log(this.markersMap)
 

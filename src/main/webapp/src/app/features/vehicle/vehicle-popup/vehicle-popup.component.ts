@@ -5,168 +5,121 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.
 import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 
+
 @Component({
   selector: 'app-vehicle-popup',
   template: `
     <div class="vehicle-popup">
-      <div class="tabs">
-        <button
-          *ngIf="popUpConfig.isTabEnabled(entityType, 'information')"
-          [class.active]="activeTab === 'information'"
-          (click)="selectTab('information')"
-        >
-          Information
-        </button>
-        <button
-          *ngIf="popUpConfig.isTabEnabled(entityType, 'poi')"
-          [class.active]="activeTab === 'poi'"
-          (click)="selectTab('poi')"
-        >
-          POI
-        </button>
-      </div>
-
-      <div class="tab-content">
+      <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
         <!-- Onglet Information -->
-        <div *ngIf="activeTab === 'information' && popUpConfig.isTabEnabled(entityType, 'information')">
+        <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
           <h4>{{ entity.licenseplate }}</h4>
-          <p>
-            <strong>Conducteur:</strong> {{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}
-          </p>
-          <p><strong>Équipe:</strong> {{ entity.team.label }}</p>
-          <p><strong>Catégorie:</strong> {{ entity.category.label }}</p>
-          <p><strong>Dernière communication:</strong> {{ entity.device.lastCommunicationDate | date:'short' }}</p>
-        </div>
+          <div class="p-field">
+            <label><strong>Conducteur:</strong></label>
+            <span>{{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}</span>
+          </div>
+          <div class="p-field">
+            <label><strong>Équipe:</strong></label>
+            <span>{{ entity.team.label }}</span>
+          </div>
+          <div class="p-field">
+            <label><strong>Catégorie:</strong></label>
+            <span>{{ entity.category.label }}</span>
+          </div>
+          <div class="p-field">
+            <label><strong>Dernière communication:</strong></label>
+            <span>{{ entity.device.lastCommunicationDate | date:'short' }}</span>
+          </div>
+        </p-tabPanel>
 
         <!-- Onglet POI -->
-        <div *ngIf="activeTab === 'poi' && popUpConfig.isTabEnabled(entityType, 'poi')">
-          <p>Liste des POIs les plus proches :</p>
-          <ul>
-            <li *ngFor="let poi of nearbyPOIs">
-              <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
-              <button type="button" (click)="centerMapOnPOI(poi.poi)">Centrer sur ce POI</button>
-              <button
-                (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
-                [class.active]="isMarkerHighlighted('poi-' + poi.poi.id)"
-              >
-                {{ isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
+        <p-tabPanel header="POI" *ngIf="popUpConfig.isTabEnabled(entityType, 'poi')">
+          <h4>Liste des POIs les plus proches :</h4>
+          <p-progressSpinner *ngIf="loadingNearbyPOIs" styleClass="custom-spinner"></p-progressSpinner>
+          <p *ngIf="!loadingNearbyPOIs && nearbyPOIs.length === 0">
+            Aucun POI trouvé à proximité.
+          </p>
+          <div *ngIf="!loadingNearbyPOIs && nearbyPOIs.length > 0">
+            <div *ngFor="let poi of nearbyPOIs" class="poi-item">
+              <div>
+                <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
+              </div>
+              <div class="poi-actions">
+                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus" (click)="centerMapOnPOI(poi.poi)"></button>
+                <button
+                  pButton
+                  [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
+                  [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                  (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
+                ></button>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
     </div>
-
   `,
   styles: [`
-    .active {
-      background-color: #007bff;
-      color: white;
-    }
     .vehicle-popup {
-      width: 300px;
     }
-    .tabs {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
+    .p-field {
+      margin-bottom: 1rem;
     }
-    .tabs button {
-      flex: 1;
-      padding: 10px;
-      cursor: pointer;
-      background-color: #f1f1f1;
-      border: none;
-      outline: none;
-      transition: background-color 0.3s;
-    }
-    .tabs button:not(:last-child) {
-      border-right: 1px solid #ccc;
-    }
-    .tabs button.active {
-      background-color: #ccc;
-      font-weight: bold;
-    }
-    .tabs button:hover {
-      background-color: #ddd;
-    }
-    .tab-content {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-top: none;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    li {
+    .poi-item {
       border: 1px solid #ccc;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
     }
-    button {
-      margin-top: 5px;
+    .poi-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 5px;
+    }
+    .custom-spinner {
+      display: block;
+      margin: 0 auto;
     }
   `]
 })
 export class VehiclePopupComponent implements OnInit {
-  //TODO(retravailler sur le système de config)
   @Input() popUpConfig: PopUpConfig;
   entityType: EntityType = EntityType.VEHICLE;
   @Input() entity: dto.VehicleSummaryDTO;
   @Output() layerEvent = new EventEmitter<LayerEvent>();
   nearbyPOIs: any[] = [];
-  activeTab: string = 'information'; // Onglet par défaut
-  highlightedStates: { [markerId: string]: boolean } = {};
+  loadingNearbyPOIs: boolean = false;
 
+  activeTabIndex: number = 0;
+  tabNames: string[] = ['information', 'poi'];
+  highlightedStates: { [markerId: string]: boolean } = {};
 
   constructor(private poiService: PoiService) {}
 
-  showAllHighlightedMarkers() {
-    this.layerEvent.emit({
-      type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
-      payload: {
-        lat: this.entity.device.coordinate?.coordinates[1] ?? 0.0,
-        lng: this.entity.device.coordinate?.coordinates[0] ?? 0.0,
-      }
-    });
-  }
-
-  toggleHighlightMarker(markerId: string) {
-    // Basculer l'état de surbrillance
-    this.highlightedStates[markerId] = !this.highlightedStates[markerId];
-    // Déterminer le type d'événement en fonction de l'état
-    const eventType = this.highlightedStates[markerId]
-      ? LayerEventType.HighlightMarker
-      : LayerEventType.RemoveHighlightMarker;
-    // Émettre l'événement
-    this.layerEvent.emit({
-      type: eventType,
-      payload: { markerID: markerId }
-    });
-    this.showAllHighlightedMarkers()
-  }
-
-  isMarkerHighlighted(markerId: string): boolean {
-    return this.highlightedStates[markerId] || false;
-  }
-
   ngOnInit() {
-    this.loadNearbyPOIs()
+    // Initialiser l'onglet actif
+    this.activeTabIndex = this.tabNames.indexOf('information');
+    // Charger les POIs si l'onglet POI est activé par défaut
+    if (this.activeTabIndex === this.tabNames.indexOf('poi')) {
+      this.loadNearbyPOIs();
+    }
+  }
+
+  onTabChange(event: any) {
+    this.activeTabIndex = event.index;
+    const tabName = this.tabNames[this.activeTabIndex];
+    this.selectTab(tabName);
   }
 
   selectTab(tab: string) {
-    this.activeTab = tab;
-    if (tab === 'information') {
-      // Aucune action supplémentaire nécessaire pour l'onglet Information
-    }
-    if (tab === 'poi' && this.nearbyPOIs.length === 0) {
+    this.activeTabIndex = this.tabNames.indexOf(tab);
+    if (tab === 'poi' && this.nearbyPOIs.length === 0 && !this.loadingNearbyPOIs) {
       this.loadNearbyPOIs();
     }
   }
 
   loadNearbyPOIs() {
+    this.loadingNearbyPOIs = true;
     const latitude = this.entity.device.coordinate?.coordinates[1] ?? 0.0;
     const longitude = this.entity.device.coordinate?.coordinates[0] ?? 0.0;
     this.poiService.getNearestPOIsWithDistance(latitude, longitude, 3).subscribe({
@@ -177,9 +130,11 @@ export class VehiclePopupComponent implements OnInit {
             poi: pair.second,
           };
         });
+        this.loadingNearbyPOIs = false;
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des POIs les plus proches:', error);
+        this.loadingNearbyPOIs = false;
       },
     });
   }
@@ -191,4 +146,31 @@ export class VehiclePopupComponent implements OnInit {
       payload: { coordinates }
     });
   }
+
+  toggleHighlightMarker(markerId: string) {
+    this.highlightedStates[markerId] = !this.highlightedStates[markerId];
+    const eventType = this.highlightedStates[markerId]
+      ? LayerEventType.HighlightMarker
+      : LayerEventType.RemoveHighlightMarker;
+    this.layerEvent.emit({
+      type: eventType,
+      payload: { markerID: markerId }
+    });
+    this.showAllHighlightedMarkers();
+  }
+
+  isMarkerHighlighted(markerId: string): boolean {
+    return this.highlightedStates[markerId] || false;
+  }
+
+  showAllHighlightedMarkers() {
+    this.layerEvent.emit({
+      type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
+      payload: {
+        lat: this.entity.device.coordinate?.coordinates[1] ?? 0.0,
+        lng: this.entity.device.coordinate?.coordinates[0] ?? 0.0,
+      }
+    });
+  }
 }
+

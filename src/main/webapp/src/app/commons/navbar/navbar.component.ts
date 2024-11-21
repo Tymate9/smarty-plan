@@ -209,9 +209,6 @@ export class NavbarComponent implements OnInit {
   removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
     // Get all agency IDs to remove (including children)
     let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
-
-    console.log('agenciesToRemove', agenciesToRemove)
-
     const vehiclesToRemove = this.vehicleOptions
       .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
       .map(vehicle => vehicle.licenseplate);

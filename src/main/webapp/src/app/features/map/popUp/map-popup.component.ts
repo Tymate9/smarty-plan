@@ -24,17 +24,7 @@ import {GeoJSONGeometry} from "wellknown";
       >
         POI
       </button>
-      <button
-        [class.active]="activeTab === 'creation'"
-        (click)="selectTab('creation')"
-      >
-        Création
-      </button>
-    </div>
-
-    <!-- Bouton pour voir tous les marqueurs mis en surbrillance -->
-    <div class="view-all-button" *ngIf="activeTab === 'vehicule' || activeTab === 'poi'">
-      <button (click)="onViewAllHighlightedMarkers()">Voir tous les marqueurs mis en surbrillance</button>
+      <button onclick="window.location.href='/poiedit'">Créer un POI</button>
     </div>
 
     <div class="tab-content">
@@ -184,6 +174,7 @@ export class MapPopupComponent implements OnInit {
       type: eventType,
       payload: { markerID: markerId }
     });
+    this.onViewAllHighlightedMarkers()
   }
 
   submitPOI() {
@@ -281,7 +272,8 @@ export class MapPopupComponent implements OnInit {
     this.layerEvent.emit({
       type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
       payload: { lat: this.latitude, lng: this.longitude }
-    });  }
+    });
+  }
 
   centerMapOnVehicle(vehicle: dto.VehicleSummaryDTO) {
     const coordinates = vehicle.device?.coordinate?.coordinates;

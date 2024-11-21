@@ -21,6 +21,7 @@ import DriverDTO = dto.DriverDTO;
       <div class="nav-buttons">
         <button class="transparent-blur-bg" (click)="navigateTo('dashboard')">État de parc</button>
         <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
+        <button class="transparent-blur-bg" (click)="navigateTo('poiedit')">Créer un POI</button>
       </div>
 
       <div class="filters">
@@ -208,9 +209,6 @@ export class NavbarComponent implements OnInit {
   removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
     // Get all agency IDs to remove (including children)
     let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
-
-    console.log('agenciesToRemove', agenciesToRemove)
-
     const vehiclesToRemove = this.vehicleOptions
       .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
       .map(vehicle => vehicle.licenseplate);
@@ -263,11 +261,12 @@ export class NavbarComponent implements OnInit {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
-
   logout() {
-  this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
+    this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
   }
-  // logout() {
-  //   this.keycloakService.logout("http://localhost:8080/")
-  // }
+
+/*  logout() {
+    this.keycloakService.logout("http://localhost:8080/")
+
+  }*/
 }

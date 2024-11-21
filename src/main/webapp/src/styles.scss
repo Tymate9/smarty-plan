@@ -56,4 +56,67 @@ body {
   }
 }
 
+.fixed-control-container {
+  @extend .transparent-blur-bg; // Hérite des styles de .transparent-blur-bg
+  padding: 10px;
+  display: inline-block;
+}
 
+.fixed-control-container .close-button {
+  display: block;
+  margin-bottom: 10px;
+  background: #ff5e5e;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.fixed-control-container .close-button:hover {
+  background: #ff3b3b;
+}
+
+/* Style pour le marqueur sélectionné */
+.selected-marker {
+  transform: scale(1.5);
+  background-color: gold;
+  border-radius: 50%;
+}
+
+/* Si vos marqueurs utilisent des images, vous pouvez cibler l'élément img */
+.selected-marker img {
+  transform: scale(1.5);
+  background-color: gold;
+  border-radius: 50%;
+}
+.selected-marker svg {
+  transform: scale(1.5);
+  background-color: gold;
+  border-radius: 50%;
+}
+
+.required {
+  color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.primary-button {
+  background-color: #007ad9;
+  color: white;
+}
+
+.danger-button {
+  background-color: #d90000;
+  color: white;
+}
+
+.secondary-button {
+  background-color: #6c757d;
+  color: white;
+}

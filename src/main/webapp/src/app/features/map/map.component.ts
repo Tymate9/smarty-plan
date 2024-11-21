@@ -124,7 +124,6 @@ export class MapComponent implements OnInit {
         .subscribe(filteredVehicles => {
 
           // Handle the filtered vehicles here, for example by updating the map markers
-          console.log("Filtered vehicles received:", filteredVehicles);
           this.displayFilteredVehiclesOnMap(filteredVehicles);
         });
     });

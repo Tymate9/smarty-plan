@@ -28,6 +28,9 @@ import {TeamTreeComponent} from "./commons/searchAutocomplete/team.tree.componen
 
 import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.component';
 import { ButtonModule } from 'primeng/button';
+import {DropdownModule} from "primeng/dropdown";
+import {TabViewModule} from "primeng/tabview";
+import {ProgressSpinnerModule} from "primeng/progressspinner";
 
 @NgModule({
   declarations: [
@@ -54,6 +57,9 @@ import { ButtonModule } from 'primeng/button';
     KeycloakAngularModule,
     HttpClientModule,
     ButtonModule,
+    DropdownModule,
+    TabViewModule,
+    ProgressSpinnerModule,
   ],
   providers: [{
     provide: APP_INITIALIZER,

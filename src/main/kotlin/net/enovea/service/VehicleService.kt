@@ -39,8 +39,6 @@ class VehicleService (
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
-        val allVehicles = VehicleEntity.listAll()
-
         val trackedVehicles = allVehicles.filter { vehicle ->
             val isVehicleTracked = vehicle.id !in untrackedVehicleIds
 

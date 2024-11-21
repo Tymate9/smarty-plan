@@ -39,7 +39,6 @@ export class TeamService {
         teamTree.push(teamMap.get(team.id));
       }
     });
-    console.log(teamTree)
     return teamTree;
   }
 }

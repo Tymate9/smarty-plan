@@ -148,7 +148,7 @@ export class LayerManager {
 
   }
 
-  private static onMapClick(e: L.LeafletMouseEvent): void {
+  private static onMapClick(): void {
     LayerManager.closeSharedControl();
   }
 
@@ -168,7 +168,6 @@ export class LayerManager {
     marker.on('click', () => {
       // Déplacer le marqueur vers le groupe non clusterisé
       this.moveMarkerToUnclusteredGroup(marker);
-
       // Ouvrir le contrôle personnalisé avec le composant approprié
       this.openFixedControl(marker);
     });

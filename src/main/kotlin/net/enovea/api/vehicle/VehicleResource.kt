@@ -29,9 +29,24 @@ class VehicleResource(
     private val vehicleSummaryMapper: VehicleSummaryMapper = VehicleSummaryMapper.INSTANCE
 
     @GET
-    fun getAllVehiclesDetails(): List<VehicleSummaryDTO> {
-        return vehicleService.getVehiclesSummary()
+    @Path("/list")
+    fun getVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<VehicleSummaryDTO> {
+        return vehicleService.getVehiclesList(agencyIds)
     }
+
+    @GET
+    fun getFilteredVehicles(
+        @QueryParam("teamLabels") teamLabels: List<String>?,
+        @QueryParam("vehicleIds") vehicleIds: List<String>?,
+        @QueryParam("driverNames") driverNames: List<String>?
+    ):
+            List<VehicleSummaryDTO> {
+        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
+        val vehicleSummaries = vehicleService.getVehiclesSummary(filteredVehicles)
+        return vehicleSummaries
+    }
+
+
 
     @GET
     @Path("/nearest")
@@ -151,5 +166,9 @@ class VehicleResource(
 
         return vehicles
     }
+
+
+
+
 
 }

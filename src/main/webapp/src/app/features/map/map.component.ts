@@ -5,8 +5,11 @@ import {PoiService} from "../poi/poi.service";
 import {VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import 'leaflet.markercluster';
+
 import {MapManager} from "../../core/cartography/map/map.manager";
 import {GeocodingService} from "../../commons/geo/geo-coding.service";
+import {FilterService} from "../../commons/navbar/filter.service";
+import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
 
 
 @Component({
@@ -31,18 +34,19 @@ export class MapComponent implements OnInit {
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
               private readonly vehicleService: VehicleService,
-              private readonly geoCodingService: GeocodingService) {}
+              private readonly geoCodingService: GeocodingService,
+              private readonly filterService:FilterService) {}
 
   ngOnInit(): void {
     this.initMap();
     this.loadPOIs();
-    this.loadVehicles();
-
+   // this.loadVehicles();
+    this.subscribeToFilterChanges();
   }
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 8);
+    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
     //Todo(Ajouter au mapmgm)
@@ -88,6 +92,71 @@ export class MapComponent implements OnInit {
       }
     });
   }
+
+  private loadFilteredVehicles(): void {
+    this.filterService.filters$.subscribe((filters) => {
+      this.vehicleService.getFilteredVehicles(filters['teamLabels'], filters['vehicleIds'], filters['driverNames']).subscribe({
+        next: (vehicles: dto.VehicleSummaryDTO[]) => {
+          vehicles.forEach(vehicle => {
+            if (vehicle.device && vehicle.device.coordinate) {
+
+              const marker = this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
+            }
+            else {
+              this.unTrackedVehicle += `${vehicle.licenseplate} /// `
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Erreur lors de la récupération des véhicules:', error);
+        }
+      });
+    });
+
+  }
+
+  private subscribeToFilterChanges(): void {
+    this.filterService.filters$.subscribe(filters => {
+      const { agencies, vehicles, drivers } = filters;
+
+      // Call getFilteredVehicles each time filters change
+      this.vehicleService.getFilteredVehicles(agencies, vehicles, drivers)
+        .subscribe(filteredVehicles => {
+
+          // Handle the filtered vehicles here, for example by updating the map markers
+          this.displayFilteredVehiclesOnMap(filteredVehicles);
+        });
+    });
+  }
+
+  private displayFilteredVehiclesOnMap(vehicles: dto.VehicleSummaryDTO[]): void {
+
+   // this.mapManager.deleteMarkers();
+    const event : LayerEvent = {
+      type : LayerEventType.DeleteAllMarkers,
+        payload: {
+          markerType :'vehicle'
+        }
+    }
+    this.mapManager.handleLayerEvent(event,null)
+
+    // Reset unTrackedVehicle list for each filter change
+    this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";
+
+    // Display new markers on the map based on the filtered vehicles
+    vehicles.forEach(vehicle => {
+
+      if (vehicle.device && vehicle.device.coordinate) {
+
+        const marker = this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
+      }
+      else {
+        this.unTrackedVehicle += `${vehicle.licenseplate} /// `
+      }
+    });
+
+  }
+
 
 }
 

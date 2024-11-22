@@ -66,7 +66,7 @@ CREATE TABLE driver
     first_name          VARCHAR(255) NOT NULL,
     last_name           VARCHAR(255) NOT NULL,
     phone_number        VARCHAR(10)
-    --allowed_tracking BOOLEAN      NOT NULL DEFAULT true
+
 );
 
 /* ===========================
@@ -143,6 +143,17 @@ create table vehicle_driver
     end_date       timestamp,
     primary key (vehicle_id, driver_id, start_date)
 );
+/* ===========================
+     Table: Driver_Team
+   =========================== */
+create table driver_team
+(
+    driver_id integer not null references driver,
+    team_id integer     not null references team,
+    start_date       timestamp   not null,
+    end_date       timestamp,
+    primary key (driver_id, team_id, start_date)
+);
 
 /* ===========================
      Table: Device
@@ -160,7 +171,7 @@ create table device
     last_data_date          timestamp,
     comment                 text,
     last_communication_date timestamp,
-    active                  boolean default true NOT NULL,
+    enabled                  boolean default true NOT NULL,
     coordinate              GEOGRAPHY(Point, 4326) NOT NULL
 );
 
@@ -228,6 +239,10 @@ create table vehicle_maintenance
     vehicle_id          VARCHAR(36)        NOT NULL references vehicle
 );
 
+/* ========================
+      Table : Vehicle untracked period
+   ======================== */
+
 CREATE TABLE vehicle_untracked_period (
     vehicle_id          VARCHAR(36)        NOT NULL references vehicle,
     start_date TIMESTAMP NOT NULL,
@@ -235,9 +250,29 @@ CREATE TABLE vehicle_untracked_period (
     primary key (vehicle_id, start_date)
 );
 
+/* ========================
+      Table : Driver untracked period
+   ======================== */
+
 CREATE TABLE driver_untracked_period (
     driver_id          INT        NOT NULL references driver,
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP,
     primary key (driver_id, start_date)
+);
+
+-- ===================================================
+-- ==            Device state table
+-- ===================================================
+
+CREATE TABLE IF NOT EXISTS device_data_state
+(
+    device_id INTEGER PRIMARY KEY,
+    state  VARCHAR(128) NULL,
+    first_comm_time TIMESTAMP WITH TIME ZONE NULL,
+    last_comm_time TIMESTAMP WITH TIME ZONE NULL,
+    last_received_data_time TIMESTAMP WITH TIME ZONE NULL,
+    last_position GEOMETRY NULL,
+    last_position_time TIMESTAMP WITH TIME ZONE NULL,
+    FOREIGN KEY (device_id) REFERENCES device(id)
 );

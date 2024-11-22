@@ -2,6 +2,7 @@ package net.enovea.domain.driver
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle.VehicleDriverEntity
 
@@ -29,7 +30,15 @@ data class DriverEntity(
     mappedBy = "driver",
     cascade = [CascadeType.ALL, CascadeType.REMOVE]
     )
-    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf()
+    val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf(),
+
+    @OneToMany(
+    fetch = FetchType.LAZY,
+    mappedBy = "driver",
+    cascade = [CascadeType.ALL, CascadeType.REMOVE]
+    )
+    val driverTeams: List<DriverTeamEntity> = mutableListOf(),
+
 
 
 ) : PanacheEntityBase {
@@ -37,5 +46,10 @@ data class DriverEntity(
     companion object : PanacheCompanionBase<DriverEntity, Int> {
         const val ENTITY_NAME = "DriverEntity"
         const val TABLE_NAME = "driver"
+
+        @Transactional
+        fun findByFullNames(fullNames: List<String>): List<DriverEntity> {
+            return list("CONCAT(firstName, ' ', lastName) IN ?1", fullNames)
+        }
     }
 }

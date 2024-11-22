@@ -1,9 +1,9 @@
 
 /* Seed pour la table vehicle_category */
 INSERT INTO vehicle_category (label) VALUES
-('Voiture'),
-('Camionette'),
-('Camion');
+('VGP'),
+('VU'),
+('PL');
 
 /* Seed pour la table team_category */
 INSERT INTO team_category (label) VALUES
@@ -34,31 +34,31 @@ INSERT INTO team (label, category_id, parent_id) VALUES
 
 /* Seed pour la table vehicle - 25 véhicules */
 INSERT INTO vehicle (id, energy, engine, externalid, licenseplate, category_id, validated) VALUES
-('1', 'Diesel', 'V6', 'ext1', 'AA-123-AA', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('2', 'Essence', 'V8', 'ext2', 'BB-456-BB', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('3', 'Electrique', 'EV', 'ext3', 'CC-789-CC', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('6', 'Diesel', 'V8', 'ext6', 'FF-303-FF', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('4', 'Diesel', 'V6', 'ext4', 'DD-101-DD', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('5', 'Essence', 'V6', 'ext5', 'EE-202-EE', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('7', 'Electrique', 'EV', 'ext7', 'GG-404-GG', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('8', 'Essence', 'V6', 'ext8', 'HH-505-HH', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('9', 'Diesel', 'V6', 'ext9', 'II-606-II', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('10', 'Electrique', 'EV', 'ext10', 'JJ-707-JJ', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('11', 'Essence', 'V8', 'ext11', 'KK-808-KK', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('12', 'Diesel', 'V6', 'ext12', 'LL-909-LL', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('13', 'Electrique', 'EV', 'ext13', 'MM-010-MM', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('14', 'Essence', 'V8', 'ext14', 'NN-111-NN', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('15', 'Diesel', 'V6', 'ext15', 'OO-212-OO', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('16', 'Electrique', 'EV', 'ext16', 'PP-313-PP', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('17', 'Essence', 'V6', 'ext17', 'QQ-414-QQ', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('18', 'Diesel', 'V8', 'ext18', 'RR-515-RR', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('19', 'Electrique', 'EV', 'ext19', 'SS-616-SS', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('20', 'Essence', 'V6', 'ext20', 'TT-717-TT', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('21', 'Diesel', 'V6', 'ext21', 'UU-818-UU', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('22', 'Electrique', 'EV', 'ext22', 'VV-919-VV', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true),
-('23', 'Essence', 'V8', 'ext23', 'WW-020-WW', (SELECT id FROM vehicle_category WHERE label = 'Camionette'), true),
-('24', 'Diesel', 'V8', 'ext24', 'XX-121-XX', (SELECT id FROM vehicle_category WHERE label = 'Camion'), true),
-('25', 'Electrique', 'EV', 'ext25', 'YY-222-YY', (SELECT id FROM vehicle_category WHERE label = 'Voiture'), true);
+('1', 'Diesel', 'V6', 'ext1', 'AA-123-AA', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('2', 'Essence', 'V8', 'ext2', 'BB-456-BB', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('3', 'Electrique', 'EV', 'ext3', 'CC-789-CC', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('6', 'Diesel', 'V8', 'ext6', 'FF-303-FF', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('4', 'Diesel', 'V6', 'ext4', 'DD-101-DD', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('5', 'Essence', 'V6', 'ext5', 'EE-202-EE', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('7', 'Electrique', 'EV', 'ext7', 'GG-404-GG', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('8', 'Essence', 'V6', 'ext8', 'HH-505-HH', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('9', 'Diesel', 'V6', 'ext9', 'II-606-II', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('10', 'Electrique', 'EV', 'ext10', 'JJ-707-JJ', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('11', 'Essence', 'V8', 'ext11', 'KK-808-KK', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('12', 'Diesel', 'V6', 'ext12', 'LL-909-LL', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('13', 'Electrique', 'EV', 'ext13', 'MM-010-MM', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('14', 'Essence', 'V8', 'ext14', 'NN-111-NN', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('15', 'Diesel', 'V6', 'ext15', 'OO-212-OO', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('16', 'Electrique', 'EV', 'ext16', 'PP-313-PP', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('17', 'Essence', 'V6', 'ext17', 'QQ-414-QQ', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('18', 'Diesel', 'V8', 'ext18', 'RR-515-RR', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('19', 'Electrique', 'EV', 'ext19', 'SS-616-SS', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('20', 'Essence', 'V6', 'ext20', 'TT-717-TT', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('21', 'Diesel', 'V6', 'ext21', 'UU-818-UU', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('22', 'Electrique', 'EV', 'ext22', 'VV-919-VV', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true),
+('23', 'Essence', 'V8', 'ext23', 'WW-020-WW', (SELECT id FROM vehicle_category WHERE label = 'VU'), true),
+('24', 'Diesel', 'V8', 'ext24', 'XX-121-XX', (SELECT id FROM vehicle_category WHERE label = 'PL'), true),
+('25', 'Electrique', 'EV', 'ext25', 'YY-222-YY', (SELECT id FROM vehicle_category WHERE label = 'VGP'), true);
 
 /* Seed pour la table device - 25 dispositifs */
 -- Les coordonnées sont aléatoires mais situées en Normandie
@@ -115,9 +115,7 @@ INSERT INTO driver (first_name, last_name, phone_number) VALUES
 ('Taylor', 'Lewis', '0600000022'),
 ('Uma', 'Lee', '0600000023'),
 ('Victor', 'Walker', '0600000024'),
-('Wendy', 'Hall', '0600000025'),
-('Xavier', 'Allen', '0600000026'),
-('Yasmine', 'Young', '0600000027');
+('Wendy', 'Hall', '0600000025');
 
 INSERT INTO vehicle_driver (vehicle_id, driver_id, start_date) VALUES
 ('1', 1, '2023-11-21'),
@@ -176,6 +174,40 @@ INSERT INTO vehicle_team (vehicle_id, team_id, start_date) VALUES
 ('25', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21');
 
 
+/* Seed pour la table driver_team - 25 associations conducteur/équipe */
+INSERT INTO driver_team (driver_id, team_id, start_date) VALUES
+('1', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21'),
+('2', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+('3', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+('4', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+('5', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
+('6', (SELECT id FROM team WHERE label = 'Service Commercial Rouen'), '2023-11-21'),
+('7', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+('8', (SELECT id FROM team WHERE label = 'Service Commercial Caen'), '2023-11-21'),
+('9', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+('10', (SELECT id FROM team WHERE label = 'Service Commercial Le Havre'), '2023-11-21'),
+('11', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+('12', (SELECT id FROM team WHERE label = 'Service Commercial Cherbourg'), '2023-11-21'),
+('13', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
+('14', (SELECT id FROM team WHERE label = 'Service Commercial Dieppe'), '2023-11-21'),
+('15', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21'),
+('16', (SELECT id FROM team WHERE label = 'Service Commercial Rouen'), '2023-11-21'),
+('17', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+('18', (SELECT id FROM team WHERE label = 'Service Commercial Caen'), '2023-11-21'),
+('19', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+('20', (SELECT id FROM team WHERE label = 'Service Commercial Le Havre'), '2023-11-21'),
+('21', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+('22', (SELECT id FROM team WHERE label = 'Service Commercial Cherbourg'), '2023-11-21'),
+('23', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21'),
+('24', (SELECT id FROM team WHERE label = 'Service Commercial Dieppe'), '2023-11-21'),
+('25', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21');
+
+
+
+
+
+
+
 /* Seed pour la table device_vehicle_install - 25 associations dispositif/véhicule */
 INSERT INTO device_vehicle_install (device_id, vehicle_id, start_date) VALUES
 (1, '1', '2023-11-21'),
@@ -214,6 +246,11 @@ INSERT INTO vehicle_untracked_period (vehicle_id, start_date, end_date) VALUES
 INSERT INTO driver_untracked_period (driver_id, start_date, end_date) VALUES
 (5, '2023-11-01', NULL),
 (12, '2023-11-01', NULL);
+
+
+-- INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (1, 3 ,'01/01/2024' );
+-- INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (2, 4 ,'01/01/2024' );
+-- INSERT INTO driver_team(driver_id, team_id, start_date) VALUES (3, 6 ,'01/01/2024' );
 
 
 

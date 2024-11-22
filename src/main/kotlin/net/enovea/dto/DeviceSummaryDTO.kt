@@ -6,6 +6,6 @@ import java.sql.Timestamp
 data class DeviceSummaryDTO (
     var id : Int,
     var lastCommunicationDate: Timestamp?,
-    var active : Boolean,
+    var enabled : Boolean,
     var coordinate: Point?
 )

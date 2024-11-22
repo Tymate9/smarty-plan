@@ -122,12 +122,17 @@ export class MapManager {
         }
         break;
 
+
       case LayerEventType.RemoveMarker:
         const { entityType } = event.payload;
         const layerManager = this.getLayerManagerByType(entityType);
         if (layerManager) {
           layerManager.handleEvent(event);
         }
+        break;
+
+      case LayerEventType.DeleteAllMarkers:
+        this.layerManagers.forEach((layer)=>{layer.handleEvent(event)});
         break;
 
       default:
@@ -181,7 +186,7 @@ export class MapManager {
       // Ajuster la vue de la carte pour inclure tous les points avec un padding
       this.map.fitBounds(bounds, { padding: [50, 50] });
     } else {
-      alert('Aucun marqueur mis en évidence.');
+      console.log('Aucun marqueur mis en évidence.');
     }
   }
 
@@ -295,8 +300,10 @@ export class MapManager {
     return vehicles;
   }
 
+  // Export Button
+
   public addExportButton(): void {
-    const exportButton = new L.Control({ position: 'topright' });
+    const exportButton = new L.Control({ position: 'bottomright' });
 
     exportButton.onAdd = () => {
       const button = L.DomUtil.create('button', 'export-csv-button');
@@ -438,4 +445,5 @@ export class MapManager {
       return value;
     }).join(',');
   }
+
 }

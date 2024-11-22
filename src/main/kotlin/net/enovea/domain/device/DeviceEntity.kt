@@ -48,8 +48,8 @@ data class DeviceEntity (
     @Column(name = "last_communication_date", nullable = true)
     var lastCommunicationDate: Timestamp? = null,
 
-    @Column(name = "active", nullable = false)
-    var active: Boolean? = true,
+    @Column(name = "enabled", nullable = false)
+    var enabled: Boolean? = true,
 
     @Column(name = "coordinate")
     var coordinate: Point = Point(

@@ -1,5 +1,6 @@
 package net.enovea.api.trip
 
+import net.enovea.api.poi.PointOfInterestEntity
 import java.time.LocalDateTime
 
 data class TripDTO(
@@ -15,5 +16,10 @@ data class TripDTO(
     val startLat: Double,
     val endLng: Double,
     val endLat: Double,
-    val trace: String?
+    val trace: String?,
+    val wktTrace: String?,
+    var poiAtStart: PointOfInterestEntity? = null,
+    var addressAtStart: String? = null,
+    var poiAtEnd: PointOfInterestEntity? = null,
+    var addressAtEnd: String? = null
 )

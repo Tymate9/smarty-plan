@@ -103,7 +103,7 @@ class SpatialService<T : PanacheEntityBase>(
         return entitiesWithDistances
     }
 
-    fun getEntityInPolygone(polygon: Polygon): List<T> {
+    fun getEntityInPolygon(polygon: Polygon): List<T> {
         val polygonWKT = polygon.toText()
 
         val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
@@ -130,21 +130,56 @@ class SpatialService<T : PanacheEntityBase>(
         return resultList as List<T>
     }
 
-    fun getEntityFromAdresse(adresse: String, limit: Int = 1): List<T> {
+    fun getEntityFromAddress(address: String, limit: Int = 1): List<T> {
 
-        val point = geoCodingService.geocode(adresse)
+        val point = geoCodingService.geocode(address)
         requireNotNull(point){
             throw IllegalArgumentException("Impossible de géocoder l'adresse fournie.")
         }
         return getNearestEntity(point, limit)
     }
 
-    fun getAdresseFromEntity(point: Point): String {
-        val adresse = geoCodingService.reverseGeocode(point)
-        requireNotNull(adresse){
-            throw IllegalArgumentException("Impossible de géocoder la coordonnée fournie.")
+    fun getAddressFromEntity(point: Point): String {
+        val address = geoCodingService.reverseGeocode(point)
+        requireNotNull(address){
+            throw IllegalArgumentException("Impossible de géocoder la coordonnée fournie : {${point.x}, ${point.y}}")
         }
-        return adresse
+        return address
+    }
+
+    fun getNearestEntityWithinRadius(point: Point, radius: Double): T? {
+        val wktPoint = point.toText()
+
+        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
+        val tableName = tableAnnotation?.name ?: entityClass.simpleName
+
+        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
+            ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
+        val columnAnnotation = coordinateField.getAnnotation(Column::class.java)
+        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
+
+        val query = """
+            SELECT e.*
+            FROM $tableName e
+            WHERE ST_DWithin(
+                e.$coordinateColumnName::geography,
+                ST_GeomFromText(:pointWKT, 4326)::geography,
+                :radius
+            )
+            ORDER BY ST_Distance(
+                e.$coordinateColumnName::geography,
+                ST_GeomFromText(:pointWKT, 4326)::geography
+            )
+            LIMIT 1
+        """.trimIndent()
+
+        val resultList = entityManager.createNativeQuery(query, entityClass.java)
+            .setParameter("pointWKT", wktPoint)
+            .setParameter("radius", radius)
+            .resultList
+
+        @Suppress("UNCHECKED_CAST")
+        return resultList.firstOrNull() as T?
     }
 }
 

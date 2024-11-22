@@ -20,7 +20,8 @@ class TripRowMapper : RowMapper<TripDTO> {
             startLat = rs.getDouble("start_lat"),
             endLng = rs.getDouble("end_lng"),
             endLat = rs.getDouble("end_lat"),
-            trace = rs.getString("trace")
+            trace = rs.getString("trace"),
+            wktTrace = rs.getString("wkt_trace")
         )
     }
 }

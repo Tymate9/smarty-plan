@@ -8,7 +8,7 @@ import TripDTO = dto.TripDTO;
   template: `
     <div>
       <h2>Trajets pour le véhicule {{ vehicleId }}</h2>
-      <table>
+      <table class="table">
         <thead>
           <tr>
             <th>ID du trajet</th>

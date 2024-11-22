@@ -1,16 +1,31 @@
 import {Component, Input, OnInit} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import * as L from 'leaflet';
-import { TripsService } from './trips.service';
+import {TripsService} from './trips.service';
 import {dto} from "../../../habarta/dto";
 import TripDTO = dto.TripDTO;
+import {parse as WKTParse} from "wellknown" ;
 
 @Component({
   selector: 'app-trip',
   template: `
-    <div>
-      <h2>Trace du trajet pour l'ID {{ tripId }}</h2>
-      <div id="map" style="height: 500px;"></div>
+    <div class="flex">
+      <div id="map" class="w-3/4 h-screen"></div>
+      <div class="drawer drawer-end w-1/4 h-screen bg-gray-100 p-4">
+        <h2 class="text-xl font-bold mb-4">Détails du trajet {{ tripId }}</h2>
+        <div *ngIf="trip">
+          <p><strong>Start Date:</strong> {{ trip.startDate }}</p>
+          <p><strong>Start POI/Address:</strong> {{ trip.poiAtStart?.label ?? trip.addressAtStart }} </p>
+          <p><strong>End Date:</strong> {{ trip.endDate }}</p>
+          <p><strong>End POI/Address:</strong> {{ trip.poiAtEnd?.label ?? trip.addressAtEnd }}</p>
+          <p><strong>Distance:</strong> {{ trip.distance }} km</p>
+          <p><strong>Duration:</strong> {{ trip.duration }} s</p>
+          <p><strong>Data Points:</strong> {{ trip.datapoints }}</p>
+        </div>
+        <div *ngIf="!trip">
+          <p>Chargement des détails du trajet...</p>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -29,7 +44,8 @@ export class TripComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private tripsService: TripsService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -41,6 +57,7 @@ export class TripComponent implements OnInit {
   loadTrip(): void {
     this.tripsService.getTripById(this.tripId).subscribe({
       next: (data) => {
+        console.log(data);
         this.trip = data;
         this.initMap();
       },
@@ -51,19 +68,20 @@ export class TripComponent implements OnInit {
   }
 
   initMap(): void {
-    if (this.trip && this.trip.trace) {
-      const traceCoordinates = this.trip.trace.split(';').map(coord => {
-        const [lng, lat] = coord.split(',').map(Number);
-        return [lat, lng] as [number, number];
-      });
+    if (this.trip && this.trip.wktTrace) {
+      const geoJSON = WKTParse(this.trip.wktTrace);
+      if (geoJSON === null || geoJSON.type !== 'LineString') {
+        alert('Erreur lors de la récupération de la trace')
+        return
+      }
 
-      this.map = L.map('map').setView(traceCoordinates[0], 13);
+      this.map = L.map('map').setView([geoJSON.coordinates[0][1], geoJSON.coordinates[0][0]], 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(this.map);
 
-      L.polyline(traceCoordinates, { color: 'blue' }).addTo(this.map);
+      L.geoJson(geoJSON, {style: {fillColor: 'blue'}}).addTo(this.map);
     }
   }
 }

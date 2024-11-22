@@ -69,7 +69,7 @@ class PointOfInterestResource (
 
             val polygon = geometry as Polygon
 
-            val entitiesInPolygon = pointOfInterestSpatialService.getEntityInPolygone(polygon)
+            val entitiesInPolygon = pointOfInterestSpatialService.getEntityInPolygon(polygon)
 
             Response.ok(entitiesInPolygon).build()
         } catch (e: Exception) {
@@ -99,7 +99,7 @@ class PointOfInterestResource (
 
 
         return try {
-            val adresse = pointOfInterestSpatialService.getAdresseFromEntity(point)
+            val adresse = pointOfInterestSpatialService.getAddressFromEntity(point)
             Response.ok(mapOf("adresse" to adresse)).build()
         } catch (e: Exception) {
             Response.status(Response.Status.BAD_REQUEST)
@@ -119,7 +119,7 @@ class PointOfInterestResource (
         val maxResults = limit ?: 1
 
         return try {
-            val entities = pointOfInterestSpatialService.getEntityFromAdresse(adresse, maxResults)
+            val entities = pointOfInterestSpatialService.getEntityFromAddress(adresse, maxResults)
             Response.ok(entities).build()
         } catch (e: Exception) {
             Response.status(Response.Status.BAD_REQUEST)

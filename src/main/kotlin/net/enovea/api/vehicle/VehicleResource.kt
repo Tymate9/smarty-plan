@@ -79,7 +79,7 @@ class VehicleResource(
 
             val polygon = geometry as Polygon
 
-            val devicesIdInPolygon = deviceSpatialService.getEntityInPolygone(polygon).map {it.id}
+            val devicesIdInPolygon = deviceSpatialService.getEntityInPolygon(polygon).map {it.id}
 
             val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(devicesIdInPolygon)).map {
                 vehicleSummaryMapper.toVehicleDTOsummary(it)

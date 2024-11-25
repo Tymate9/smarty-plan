@@ -81,7 +81,7 @@ export class PoiPanel {
           <!-- Liste déroulante des suggestions -->
           <ul *ngIf="showSuggestions" class="suggestions-list">
             <li *ngFor="let poi of filteredPois" (click)="onPoiSelected(poi)">
-              {{ poi.label }}
+              {{ poi.client_label }}
             </li>
           </ul>
 
@@ -135,7 +135,7 @@ export class PoiPanel {
           <div class="poi-panel" *ngFor="let poiPanel of poiPanels">
             <!-- En-tête du panneau -->
             <div class="poi-header" (click)="togglePanel(poiPanel)" [ngClass]="{'modified': poiPanel.isModified}">
-              <span>{{ poiPanel.poi.label }}</span>
+              <span>{{poiPanel.poi.client_code}}-{{ poiPanel.poi.client_label }}</span>
               <span>{{ poiPanel.address }}</span>
               <button
                 class="delete-button"
@@ -150,10 +150,20 @@ export class PoiPanel {
               <form (ngSubmit)="onSubmit(poiPanel)">
                 <!-- Champ Label -->
                 <label>
-                  Label:
+                  Code client:
                   <input
                     type="text"
-                    [(ngModel)]="poiPanel.poi.label"
+                    [(ngModel)]="poiPanel.poi.client_code"
+                    name="code{{poiPanel.poi.id}}"
+                    required
+                    (ngModelChange)="poiPanel.isModified = true"
+                  />
+                </label>
+                <label>
+                  Libéllé client:
+                  <input
+                    type="text"
+                    [(ngModel)]="poiPanel.poi.client_label"
                     name="label{{poiPanel.poi.id}}"
                     required
                     (ngModelChange)="poiPanel.isModified = true"
@@ -492,7 +502,7 @@ export class PoiManagerComponent implements OnInit {
       polyline: false,
     });
     this.drawControl.addTo(this.map);
-    this.addDrawControlMessage(`Cliquez ici pour commencer le dessin du polygone du POI ${poiPanel.poi.label}`);
+    this.addDrawControlMessage(`Cliquez ici pour commencer le dessin du polygone du POI ${poiPanel.poi.client_code}-${poiPanel.poi.client_label}`);
   }
 
   startCircleDrawing(poiPanel: PoiPanel) {
@@ -511,7 +521,7 @@ export class PoiManagerComponent implements OnInit {
       polyline: false,
     });
     this.drawControl.addTo(this.map);
-    this.addDrawControlMessage(`Cliquez ici pour commencer le dessin du polygone du POI ${poiPanel.poi.label}`);
+    this.addDrawControlMessage(`Cliquez ici pour commencer le dessin du polygone du POI ${poiPanel.poi.client_code}-${poiPanel.poi.client_label}`);
   }
 
   onDrawCreated(e: any) {
@@ -746,7 +756,8 @@ export class PoiManagerComponent implements OnInit {
     // Créer le nouvel objet POI avec un polygone valide
     const newPoi: PointOfInterestEntity = {
       id: isTemporary ? this.temporaryPoiId-- : -1,
-      label: label,
+      client_code : "-1",
+      client_label: label,
       category: defaultCategory,
       coordinate: {
         type: 'Point',
@@ -860,7 +871,8 @@ export class PoiManagerComponent implements OnInit {
 
     // Construire l'objet poiData avec les chaînes WKT existantes
     const poiData: PointOfInterestForm = {
-      label: poi.label,
+      clientCode: poi.client_code,
+      clientLabel: poi.client_label,
       type: poi.category.id,
       WKTPoint: wktPoint, // Utiliser la chaîne WKT générée à partir de poi.coordinate
       WKTPolygon: wktPolygon, // Utiliser la chaîne WKT générée à partir de poi.area
@@ -935,7 +947,7 @@ export class PoiManagerComponent implements OnInit {
 
   isFormValid(poiPanel: PoiPanel): boolean {
     const poi = poiPanel.poi;
-    const isLabelValid = poi.label !== '';
+    const isLabelValid = poi.client_label !== '';
     const isCategoryValid = poi.category && poi.category.id !== undefined;
 
     if (poiPanel.inputType === 'adresse') {

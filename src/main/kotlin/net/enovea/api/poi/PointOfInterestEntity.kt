@@ -20,7 +20,9 @@ data class PointOfInterestEntity(
     @JoinColumn(name = "type", nullable = false)
     var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
 
-    var label: String = "",
+    var client_code : String = "",
+
+    var client_label: String = "",
 
     @Column(name = "coordinate")
     var coordinate: Point = Point(

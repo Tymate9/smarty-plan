@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotNull
 
 data class PointOfInterestForm(
     @field:NotBlank
-    var label: String,
+    var clientCode: String,
+
+    @field:NotBlank
+    var clientLabel: String,
 
     @field:NotNull
     var type: Int,

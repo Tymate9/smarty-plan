@@ -10,7 +10,8 @@ export interface PoiWithDistance {
 }
 
 export interface PointOfInterestForm {
-  label: string;
+  clientCode: string;
+  clientLabel: string;
   type: number;
   WKTPoint: string;
   WKTPolygon: string;

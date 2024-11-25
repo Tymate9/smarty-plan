@@ -191,7 +191,7 @@ export class LayerManager {
 
     if (this.entityType === EntityType.POI) {
       this.addPOIArea(marker, entity);
-      this.bindTooltip(marker, `${entity.label} - ${entity.category.label}`);
+      this.bindTooltip(marker, `${entity.client_code}-${entity.client_label} - ${entity.category.label}`);
     } else if (this.entityType === EntityType.VEHICLE) {
       this.bindTooltip(marker, `${entity.licenseplate} - ${entity.driver ? entity.driver.firstName + ' ' + entity.driver.lastName : 'Aucun conducteur'}`);
     }

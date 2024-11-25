@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, OnInit} from '@angular/core';
+import {Component, EventEmitter, Output, OnInit, OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
 import { FilterService } from './filter.service';
 import {KeycloakService} from "keycloak-angular";
@@ -11,8 +11,8 @@ import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import DriverDTO = dto.DriverDTO;
-
-
+import {ConfigService} from "../../core/config/config.service";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-navbar',
@@ -25,14 +25,15 @@ import DriverDTO = dto.DriverDTO;
       </div>
 
       <div class="filters">
-        <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-team-tree>
+        <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"></app-team-tree>
         <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
-        <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)"  [selectedItems]="driverSelected"></app-search-autocomplete>
+        <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
       </div>
+
       <div class="user-info">
         <span>{{ userName }}</span>
         <span>{{ userRole }}</span>
-        <button class="transparent-blur-bg"  (click)="logout()">Déconnexion</button>
+        <button class="transparent-blur-bg" (click)="logout()" [disabled]="!logoutURL">Déconnexion</button>
       </div>
     </nav>
   `,
@@ -41,7 +42,6 @@ import DriverDTO = dto.DriverDTO;
       display: flex;
       justify-content: space-between;
       padding: 10px;
-
     }
     .nav-buttons button {
       margin-right: 10px;
@@ -61,24 +61,27 @@ import DriverDTO = dto.DriverDTO;
     }
   `]
 })
-export class NavbarComponent implements OnInit {
-  constructor(private filterService: FilterService,
-              private keycloakService: KeycloakService,
-              private router: Router,
-              private  vehicleService:VehicleService,
-              private teamService: TeamService,
-              private driverService: DriverService) {}
+export class NavbarComponent implements OnInit, OnDestroy {
+  constructor(
+    private filterService: FilterService,
+    private keycloakService: KeycloakService,
+    private router: Router,
+    private vehicleService: VehicleService,
+    private teamService: TeamService,
+    private driverService: DriverService,
+    private configService: ConfigService // Injection de ConfigService
+  ) {}
 
   userName: string = '';
   userRole: string = '';
   userProfile: KeycloakProfile | null = null;
 
-  agencyOptions:Option[] = [];
-  agencyTree:Option[]=[];
-  driverOptions:DriverDTO[]=[];
-  vehicleOptions:VehicleSummaryDTO[]=[];
+  agencyOptions: Option[] = [];
+  agencyTree: Option[] = [];
+  driverOptions: DriverDTO[] = [];
+  vehicleOptions: VehicleSummaryDTO[] = [];
 
-  // These will hold the filtered options based on selected agencies
+  // Options filtrées en fonction des agences sélectionnées
   filteredVehicleOptions: string[] = [];
   filteredDriverOptions: string[] = [];
 
@@ -86,12 +89,14 @@ export class NavbarComponent implements OnInit {
   vehicleSelected: string[] = [];
   driverSelected: string[] = [];
 
+  logoutURL: string = ''; // Propriété pour stocker la logoutURL
+  private configSubscription: Subscription; // Abonnement pour la configuration
 
   updateAgencies(tags: string[]) {
     const previouslySelectedAgencies = [...this.agencySelected];
     this.agencySelected = tags;
 
-    // Handle only agency removals
+    // Gérer uniquement les suppressions d'agences
     if (this.agencySelected.length < previouslySelectedAgencies.length) {
       const removedAgencies = previouslySelectedAgencies.filter(
         agency => !this.agencySelected.includes(agency)
@@ -111,12 +116,12 @@ export class NavbarComponent implements OnInit {
     const teamMap = new Map<number, any>();
     const roots: any[] = [];
 
-    // Map all teams by ID
+    // Mapper toutes les équipes par ID
     teams.forEach(team => {
       teamMap.set(team.id, { ...team, children: [] });
     });
 
-    // Link children to their parents
+    // Lier les enfants à leurs parents
     teams.forEach(team => {
       if (team.parentTeam?.id) {
         const parent = teamMap.get(team.parentTeam.id);
@@ -124,7 +129,7 @@ export class NavbarComponent implements OnInit {
           parent.children.push(teamMap.get(team.id));
         }
       } else {
-        // Root level team
+        // Équipe de niveau racine
         roots.push(teamMap.get(team.id));
       }
     });
@@ -155,35 +160,48 @@ export class NavbarComponent implements OnInit {
 
   async ngOnInit() {
     try {
+      // Charger le profil utilisateur depuis Keycloak
       this.userProfile = await this.keycloakService.loadUserProfile();
       this.userName = `${this.userProfile.firstName} ${this.userProfile.lastName}`;
 
+      // Récupérer les agences
       this.teamService.getAgencies().subscribe(teams => {
         this.agencyOptions = this.transformToHierarchy(teams);
-        this.agencyTree=this.agencyOptions;
+        this.agencyTree = this.agencyOptions;
       });
+
+      // Récupérer les véhicules
       this.vehicleService.getVehiclesList().subscribe((vehicles) => {
         this.vehicleOptions = vehicles;
         this.filteredVehicleOptions = vehicles.map(vehicle => vehicle.licenseplate);
       });
+
+      // Récupérer les conducteurs
       this.driverService.getDrivers().subscribe((drivers) => {
         this.driverOptions = drivers;
-        this.filteredDriverOptions = drivers.map(driver=>  `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+        this.filteredDriverOptions = drivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
       });
 
-
-      // Si les rôles sont dans le token, les récupérer
+      // Récupérer les rôles de l'utilisateur depuis Keycloak
       const roles = this.keycloakService.getUserRoles();
       if (roles && roles.length > 0) {
         this.userRole = roles.join(' / ');
       }
+
+      // Abonner à la configuration Keycloak pour obtenir la logoutURL
+      this.configSubscription = this.configService.getKeycloakConfig().subscribe(config => {
+        if (config) {
+          this.logoutURL = config.logoutURL;
+          console.log('Logout URL:', this.logoutURL); // Log pour vérification
+        }
+      });
 
     } catch (error) {
       console.error('Failed to load user profile', error);
     }
   }
 
-  //filter vehicles and drivers based on selected agencies
+  // Filtrer les véhicules et conducteurs basés sur les agences sélectionnées
   filterVehiclesAndDrivers() {
     if (this.agencySelected.length > 0) {
 
@@ -192,25 +210,20 @@ export class NavbarComponent implements OnInit {
       });
 
       this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
-        this.filteredDriverOptions = filteredDrivers.map(driver=>  `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
-
+        this.filteredDriverOptions = filteredDrivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
       });
     } else {
-      // If no agency is selected, reset to the original options
+      // Si aucune agence n'est sélectionnée, réinitialiser aux options originales
       this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
-      this.filteredDriverOptions = this.driverOptions.map(driver=>  `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
-
+      this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
     }
 
 
   }
 
   removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
-    // Get all agency IDs to remove (including children)
+    // Obtenir tous les IDs d'agences à supprimer (y compris les enfants)
     let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
-
-    console.log('agenciesToRemove', agenciesToRemove)
-
     const vehiclesToRemove = this.vehicleOptions
       .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
       .map(vehicle => vehicle.licenseplate);
@@ -218,7 +231,6 @@ export class NavbarComponent implements OnInit {
     this.vehicleSelected = this.vehicleSelected.filter(
       vehicleId => !vehiclesToRemove.includes(vehicleId)
     );
-
 
     const driversToRemove = this.driverOptions
       .filter(driver => agenciesToRemove.includes(driver.team.label))
@@ -228,28 +240,27 @@ export class NavbarComponent implements OnInit {
       .filter(driverName => !driversToRemove.includes(driverName));
   }
 
-
   getAllAgencyIdsToRemove(agencyId: string): string[] {
-    // Recursive function to find an agency anywhere in the tree
+    // Fonction récursive pour trouver une agence dans l'arbre
     const findAgencyInTree = (tree: any[], agencyId: string): any | null => {
       for (const agency of tree) {
         if (agency.label === agencyId) {
-          return agency; // Found the agency
+          return agency; // Agence trouvée
         }
         if (agency.children) {
           const found = findAgencyInTree(agency.children, agencyId);
-          if (found) return found; // Found in a child branch
+          if (found) return found; // Trouvée dans une branche enfant
         }
       }
-      return null; // Not found
+      return null; // Non trouvée
     };
     const agency = findAgencyInTree(this.agencyTree, agencyId);
     if (!agency) return [];
 
-    // Start with the current agency's ID
+    // Commencer avec l'ID de l'agence actuelle
     let idsToRemove = [agencyId];
 
-    // Recursively collect IDs of all child agencies
+    // Récursivement collecter les IDs des agences enfants
     if (agency.children) {
       for (const child of agency.children) {
         idsToRemove = idsToRemove.concat(this.getAllAgencyIdsToRemove(child.label));
@@ -263,11 +274,20 @@ export class NavbarComponent implements OnInit {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
-  // logout() {
-  // this.keycloakService.logout("https://smartyplan.staging.nm.enovea.net/")
-  // }
   logout() {
-    this.keycloakService.logout("http://localhost:8080/")
+    if (this.logoutURL) {
+      console.log(this.logoutURL)
+      this.keycloakService.logout(this.logoutURL);
+    } else {
+      console.error('Logout URL not available.');
+      alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
+    }
+  }
 
+  ngOnDestroy() {
+    if (this.configSubscription) {
+      this.configSubscription.unsubscribe();
+    }
   }
 }
+

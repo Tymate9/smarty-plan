@@ -202,7 +202,8 @@ export class MapPopupComponent implements OnInit {
     }
     // Construire l'objet poiData avec WKTPoint et WKTPolygon
     const poiData: PointOfInterestForm = {
-      label: this.poiName,
+      clientCode : this.poiName,
+      clientLabel: this.poiName,
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
       WKTPolygon: wktPolygon

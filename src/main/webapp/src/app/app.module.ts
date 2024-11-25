@@ -33,6 +33,7 @@ import { TreeTableModule } from 'primeng/treetable';
 import {DropdownModule} from "primeng/dropdown";
 import {TabViewModule} from "primeng/tabview";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {ConfigService} from "./core/config/config.service";
 
 @NgModule({
   declarations: [
@@ -65,12 +66,15 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
     TabViewModule,
     ProgressSpinnerModule,
   ],
-  providers: [{
-    provide: APP_INITIALIZER,
-    useFactory: initializeKeycloak,
-    multi: true,
-    deps: [KeycloakService],
-  }, {
+  providers: [
+    ConfigService,
+    KeycloakService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      deps: [KeycloakService, ConfigService],
+      multi: true
+    }, {
     provide: HTTP_INTERCEPTORS,
     useClass: CacheInterceptor,
     multi: true

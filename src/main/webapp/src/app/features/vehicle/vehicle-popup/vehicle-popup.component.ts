@@ -4,7 +4,8 @@ import {dto} from "../../../../habarta/dto";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
-
+import {SmsApiService, SmsForm, SmsPackForm, SmsStatistics} from "../../../services/sms-api.service";
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-vehicle-popup',
@@ -42,10 +43,12 @@ import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
           <div *ngIf="!loadingNearbyPOIs && nearbyPOIs.length > 0">
             <div *ngFor="let poi of nearbyPOIs" class="poi-item">
               <div>
-                <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance : {{ poi.distance | number:'1.0-2' }} km
+                <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance
+                : {{ poi.distance | number:'1.0-2' }} km
               </div>
               <div class="poi-actions">
-                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus" (click)="centerMapOnPOI(poi.poi)"></button>
+                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus"
+                        (click)="centerMapOnPOI(poi.poi)"></button>
                 <button
                   pButton
                   [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
@@ -56,10 +59,116 @@ import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
             </div>
           </div>
         </p-tabPanel>
+
+        <p-tabPanel header="Achat de SMS">
+          <h4>Achat d'un pack SMS</h4>
+
+          <!-- Tableau des statistiques -->
+          <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Total SMS achetés</th>
+                <th>Total SMS envoyés</th>
+                <th>SMS disponibles</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-stat>
+              <tr>
+                <td>{{ stat.totalPurchasedSms }}</td>
+                <td>{{ stat.totalSentSms }}</td>
+                <td>{{ stat.smsAvailable }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+
+          <!-- Message de chargement si les statistiques ne sont pas encore disponibles -->
+          <p *ngIf="!smsStatistics">Chargement des statistiques...</p>
+
+          <!-- Formulaire d'achat de SMS -->
+          <form [formGroup]="smsPackFormGroup" (ngSubmit)="buySmsPack()">
+            <div class="p-field">
+              <label for="totalSms">Nombre de SMS à acheter :</label>
+              <input id="totalSms" type="number" formControlName="totalSms"/>
+              <div *ngIf="smsPackFormGroup.get('totalSms')?.invalid && smsPackFormGroup.get('totalSms')?.touched"
+                   class="error">
+                Veuillez entrer un nombre supérieur ou égal à 1.
+              </div>
+            </div>
+            <button pButton type="submit" label="Acheter" [disabled]="smsPackFormGroup.invalid"></button>
+          </form>
+        </p-tabPanel>
+
+        <!-- Onglet Envoyer un SMS -->
+        <p-tabPanel header="Envoyer un SMS">
+          <h4>Envoyer un SMS à {{ entity.driver?.firstName + " " + entity.driver?.lastName }}</h4>
+          <form [formGroup]="smsFormGroup" (ngSubmit)="sendSms()">
+            <!-- Ligne pour l'indicatif et le numéro de téléphone -->
+            <div class="flex flex-row flex-wrap">
+              <!-- Champ Indicatif -->
+              <div class="col-4">
+                <div class="p-field">
+                  <label for="callingCode">Indicatif :</label>
+                  <input id="callingCode" type="text" formControlName="callingCode" [disabled]="true"
+                         class="p-inputtext"/>
+                </div>
+              </div>
+              <!-- Champ Numéro de téléphone -->
+              <div class="col-4">
+                <div class="p-field">
+                  <label for="phoneNumber">Numéro de téléphone :</label>
+                  <input id="phoneNumber" type="text" formControlName="phoneNumber" [disabled]="true"
+                         class="p-inputtext"/>
+                </div>
+              </div>
+            </div>
+            <!-- Champ Message -->
+            <div class="p-field">
+              <label for="content">Message :</label>
+              <textarea id="content" formControlName="content" rows="5" [style.width.px]=600></textarea>
+              <div
+                *ngIf="smsFormGroup.get('content')?.invalid && (smsFormGroup.get('content')?.dirty || smsFormGroup.get('content')?.touched)"
+                class="error">
+                <div *ngIf="smsFormGroup.get('content')?.errors?.['required']">
+                  Le message est requis.
+                </div>
+                <div *ngIf="smsFormGroup.get('content')?.errors?.['minlength']">
+                  Le message doit contenir au moins 1 caractère.
+                </div>
+                <div *ngIf="smsFormGroup.get('content')?.errors?.['maxlength']">
+                  Le message ne doit pas dépasser 160 caractères.
+                </div>
+              </div>
+            </div>
+            <button pButton type="submit" label="Envoyer" [disabled]="smsFormGroup.invalid"></button>
+          </form>
+        </p-tabPanel>
+
       </p-tabView>
     </div>
   `,
   styles: [`
+    .p-grid > .p-col-6 {
+      padding: 0 0.5rem;
+    }
+
+    .p-field label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.8em;
+    }
+
+    .p-field.p-grid {
+      align-items: center;
+    }
+
+    .p-field.p-grid label {
+      margin-bottom: 0;
+    }
+
     .vehicle-popup {
     }
     .p-field {
@@ -89,12 +198,32 @@ export class VehiclePopupComponent implements OnInit {
   @Output() layerEvent = new EventEmitter<LayerEvent>();
   nearbyPOIs: any[] = [];
   loadingNearbyPOIs: boolean = false;
-
+  smsStatistics: SmsStatistics | null = null;
+  smsPackFormGroup: FormGroup;
+  smsFormGroup: FormGroup;
+  smsForm: SmsForm
   activeTabIndex: number = 0;
   tabNames: string[] = ['information', 'poi'];
   highlightedStates: { [markerId: string]: boolean } = {};
 
-  constructor(private poiService: PoiService) {}
+  constructor(
+    private smsApiService: SmsApiService,
+    private poiService: PoiService,
+    private formBuilder: FormBuilder
+  ) {
+
+    // Initialisation du formulaire d'achats de pack de SMS
+    this.smsPackFormGroup = this.formBuilder.group({
+      totalSms: [null, [Validators.required, Validators.min(1)]]
+    });
+
+    // Initialisation du formulaire d'envoi de SMS
+    this.smsFormGroup = this.formBuilder.group({
+      callingCode: [{ value: '+33', disabled: true }], // Indicatif téléphonique désactivé
+      phoneNumber: [{ value: '', disabled: true }],    // Numéro de téléphone désactivé
+      content: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(160)]]
+    });
+  }
 
   ngOnInit() {
     // Initialiser l'onglet actif
@@ -103,6 +232,28 @@ export class VehiclePopupComponent implements OnInit {
     if (this.activeTabIndex === this.tabNames.indexOf('poi')) {
       this.loadNearbyPOIs();
     }
+    this.smsForm = {
+      userName: '',
+      callingCode: '+33',
+      phoneNumber: this.entity.driver!.phoneNumber!,
+      content: ''
+    };
+    this.loadSmsStatistics();
+    this.smsFormGroup.patchValue({
+      phoneNumber: this.entity.driver?.phoneNumber || '',
+      callingCode: '+33' // Vous pouvez ajuster si nécessaire
+    });
+  }
+
+  loadSmsStatistics(): void {
+    this.smsApiService.getSmsStatistics().subscribe({
+      next: (response) => {
+        this.smsStatistics = response;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des statistiques des SMS:', err);
+      }
+    });
   }
 
   onTabChange(event: any) {
@@ -171,6 +322,53 @@ export class VehiclePopupComponent implements OnInit {
         lng: this.entity.device.coordinate?.coordinates[0] ?? 0.0,
       }
     });
+  }
+
+  buySmsPack(): void {
+    if (this.smsPackFormGroup.invalid) {
+      return;
+    }
+
+    const packForm: SmsPackForm = {
+      companyName: 'Normandie Manutention',
+      totalSms: this.smsPackFormGroup.value.totalSms
+    };
+
+    this.smsApiService.buySmsPack(packForm).subscribe({
+      next: (response) => {
+        console.log('Pack de SMS acheté avec succès:', response);
+        this.loadSmsStatistics();
+        this.smsPackFormGroup.reset();
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'achat du pack SMS:', err);
+      }
+    });
+  }
+
+  sendSms(): void {
+    if (this.smsFormGroup.invalid) {
+      return;
+    }
+
+    const smsForm: SmsForm = {
+      userName: '', //TODO(Ajouter le nom d'utilisateur provenant de Keycloak)
+      callingCode: this.smsFormGroup.get('callingCode')?.value,
+      phoneNumber: this.smsFormGroup.get('phoneNumber')?.value,
+      content: this.smsFormGroup.get('content')?.value
+    };
+
+    this.smsApiService.sendSms(smsForm).subscribe({
+      next: (response) => {
+        console.log('SMS envoyé avec succès:', response);
+        // Réinitialiser le champ de contenu après envoi
+        this.smsFormGroup.get('content')?.reset();
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'envoi du SMS:', err);
+      }
+    });
+    this.loadSmsStatistics();
   }
 }
 

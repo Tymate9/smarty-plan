@@ -1,6 +1,6 @@
 import {APP_INITIALIZER, NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -34,6 +34,7 @@ import {DropdownModule} from "primeng/dropdown";
 import {TabViewModule} from "primeng/tabview";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ConfigService} from "./core/config/config.service";
+import {TableModule} from "primeng/table";
 
 @NgModule({
   declarations: [
@@ -65,6 +66,8 @@ import {ConfigService} from "./core/config/config.service";
     DropdownModule,
     TabViewModule,
     ProgressSpinnerModule,
+    ReactiveFormsModule,
+    TableModule,
   ],
   providers: [
     ConfigService,

@@ -9,6 +9,12 @@ export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
   second: dto.VehicleSummaryDTO;
 }
+export interface TeamHierarchyNode {
+  label: string;
+  children?: TeamHierarchyNode[]; // Subteams
+  vehicles: dto.VehicleTableDTO[];     // List of vehicles at this team level
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -68,5 +74,32 @@ export class VehicleService {
     }
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
+  // getFilteredVehicless(
+  //   teamLabels: string[]=[],
+  //   vehicleIds: string[]=[],
+  //   driverNames: string[]=[]
+  // ): Observable<dto.VehicleTableDTO[]> {
+  //   const params={
+  //     teamLabels: teamLabels.length ? teamLabels : [],
+  //     vehicleIds: vehicleIds.length ? vehicleIds : [],
+  //     driverNames: driverNames.length ? driverNames : []
+  //   }
+  //   return this.http.get<dto.VehicleTableDTO[]>(`${this.baseUrl}/tableData`,  {params});
+  // }
+
+  getFilteredVehicless(
+    teamLabels: string[]=[],
+    vehicleIds: string[]=[],
+    driverNames: string[]=[]
+  ): Observable<TeamHierarchyNode[]> {
+    const params={
+      teamLabels: teamLabels.length ? teamLabels : [],
+      vehicleIds: vehicleIds.length ? vehicleIds : [],
+      driverNames: driverNames.length ? driverNames : []
+    }
+    return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableData`,  {params});
+  }
+
+
 
 }

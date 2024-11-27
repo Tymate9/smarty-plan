@@ -55,7 +55,20 @@ data class DeviceEntity (
     var coordinate: Point = Point(
         CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
         GeometryFactory()
+    ),
+    @OneToOne(
+        fetch = FetchType.LAZY,
+        mappedBy = "device",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
     )
+    var deviceDataState: DeviceDataStateEntity? = null
+
+//    @OneToMany(
+//        fetch = FetchType.LAZY,
+//        mappedBy = "device",
+//        cascade = [CascadeType.ALL], orphanRemoval = true)
+//    var deviceDataStates: MutableList<DeviceDataStateEntity>? = mutableListOf()
 
     ): PanacheEntityBase {
 

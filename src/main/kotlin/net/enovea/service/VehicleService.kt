@@ -1,16 +1,23 @@
 package net.enovea.service
-import io.quarkus.hibernate.orm.panache.Panache
-import jakarta.persistence.EntityManager
-import jakarta.persistence.TypedQuery
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.transaction.Transactional
+import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.common.geo.GeoCodingService
+import net.enovea.common.geo.SpatialService
 import net.enovea.domain.vehicle.*
+import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
+import net.enovea.dto.VehicleTableDTO
 
 
 class VehicleService (
     private val vehicleSummaryMapper: VehicleSummaryMapper,
     private val vehicleMapper: VehicleMapper,
+    private val vehicleDataMapper: VehicleTableMapper,
+    private val spatialService: SpatialService<PointOfInterestEntity>,
+    private val geoCodingService: GeoCodingService,
+
 ){
 
     //function returns all vehicles details (tracked and untracked)
@@ -82,6 +89,72 @@ class VehicleService (
 
         return allVehicleDTOsummary
     }
+
+
+    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
+        // Get the IDs of untracked vehicles/drivers
+        val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
+        val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
+
+        val allVehicles = vehicles ?: VehicleEntity.listAll()
+        val allVehicleDataDTO = allVehicles.map { vehicle ->
+            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleSummaryMapper)
+        }
+
+        // Replace the last position for the untracked vehicles/drivers by null
+        allVehicleDataDTO.forEach { vehicleDataDTO ->
+            val driver = vehicleDataDTO.driver
+            val isVehicleTracked = vehicleDataDTO.id !in untrackedVehicleIds
+            val isDriverTracked = driver == null || driver.id !in untrackedDriverIds
+
+            if (!isVehicleTracked || !isDriverTracked) {
+                vehicleDataDTO.device.deviceDataState?.lastPosition = null
+            } else {
+                try {
+                    // Try to fetch POI using spatial service
+                    val poi = vehicleDataDTO.device.deviceDataState?.lastPosition?.let {
+                        spatialService.getNearestEntityWithinRadius(it, 200.0)
+                    }
+                    if (poi != null) {
+                        vehicleDataDTO.lastPositionAddress = poi.label
+                    } else {
+                        // If no POI, try to fetch address using geocoding service
+                        val address = vehicleDataDTO.device.deviceDataState?.lastPosition?.let {
+                            geoCodingService.reverseGeocode(it)
+                        }
+                        vehicleDataDTO.lastPositionAddress = address
+                    }
+                } catch (e: Exception) {
+                    // Handle any errors during POI lookup or reverse geocoding
+                    vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
+                }
+            }
+        }
+        // Now we build the hierarchy of vehicles based on their teams
+        val vehiclesWithHierarchy = allVehicleDataDTO.map { vehicleDataDTO ->
+            val team = vehicleDataDTO.team
+            val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
+            vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
+        }
+
+        println(allVehicleDataDTO)
+        val teamHierarchy=buildTeamHierarchyForest(vehiclesWithHierarchy)
+        println(teamHierarchy)
+        return teamHierarchy
+    }
+
+    // Helper function to build team hierarchy
+    private fun buildTeamHierarchy(team: TeamDTO?): String {
+        // Recursively build the team hierarchy
+        val hierarchy = mutableListOf<String>()
+        var currentTeam = team
+        while (currentTeam != null) {
+            hierarchy.add(currentTeam.label)  // Add the team label to the hierarchy
+            currentTeam = currentTeam.parentTeam  // Move to the parent team
+        }
+        return hierarchy.reversed().joinToString(" > ")  // Reverse and join to get the hierarchy string
+    }
+
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers
     fun getVehiclesDetails(): List<VehicleDTO> {
@@ -207,6 +280,68 @@ class VehicleService (
 
 
 }
+
+
+// Tree node data class
+data class TeamHierarchyNode(
+    val label: String,
+    val children: MutableList<TeamHierarchyNode> = mutableListOf(),
+    val vehicles: MutableList<VehicleTableDTO> = mutableListOf()
+)
+
+// Function to build a hierarchy tree for multiple top-level teams
+fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarchyNode> {
+    // Map to store team nodes by their labels
+    val teamNodes = mutableMapOf<String, TeamHierarchyNode>()
+
+    vehicles.forEach { vehicle ->
+        val teamHierarchy = vehicle.teamHierarchy?.split(" > ")
+
+        // Process the hierarchy and construct nodes
+        var currentNode: TeamHierarchyNode? = null
+        if (teamHierarchy != null) {
+            for (teamLabel in teamHierarchy) {
+                val node = teamNodes.getOrPut(teamLabel) { TeamHierarchyNode(teamLabel) }
+
+                // Link the current node to its parent if it exists
+                if (currentNode != null && !currentNode.children.contains(node)) {
+                    currentNode.children.add(node)
+                }
+
+                currentNode = node
+            }
+        }
+
+        // Add the vehicle to the leaf node
+        currentNode?.vehicles?.add(vehicle)
+    }
+
+    // Collect the top-level nodes (those that are not children of any other node)
+    val allNodes = teamNodes.values.toSet()
+    val childNodes = teamNodes.values.flatMap { it.children }.toSet()
+    val topLevelNodes = allNodes.subtract(childNodes)
+
+    return topLevelNodes.toList()
+}
+
+// Function to print the hierarchy tree (for visualization)
+fun printTeamHierarchyForest(forest: List<TeamHierarchyNode>, indent: String = "") {
+    forest.forEach { node ->
+        printTeamHierarchyTree(node, indent)
+    }
+}
+
+// Recursive helper to print a single tree
+fun printTeamHierarchyTree(node: TeamHierarchyNode, indent: String) {
+    println("${indent}${node.label}")
+    node.children.forEach { child ->
+        printTeamHierarchyTree(child, "$indent  ")
+    }
+    node.vehicles.forEach { vehicle ->
+        println("$indent  Vehicle: ${vehicle.id}")
+    }
+}
+
 
 
 

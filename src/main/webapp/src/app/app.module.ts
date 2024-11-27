@@ -28,6 +28,8 @@ import {TeamTreeComponent} from "./commons/searchAutocomplete/team.tree.componen
 
 import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.component';
 import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TreeTableModule } from 'primeng/treetable';
 import {DropdownModule} from "primeng/dropdown";
 import {TabViewModule} from "primeng/tabview";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
@@ -57,6 +59,8 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
     KeycloakAngularModule,
     HttpClientModule,
     ButtonModule,
+    TableModule,
+    TreeTableModule,
     DropdownModule,
     TabViewModule,
     ProgressSpinnerModule,

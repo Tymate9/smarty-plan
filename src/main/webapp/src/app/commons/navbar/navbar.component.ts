@@ -25,7 +25,6 @@ import DriverDTO = dto.DriverDTO;
       </div>
 
       <div class="filters">
-
         <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" ></app-team-tree>
         <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
         <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)"  [selectedItems]="driverSelected"></app-search-autocomplete>

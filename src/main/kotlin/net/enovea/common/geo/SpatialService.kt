@@ -146,6 +146,45 @@ class SpatialService<T : PanacheEntityBase>(
         }
         return adresse
     }
+
+    fun getNearestEntityWithinRadius(point: Point, radius: Double): T? {
+        val wktPoint = point.toText()
+
+        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
+        val tableName = tableAnnotation?.name ?: entityClass.simpleName
+
+        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
+            ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
+        val columnAnnotation = coordinateField.getAnnotation(Column::class.java)
+        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
+
+        val query = """
+            SELECT e.*
+            FROM $tableName e
+            WHERE ST_DWithin(
+                e.$coordinateColumnName::geography,
+                ST_GeomFromText(:pointWKT, 4326)::geography,
+                :radius
+            )
+            ORDER BY ST_Distance(
+                e.$coordinateColumnName::geography,
+                ST_GeomFromText(:pointWKT, 4326)::geography
+            )
+            LIMIT 1
+        """.trimIndent()
+
+        val resultList = entityManager.createNativeQuery(query, entityClass.java)
+            .setParameter("pointWKT", wktPoint)
+            .setParameter("radius", radius)
+            .resultList
+
+        @Suppress("UNCHECKED_CAST")
+        return resultList.firstOrNull() as T?
+    }
+
+
+
+
 }
 
 

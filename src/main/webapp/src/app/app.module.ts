@@ -32,7 +32,10 @@ import {DropdownModule} from "primeng/dropdown";
 import {TabViewModule} from "primeng/tabview";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {TripsComponent} from "./features/trips/trips.component";
-import {TripComponent} from "./features/trips/trip.component";
+import {TripMapComponent} from "./features/trips/trip-map.component";
+import {CardModule} from "primeng/card";
+import {ToggleButtonModule} from "primeng/togglebutton";
+import {TimelineModule} from "primeng/timeline";
 
 @NgModule({
   declarations: [
@@ -53,7 +56,7 @@ import {TripComponent} from "./features/trips/trip.component";
     TeamTreeComponent,
     PoiManagerComponent,
     TripsComponent,
-    TripComponent
+    TripMapComponent
   ],
   imports: [
     BrowserModule,
@@ -65,6 +68,9 @@ import {TripComponent} from "./features/trips/trip.component";
     DropdownModule,
     TabViewModule,
     ProgressSpinnerModule,
+    CardModule,
+    ToggleButtonModule,
+    TimelineModule,
   ],
   providers: [{
     provide: APP_INITIALIZER,

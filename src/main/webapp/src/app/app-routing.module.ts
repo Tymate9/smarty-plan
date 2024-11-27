@@ -4,7 +4,7 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
 import {TripsComponent} from "./features/trips/trips.component";
-import {TripComponent} from "./features/trips/trip.component";
+import {TripMapComponent} from "./features/trips/trip-map.component";
 import {PoiManagerComponent} from "./features/poi/poi-manager/poi-manager.component";
 
 const routes: Routes = [
@@ -17,7 +17,7 @@ const routes: Routes = [
       { path: 'poiedit/:label', component: PoiManagerComponent},
       { path: 'poiedit', component: PoiManagerComponent},
       { path: 'trips/:vehicleId', component: TripsComponent },
-      { path: 'trip/:tripId', component: TripComponent },
+      { path: 'trip/:vehicleId/:date', component: TripMapComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

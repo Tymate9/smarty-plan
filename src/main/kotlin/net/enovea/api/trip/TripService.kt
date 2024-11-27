@@ -8,16 +8,13 @@ import org.locationtech.jts.geom.GeometryFactory
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.windowed
 
 class TripService(
     private val tripRepository: TripRepository,
     private val spatialService: SpatialService<PointOfInterestEntity>
 ) {
 
-    fun computeTripMapDTO(vehicleId: String, date: String) : TripMapDTO {
+    fun computeTripMapDTO(vehicleId: String, date: String): TripMapDTO {
 
         val geometryFactory = GeometryFactory()
 
@@ -32,11 +29,15 @@ class TripService(
                 trip.addressAtStart = spatialService.getAddressFromEntity(startPoint)
             }
             trip
-        }.reversed().windowed(2, 1, false).map { (end, start) ->
-            end.startDuration =
-                end.startDate.toEpochSecond(ZoneOffset.of("Z")) - start.endDate.toEpochSecond(ZoneOffset.of("Z"))
-            end
-        }.reversed()
+        }.let {
+            // compute start duration for each trip
+            it.zipWithNext().forEach { (start, end) ->
+                end.lastTripEnd = start.endDate
+                end.startDuration =
+                    end.startDate.toEpochSecond(ZoneOffset.of("Z")) - start.endDate.toEpochSecond(ZoneOffset.of("Z"))
+            }
+            it
+        }
 
         // compute end POI/address for last trip
         val endPoint = geometryFactory.createPoint(Coordinate(trips.last().endLng, trips.last().endLat))

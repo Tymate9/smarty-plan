@@ -18,6 +18,7 @@ data class TripDTO(
     val endLat: Double,
     val trace: String?,
     val wktTrace: String?,
+    var lastTripEnd: LocalDateTime? = null,
     var startDuration: Long? = 0,
     var poiAtStart: PointOfInterestEntity? = null,
     var addressAtStart: String? = null,

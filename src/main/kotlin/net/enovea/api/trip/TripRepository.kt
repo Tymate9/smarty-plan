@@ -33,6 +33,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     FROM trips_test_smarty_plan 
                     WHERE vehicle_id = :vehicleId 
                     AND date_trunc(start_date, 'day') = :date
+                    ORDER BY start_date
                 """.trimIndent()
             )
                 .bind("vehicleId", vehicleId)

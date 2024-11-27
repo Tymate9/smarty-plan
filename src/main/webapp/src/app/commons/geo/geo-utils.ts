@@ -13,7 +13,7 @@ export class GeoUtils {
       points.push(point);
     }
     points.push(points[0]);
-    return L.polygon(points, { color: '#ff0000' });
+    return L.polygon(points, {color: '#ff0000'});
   }
 
   static destinationPoint(lat: number, lng: number, distance: number, bearing: number): L.LatLng {

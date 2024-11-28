@@ -1,6 +1,8 @@
 --liquibase formatted sql
 
--- changeset smarty_plan:4
+-- changeset smarty_plan:4 context:dev, prod
+
+
 ALTER TABLE point_of_interest
     ADD COLUMN client_code VARCHAR(255),
     ADD COLUMN client_label VARCHAR(255);

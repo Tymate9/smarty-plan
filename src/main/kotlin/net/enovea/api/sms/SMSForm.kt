@@ -19,6 +19,7 @@ data class SMSForm(
     val phoneNumber: String,
 
     @field:NotBlank(message = "Content is required")
+    @field:Size(max = 160, message = "Content must be at least 160 characters")
     val content: String
 ) {
     override fun toString(): String {

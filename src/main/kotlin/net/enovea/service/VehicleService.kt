@@ -182,7 +182,7 @@ class VehicleService (
                     ?.filter { it.key.end == null }
                     ?.maxByOrNull { it.key.start }
                     ?.let { recentDevice ->
-                        recentDevice.value.coordinate = null
+                        recentDevice.value.deviceDataState?.lastPosition = null
                     }
             }
         }

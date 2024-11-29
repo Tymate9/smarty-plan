@@ -90,7 +90,7 @@ class VehicleService (
         return allVehicleDTOsummary
     }
 
-
+// TODO seperate the data treatment method
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
         // Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
@@ -149,12 +149,11 @@ class VehicleService (
         val hierarchy = mutableListOf<String>()
         var currentTeam = team
         while (currentTeam != null) {
-            hierarchy.add(currentTeam.label)  // Add the team label to the hierarchy
-            currentTeam = currentTeam.parentTeam  // Move to the parent team
+            hierarchy.add(currentTeam.label)
+            currentTeam = currentTeam.parentTeam
         }
-        return hierarchy.reversed().joinToString(" > ")  // Reverse and join to get the hierarchy string
+        return hierarchy.reversed().joinToString(" > ")
     }
-
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers
     fun getVehiclesDetails(): List<VehicleDTO> {
@@ -323,25 +322,6 @@ fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarch
 
     return topLevelNodes.toList()
 }
-
-// Function to print the hierarchy tree (for visualization)
-fun printTeamHierarchyForest(forest: List<TeamHierarchyNode>, indent: String = "") {
-    forest.forEach { node ->
-        printTeamHierarchyTree(node, indent)
-    }
-}
-
-// Recursive helper to print a single tree
-fun printTeamHierarchyTree(node: TeamHierarchyNode, indent: String) {
-    println("${indent}${node.label}")
-    node.children.forEach { child ->
-        printTeamHierarchyTree(child, "$indent  ")
-    }
-    node.vehicles.forEach { vehicle ->
-        println("$indent  Vehicle: ${vehicle.id}")
-    }
-}
-
 
 
 

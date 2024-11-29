@@ -74,20 +74,7 @@ export class VehicleService {
     }
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
-  // getFilteredVehicless(
-  //   teamLabels: string[]=[],
-  //   vehicleIds: string[]=[],
-  //   driverNames: string[]=[]
-  // ): Observable<dto.VehicleTableDTO[]> {
-  //   const params={
-  //     teamLabels: teamLabels.length ? teamLabels : [],
-  //     vehicleIds: vehicleIds.length ? vehicleIds : [],
-  //     driverNames: driverNames.length ? driverNames : []
-  //   }
-  //   return this.http.get<dto.VehicleTableDTO[]>(`${this.baseUrl}/tableData`,  {params});
-  // }
-
-  getFilteredVehicless(
+  getFilteredVehiclesDashboard(
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
     driverNames: string[]=[]

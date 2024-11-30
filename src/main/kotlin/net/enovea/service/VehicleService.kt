@@ -1,5 +1,6 @@
 package net.enovea.service
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.GeoCodingService
@@ -10,43 +11,19 @@ import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
 
-
 class VehicleService (
-    private val vehicleSummaryMapper: VehicleSummaryMapper,
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
     private val spatialService: SpatialService<PointOfInterestEntity>,
     private val geoCodingService: GeoCodingService,
-
-){
-
-    //function returns all vehicles details (tracked and untracked)
-    fun getAllVehiclesDetails(): List<VehicleDTO> {
-        val vehicles = VehicleEntity.listAll()
-        return vehicles.map { vehicleMapper.toVehicleDTO(it) }
-    }
-
-    //function returns all vehicles summaries (tracked and untracked)
-    fun getAllVehiclesSummaries(): List<VehicleSummaryDTO> {
-        val vehicles = VehicleEntity.listAll()
-        return vehicles.map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
-    }
-
-    //function returns only the tracked vehicles(details)
-    fun getTrackedVehiclesDetails(): List<VehicleDTO> {
-        val allVehicles = VehicleEntity.listAll()
-        val trackedVehicles = filterVehicle(allVehicles)
-        return trackedVehicles.map { vehicleMapper.toVehicleDTO(it) }
-    }
-
-    fun filterVehicle(
-        allVehicles: List<VehicleEntity>
-    ): List<VehicleEntity> {
+    private val entityManager: EntityManager,
+    ){
+    fun filterVehicle( vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
-        val trackedVehicles = allVehicles.filter { vehicle ->
+        val trackedVehicles = vehicles.filter { vehicle ->
             val isVehicleTracked = vehicle.id !in untrackedVehicleIds
 
             // Get the most recent driver's ID where end_date is null
@@ -64,31 +41,22 @@ class VehicleService (
     }
 
     //function returns tracked and untracked vehicles(summary) with replacing the last position by null for untracked vehicles/drivers
-    fun getVehiclesSummary(vehicles: List<VehicleEntity>? = null): List<VehicleSummaryDTO> {
+    fun removeLocalizationToUntrackedVehicle(vehicles: List<VehicleEntity> = VehicleEntity.listAll()): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
-
-        val allVehicles = vehicles ?: VehicleEntity.listAll()
-        val allVehicleDTOsummary = allVehicles.map { vehicle ->
-            vehicleSummaryMapper.toVehicleDTOsummary(vehicle)
-        }
-
-        //Replace the last position for the untracked vehicles/drivers by null
-        allVehicleDTOsummary.forEach { vehicleDTOsummary ->
-
-            val driver = vehicleDTOsummary.driver
-            val isVehicleTracked = vehicleDTOsummary.id !in untrackedVehicleIds
-            val isDriverTracked = driver == null || driver.id !in untrackedDriverIds
-
-            if (!isVehicleTracked || !isDriverTracked) {
-                vehicleDTOsummary.device.coordinate = null
-
+        return vehicles.map { vehicle ->
+            if(vehicle.id in untrackedVehicleIds || VehicleEntity.getCurrentDriver(vehicle.vehicleDrivers)?.id in untrackedDriverIds ) {
+                entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
+                VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.lastPosition = null
             }
+            else {
+                entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
+            }
+            vehicle
         }
-
-        return allVehicleDTOsummary
     }
+
 
 // TODO seperate the data treatment method
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
@@ -98,7 +66,7 @@ class VehicleService (
 
         val allVehicles = vehicles ?: VehicleEntity.listAll()
         val allVehicleDataDTO = allVehicles.map { vehicle ->
-            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleSummaryMapper)
+            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
         }
 
         // Replace the last position for the untracked vehicles/drivers by null
@@ -116,7 +84,7 @@ class VehicleService (
                         spatialService.getNearestEntityWithinRadius(it, 200.0)
                     }
                     if (poi != null) {
-                        vehicleDataDTO.lastPositionAddress = poi.label
+                        vehicleDataDTO.lastPositionAddress = poi.client_label
                     } else {
                         // If no POI, try to fetch address using geocoding service
                         val address = vehicleDataDTO.device.deviceDataState?.lastPosition?.let {
@@ -190,6 +158,7 @@ class VehicleService (
     }
 
 
+
     @Transactional
     fun getVehiclesList(agencyIds: List<String>?): List<VehicleSummaryDTO> {
 
@@ -218,9 +187,8 @@ class VehicleService (
 
         val panacheQuery = VehicleEntity.find(baseQuery, params)
 
-        return panacheQuery.list().map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
+        return panacheQuery.list().map { vehicleMapper.toVehicleDTOSummary(it) }
     }
-
 
     //Function returns the list of vehicles based on the filters provided
     @Transactional
@@ -273,8 +241,6 @@ class VehicleService (
 
         return panacheQuery.list()
     }
-
-
 }
 
 

@@ -5,6 +5,8 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
+import net.enovea.domain.device.DeviceEntity
+import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.vehicle_category.VehicleCategoryEntity
 
 /**
@@ -72,6 +74,10 @@ data class VehicleEntity(
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"
 
+        fun getCurrentDriver(vehicleDriversList: List<VehicleDriverEntity>): DriverEntity? = vehicleDriversList.filter { it.endDate == null }.maxByOrNull { it.id.startDate }?.driver
+
+        fun getCurrentDevice(vehicleDevicesList: List<DeviceVehicleInstallEntity>): DeviceEntity? = vehicleDevicesList.filter { it.endDate == null }.maxByOrNull { it.id.startDate }?.device
+
         // Method to find by ID as String
         @Transactional
         fun findByIdString(id: String): VehicleEntity? {
@@ -87,8 +93,5 @@ data class VehicleEntity(
                         "JOIN FETCH vd.DriverEntity"
             ).list()
         }
-
-
-
     }
 }

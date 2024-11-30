@@ -24,7 +24,7 @@ import {Router} from "@angular/router";
             </div>
             <div class="p-field">
               <label>Adresse :</label>
-              <span>{{ address }}</span>
+              <span>{{ entity.address }}</span>
             </div>
             <div class="p-field">
               <label>Catégorie :</label>
@@ -220,7 +220,6 @@ export class PoiPopupComponent implements OnInit {
   activeTabIndex: number = 0;
   tabNames: string[] = ['information', 'proximite', 'dessus', 'editer'];
 
-  address: string = 'Chargement...';
   updatedPoi: { clientCode: string, clientLabel: string };
   categories: dto.PointOfInterestCategoryEntity[] = [];
   categoryOptions: { label: string; value: number }[] = [];
@@ -240,16 +239,6 @@ export class PoiPopupComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Obtenir l'adresse à partir des coordonnées
-    this.poiService.getAddressFromCoordinates(
-      this.entity.coordinate.coordinates[1],
-      this.entity.coordinate.coordinates[0]
-    ).subscribe({
-      next: (response) => {
-        this.address = response.adresse;
-      },
-      error: () => this.address = 'Adresse non disponible',
-    });
 
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {

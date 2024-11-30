@@ -701,9 +701,9 @@ export class PoiManagerComponent implements OnInit {
       if (this.newPoiAddress.trim()) {
         this.geocodingService.geocodeAddress(this.newPoiAddress).subscribe(
           (result) => {
+            this.newPoiAddress = result.adresse
             const latitude = result.latitude;
             const longitude = result.longitude;
-
             const label = `Nouveau POI à l'adresse ${this.newPoiAddress}`;
             this.createPoi(label, this.newPoiAddress, latitude, longitude);
           },
@@ -759,6 +759,7 @@ export class PoiManagerComponent implements OnInit {
       client_code : "-1",
       client_label: label,
       category: defaultCategory,
+      address:address ?? "Adresse Inconnu",
       coordinate: {
         type: 'Point',
         coordinates: [longitude, latitude],
@@ -831,6 +832,7 @@ export class PoiManagerComponent implements OnInit {
       // Géocoder l'adresse pour obtenir les coordonnées
       this.geocodingService.geocodeAddress(poiPanel.modifiedAddress).subscribe(
         (result) => {
+          console.log(result)
           latitude = result.latitude;
           longitude = result.longitude;
           // Procéder à la création ou mise à jour du POI

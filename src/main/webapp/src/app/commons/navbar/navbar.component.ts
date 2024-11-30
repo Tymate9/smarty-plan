@@ -192,7 +192,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.configSubscription = this.configService.getKeycloakConfig().subscribe(config => {
         if (config) {
           this.logoutURL = config.logoutURL;
-          console.log('Logout URL:', this.logoutURL); // Log pour vérification
         }
       });
 
@@ -276,7 +275,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout() {
     if (this.logoutURL) {
-      console.log(this.logoutURL)
       this.keycloakService.logout(this.logoutURL);
     } else {
       console.error('Logout URL not available.');

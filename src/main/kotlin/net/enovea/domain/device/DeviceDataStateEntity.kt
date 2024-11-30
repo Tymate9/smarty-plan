@@ -33,7 +33,8 @@ data class DeviceDataStateEntity (
 
 
     @Column(name = "last_position")
-    var lastPosition: Point = Point(
+    //TODO(Modifier ça par coordonné)
+    var lastPosition: Point? = Point(
         CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
         GeometryFactory()
     ),

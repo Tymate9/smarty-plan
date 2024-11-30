@@ -15,10 +15,14 @@ interface DeviceSummaryMapper {
     @Mapping(target = "lastCommunicationDate", source = "lastCommunicationDate")
     @Mapping(target = "enabled", source = "enabled")
     @Mapping(target = "coordinate", source = "deviceDataState", qualifiedByName = ["coordinateMapper"])
+    @Mapping(target="state", source = "deviceDataState", qualifiedByName = ["stateMapper"])
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
 
     @Named("coordinateMapper")
     fun coordinateMapper(deviceDataState: DeviceDataStateEntity): Point? = deviceDataState.lastPosition
+
+    @Named("stateMapper")
+    fun stateMapper(deviceDataState: DeviceDataStateEntity): String? = deviceDataState.state
 
     companion object {
         val INSTANCE: DeviceSummaryMapper = Mappers.getMapper(DeviceSummaryMapper::class.java)

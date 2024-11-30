@@ -12,17 +12,17 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-@Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleSummaryMapper::class  ])
+@Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleMapper::class  ])
 interface VehicleTableMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "licenseplate", source = "licenseplate")
     @Mapping(source = "category",target = "category")
-    @Mapping(target = "driver", expression = "java(vehicleSummaryMapper.mapMostRecentDriver(vehicleEntity.retrieveVehicleDrivers()))")
+    @Mapping(target = "driver", expression = "java(vehicleMapper.mapMostRecentDriver(vehicleEntity.retrieveVehicleDrivers()))")
     @Mapping(source ="vehicleDevices",target = "device")
     @Mapping(source ="vehicleTeams",target = "team")
     fun toVehicleTableDTO(vehicleEntity: VehicleEntity,
-                          @Context vehicleSummaryMapper: VehicleSummaryMapper): VehicleTableDTO
+                          @Context vehicleMapper: VehicleMapper): VehicleTableDTO
 
     //Map most recent Device to DeviceDataDTO
     fun mapRecentDevice(vehicleDevices: List<DeviceVehicleInstallEntity>): DeviceDataDTO? {

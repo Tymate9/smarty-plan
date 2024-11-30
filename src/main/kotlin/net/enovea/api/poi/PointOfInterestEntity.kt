@@ -30,6 +30,8 @@ data class PointOfInterestEntity(
         GeometryFactory()
     ),
 
+    var address: String = "NOT_COMPUTED",
+
     var area: Polygon = run {
         val coordinates = arrayOf(
             Coordinate(0.0, 0.0),

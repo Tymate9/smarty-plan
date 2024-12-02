@@ -43,7 +43,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           <div *ngIf="!loadingNearbyPOIs && nearbyPOIs.length > 0">
             <div *ngFor="let poi of nearbyPOIs" class="poi-item">
               <div>
-                <strong>{{ poi.poi.label }}</strong> - {{ poi.poi.category.label }} - Distance
+                <strong>{{ poi.poi.client_code + "" + poi.poi.client_label }}</strong> - {{ poi.poi.category.label }} - Distance
                 : {{ poi.distance | number:'1.0-2' }} km
               </div>
               <div class="poi-actions">

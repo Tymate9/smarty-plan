@@ -84,7 +84,7 @@ class VehicleService (
                         spatialService.getNearestEntityWithinRadius(it, 200.0)
                     }
                     if (poi != null) {
-                        vehicleDataDTO.lastPositionAddress = poi.client_label
+                        vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label
                     } else {
                         // If no POI, try to fetch address using geocoding service
                         val address = vehicleDataDTO.device.deviceDataState?.lastPosition?.let {

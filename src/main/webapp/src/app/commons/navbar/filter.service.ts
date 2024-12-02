@@ -9,14 +9,31 @@ export class FilterService {
   private localStorageKey = 'userFilters';
 
   // Utilisation de BehaviorSubject pour stocker les filtres
-  private selectedFilters = new BehaviorSubject<{ [key: string]: string[] }>({
-    agencies: [],
-    vehicles: [],
-    drivers: []
-  });
+  private selectedFilters: BehaviorSubject<{ [key: string]: string[] }>;
 
   // Observable pour suivre les changements
-  filters$ = this.selectedFilters.asObservable();
+  filters$: Observable<{ [key: string]: string[] }>;
+
+  constructor() {
+    // Charger les filtres depuis le localStorage lors de l'initialisation
+    const savedFilters = localStorage.getItem(this.localStorageKey);
+    let initialFilters: { [key: string]: string[] };
+
+    if (savedFilters) {
+      initialFilters = JSON.parse(savedFilters);
+    } else {
+      // Initialiser avec les valeurs par défaut si aucun filtre n'est présent dans le localStorage
+      initialFilters = {
+        agencies: [],
+        vehicles: [],
+        drivers: []
+      };
+    }
+
+    // Initialiser selectedFilters avec les filtres chargés ou les valeurs par défaut
+    this.selectedFilters = new BehaviorSubject<{ [key: string]: string[] }>(initialFilters);
+    this.filters$ = this.selectedFilters.asObservable();
+  }
 
   // Méthode pour mettre à jour les filtres
   updateFilters(filters: { [key: string]: string[] }) {
@@ -33,13 +50,5 @@ export class FilterService {
     const filters = this.getCurrentFilters();
     localStorage.setItem(this.localStorageKey, JSON.stringify(filters));
   }
-
-  // Méthode pour charger les filtres depuis le localStorage
-  loadFiltersFromLocalStorage(): void {
-    const savedFilters = localStorage.getItem(this.localStorageKey);
-    if (savedFilters) {
-      const filters = JSON.parse(savedFilters);
-      this.updateFilters(filters);
-    }
-  }
 }
+

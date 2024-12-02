@@ -145,6 +145,7 @@ export class DashboardComponent implements OnInit {
     this.filterService.filters$.subscribe(filters => {
       const {agencies, vehicles, drivers} = filters;
 
+      console.log("dans le subscripe")
       // Fetch the filtered vehicles based on the selected filters
       this.vehicleService.getFilteredVehiclesDashboard(agencies, vehicles, drivers).subscribe(filteredVehicles => {
         this.vehiclesTree=this.transformToTreeNodes(filteredVehicles)

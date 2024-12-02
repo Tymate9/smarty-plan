@@ -71,6 +71,7 @@ export class VehicleService {
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
     }
+    console.log("Appelle API pour la route getFilteredVehicles")
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
   getFilteredVehiclesDashboard(
@@ -83,6 +84,7 @@ export class VehicleService {
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
     }
+    console.log("Appelle API pour la route getFilteredVehiclesDashboard")
     return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableData`,  {params});
   }
 

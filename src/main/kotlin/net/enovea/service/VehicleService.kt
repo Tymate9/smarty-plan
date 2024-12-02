@@ -76,18 +76,18 @@ class VehicleService (
             val isDriverTracked = driver == null || driver.id !in untrackedDriverIds
 
             if (!isVehicleTracked || !isDriverTracked) {
-                vehicleDataDTO.device.deviceDataState?.lastPosition = null
+                vehicleDataDTO.device.deviceDataState?.coordinate = null
             } else {
                 try {
                     // Try to fetch POI using spatial service
-                    val poi = vehicleDataDTO.device.deviceDataState?.lastPosition?.let {
+                    val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
                         spatialService.getNearestEntityWithinRadius(it, 200.0)
                     }
                     if (poi != null) {
                         vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label
                     } else {
                         // If no POI, try to fetch address using geocoding service
-                        val address = vehicleDataDTO.device.deviceDataState?.lastPosition?.let {
+                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
                             geoCodingService.reverseGeocode(it)
                         }
                         vehicleDataDTO.lastPositionAddress = address
@@ -150,7 +150,7 @@ class VehicleService (
                     ?.filter { it.key.end == null }
                     ?.maxByOrNull { it.key.start }
                     ?.let { recentDevice ->
-                        recentDevice.value.deviceDataState?.lastPosition = null
+                        recentDevice.value.deviceDataState?.coordinate = null
                     }
             }
         }

@@ -12,7 +12,7 @@ import TeamDTO = dto.TeamDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import DriverDTO = dto.DriverDTO;
 import {ConfigService} from "../../core/config/config.service";
-import {Subscription} from "rxjs";
+import {forkJoin, Subscription} from "rxjs";
 import {NotificationService} from "../notification/notification.service";
 
 @Component({
@@ -200,12 +200,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   emitSelectedTags() {
-    // Appeler le service pour mettre à jour les filtres partagés
-    this.filterService.updateFilters({
+    const newFilters = {
       agencies: this.agencySelected,
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
-    });
+    };
+
+    if (!this.areFiltersEqual(this.filterService.getCurrentFilters(), newFilters)) {
+      this.filterService.updateFilters(newFilters);
+    }
+  }
+
+  private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
+    return JSON.stringify(filters1) === JSON.stringify(filters2);
   }
 
   async ngOnInit() {
@@ -214,22 +221,26 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.userProfile = await this.keycloakService.loadUserProfile();
       this.userName = `${this.userProfile.firstName} ${this.userProfile.lastName}`;
 
-      // Récupérer les agences
-      this.teamService.getAgencies().subscribe(teams => {
-        this.agencyOptions = this.transformToHierarchy(teams);
+      // Charger les agences, les véhicules et les conducteurs en parallèle
+      forkJoin({
+        agencies: this.teamService.getAgencies(),
+        vehicles: this.vehicleService.getVehiclesList(),
+        drivers: this.driverService.getDrivers()
+      }).subscribe(({ agencies, vehicles, drivers }) => {
+        // Traitement des agences
+        this.agencyOptions = this.transformToHierarchy(agencies);
         this.agencyTree = this.agencyOptions;
-      });
 
-      // Récupérer les véhicules
-      this.vehicleService.getVehiclesList().subscribe((vehicles) => {
+        // Traitement des véhicules
         this.vehicleOptions = vehicles;
         this.filteredVehicleOptions = vehicles.map(vehicle => vehicle.licenseplate);
-      });
 
-      // Récupérer les conducteurs
-      this.driverService.getDrivers().subscribe((drivers) => {
+        // Traitement des conducteurs
         this.driverOptions = drivers;
         this.filteredDriverOptions = drivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+
+        // Charger les filtres initiaux depuis le FilterService
+        this.loadInitialFilters();
       });
 
       // Récupérer les rôles de l'utilisateur depuis Keycloak
@@ -244,9 +255,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.logoutURL = config.logoutURL;
         }
       });
-
-      // Charger les filtres depuis le localStorage après avoir les agences
-      this.loadSavedFilters();
 
     } catch (error) {
       console.error('Failed to load user profile', error);
@@ -342,20 +350,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.notificationService.success('Filtres sauvegardés', 'Vos filtres ont été sauvegardés avec succès.');
   }
 
-  private loadSavedFilters(): void {
-    // Charger les filtres depuis le localStorage
-    this.filterService.loadFiltersFromLocalStorage();
-
-    // Récupérer les filtres actuels depuis le service
-    const currentFilters = this.filterService.getCurrentFilters() as { agencies : string[], vehicles : string[], drivers : string[] };
+  private loadInitialFilters(): void {
+    // Récupérer les filtres initiaux depuis le FilterService
+    const currentFilters = this.filterService.getCurrentFilters() as { agencies: string[], vehicles: string[], drivers: string[] };
 
     // Mettre à jour les sélections locales avec les filtres chargés
     this.agencySelected = currentFilters.agencies || [];
     this.vehicleSelected = currentFilters.vehicles || [];
     this.driverSelected = currentFilters.drivers || [];
-
-    // Émettre les filtres sélectionnés pour synchroniser les autres composants
-    this.emitSelectedTags();
 
     // Filtrer les véhicules et les conducteurs en fonction des agences sélectionnées
     this.filterVehiclesAndDrivers();
@@ -388,8 +390,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
       this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
     }
-
-    this.emitSelectedTags();
   }
 
   ngOnDestroy() {

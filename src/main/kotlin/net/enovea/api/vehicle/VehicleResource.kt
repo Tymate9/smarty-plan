@@ -9,6 +9,8 @@ import net.enovea.domain.vehicle.DeviceVehicleInstallEntity
 import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.domain.vehicle.VehicleSummaryMapper
 import net.enovea.dto.VehicleSummaryDTO
+import net.enovea.dto.VehicleTableDTO
+import net.enovea.service.TeamHierarchyNode
 import net.enovea.service.VehicleService
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -34,6 +36,7 @@ class VehicleResource(
         return vehicleService.getVehiclesList(agencyIds)
     }
 
+
     @GET
     fun getFilteredVehicles(
         @QueryParam("teamLabels") teamLabels: List<String>?,
@@ -43,6 +46,32 @@ class VehicleResource(
             List<VehicleSummaryDTO> {
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
         val vehicleSummaries = vehicleService.getVehiclesSummary(filteredVehicles)
+        return vehicleSummaries
+    }
+//
+//    @GET
+//    @Path("/tableData")
+//    fun getFilteredVehiclesTableData(
+//        @QueryParam("teamLabels") teamLabels: List<String>?,
+//        @QueryParam("vehicleIds") vehicleIds: List<String>?,
+//        @QueryParam("driverNames") driverNames: List<String>?
+//    ):
+//            List<VehicleTableDTO> {
+//        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
+//        val vehicleSummaries = vehicleService.getVehiclesTableData(filteredVehicles)
+//        return vehicleSummaries
+//    }
+
+
+    @GET
+    @Path("/tableData")
+    fun getFilteredVehiclesTableData(
+        @QueryParam("teamLabels") teamLabels: List<String>?,
+        @QueryParam("vehicleIds") vehicleIds: List<String>?,
+        @QueryParam("driverNames") driverNames: List<String>?
+    ): List<TeamHierarchyNode> {
+        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
+        val vehicleSummaries = vehicleService.getVehiclesTableData(filteredVehicles)
         return vehicleSummaries
     }
 

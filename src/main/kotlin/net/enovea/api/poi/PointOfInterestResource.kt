@@ -82,6 +82,33 @@ class PointOfInterestResource (
     //http://localhost:8080/poi/toAdresse?latitude=48.8566&longitude=2.3522
 
     @GET
+    @Path("/nearestPOIWithRadius")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun findNearestPOI(
+        @QueryParam("latitude") latitude: Double?,
+        @QueryParam("longitude") longitude: Double?
+    ): Response {
+        if (latitude == null || longitude == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Les paramètres 'latitude' et 'longitude' sont requis."))
+                .build()
+        }
+
+        val geometryFactory = GeometryFactory()
+        val point: Point = geometryFactory.createPoint(Coordinate(longitude, latitude))
+
+        return try {
+            val poi = pointOfInterestSpatialService.getNearestEntityWithinRadius(point,200.0)
+            Response.ok(mapOf("poi" to poi)).build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to e.message))
+                .build()
+        }
+
+    }
+
+    @GET
     @Path("/toAdresse")
     @Produces(MediaType.APPLICATION_JSON)
     fun getAdresseFromCoordinate(

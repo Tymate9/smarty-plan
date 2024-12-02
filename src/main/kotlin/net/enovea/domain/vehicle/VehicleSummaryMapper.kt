@@ -19,6 +19,7 @@ interface VehicleSummaryMapper {
     fun toVehicleDTOsummary(vehicleEntity: VehicleEntity): VehicleSummaryDTO
 
     //Map VehicleDrivers to recent DriverDTO
+
     fun mapMostRecentDriver(vehicleDrivers: List<VehicleDriverEntity>): DriverDTO? {
         return vehicleDrivers
             .filter { it.endDate == null }

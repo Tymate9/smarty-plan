@@ -64,6 +64,10 @@ data class VehicleEntity(
 
 
     ) : PanacheEntityBase {
+
+    fun retrieveVehicleDrivers(): List<VehicleDriverEntity> {
+        return vehicleDrivers
+    }
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"
@@ -83,8 +87,6 @@ data class VehicleEntity(
                         "JOIN FETCH vd.DriverEntity"
             ).list()
         }
-
-
 
 
 

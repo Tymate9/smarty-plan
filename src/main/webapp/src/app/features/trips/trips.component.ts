@@ -25,10 +25,10 @@ import {Calendar} from "primeng/calendar";
         </p-tabPanel>
         <p-calendar #calendar
                     id="date-selector"
-                    (blur)="hideCalendar($event)"
                     [(ngModel)]="calendarDate"
                     [showIcon]="true"
                     [readonlyInput]="true"
+                    [showButtonBar]="true"
                     [maxDate]="now"
                     dateFormat="yymmdd"></p-calendar>
       </p-tabView>
@@ -45,6 +45,28 @@ import {Calendar} from "primeng/calendar";
         left: 50%;
         transform: translateX(-50%);
         z-index: 10000;
+
+        ::ng-deep {
+          .p-datepicker-trigger[aria-expanded=true] {
+            &:before {
+              content: "\\e90b";
+              font-family: primeicons;
+              speak: none;
+              font-style: normal;
+              font-weight: 400;
+              font-variant: normal;
+              text-transform: none;
+            }
+            calendaricon {
+              display:none;
+            }
+          }
+          .p-datepicker {
+          top: 110%;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        }
       }
 
       ::ng-deep {

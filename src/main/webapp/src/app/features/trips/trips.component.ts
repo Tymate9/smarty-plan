@@ -1,72 +1,121 @@
-import {Component, Input, OnInit} from '@angular/core';
-import { TripsService } from './trips.service';
+import {Component, Input, OnInit, ViewChild} from "@angular/core";
+import {ActivatedRoute, Router} from "@angular/router";
+import {TripsService} from "./trips.service";
 import {dto} from "../../../habarta/dto";
-import TripDTO = dto.TripDTO;
+import TripEventsDTO = dto.TripEventsDTO;
+import {Calendar} from "primeng/calendar";
+
 
 @Component({
   selector: 'app-trips',
   template: `
-    <div>
-      <h2>Trajets pour le véhicule {{ vehicleId }}</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID du trajet</th>
-            <th>Date de calcul</th>
-            <th>Date de début</th>
-            <th>Date de fin</th>
-            <th>Distance (km)</th>
-            <th>Durée (s)</th>
-            <th>Points de données</th>
-            <th>Coordonnées de départ</th>
-            <th>Coordonnées d'arrivée</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let trip of trips">
-            <td>{{ trip.tripId }}</td>
-            <td>{{ trip.computeDate }}</td>
-            <td>{{ trip.startDate }}</td>
-            <td>{{ trip.endDate }}</td>
-            <td>{{ trip.distance }}</td>
-            <td>{{ trip.duration }}</td>
-            <td>{{ trip.datapoints }}</td>
-            <td>{{ trip.startLng }}, {{ trip.startLat }}</td>
-            <td>{{ trip.endLng }}, {{ trip.endLat }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="trip-container">
+      <p-tabView>
+        <p-tabPanel>
+          <ng-template pTemplate="header">
+            <i class="pi pi-map"></i>
+          </ng-template>
+          <app-trip-map [tripData]="tripData"></app-trip-map>
+        </p-tabPanel>
+        <p-tabPanel>
+          <ng-template pTemplate="header">
+            <i class="pi pi-list"></i>
+          </ng-template>
+          <app-trip-list [tripData]="tripData"></app-trip-list>
+        </p-tabPanel>
+        <p-calendar #calendar
+                    id="date-selector"
+                    (blur)="hideCalendar($event)"
+                    [(ngModel)]="calendarDate"
+                    [showIcon]="true"
+                    [readonlyInput]="true"
+                    [maxDate]="now"
+                    dateFormat="yymmdd"></p-calendar>
+      </p-tabView>
     </div>
   `,
   styles: [`
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    th {
-      background-color: #f2f2f2;
+    #trip-container {
+      position: relative;
+      z-index: 10000;
+
+      #date-selector {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10000;
+      }
+
+      ::ng-deep {
+        .p-tabview-nav-container {
+          z-index: 10000;
+        }
+
+        .p-tabview-nav {
+          background: transparent;
+          border: none;
+          .p-tabview-nav-link {
+            margin-left: 5px;
+            border-radius: 10px;
+          }
+        }
+        .p-tabview-panels {
+          padding: 0;
+        }
+      }
     }
   `]
 })
 export class TripsComponent implements OnInit {
   @Input()
-  vehicleId = '1';
-  trips: TripDTO[] = [];
+  vehicleId: string = '';
+  @Input()
+  date: string = '';
+  protected now = new Date();
+  @ViewChild('calendar')
+  calendar!: Calendar;
 
-  constructor(private tripsService: TripsService) {}
+  get calendarDate(): string {
+    return this.date;
+  }
+  set calendarDate(date: Date) {
+    date.setHours(3);
+    this.router.navigate(['/trip', this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
+  }
+
+  protected hideCalendar(event: Event) {
+    console.log(event);
+    this.calendar.hideOverlay()
+  }
+
+  protected tripData: TripEventsDTO | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    protected router: Router,
+    private tripsService: TripsService
+  ) {
+  }
 
   ngOnInit(): void {
-    this.tripsService.getTripsByVehicle(this.vehicleId).subscribe({
+    this.route.paramMap.subscribe(params => {
+      this.date = params.get('date') || '';
+      this.vehicleId = params.get('vehicleId') || '';
+      this.loadTrips();
+    });
+  }
+
+  loadTrips(): void {
+    this.tripsService.getTripByDateAndVehicle(this.vehicleId, this.date).subscribe({
       next: (data) => {
-        this.trips = data;
+        this.tripData = data;
       },
       error: (error) => {
-        console.error('Erreur lors de la récupération des trajets:', error);
+        console.error('Erreur lors de la récupération du trajet:', error);
       }
     });
   }
+
+  protected readonly Date = Date;
 }

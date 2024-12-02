@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {map, Observable} from 'rxjs';
 import {dto} from "../../../habarta/dto";
 import TripDTO = dto.TripDTO;
-import TripMapDTO = dto.TripMapDTO;
+import TripEventsDTO = dto.TripEventsDTO;
 
 @Injectable({
   providedIn: 'root'
@@ -17,19 +17,17 @@ export class TripsService {
     return this.http.get<TripDTO[]>(`${this.apiUrl}/vehicle/${vehicleId}`);
   }
 
-  getTripByDateAndVehicle(vehicleId: string, date: string): Observable<TripMapDTO> {
-    return this.http.get<TripMapDTO>(`${this.apiUrl}/vehicle/${vehicleId}/${date}`).pipe(map(this.decodeTripMapDTO));
+  getTripByDateAndVehicle(vehicleId: string, date: string): Observable<TripEventsDTO> {
+    return this.http.get<TripEventsDTO>(`${this.apiUrl}/vehicle/${vehicleId}/${date}`).pipe(map(this.decodeTripEventsDTO));
   }
 
-  private decodeTripMapDTO(tripMapDTO: TripMapDTO): TripMapDTO {
-    tripMapDTO.trips = tripMapDTO.trips.map(trip => {
-      trip.computeDate = new Date(trip.computeDate);
-      trip.startDate = new Date(trip.startDate);
-      trip.endDate = new Date(trip.endDate);
-      trip.lastTripEnd = trip.lastTripEnd && new Date(trip.lastTripEnd);
-      return trip;
+  private decodeTripEventsDTO(tripEventsDto: TripEventsDTO): TripEventsDTO {
+    tripEventsDto.tripEvents = tripEventsDto.tripEvents.map(tripEvent => {
+      tripEvent.start = tripEvent.start && new Date(tripEvent.start);
+      tripEvent.end = tripEvent.end && new Date(tripEvent.end);
+      return tripEvent;
     });
-    return tripMapDTO;
+    return tripEventsDto;
   }
 
   formatDuration(duration: number, withoutSeconds = true): string {
@@ -38,16 +36,4 @@ export class TripsService {
     const seconds = duration % 60;
     return `${hours > 0 ? `${hours}h ` : ``}${minutes}min${!withoutSeconds ? ` ${seconds}s` : ''}`;
   }
-}
-
-
-export interface TripEvent {
-  index: number,
-  eventType: 'trip' | 'stop'
-  start: string | null,
-  end: string | null,
-  distance: string | null,
-  duration: string | null,
-  address: string | null,
-  color: string | null
 }

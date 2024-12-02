@@ -1,6 +1,5 @@
 package net.enovea.api.trip
 
-import net.enovea.api.poi.PointOfInterestEntity
 import java.time.LocalDateTime
 
 data class TripDTO(
@@ -18,23 +17,36 @@ data class TripDTO(
     val endLat: Double,
     val trace: String?,
     val wktTrace: String?,
-    var lastTripEnd: LocalDateTime? = null,
-    var startDuration: Long? = 0,
-    var poiAtStart: PointOfInterestEntity? = null,
-    var addressAtStart: String? = null,
-    var poiAtEnd: PointOfInterestEntity? = null,
-    var addressAtEnd: String? = null
 )
 
-data class TripMapDTO(
+data class TripEventsDTO(
     val vehicleId: String,
     val range: Int,
-    val tripAmount: Int,
     val stopDuration: Long,
     val drivingDuration: Long,
+    val tripAmount: Int,
     val drivingDistance: Double,
     val poiAmount: Int,
-    val trips: List<TripDTO>,
-    var poiAtEnd: PointOfInterestEntity? = null,
-    var addressAtEnd: String? = null
+    val tripEvents: List<TripEventDTO>,
+)
+
+enum class TripEventType {
+    TRIP,
+    STOP
+}
+
+data class TripEventDTO(
+    val index: Int,
+    val eventType: TripEventType,
+    val distance: Double?,
+    val color: String?,
+    val poiId: Int?,
+    val poiLabel: String?,
+    val address: String?,
+    var start: LocalDateTime? = null,
+    var end: LocalDateTime? = null,
+    var duration: Long? = null,
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val wktTrace: String? = null,
 )

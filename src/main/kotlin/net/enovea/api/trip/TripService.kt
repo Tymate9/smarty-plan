@@ -14,47 +14,89 @@ class TripService(
     private val spatialService: SpatialService<PointOfInterestEntity>
 ) {
 
-    fun computeTripMapDTO(vehicleId: String, date: String): TripMapDTO {
+    fun computeTripEventsDTO(vehicleId: String, date: String): TripEventsDTO {
 
         val geometryFactory = GeometryFactory()
 
-        // compute start POI/address for each trip and difference between each
+        // compute events for each trip and stop between each trip
         val trips = tripRepository.findByVehicleIdAndDate(
             vehicleId,
             LocalDate.parse(date, BASIC_ISO_DATE)
-        ).map { trip ->
+        )
+        val tripEvents = trips
+            .reversed()
+            .windowed(2, partialWindows = true)
+            .reversed()
+            .flatMapIndexed { index, trips ->
+            val trip = trips.first()
+            val precedingTrip = trips.getOrNull(1)
             val startPoint = geometryFactory.createPoint(Coordinate(trip.startLng, trip.startLat))
-            trip.poiAtStart = spatialService.getNearestEntityWithinRadius(startPoint, 100.0)
-            if (trip.poiAtStart == null) {
-                trip.addressAtStart = spatialService.getAddressFromEntity(startPoint)
-            }
-            trip
-        }.let {
-            // compute start duration for each trip
-            it.zipWithNext().forEach { (start, end) ->
-                end.lastTripEnd = start.endDate
-                end.startDuration =
-                    end.startDate.toEpochSecond(ZoneOffset.of("Z")) - start.endDate.toEpochSecond(ZoneOffset.of("Z"))
-            }
-            it
-        }
+            val poiAtStart = spatialService.getNearestEntityWithinRadius(startPoint, 100.0)
+            val addressAtStart = if (poiAtStart == null) {
+                spatialService.getAddressFromEntity(startPoint)
+            } else null
+            listOf(
+                TripEventDTO(
+                    index = index * 2,
+                    eventType = TripEventType.STOP,
+                    distance = null,
+                    lat = poiAtStart?.coordinate?.y ?: trip.startLat,
+                    lng = poiAtStart?.coordinate?.x ?: trip.startLng,
+                    color = poiAtStart?.category?.color ?: "black",
+                    poiId = poiAtStart?.id,
+                    poiLabel = poiAtStart?.label,
+                    address = addressAtStart,
+                    duration = precedingTrip?.let { trip.startDate.toEpochSecond(ZoneOffset.of("Z")) - it.endDate.toEpochSecond(ZoneOffset.of("Z")) },
+                    start = precedingTrip?.endDate,
+                    end = trip.startDate
+                ),
+                TripEventDTO(
+                    index = index * 2 + 1,
+                    eventType = TripEventType.TRIP,
+                    distance = trip.distance,
+                    duration = trip.duration,
+                    start = trip.startDate,
+                    end = trip.endDate,
+                    wktTrace = trip.wktTrace,
+                    color = null,
+                    poiId = null,
+                    poiLabel = null,
+                    address = null
+                )
+            )
+        }.toMutableList()
 
         // compute end POI/address for last trip
         val endPoint = geometryFactory.createPoint(Coordinate(trips.last().endLng, trips.last().endLat))
         val poiAtEnd = spatialService.getNearestEntityWithinRadius(endPoint, 100.0)
         val addressAtEnd = if (poiAtEnd == null) spatialService.getAddressFromEntity(endPoint) else null
-        return TripMapDTO(
+        tripEvents.add(
+            TripEventDTO(
+                index = tripEvents.size,
+                eventType = TripEventType.STOP,
+                distance = null,
+                color = poiAtEnd?.category?.color ?: "black",
+                poiId = poiAtEnd?.id,
+                poiLabel = poiAtEnd?.label,
+                lat = poiAtEnd?.coordinate?.y ?: trips.last().endLat,
+                lng = poiAtEnd?.coordinate?.x ?: trips.last().endLng,
+                address = addressAtEnd,
+                duration = null,
+                start = trips.last().endDate,
+                end = null
+            )
+        )
+
+        return TripEventsDTO(
             vehicleId = vehicleId,
             range = trips.last().endDate.toEpochSecond(ZoneOffset.of("Z")).toInt()
                     - trips.first().startDate.toEpochSecond(ZoneOffset.of("Z")).toInt(),
             tripAmount = trips.size,
-            stopDuration = trips.sumOf { it.startDuration ?: 0 },
+            stopDuration = tripEvents.filter { it.eventType == TripEventType.STOP }.sumOf { it.duration ?: 0 },
             drivingDuration = trips.sumOf { it.duration ?: 0 },
             drivingDistance = trips.sumOf { it.distance ?: 0.0 },
-            poiAmount = trips.count { it.poiAtStart != null } + (poiAtEnd?.let { 1 } ?: 0),
-            trips = trips,
-            poiAtEnd = poiAtEnd,
-            addressAtEnd = addressAtEnd
+            poiAmount = tripEvents.count { it.poiId != null } + (poiAtEnd?.let { 1 } ?: 0),
+            tripEvents = tripEvents,
         )
     }
 }

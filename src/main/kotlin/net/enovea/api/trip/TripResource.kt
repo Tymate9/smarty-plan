@@ -10,9 +10,6 @@ import net.enovea.common.geo.SpatialService
 import net.enovea.repository.TripRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
 
 @Path("/api/trips")
 class TripResource(
@@ -25,20 +22,7 @@ class TripResource(
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     fun getTripById(@PathParam("id") tripId: String): TripDTO? {
-        val geometryFactory = GeometryFactory()
-        return tripRepository.findById(tripId)?.let { trip ->
-            val startPoint = geometryFactory.createPoint(Coordinate(trip.startLng, trip.startLat))
-            val endPoint = geometryFactory.createPoint(Coordinate(trip.endLng, trip.endLat))
-            trip.poiAtStart = spatialService.getNearestEntityWithinRadius(startPoint, 100.0)
-            trip.poiAtEnd = spatialService.getNearestEntityWithinRadius(endPoint, 100.0)
-            if (trip.poiAtStart == null) {
-                trip.addressAtStart = spatialService.getAddressFromEntity(startPoint)
-            }
-            if (trip.poiAtEnd == null) {
-                trip.addressAtEnd = spatialService.getAddressFromEntity(endPoint)
-            }
-            trip
-        }
+        return tripRepository.findById(tripId)
     }
 
     @GET
@@ -47,8 +31,8 @@ class TripResource(
     fun getTripsByVehicleIdAndDate(
         @PathParam("vehicleId") vehicleId: String,
         @PathParam("date") date: String // format %Y%m%d
-    ): TripMapDTO {
-        return tripService.computeTripMapDTO(vehicleId, date)
+    ): TripEventsDTO {
+        return tripService.computeTripEventsDTO(vehicleId, date)
     }
 
     @GET

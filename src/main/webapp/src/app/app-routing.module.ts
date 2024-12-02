@@ -3,9 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
-import {TripsComponent} from "./features/trips/trips.component";
+import {TripListComponent} from "./features/trips/trip-list.component";
 import {TripMapComponent} from "./features/trips/trip-map.component";
 import {PoiManagerComponent} from "./features/poi/poi-manager/poi-manager.component";
+import {TripsComponent} from "./features/trips/trips.component";
 
 const routes: Routes = [
   {
@@ -16,8 +17,7 @@ const routes: Routes = [
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit/:label', component: PoiManagerComponent},
       { path: 'poiedit', component: PoiManagerComponent},
-      { path: 'trips/:vehicleId', component: TripsComponent },
-      { path: 'trip/:vehicleId/:date', component: TripMapComponent },
+      { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

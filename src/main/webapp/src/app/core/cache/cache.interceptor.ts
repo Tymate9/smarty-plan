@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
-import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { CacheService } from './cache.service';
-import { canCacheRequest } from './cache.utils';
+import {Injectable} from '@angular/core';
+import {HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse} from '@angular/common/http';
+import {Observable, of} from 'rxjs';
+import {tap} from 'rxjs/operators';
+import {CacheService} from './cache.service';
+import {canCacheRequest} from './cache.utils';
 import {CACHE_DURATIONS} from "./cache-config";
 
 @Injectable()
 export class CacheInterceptor implements HttpInterceptor {
-  constructor(private cacheService: CacheService) {}
+  constructor(private cacheService: CacheService) {
+  }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -52,7 +53,12 @@ export class CacheInterceptor implements HttpInterceptor {
 
   private getCacheDuration(url: string): number {
     // TODO(Vérifier s'il n'y a pas une manière plus intélligente de le faire, surtout au niveau de la récupération de la récupération de la cléfs de CACHE_DURATION).
-    const routeMatch = url.split('/')[3]; // Récupère le premier paramètre après l'hôte
+    const routeMatch = url.split('/')[4]; // Récupère le premier paramètre après l'hôte
+    // cas particulier pour les trajets
+    if (routeMatch === 'trip' && url.split('/')[7] === new Date().toISOString().split('T')[0].replaceAll('-', '')) {
+      return CACHE_DURATIONS.trips_same_day
+
+    }
     return CACHE_DURATIONS[routeMatch as keyof typeof CACHE_DURATIONS] || 0;
   }
 

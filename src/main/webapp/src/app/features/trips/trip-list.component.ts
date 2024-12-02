@@ -1,0 +1,71 @@
+import {Component, Input} from '@angular/core';
+import {dto} from "../../../habarta/dto";
+import TripEventsDTO = dto.TripEventsDTO;
+import TripEventType = dto.TripEventType;
+import {TripsService} from "./trips.service";
+
+@Component({
+  selector: 'app-trip-list',
+  template: `
+    <div>
+      <p-table [value]="tripData?.tripEvents ?? []" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Type / Adresse</th>
+            <th>De</th>
+            <th>À</th>
+            <th>Durée arrêt</th>
+            <th>Durée trajet</th>
+            <th>Distance</th>
+            <th>Vitesse moyenne</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-tripEvent>
+          <tr>
+            <td>{{ tripEvent.eventType === TripEventType.STOP ? (tripEvent.address || tripEvent.poiLabel) : 'Trajet' }}</td>
+            <td>{{ tripEvent.start | date: 'HH:mm' }}</td>
+            <td>{{ tripEvent.end | date: 'HH:mm' }}</td>
+            <td>{{ tripEvent.eventType === TripEventType.STOP ? (tripsService.formatDuration(tripEvent.duration)) : '-' }}</td>
+            <td>{{ tripEvent.eventType === TripEventType.TRIP ? (tripsService.formatDuration(tripEvent.duration)) : '-' }}</td>
+            <td>{{ tripEvent.distance?.toFixed(1) }} Km</td>
+            <td>{{ (tripEvent.distance?.toFixed(1) ?? 0) / ((tripEvent.duration?.toFixed(1) ?? 1) / 3600) }} Km/h</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  `,
+  styles: [`
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  `]
+})
+export class TripListComponent {
+  private _tripData: TripEventsDTO | null = null;
+
+  constructor(
+    protected tripsService: TripsService
+  ) {
+  }
+
+  @Input() set tripData(tripEvents: TripEventsDTO | null) {
+    if (!tripEvents) {
+      return;
+    }
+
+    this._tripData = tripEvents;
+  }
+  get tripData(): TripEventsDTO | null {
+    return this._tripData;
+  }
+
+  protected readonly TripEventType = TripEventType;
+}

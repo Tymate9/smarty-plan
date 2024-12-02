@@ -6,7 +6,6 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {TreeNode} from "primeng/api";
 import {PoiService} from "../poi/poi.service";
 import {GeocodingService} from "../../commons/geo/geo-coding.service";
-import TeamEntity = dto.TeamEntity;
 
 @Component({
   selector: 'app-dashboard',
@@ -70,6 +69,7 @@ import TeamEntity = dto.TeamEntity;
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
       padding: 8px !important;
       border-bottom: 1px solid #ddd !important;
+      width: auto;
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
@@ -88,7 +88,10 @@ import TeamEntity = dto.TeamEntity;
     }
     :host ::ng-deep .p-treetable.custom-tree-table .root-node {
       background-color: var(--gray-200);
-      color: var(--blue-800)
+      color: var(--blue-800);
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+
     }
 
     :host ::ng-deep .p-treetable.custom-tree-table .roulant {
@@ -105,8 +108,6 @@ import TeamEntity = dto.TeamEntity;
       background-color: #C71400;
       color: white;
     }
-
-
 
   `]
 })

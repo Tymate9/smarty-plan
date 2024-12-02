@@ -136,10 +136,7 @@ class VehicleService (
             val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
-
-        println(allVehicleDataDTO)
         val teamHierarchy=buildTeamHierarchyForest(vehiclesWithHierarchy)
-        println(teamHierarchy)
         return teamHierarchy
     }
 

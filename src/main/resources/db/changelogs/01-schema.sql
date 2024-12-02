@@ -272,7 +272,7 @@ CREATE TABLE IF NOT EXISTS device_data_state
     first_comm_time TIMESTAMP WITH TIME ZONE NULL,
     last_comm_time TIMESTAMP WITH TIME ZONE NULL,
     last_received_data_time TIMESTAMP WITH TIME ZONE NULL,
-    last_position GEOGRAPHY(Point, 4326) NOT NULL,
+    last_position GEOMETRY NULL,
     last_position_time TIMESTAMP WITH TIME ZONE NULL,
     FOREIGN KEY (device_id) REFERENCES device(id)
 );

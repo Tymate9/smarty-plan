@@ -1,4 +1,4 @@
- import {Component, Input, Output, EventEmitter, SimpleChanges} from '@angular/core';
+ import {Component, Input, Output, EventEmitter, SimpleChanges, OnChanges} from '@angular/core';
 
 @Component({
   selector: 'app-search-autocomplete',
@@ -94,7 +94,7 @@
     }
   `]
 })
-export class SearchAutocompleteComponent {
+export class SearchAutocompleteComponent implements OnChanges{
   @Input() label: string = '';
   @Input() options: string[] = [];
   @Input() selectedItems: string[] = [];
@@ -112,10 +112,9 @@ export class SearchAutocompleteComponent {
 
 
   ngOnChanges(changes: SimpleChanges) {
-    // Detect changes in selectedItems and update selectedTags accordingly
-    if (changes['selectedItems'] && changes['selectedItems'].currentValue !== this.selectedTags) {
-      this.selectedTags = [...this.selectedItems]; // Reset selectedTags from parent
-      this.filterOptions(); // Reapply filter to exclude selected items
+    if (changes['selectedItems']) {
+      this.selectedTags = [...this.selectedItems]; // Copier les éléments sélectionnés
+      this.filterOptions(); // Mettre à jour les options filtrées
     }
   }
 

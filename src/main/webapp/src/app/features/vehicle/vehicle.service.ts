@@ -15,7 +15,6 @@ export interface TeamHierarchyNode {
   vehicles: dto.VehicleTableDTO[];     // List of vehicles at this team level
 }
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -28,8 +27,6 @@ export class VehicleService {
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
   }
-
-
 
   //Méthode pour récupérer la liste de vehiclesDTO
   getVehiclesList(agencyIds: string[] | null = null ): Observable<VehicleSummaryDTO[]> {
@@ -65,9 +62,11 @@ export class VehicleService {
   getFilteredVehicles(
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
-    driverNames: string[]=[]
-  ): Observable<dto.VehicleSummaryDTO[]> {
+    driverNames: string[]=[],
+    format : string = "RESUME"
+  ): Observable<any> {
     const params={
+      format : format,
       teamLabels: teamLabels.length ? teamLabels : [],
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
@@ -86,7 +85,5 @@ export class VehicleService {
     }
     return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableData`,  {params});
   }
-
-
 
 }

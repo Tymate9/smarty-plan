@@ -8,6 +8,7 @@ import jakarta.ws.rs.Produces
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
+import net.enovea.domain.device.DeviceDataStateEntity
 import net.enovea.domain.device.DeviceEntity
 
 @Dependent
@@ -28,12 +29,12 @@ class GeoConfig {
             geoCodingService = geoCodingService
         )
 
-    @Named("deviceSpatialService")
+    @Named(" deviceDataStateSpatialService")
     @Produces
     @ApplicationScoped
-    fun deviceSpatialService(entityManager : EntityManager, geoCodingService: GeoCodingService) : SpatialService<DeviceEntity> =
-        SpatialService<DeviceEntity>(
-            entityClass = DeviceEntity::class,
+    fun  deviceDataStateSpatialService(entityManager : EntityManager, geoCodingService: GeoCodingService) : SpatialService<DeviceDataStateEntity> =
+        SpatialService<DeviceDataStateEntity>(
+            entityClass = DeviceDataStateEntity::class,
             entityManager = entityManager,
             geoCodingService = geoCodingService
         )

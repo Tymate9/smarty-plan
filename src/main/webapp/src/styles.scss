@@ -21,6 +21,7 @@ $color-brown-tertiary: #EEE3D4;      // Marron clair, fond tertiaire
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  // Optionnel : légère ombre pour un effet de profondeur
 }
 
+
 body {
   font-family: 'Arial', sans-serif;
   //background: $color-gray-secondary;
@@ -120,4 +121,8 @@ body {
 .secondary-button {
   background-color: #6c757d;
   color: white;
+}
+
+.p-toast {
+  z-index: 9999 !important;
 }

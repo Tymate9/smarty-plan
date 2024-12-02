@@ -36,6 +36,11 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ConfigService} from "./core/config/config.service";
 import {TableModule} from "primeng/table";
 
+import { ToastModule} from "primeng/toast";
+import { MessageService } from 'primeng/api';
+import {MenubarModule} from "primeng/menubar";
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -68,8 +73,11 @@ import {TableModule} from "primeng/table";
     ProgressSpinnerModule,
     ReactiveFormsModule,
     TableModule,
+    ToastModule,
+    MenubarModule,
   ],
   providers: [
+    MessageService,
     ConfigService,
     KeycloakService,
     {

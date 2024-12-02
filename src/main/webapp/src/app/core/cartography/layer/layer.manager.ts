@@ -399,4 +399,15 @@ export class LayerManager {
       }
     });
   }
+
+  // Méthode pour mettre à jour la position d'un marqueur existant
+  public updateMarkerPosition(markerId: string, newCoordinates: any): void {
+    const marker = this.markersMap.get(markerId);
+    if (marker) {
+      // Mettre à jour la position du marqueur
+      marker.setLatLng(new L.LatLng(newCoordinates.coordinates[1], newCoordinates.coordinates[0]));
+    } else {
+      console.warn(`Le marqueur avec l'ID ${markerId} n'a pas été trouvé.`);
+    }
+  }
 }

@@ -17,7 +17,7 @@ data class DeviceDataStateEntity (
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "device_data_state_seq")
     @SequenceGenerator(name = "device_data_state_seq", sequenceName = "device_data_state_seq", allocationSize = 1)
     @Column(name = "device_id")
-    var deviceId: Int = -1,
+    var device_id: Int = -1,
 
     @Column(name = "state", length = 128, nullable = true)
     var state: String? = null,
@@ -34,7 +34,7 @@ data class DeviceDataStateEntity (
 
     @Column(name = "last_position")
     //TODO(Modifier ça par coordonné)
-    var lastPosition: Point? = Point(
+    var coordinate: Point? = Point(
         CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
         GeometryFactory()
     ),

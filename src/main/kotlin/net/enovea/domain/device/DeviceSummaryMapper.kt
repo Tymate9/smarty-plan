@@ -19,7 +19,7 @@ interface DeviceSummaryMapper {
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
 
     @Named("coordinateMapper")
-    fun coordinateMapper(deviceDataState: DeviceDataStateEntity): Point? = deviceDataState.lastPosition
+    fun coordinateMapper(deviceDataState: DeviceDataStateEntity): Point? = deviceDataState.coordinate
 
     @Named("stateMapper")
     fun stateMapper(deviceDataState: DeviceDataStateEntity): String? = deviceDataState.state

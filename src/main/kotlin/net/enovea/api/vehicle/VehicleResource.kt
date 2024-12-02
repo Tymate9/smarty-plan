@@ -86,7 +86,7 @@ class VehicleResource(
 
         val maxResults = limit ?: 10
 
-        val deviceIdList : List<Int> = deviceDataStateSpatialService.getNearestEntity(point, maxResults).map {deviceDataState -> deviceDataState.deviceId}
+        val deviceIdList : List<Int> = deviceDataStateSpatialService.getNearestEntity(point, maxResults).map {deviceDataState -> deviceDataState.device_id}
 
         val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(deviceIdList))
 
@@ -119,7 +119,7 @@ class VehicleResource(
 
             val polygon = geometry as Polygon
 
-            val devicesIdInPolygon = deviceDataStateSpatialService.getEntityInPolygone(polygon).map {deviceDataState -> deviceDataState.deviceId}
+            val devicesIdInPolygon = deviceDataStateSpatialService.getEntityInPolygone(polygon).map {deviceDataState -> deviceDataState.device_id}
 
             val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(devicesIdInPolygon)).map {
                 vehicleMapper.toVehicleDTOSummary(it)

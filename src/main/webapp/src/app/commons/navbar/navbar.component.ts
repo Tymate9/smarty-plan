@@ -13,53 +13,104 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import DriverDTO = dto.DriverDTO;
 import {ConfigService} from "../../core/config/config.service";
 import {Subscription} from "rxjs";
+import {NotificationService} from "../notification/notification.service";
 
 @Component({
   selector: 'app-navbar',
   template: `
-    <nav class="navbar">
-      <div class="nav-buttons">
-        <button class="transparent-blur-bg" (click)="navigateTo('dashboard')">État de parc</button>
-        <button class="transparent-blur-bg" (click)="navigateTo('cartography')">Cartographie</button>
-        <button class="transparent-blur-bg" (click)="navigateTo('poiedit')">Créer un POI</button>
-      </div>
-
-      <div class="filters">
-        <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"></app-team-tree>
-        <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
-        <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
-      </div>
-
-      <div class="user-info">
-        <span>{{ userName }}</span>
-        <span>{{ userRole }}</span>
-        <button class="transparent-blur-bg" (click)="logout()" [disabled]="!logoutURL">Déconnexion</button>
-      </div>
-    </nav>
+    <p-menubar [style]="{'border': 'none', 'width': '100%'}" class="p-menubar transparent-blur-bg full-width">
+      <ng-template pTemplate="start">
+        <div class="nav-container">
+          <div class="nav-buttons">
+            <div class="nav-buttons-row">
+              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" class="transparent-blur-bg"></p-button>
+              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" class="transparent-blur-bg"></p-button>
+            </div>
+            <div class="nav-button-center">
+              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-plus" class="transparent-blur-bg"></p-button>
+            </div>
+          </div>
+          <div class="filters center">
+            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>
+            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
+            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
+            <p-button (onClick)="saveFilters()" icon="pi pi-save" class="transparent-blur-bg save-filters-button"></p-button>
+          </div>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="end">
+        <div class="user-info compact">
+          <p-button icon="pi pi-cog" class="user-settings transparent-blur-bg"></p-button>
+          <p-button (onClick)="logout()" icon="pi pi-power-off" class="transparent-blur-bg" [disabled]="!logoutURL"></p-button>
+        </div>
+      </ng-template>
+    </p-menubar>
   `,
-  styles: [`
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-    }
-    .nav-buttons button {
-      margin-right: 10px;
-    }
-    .filters {
-      flex-grow: 1;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-    }
-    .user-info {
-      display: flex;
-      align-items: center;
-    }
-    .user-info span {
-      margin-right: 10px;
-    }
-  `]
+  styles: [
+    `
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+      }
+      .nav-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .nav-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: auto;
+      }
+      .nav-buttons-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .nav-button-center {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      .nav-buttons p-button {
+        margin-right: 10px;
+        background: transparent;
+        border: none;
+      }
+      .filters {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 0 auto;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+      }
+      .user-info.compact {
+        gap: 5px;
+      }
+      .user-settings {
+        margin-right: 10px;
+        background: transparent;
+        border: none;
+      }
+      .p-menubar {
+        padding: 0.5rem;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        border-radius: 3px;
+        width: 100%;
+      }
+    `,
+  ],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
@@ -69,7 +120,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private vehicleService: VehicleService,
     private teamService: TeamService,
     private driverService: DriverService,
-    private configService: ConfigService // Injection de ConfigService
+    private configService: ConfigService,
+    private notificationService : NotificationService
   ) {}
 
   userName: string = '';
@@ -110,7 +162,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.emitSelectedTags();
     this.filterVehiclesAndDrivers();
   }
-
 
   transformToHierarchy(teams: TeamDTO[]): any[] {
     const teamMap = new Map<number, any>();
@@ -155,7 +206,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
     });
-
   }
 
   async ngOnInit() {
@@ -194,6 +244,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.logoutURL = config.logoutURL;
         }
       });
+
+      // Charger les filtres depuis le localStorage après avoir les agences
+      this.loadSavedFilters();
 
     } catch (error) {
       console.error('Failed to load user profile', error);
@@ -280,6 +333,63 @@ export class NavbarComponent implements OnInit, OnDestroy {
       console.error('Logout URL not available.');
       alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
     }
+  }
+
+  saveFilters(): void {
+    this.filterService.saveFiltersToLocalStorage();
+
+    // Afficher une notification
+    this.notificationService.success('Filtres sauvegardés', 'Vos filtres ont été sauvegardés avec succès.');
+  }
+
+  private loadSavedFilters(): void {
+    // Charger les filtres depuis le localStorage
+    this.filterService.loadFiltersFromLocalStorage();
+
+    // Récupérer les filtres actuels depuis le service
+    const currentFilters = this.filterService.getCurrentFilters() as { agencies : string[], vehicles : string[], drivers : string[] };
+
+    // Mettre à jour les sélections locales avec les filtres chargés
+    this.agencySelected = currentFilters.agencies || [];
+    this.vehicleSelected = currentFilters.vehicles || [];
+    this.driverSelected = currentFilters.drivers || [];
+
+    // Émettre les filtres sélectionnés pour synchroniser les autres composants
+    this.emitSelectedTags();
+
+    // Filtrer les véhicules et les conducteurs en fonction des agences sélectionnées
+    this.filterVehiclesAndDrivers();
+
+    // Mettre à jour les options filtrées pour les véhicules et les conducteurs
+    // en fonction des sélections chargées
+    this.updateFilteredOptionsAfterLoading();
+  }
+
+  private updateFilteredOptionsAfterLoading(): void {
+    // Si des agences sont sélectionnées, filtrer les véhicules et conducteurs
+    if (this.agencySelected.length > 0) {
+      // Filtrer les véhicules
+      this.vehicleService.getVehiclesList(this.agencySelected).subscribe((filteredVehicles) => {
+        this.filteredVehicleOptions = filteredVehicles.map(vehicle => vehicle.licenseplate);
+
+        // Mettre à jour les sélections de véhicules pour ne conserver que ceux qui sont toujours valides
+        this.vehicleSelected = this.vehicleSelected.filter(licensePlate => this.filteredVehicleOptions.includes(licensePlate));
+      });
+
+      // Filtrer les conducteurs
+      this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
+        this.filteredDriverOptions = filteredDrivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+
+        // Mettre à jour les sélections de conducteurs pour ne conserver que ceux qui sont toujours valides
+        this.driverSelected = this.driverSelected.filter(driverName => this.filteredDriverOptions.includes(driverName));
+      });
+    } else {
+      // Si aucune agence n'est sélectionnée, réinitialiser les options
+      this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
+      this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+    }
+
+    this.emitSelectedTags();
   }
 
   ngOnDestroy() {

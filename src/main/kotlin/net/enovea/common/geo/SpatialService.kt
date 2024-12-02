@@ -181,10 +181,6 @@ class SpatialService<T : PanacheEntityBase>(
         @Suppress("UNCHECKED_CAST")
         return resultList.firstOrNull() as T?
     }
-
-
-
-
 }
 
 

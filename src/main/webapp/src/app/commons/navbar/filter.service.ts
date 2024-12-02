@@ -6,6 +6,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
   providedIn: 'root'
 })
 export class FilterService {
+  private localStorageKey = 'userFilters';
 
   // Utilisation de BehaviorSubject pour stocker les filtres
   private selectedFilters = new BehaviorSubject<{ [key: string]: string[] }>({
@@ -27,5 +28,18 @@ export class FilterService {
     return this.selectedFilters.getValue();
   }
 
+  // Méthode pour sauvegarder les filtres actuels dans le localStorage
+  saveFiltersToLocalStorage(): void {
+    const filters = this.getCurrentFilters();
+    localStorage.setItem(this.localStorageKey, JSON.stringify(filters));
+  }
 
+  // Méthode pour charger les filtres depuis le localStorage
+  loadFiltersFromLocalStorage(): void {
+    const savedFilters = localStorage.getItem(this.localStorageKey);
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+      this.updateFilters(filters);
+    }
+  }
 }

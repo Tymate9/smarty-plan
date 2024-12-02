@@ -122,7 +122,6 @@ export class MapManager {
         }
         break;
 
-
       case LayerEventType.RemoveMarker:
         const { entityType } = event.payload;
         const layerManager = this.getLayerManagerByType(entityType);
@@ -135,6 +134,15 @@ export class MapManager {
         this.layerManagers.forEach((layer)=>{layer.handleEvent(event)});
         break;
 
+      case LayerEventType.UpdateMarkerPosition:
+        const umpLayerManager = this.getLayerManagerByType(event.payload.entityType);
+        if (umpLayerManager) {
+          umpLayerManager.updateMarkerPosition(event.payload.id, event.payload.newCoordinates);
+        } else {
+          console.warn(`Aucun LayerManager trouvé pour le type d'entité : ${event.payload.entityType}`);
+        }
+        break;
+
       default:
         console.warn(`Type d'événement inconnu : ${event.type}`);
         break;
@@ -142,7 +150,6 @@ export class MapManager {
   }
 
   // Marker Region
-  // Ajout d'un marqueur
   addMarker(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
     const marker = MarkerFactory.createMarker(type, entity);
     if (marker) {

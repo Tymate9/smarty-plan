@@ -90,7 +90,7 @@ interface VehicleMapper {
     fun localizationLastPositionMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): Point? = vehicleDevices
         .filter { it.endDate == null }
         .maxByOrNull { it.id.startDate }
-        ?.let { it.device?.deviceDataState?.lastPosition }
+        ?.let { it.device?.deviceDataState?.coordinate }
 
 
 

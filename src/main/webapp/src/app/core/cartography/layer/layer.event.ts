@@ -21,5 +21,6 @@ export enum LayerEventType {
   AddPOIRequest = 'ADD_POI_REQUEST',
   PopupClosed = 'POPUP_CLOSED',
   RemoveMarker = 'REMOVE_MARKER',
-  DeleteAllMarkers='DELETE_ALL_MARKERS'
+  DeleteAllMarkers='DELETE_ALL_MARKERS',
+  UpdateMarkerPosition='UPDATE_MARKER_POSITION'
 }

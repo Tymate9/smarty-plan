@@ -48,7 +48,7 @@ class VehicleService (
         return vehicles.map { vehicle ->
             if(vehicle.id in untrackedVehicleIds || VehicleEntity.getCurrentDriver(vehicle.vehicleDrivers)?.id in untrackedDriverIds ) {
                 entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
-                VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.lastPosition = null
+                VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.coordinate = null
             }
             else {
                 entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)

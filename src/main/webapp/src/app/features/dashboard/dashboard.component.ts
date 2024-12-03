@@ -6,6 +6,8 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {TreeNode} from "primeng/api";
 import {PoiService} from "../poi/poi.service";
 import {GeocodingService} from "../../commons/geo/geo-coding.service";
+import {Router} from "@angular/router";
+import {DatePipe} from "@angular/common";
 
 @Component({
   selector: 'app-dashboard',
@@ -33,7 +35,7 @@ import {GeocodingService} from "../../commons/geo/geo-coding.service";
           'has-vehicle': rowData.vehicle
         }">
 
-          <td *ngIf="!rowData.vehicle" colspan="6">
+          <td *ngIf="!rowData.vehicle" colspan="7">
             <p-treeTableToggler [rowNode]="rowNode" />
             {{ rowData.label }}
           </td>
@@ -52,6 +54,7 @@ import {GeocodingService} from "../../commons/geo/geo-coding.service";
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'shortTime'  }}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.distance || '50 km' }}</td>
+          <td *ngIf="rowData.vehicle"><p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar" class="transparent-blur-bg"></p-button></td>
         </tr>
       </ng-template>
     </p-treeTable>
@@ -123,13 +126,16 @@ export class DashboardComponent implements OnInit {
   vehicles: VehicleSummaryDTO[] = [];
   vehiclesTree: TreeNode[] = [];
   teamHierarchy:TeamHierarchyNode[];
+  today = new Date().toISOString().split('T')[0].replaceAll('-', '');
 
 
   constructor(
     private filterService: FilterService,
     private readonly vehicleService: VehicleService,
     private readonly poiService: PoiService,
-    private readonly geoCodingService:GeocodingService) {}
+    private readonly geoCodingService:GeocodingService,
+    protected router: Router
+  ) {}
 
   ngOnInit() {
     // S'abonner aux filtres partagés
@@ -198,5 +204,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  protected readonly DatePipe = DatePipe;
 }
 

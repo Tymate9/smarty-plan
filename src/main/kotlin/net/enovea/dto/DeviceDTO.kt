@@ -16,6 +16,6 @@ data class DeviceDTO (
     var comment: String?,
     var lastCommunicationDate: Timestamp?,
     var enabled : Boolean,
-    var coordinate: Point?,
+/*    var coordinate: Point?,*/
     var deviceDataState: DeviceDataStateDTO?
 )

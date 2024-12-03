@@ -7,5 +7,6 @@ data class DeviceSummaryDTO (
     var id : Int,
     var lastCommunicationDate: Timestamp?,
     var enabled : Boolean,
-    var coordinate: Point?
+    var coordinate: Point?,
+    var state: String,
 )

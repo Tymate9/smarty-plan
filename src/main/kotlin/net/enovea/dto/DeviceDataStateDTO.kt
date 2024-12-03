@@ -9,6 +9,6 @@ data class DeviceDataStateDTO (
     var firstCommTime: Timestamp ? = null,
     var lastCommTime: Timestamp ? = null,
     var lastReceivedDataTime: Timestamp ? = null,
-    var lastPosition: Point ? = null,
+    var coordinate: Point ? = null,
     var lastPositionTime: Timestamp ? = null
 )

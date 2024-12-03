@@ -44,9 +44,10 @@ import {GeocodingService} from "../../commons/geo/geo-coding.service";
           </td>
           <td *ngIf="rowData.vehicle"
               [ngClass]="{
-            'roulant': rowData.vehicle.device.deviceDataState.state === 'Roulant',
-            'a-l-arret': rowData.vehicle.device.deviceDataState.state === 'A l\\'arrêt',
-            'arrete': rowData.vehicle.device.deviceDataState.state === 'Arrêté'
+            'MOVING': rowData.vehicle.device.deviceDataState.state === 'MOVING',
+            'OFF': rowData.vehicle.device.deviceDataState.state === 'OFF',
+            'STOP': rowData.vehicle.device.deviceDataState.state === 'STOP',
+            'NO_COM': rowData.vehicle.device.deviceDataState.state === 'NO_COM'
           }">{{ rowData.vehicle.device.deviceDataState.state }}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'shortTime'  }}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>
@@ -94,18 +95,23 @@ import {GeocodingService} from "../../commons/geo/geo-coding.service";
 
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .roulant {
+    :host ::ng-deep .p-treetable.custom-tree-table .MOVING {
       background-color: #21A179;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .a-l-arret {
+    :host ::ng-deep .p-treetable.custom-tree-table .STOP {
       background-color: #FE8F2B;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .arrete {
+    :host ::ng-deep .p-treetable.custom-tree-table .OFF {
       background-color: #C71400;
+      color: white;
+    }
+
+    :host ::ng-deep .p-treetable.custom-tree-table .NO_COM {
+      background-color: #E5E5E5;
       color: white;
     }
 

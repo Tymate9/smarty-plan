@@ -19,12 +19,12 @@ import {Router} from "@angular/router";
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
           <div class="p-fluid">
             <div class="p-field">
-              <label>Label :</label>
-              <span>{{ entity.label }}</span>
+              <label>Dénomination :</label>
+              <span>{{entity.client_code}}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
               <label>Adresse :</label>
-              <span>{{ address }}</span>
+              <span>{{ entity.address }}</span>
             </div>
             <div class="p-field">
               <label>Catégorie :</label>
@@ -90,11 +90,19 @@ import {Router} from "@angular/router";
           <form (ngSubmit)="submitUpdate()" #poiForm="ngForm">
             <div class="p-fluid">
               <div class="p-field">
+                <label for="label">Code client : </label>
+                <input
+                  type="text"
+                  id="label-code"
+                  [(ngModel)]="updatedPoi.clientCode"
+                  name="label-code"
+                  required
+                />
                 <label for="label">Nom :</label>
                 <input
                   type="text"
                   id="label"
-                  [(ngModel)]="updatedPoi.label"
+                  [(ngModel)]="updatedPoi.clientLabel"
                   name="label"
                   required
                 />
@@ -212,8 +220,7 @@ export class PoiPopupComponent implements OnInit {
   activeTabIndex: number = 0;
   tabNames: string[] = ['information', 'proximite', 'dessus', 'editer'];
 
-  address: string = 'Chargement...';
-  updatedPoi: { label: string };
+  updatedPoi: { clientCode: string, clientLabel: string };
   categories: dto.PointOfInterestCategoryEntity[] = [];
   categoryOptions: { label: string; value: number }[] = [];
 
@@ -232,20 +239,11 @@ export class PoiPopupComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Obtenir l'adresse à partir des coordonnées
-    this.poiService.getAddressFromCoordinates(
-      this.entity.coordinate.coordinates[1],
-      this.entity.coordinate.coordinates[0]
-    ).subscribe({
-      next: (response) => {
-        this.address = response.adresse;
-      },
-      error: () => this.address = 'Adresse non disponible',
-    });
 
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {
-      label: this.entity.label,
+      clientCode: this.entity.client_code,
+      clientLabel: this.entity.client_label
     };
 
     // Récupérer les catégories et préparer les options pour le select
@@ -269,7 +267,7 @@ export class PoiPopupComponent implements OnInit {
   }
 
   navigateToPoiEdit() {
-    this.router.navigate(['/poiedit', this.entity.label]);
+    this.router.navigate(['/poiedit', this.entity.client_label]);
   }
 
   onTabChange(event: any) {
@@ -330,7 +328,8 @@ export class PoiPopupComponent implements OnInit {
     const wktPoint = `POINT(${this.entity.coordinate.coordinates[0]} ${this.entity.coordinate.coordinates[1]})`;
 
     const updatedData: PointOfInterestForm = {
-      label: this.updatedPoi.label,
+      clientCode : this.updatedPoi.clientCode,
+      clientLabel: this.updatedPoi.clientLabel,
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
       WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry)

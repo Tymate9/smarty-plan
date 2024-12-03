@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets
 
 class GeoCodingService {
 
-    fun geocode(adresse: String): Point? {
+    fun geocode(adresse: String): GeoCodeResponse? {
         val encodedAddress = URLEncoder.encode(adresse, StandardCharsets.UTF_8.name())
         val url = "https://api-adresse.data.gouv.fr/search/?q=$encodedAddress&limit=1"
 
@@ -27,7 +27,6 @@ class GeoCodingService {
                 val responseBody = EntityUtils.toString(response.entity)
                 val mapper = jacksonObjectMapper()
                 val rootNode: JsonNode = mapper.readTree(responseBody)
-
                 val features = rootNode["features"]
                 if (features != null && features.isArray && features.size() > 0) {
                     val firstFeature = features[0]
@@ -37,7 +36,10 @@ class GeoCodingService {
                     val latitude = coordinates[1].asDouble()
 
                     val geometryFactory = GeometryFactory()
-                    return geometryFactory.createPoint(Coordinate(longitude, latitude))
+                    return GeoCodeResponse(
+                        adresse = firstFeature["properties"]["label"].asText(),
+                        coordinate = geometryFactory.createPoint(Coordinate(longitude, latitude))
+                    )
                 }
             } else {
                 throw RuntimeException("Erreur lors de la requête de géocodage : statut $status")

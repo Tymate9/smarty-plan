@@ -104,17 +104,17 @@ export class MarkerFactory {
   static getVehicleIcon(entity: any): L.DivIcon {
     // Définir la couleur en fonction de l'ID de l'entité avec modulo
     let color: string = "";
-    switch (entity.id % 4) {
-      case 0:
+    switch (entity.device.state) {
+      case "NO_COM":
         color = 'gris';
         break;
-      case 1:
+      case "STOP":
         color = 'rouge';
         break;
-      case 2:
+      case "OFF":
         color = 'orange';
         break;
-      case 3:
+      case "MOVING":
         color = 'vert';
         break;
     }

@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset smarty_plan:1
+--changeset smarty_plan:1 context:dev, prod
 
 /* ===========================
  Table: team_category

@@ -4,12 +4,10 @@ import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import net.enovea.common.geo.SpatialService
+import net.enovea.domain.device.DeviceDataStateEntity
 import net.enovea.domain.device.DeviceEntity
-import net.enovea.domain.vehicle.DeviceVehicleInstallEntity
-import net.enovea.domain.vehicle.VehicleEntity
-import net.enovea.domain.vehicle.VehicleSummaryMapper
+import net.enovea.domain.vehicle.*
 import net.enovea.dto.VehicleSummaryDTO
-import net.enovea.dto.VehicleTableDTO
 import net.enovea.service.TeamHierarchyNode
 import net.enovea.service.VehicleService
 import org.locationtech.jts.geom.Coordinate
@@ -18,17 +16,15 @@ import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import org.locationtech.jts.io.WKTReader
 
-
 // TODO(A refactoriser et à améliorer avec le VehicleService et travailler sur le nombre de résultat retourner après le filtre)
 @Path("/api/vehicles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 class VehicleResource(
     private val vehicleService: VehicleService,
-    private val deviceSpatialService: SpatialService<DeviceEntity>
-
+    private val deviceDataStateSpatialService: SpatialService<DeviceDataStateEntity>,
 ) {
-    private val vehicleSummaryMapper: VehicleSummaryMapper = VehicleSummaryMapper.INSTANCE
+    private val vehicleMapper: VehicleMapper = VehicleMapper.INSTANCE
 
     @GET
     @Path("/list")
@@ -36,32 +32,32 @@ class VehicleResource(
         return vehicleService.getVehiclesList(agencyIds)
     }
 
-
     @GET
     fun getFilteredVehicles(
+        @QueryParam("format") format: VehicleFormat?,
         @QueryParam("teamLabels") teamLabels: List<String>?,
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
         @QueryParam("driverNames") driverNames: List<String>?
-    ):
-            List<VehicleSummaryDTO> {
+    ): Response {
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
-        val vehicleSummaries = vehicleService.getVehiclesSummary(filteredVehicles)
-        return vehicleSummaries
+        val vehicleSummaries = vehicleService.removeLocalizationToUntrackedVehicle(filteredVehicles)
+        return Response.ok(formatResponse(format ?: VehicleFormat.RESUME, vehicleSummaries)).build()
     }
-//
-//    @GET
-//    @Path("/tableData")
-//    fun getFilteredVehiclesTableData(
-//        @QueryParam("teamLabels") teamLabels: List<String>?,
-//        @QueryParam("vehicleIds") vehicleIds: List<String>?,
-//        @QueryParam("driverNames") driverNames: List<String>?
-//    ):
-//            List<VehicleTableDTO> {
-//        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
-//        val vehicleSummaries = vehicleService.getVehiclesTableData(filteredVehicles)
-//        return vehicleSummaries
-//    }
 
+    private fun formatResponse(vehicleFormat: VehicleFormat, vehicles : List<VehicleEntity>) : Any {
+        return when(vehicleFormat)
+        {
+            VehicleFormat.FULL -> vehicles.map{ vehicle ->
+                vehicleMapper.toVehicleDTO(vehicle)
+            }
+            VehicleFormat.RESUME -> vehicles.map{ vehicle ->
+                vehicleMapper.toVehicleDTOSummary(vehicle)
+            }
+            VehicleFormat.LOCALIZATION -> vehicles.map{ vehicle ->
+                vehicleMapper.toVehicleLocalizationDTO(vehicle)
+            }
+        }
+    }
 
     @GET
     @Path("/tableData")
@@ -90,12 +86,12 @@ class VehicleResource(
 
         val maxResults = limit ?: 10
 
-        val deviceIdList : List<Int> = deviceSpatialService.getNearestEntity(point, maxResults).map {it.id}
+        val deviceIdList : List<Int> = deviceDataStateSpatialService.getNearestEntity(point, maxResults).map {deviceDataState -> deviceDataState.device_id}
 
         val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(deviceIdList))
 
         return response.map {
-            vehicleSummaryMapper.toVehicleDTOsummary(it)
+            vehicleMapper.toVehicleDTOSummary(it)
         }
 
     }
@@ -123,10 +119,10 @@ class VehicleResource(
 
             val polygon = geometry as Polygon
 
-            val devicesIdInPolygon = deviceSpatialService.getEntityInPolygone(polygon).map {it.id}
+            val devicesIdInPolygon = deviceDataStateSpatialService.getEntityInPolygone(polygon).map {deviceDataState -> deviceDataState.device_id}
 
             val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(devicesIdInPolygon)).map {
-                vehicleSummaryMapper.toVehicleDTOsummary(it)
+                vehicleMapper.toVehicleDTOSummary(it)
             }
 
             Response.ok(response).build()
@@ -159,7 +155,7 @@ class VehicleResource(
 
         return try {
             // Récupérer la liste des entités Device avec leur distance
-            val deviceWithDistances: List<Pair<Double, DeviceEntity>> = deviceSpatialService.getNearestEntityWithDistance(point, maxResults)
+            val deviceWithDistances: List<Pair<Double, DeviceEntity>> = deviceDataStateSpatialService.getNearestEntityWithDistance(point, maxResults).map {pair -> Pair(pair.first, pair.second.device!!)}
 
             // Extraire les IDs des devices pour trouver les VehicleEntity correspondants
             val deviceIds = deviceWithDistances.map { it.second.id }
@@ -174,7 +170,7 @@ class VehicleResource(
             // Transformer en une liste de Pair<distance, VehicleSummaryDTO>
             val resultList = deviceWithDistances.mapNotNull { (distance, deviceEntity) ->
                 vehicleMapById[deviceEntity.id]?.let { vehicle ->
-                    val vehicleDTO = vehicleSummaryMapper.toVehicleDTOsummary(vehicle)
+                    val vehicleDTO = vehicleMapper.toVehicleDTOSummary(vehicle)
                     Pair(distance, vehicleDTO)
                 }
             }

@@ -187,7 +187,8 @@ class PointOfInterestResource (
 
             // 4. Créer l'entité POI avec le Polygon et le Point
             val poiEntity = PointOfInterestEntity(
-                label = poiForm.label,
+                client_code = poiForm.clientCode,
+                client_label = poiForm.clientLabel,
                 category = category,
                 coordinate = pointGeometry, // Coordonnées indépendantes de la zone
                 area = polygonGeometry
@@ -254,7 +255,8 @@ class PointOfInterestResource (
             val coordinatePoint: Point = pointGeometry
 
             // 5. Mettre à jour les champs de l'entité POI
-            existingPOI.label = poiForm.label
+            existingPOI.client_code = poiForm.clientCode
+            existingPOI.client_label = poiForm.clientLabel
             existingPOI.category = category
             existingPOI.coordinate = coordinatePoint
             existingPOI.area = areaPolygon

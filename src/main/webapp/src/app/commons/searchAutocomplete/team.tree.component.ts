@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, SimpleChanges} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "@angular/core";
 
 export interface Option {
   label: string;
@@ -124,7 +124,7 @@ export interface Option {
     }
   `]
 })
-export class TeamTreeComponent {
+export class TeamTreeComponent implements OnChanges{
   @Input() label: string = '';
   @Input() options: Option[] = [];
   @Input() selectedItems: string[] = [];
@@ -141,9 +141,9 @@ export class TeamTreeComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['selectedItems'] && changes['selectedItems'].currentValue !== this.selectedTags) {
-      this.selectedTags = [...this.selectedItems]; // Reset selectedTags from parent
-      this.filterOptions(); // Reapply filter to exclude selected items
+    if (changes['selectedItems']) {
+      this.selectedTags = [...this.selectedItems]; // Copier les éléments sélectionnés
+      this.filterOptions(); // Mettre à jour les options filtrées
     }
   }
 

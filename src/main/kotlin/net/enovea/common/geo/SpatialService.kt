@@ -132,11 +132,11 @@ class SpatialService<T : PanacheEntityBase>(
 
     fun getEntityFromAddress(address: String, limit: Int = 1): List<T> {
 
-        val point = geoCodingService.geocode(address)
-        requireNotNull(point){
+        val result = geoCodingService.geocode(address)
+        requireNotNull(result){
             throw IllegalArgumentException("Impossible de géocoder l'adresse fournie.")
         }
-        return getNearestEntity(point, limit)
+        return getNearestEntity(result.coordinate, limit)
     }
 
     fun getAddressFromEntity(point: Point): String {

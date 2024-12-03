@@ -63,7 +63,7 @@ import TripEventType = dto.TripEventType;
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
-              > {{ event.address || event.poiLabel }} : {{ event.start?.toLocaleTimeString() }}
+              > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }} : {{ event.start?.toLocaleTimeString() }}
                 -> {{ event.end?.toLocaleTimeString() }} {{ event.duration }}
               </div>
             </ng-template>
@@ -210,7 +210,7 @@ export class TripMapComponent {
             className: 'custom-poi-icon',
           })
         ).addTo(this.featureGroup).bindPopup(
-          `<b>${tripEvent.poiLabel || tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
+          `<b>${tripEvent.poiLabel ? tripEvent.poiLabel + ' ' + tripEvent.address : tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
         );
       }
 

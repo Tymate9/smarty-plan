@@ -20,13 +20,17 @@ data class PointOfInterestEntity(
     @JoinColumn(name = "type", nullable = false)
     var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
 
-    var label: String = "",
+    var client_code : String = "",
+
+    var client_label: String = "",
 
     @Column(name = "coordinate")
     var coordinate: Point = Point(
         CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
         GeometryFactory()
     ),
+
+    var address: String = "NOT_COMPUTED",
 
     var area: Polygon = run {
         val coordinates = arrayOf(
@@ -41,9 +45,11 @@ data class PointOfInterestEntity(
             GeometryFactory()
         )
         Polygon(linearRing, null, GeometryFactory())
-    }
+    },
 
 ) : PanacheEntityBase {
+    val denomination: String = "${client_code}-${client_label}"
+
     companion object : PanacheCompanionBase<PointOfInterestEntity, Int> {
         const val ID_SEQUENCE = "point_of_interest_id_seq"
         const val ENTITY_NAME = "PointOfInterest"

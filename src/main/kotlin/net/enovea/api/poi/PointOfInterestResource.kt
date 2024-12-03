@@ -82,6 +82,33 @@ class PointOfInterestResource (
     //http://localhost:8080/poi/toAdresse?latitude=48.8566&longitude=2.3522
 
     @GET
+    @Path("/nearestPOIWithRadius")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun findNearestPOI(
+        @QueryParam("latitude") latitude: Double?,
+        @QueryParam("longitude") longitude: Double?
+    ): Response {
+        if (latitude == null || longitude == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Les paramètres 'latitude' et 'longitude' sont requis."))
+                .build()
+        }
+
+        val geometryFactory = GeometryFactory()
+        val point: Point = geometryFactory.createPoint(Coordinate(longitude, latitude))
+
+        return try {
+            val poi = pointOfInterestSpatialService.getNearestEntityWithinRadius(point,200.0)
+            Response.ok(mapOf("poi" to poi)).build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to e.message))
+                .build()
+        }
+
+    }
+
+    @GET
     @Path("/toAdresse")
     @Produces(MediaType.APPLICATION_JSON)
     fun getAdresseFromCoordinate(
@@ -160,7 +187,8 @@ class PointOfInterestResource (
 
             // 4. Créer l'entité POI avec le Polygon et le Point
             val poiEntity = PointOfInterestEntity(
-                label = poiForm.label,
+                client_code = poiForm.clientCode,
+                client_label = poiForm.clientLabel,
                 category = category,
                 coordinate = pointGeometry, // Coordonnées indépendantes de la zone
                 area = polygonGeometry
@@ -227,7 +255,8 @@ class PointOfInterestResource (
             val coordinatePoint: Point = pointGeometry
 
             // 5. Mettre à jour les champs de l'entité POI
-            existingPOI.label = poiForm.label
+            existingPOI.client_code = poiForm.clientCode
+            existingPOI.client_label = poiForm.clientLabel
             existingPOI.category = category
             existingPOI.coordinate = coordinatePoint
             existingPOI.area = areaPolygon

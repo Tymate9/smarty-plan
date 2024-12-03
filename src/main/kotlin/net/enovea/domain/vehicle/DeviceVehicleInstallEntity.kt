@@ -14,8 +14,9 @@ data class DeviceVehicleInstallEntity (
     @EmbeddedId
     val id: DeviceVehicleInstallId = DeviceVehicleInstallId(),
 
+    //TODO(Ajouter la nullité de cette attribut)
     @Column(name = "end_date", nullable = true)
-    val endDate: Timestamp = Timestamp(System.currentTimeMillis()),
+    val endDate: Timestamp? = null,
 
     @Column(name = "fitment_odometer" ,nullable = true)
     var fitmentOdometer: Int?=null,

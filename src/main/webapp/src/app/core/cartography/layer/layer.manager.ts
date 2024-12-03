@@ -191,7 +191,7 @@ export class LayerManager {
 
     if (this.entityType === EntityType.POI) {
       this.addPOIArea(marker, entity);
-      this.bindTooltip(marker, `${entity.label} - ${entity.category.label}`);
+      this.bindTooltip(marker, `${entity.client_code}-${entity.client_label} - ${entity.category.label}`);
     } else if (this.entityType === EntityType.VEHICLE) {
       this.bindTooltip(marker, `${entity.licenseplate} - ${entity.driver ? entity.driver.firstName + ' ' + entity.driver.lastName : 'Aucun conducteur'}`);
     }
@@ -398,5 +398,16 @@ export class LayerManager {
         this.markersMap.delete(id);
       }
     });
+  }
+
+  // Méthode pour mettre à jour la position d'un marqueur existant
+  public updateMarkerPosition(markerId: string, newCoordinates: any): void {
+    const marker = this.markersMap.get(markerId);
+    if (marker) {
+      // Mettre à jour la position du marqueur
+      marker.setLatLng(new L.LatLng(newCoordinates.coordinates[1], newCoordinates.coordinates[0]));
+    } else {
+      console.warn(`Le marqueur avec l'ID ${markerId} n'a pas été trouvé.`);
+    }
   }
 }

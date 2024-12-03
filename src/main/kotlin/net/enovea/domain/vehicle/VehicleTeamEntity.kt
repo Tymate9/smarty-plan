@@ -15,8 +15,9 @@ data class VehicleTeamEntity (
     @EmbeddedId
     val id: VehicleTeamId = VehicleTeamId(),
 
+    //TODO(Vérifier si la nullité est ok ici)
     @Column(name = "end_date", nullable = true)
-    val endDate: Timestamp=Timestamp(System.currentTimeMillis()),
+    val endDate: Timestamp?= null,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("vehicleId")

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface GeocodeResult {
+  adresse: string;
   latitude: number;
   longitude: number;
 }

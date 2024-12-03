@@ -23,11 +23,13 @@ class GeoCodingResource(
         }
 
         return try {
-            val point = geoCodingService.geocode(adresse)
-            if (point != null) {
+            //TODO(Doit être améliorer en réflechissant à un objet cohérents)
+            val geoCodeResponse = geoCodingService.geocode(adresse)
+            if (geoCodeResponse != null) {
                 val result = mapOf(
-                    "latitude" to point.y,
-                    "longitude" to point.x
+                    "adresse" to geoCodeResponse.adresse,
+                    "latitude" to geoCodeResponse.coordinate.y,
+                    "longitude" to geoCodeResponse.coordinate.x
                 )
                 Response.ok(result).build()
             } else {

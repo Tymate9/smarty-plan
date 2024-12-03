@@ -1,36 +1,42 @@
 import {APP_INITIALIZER, NgModule} from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import {BrowserModule} from '@angular/platform-browser';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { HelloWorldComponent } from './features/hello-world/hello-world.component';
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {HelloWorldComponent} from './features/hello-world/hello-world.component';
 
-import { initializeKeycloak } from './keycloak-init';
+import {initializeKeycloak} from './keycloak-init';
 import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
 
-import { HttpClientModule } from '@angular/common/http';
-import { LandingPageComponent } from './features/auth/landing-page/landing-page.component';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {LandingPageComponent} from './features/auth/landing-page/landing-page.component';
 import {AdminComponent} from './features/auth/admin/admin.component';
-import { MapComponent } from './features/map/map.component';
-import { NavbarComponent } from './commons/navbar/navbar.component';
-import { SearchAutocompleteComponent } from './commons/searchAutocomplete/search-autocomplete.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { CartographyComponent } from './features/cartography/cartography.component';
-import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
-
-import { HTTP_INTERCEPTORS } from "@angular/common/http";
-import { CacheInterceptor } from "./core/cache/cache.interceptor";
-import { MapPopupComponent } from './features/map/popUp/map-popup.component';
-import { PoiPopupComponent } from './features/poi/poi-popup/poi-popup.component';
-import { VehiclePopupComponent } from './features/vehicle/vehicle-popup/vehicle-popup.component';
+import {MapComponent} from './features/map/map.component';
+import {NavbarComponent} from './commons/navbar/navbar.component';
+import {SearchAutocompleteComponent} from './commons/searchAutocomplete/search-autocomplete.component';
+import {DashboardComponent} from './features/dashboard/dashboard.component';
+import {CartographyComponent} from './features/cartography/cartography.component';
+import {MainLayoutComponent} from './layout/main-layout/main-layout.component';
+import {CacheInterceptor} from "./core/cache/cache.interceptor";
+import {MapPopupComponent} from './features/map/popUp/map-popup.component';
+import {PoiPopupComponent} from './features/poi/poi-popup/poi-popup.component';
+import {VehiclePopupComponent} from './features/vehicle/vehicle-popup/vehicle-popup.component';
 import {TeamTreeComponent} from "./commons/searchAutocomplete/team.tree.component";
 
-import { PoiManagerComponent } from './features/poi/poi-manager/poi-manager.component';
-import { ButtonModule } from 'primeng/button';
+import {PoiManagerComponent} from './features/poi/poi-manager/poi-manager.component';
+import {ButtonModule} from 'primeng/button';
+import {TreeTableModule} from 'primeng/treetable';
 import {DropdownModule} from "primeng/dropdown";
 import {TabViewModule} from "primeng/tabview";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {ConfigService} from "./core/config/config.service";
+import {TableModule} from "primeng/table";
+
+import {ToastModule} from "primeng/toast";
+import {MessageService} from 'primeng/api';
+import {MenubarModule} from "primeng/menubar";
+
 import {TripListComponent} from "./features/trips/trip-list.component";
 import {TripMapComponent} from "./features/trips/trip-map.component";
 import {CardModule} from "primeng/card";
@@ -38,7 +44,6 @@ import {ToggleButtonModule} from "primeng/togglebutton";
 import {TimelineModule} from "primeng/timeline";
 import {TripsComponent} from "./features/trips/trips.component";
 import {CalendarModule} from "primeng/calendar";
-import {TableModule} from "primeng/table";
 
 @NgModule({
   declarations: [
@@ -57,7 +62,6 @@ import {TableModule} from "primeng/table";
     VehiclePopupComponent,
     PoiManagerComponent,
     TeamTreeComponent,
-    PoiManagerComponent,
     TripsComponent,
     TripListComponent,
     TripMapComponent
@@ -69,21 +73,29 @@ import {TableModule} from "primeng/table";
     KeycloakAngularModule,
     HttpClientModule,
     ButtonModule,
+    TableModule,
+    TreeTableModule,
     DropdownModule,
     TabViewModule,
     ProgressSpinnerModule,
+    ReactiveFormsModule,
+    ToastModule,
+    MenubarModule,
     CardModule,
     ToggleButtonModule,
     TimelineModule,
     CalendarModule,
-    TableModule,
   ],
-  providers: [{
-    provide: APP_INITIALIZER,
-    useFactory: initializeKeycloak,
-    multi: true,
-    deps: [KeycloakService],
-  }, {
+  providers: [
+    MessageService,
+    ConfigService,
+    KeycloakService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      deps: [KeycloakService, ConfigService],
+      multi: true
+    }, {
     provide: HTTP_INTERCEPTORS,
     useClass: CacheInterceptor,
     multi: true

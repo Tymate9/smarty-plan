@@ -5,17 +5,19 @@ import {PoiService} from "../poi/poi.service";
 import {VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import 'leaflet.markercluster';
-
+import { interval, Subscription } from 'rxjs';
 import {MapManager} from "../../core/cartography/map/map.manager";
 import {GeocodingService} from "../../commons/geo/geo-coding.service";
 import {FilterService} from "../../commons/navbar/filter.service";
 import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
+import {NotificationService} from "../../commons/notification/notification.service";
 
 
 @Component({
   selector: 'app-map',
   template: `
     <p>{{unTrackedVehicle}}</p>
+    <button (click)="refreshVehiclePositions()">Mettre à jour les positions</button>
     <div id="map"></div>
   `,
   styles: [`
@@ -30,18 +32,21 @@ export class MapComponent implements OnInit {
   private map!: L.Map;
   private mapManager : MapManager;
   protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
+  private filters : { agencies : string[], vehicles : string[], drivers : string[] };
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
               private readonly vehicleService: VehicleService,
               private readonly geoCodingService: GeocodingService,
-              private readonly filterService:FilterService) {}
+              private readonly filterService:FilterService,
+              private readonly notificationService: NotificationService) {}
 
   ngOnInit(): void {
     this.initMap();
     this.loadPOIs();
-   // this.loadVehicles();
     this.subscribeToFilterChanges();
+    this.startVehiclePositionUpdater();
+
   }
 
   private initMap(): void {
@@ -117,10 +122,10 @@ export class MapComponent implements OnInit {
 
   private subscribeToFilterChanges(): void {
     this.filterService.filters$.subscribe(filters => {
-      const { agencies, vehicles, drivers } = filters;
+      this.filters = filters as { agencies : string[], vehicles : string[], drivers : string[] };
 
       // Call getFilteredVehicles each time filters change
-      this.vehicleService.getFilteredVehicles(agencies, vehicles, drivers)
+      this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
 
           // Handle the filtered vehicles here, for example by updating the map markers
@@ -157,6 +162,51 @@ export class MapComponent implements OnInit {
 
   }
 
+  private updateSubscription?: Subscription;
 
+  private startVehiclePositionUpdater(): void {
+    // Créer un intervalle qui émet toutes les 5 minutes (300000 ms)
+    this.updateSubscription = interval(300000).subscribe(() => {
+      this.updateVehiclePositions();
+    });
+  }
+
+  private updateVehiclePositions(): void {
+    this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers, "LOCALIZATION").subscribe({
+      next: (filteredLocalizations: dto.VehicleLocalizationDTO[]) => {
+        filteredLocalizations.forEach((result: dto.VehicleLocalizationDTO) => {
+          const markerId = `vehicle-${result.id}`;
+          const event: LayerEvent = {
+            type: LayerEventType.UpdateMarkerPosition,
+            payload: {
+              id: markerId,
+              entityType: EntityType.VEHICLE,
+              newCoordinates: result.lastPosition,
+            }
+          };
+          this.mapManager.handleLayerEvent(event, null);
+        });
+        // Afficher une notification de succès après la mise à jour
+        this.notificationService.success('Mise à jour réussie', 'Les positions des véhicules ont été mises à jour.');
+      },
+      error: (error) => {
+        console.error('Erreur lors de la mise à jour des positions des véhicules:', error);
+
+        // Afficher une notification d'erreur
+        this.notificationService.error('Erreur de mise à jour', 'Impossible de mettre à jour les positions des véhicules.');
+      }
+    });
+  }
+
+  refreshVehiclePositions(): void {
+    // Arrêter le minuteur actuel
+    if (this.updateSubscription) {
+      this.updateSubscription.unsubscribe();
+    }
+    // Mettre à jour immédiatement les positions
+    this.updateVehiclePositions();
+    // Redémarrer le minuteur
+    this.startVehiclePositionUpdater();
+  }
 }
 

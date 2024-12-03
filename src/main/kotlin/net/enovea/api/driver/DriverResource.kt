@@ -15,6 +15,4 @@ class DriverResource(private val driverService: DriverService) {
     fun getDrivers(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<DriverDTO> {
         return driverService.getDrivers(agencyIds)
     }
-
-
 }

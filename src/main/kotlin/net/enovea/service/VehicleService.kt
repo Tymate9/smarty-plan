@@ -1,45 +1,29 @@
 package net.enovea.service
-import io.quarkus.hibernate.orm.panache.Panache
+
 import jakarta.persistence.EntityManager
-import jakarta.persistence.TypedQuery
 import jakarta.transaction.Transactional
+import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.common.geo.GeoCodingService
+import net.enovea.common.geo.SpatialService
 import net.enovea.domain.vehicle.*
+import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
-
+import net.enovea.dto.VehicleTableDTO
 
 class VehicleService (
-    private val vehicleSummaryMapper: VehicleSummaryMapper,
     private val vehicleMapper: VehicleMapper,
-){
-
-    //function returns all vehicles details (tracked and untracked)
-    fun getAllVehiclesDetails(): List<VehicleDTO> {
-        val vehicles = VehicleEntity.listAll()
-        return vehicles.map { vehicleMapper.toVehicleDTO(it) }
-    }
-
-    //function returns all vehicles summaries (tracked and untracked)
-    fun getAllVehiclesSummaries(): List<VehicleSummaryDTO> {
-        val vehicles = VehicleEntity.listAll()
-        return vehicles.map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
-    }
-
-    //function returns only the tracked vehicles(details)
-    fun getTrackedVehiclesDetails(): List<VehicleDTO> {
-        val allVehicles = VehicleEntity.listAll()
-        val trackedVehicles = filterVehicle(allVehicles)
-        return trackedVehicles.map { vehicleMapper.toVehicleDTO(it) }
-    }
-
-    fun filterVehicle(
-        allVehicles: List<VehicleEntity>
-    ): List<VehicleEntity> {
+    private val vehicleDataMapper: VehicleTableMapper,
+    private val spatialService: SpatialService<PointOfInterestEntity>,
+    private val geoCodingService: GeoCodingService,
+    private val entityManager: EntityManager,
+    ){
+    fun filterVehicle( vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
-        val trackedVehicles = allVehicles.filter { vehicle ->
+        val trackedVehicles = vehicles.filter { vehicle ->
             val isVehicleTracked = vehicle.id !in untrackedVehicleIds
 
             // Get the most recent driver's ID where end_date is null
@@ -57,30 +41,83 @@ class VehicleService (
     }
 
     //function returns tracked and untracked vehicles(summary) with replacing the last position by null for untracked vehicles/drivers
-    fun getVehiclesSummary(vehicles: List<VehicleEntity>? = null): List<VehicleSummaryDTO> {
+    fun removeLocalizationToUntrackedVehicle(vehicles: List<VehicleEntity> = VehicleEntity.listAll()): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
+        val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
+        val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
+        return vehicles.map { vehicle ->
+            if(vehicle.id in untrackedVehicleIds || VehicleEntity.getCurrentDriver(vehicle.vehicleDrivers)?.id in untrackedDriverIds ) {
+                entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
+                VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.coordinate = null
+            }
+            else {
+                entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
+            }
+            vehicle
+        }
+    }
+
+
+// TODO seperate the data treatment method
+    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
+        // Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
         val allVehicles = vehicles ?: VehicleEntity.listAll()
-        val allVehicleDTOsummary = allVehicles.map { vehicle ->
-            vehicleSummaryMapper.toVehicleDTOsummary(vehicle)
+        val allVehicleDataDTO = allVehicles.map { vehicle ->
+            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
         }
 
-        //Replace the last position for the untracked vehicles/drivers by null
-        allVehicleDTOsummary.forEach { vehicleDTOsummary ->
-
-            val driver = vehicleDTOsummary.driver
-            val isVehicleTracked = vehicleDTOsummary.id !in untrackedVehicleIds
+        // Replace the last position for the untracked vehicles/drivers by null
+        allVehicleDataDTO.forEach { vehicleDataDTO ->
+            val driver = vehicleDataDTO.driver
+            val isVehicleTracked = vehicleDataDTO.id !in untrackedVehicleIds
             val isDriverTracked = driver == null || driver.id !in untrackedDriverIds
 
             if (!isVehicleTracked || !isDriverTracked) {
-                vehicleDTOsummary.device.coordinate = null
-
+                vehicleDataDTO.device.deviceDataState?.coordinate = null
+            } else {
+                try {
+                    // Try to fetch POI using spatial service
+                    val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+                        spatialService.getNearestEntityWithinRadius(it, 200.0)
+                    }
+                    if (poi != null) {
+                        vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label
+                    } else {
+                        // If no POI, try to fetch address using geocoding service
+                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+                            geoCodingService.reverseGeocode(it)
+                        }
+                        vehicleDataDTO.lastPositionAddress = address
+                    }
+                } catch (e: Exception) {
+                    // Handle any errors during POI lookup or reverse geocoding
+                    vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
+                }
             }
         }
+        // Now we build the hierarchy of vehicles based on their teams
+        val vehiclesWithHierarchy = allVehicleDataDTO.map { vehicleDataDTO ->
+            val team = vehicleDataDTO.team
+            val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
+            vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
+        }
+        val teamHierarchy=buildTeamHierarchyForest(vehiclesWithHierarchy)
+        return teamHierarchy
+    }
 
-        return allVehicleDTOsummary
+    // Helper function to build team hierarchy
+    private fun buildTeamHierarchy(team: TeamDTO?): String {
+        // Recursively build the team hierarchy
+        val hierarchy = mutableListOf<String>()
+        var currentTeam = team
+        while (currentTeam != null) {
+            hierarchy.add(currentTeam.label)
+            currentTeam = currentTeam.parentTeam
+        }
+        return hierarchy.reversed().joinToString(" > ")
     }
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers
@@ -113,12 +150,13 @@ class VehicleService (
                     ?.filter { it.key.end == null }
                     ?.maxByOrNull { it.key.start }
                     ?.let { recentDevice ->
-                        recentDevice.value.coordinate = null
+                        recentDevice.value.deviceDataState?.coordinate = null
                     }
             }
         }
         return allVehicleDTOs
     }
+
 
 
     @Transactional
@@ -149,9 +187,8 @@ class VehicleService (
 
         val panacheQuery = VehicleEntity.find(baseQuery, params)
 
-        return panacheQuery.list().map { vehicleSummaryMapper.toVehicleDTOsummary(it) }
+        return panacheQuery.list().map { vehicleMapper.toVehicleDTOSummary(it) }
     }
-
 
     //Function returns the list of vehicles based on the filters provided
     @Transactional
@@ -204,8 +241,49 @@ class VehicleService (
 
         return panacheQuery.list()
     }
+}
 
 
+// Tree node data class
+data class TeamHierarchyNode(
+    val label: String,
+    val children: MutableList<TeamHierarchyNode> = mutableListOf(),
+    val vehicles: MutableList<VehicleTableDTO> = mutableListOf()
+)
+
+// Function to build a hierarchy tree for multiple top-level teams
+fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarchyNode> {
+    // Map to store team nodes by their labels
+    val teamNodes = mutableMapOf<String, TeamHierarchyNode>()
+
+    vehicles.forEach { vehicle ->
+        val teamHierarchy = vehicle.teamHierarchy?.split(" > ")
+
+        // Process the hierarchy and construct nodes
+        var currentNode: TeamHierarchyNode? = null
+        if (teamHierarchy != null) {
+            for (teamLabel in teamHierarchy) {
+                val node = teamNodes.getOrPut(teamLabel) { TeamHierarchyNode(teamLabel) }
+
+                // Link the current node to its parent if it exists
+                if (currentNode != null && !currentNode.children.contains(node)) {
+                    currentNode.children.add(node)
+                }
+
+                currentNode = node
+            }
+        }
+
+        // Add the vehicle to the leaf node
+        currentNode?.vehicles?.add(vehicle)
+    }
+
+    // Collect the top-level nodes (those that are not children of any other node)
+    val allNodes = teamNodes.values.toSet()
+    val childNodes = teamNodes.values.flatMap { it.children }.toSet()
+    val topLevelNodes = allNodes.subtract(childNodes)
+
+    return topLevelNodes.toList()
 }
 
 

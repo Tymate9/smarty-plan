@@ -3,12 +3,13 @@ package net.enovea.conf
 import net.enovea.api.sms.SmsService
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
+import org.eclipse.microprofile.config.inject.ConfigProperty
 
 class SmsServiceConfiguration {
     @Produces
     @Named("smsService")
-    fun smsService(
+    fun smsService( @ConfigProperty(name = "quarkus.sms-sender.url") baseUrl : String
     ): SmsService {
-        return SmsService()
+        return SmsService(baseUrl)
     }
 }

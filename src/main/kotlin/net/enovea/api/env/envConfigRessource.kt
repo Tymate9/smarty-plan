@@ -25,7 +25,7 @@ class EnvConfigResource {
                 authServerURL = "http://localhost:45180/",
                 clientId = "smarty-plan-front"
             )
-            "test" -> keycloakConfigDTO(
+            "staging" -> keycloakConfigDTO(
                 logoutURL = "https://smartyplan.staging.nm.enovea.net/",
                 realmName = "SmartyPlan-Staging",
                 authServerURL = "https://keycloak.staging.nm.enovea.net/",

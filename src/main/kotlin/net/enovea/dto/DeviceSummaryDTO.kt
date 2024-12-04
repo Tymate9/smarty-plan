@@ -8,5 +8,5 @@ data class DeviceSummaryDTO (
     var lastCommunicationDate: Timestamp?,
     var enabled : Boolean,
     var coordinate: Point?,
-    var state: String,
+    var state: String?,
 )

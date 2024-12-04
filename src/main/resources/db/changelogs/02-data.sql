@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
--- changeset smarty_plan:2 context:dev, prod
+-- changeset smarty_plan:2 context:dev or prod
 
 /* Seed pour la table vehicle_category */
 INSERT INTO vehicle_category (label) VALUES

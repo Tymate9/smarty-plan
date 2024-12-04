@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
--- changeset smarty_plan:5 context:dev, prod
+-- changeset smarty_plan:5 context:dev or prod
 
 ALTER TABLE device
     DROP COLUMN IF EXISTS coordinate;

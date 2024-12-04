@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
--- changeset smarty_plan:4 context:dev, prod
+-- changeset smarty_plan:4 context:dev or prod
 
 
 ALTER TABLE point_of_interest

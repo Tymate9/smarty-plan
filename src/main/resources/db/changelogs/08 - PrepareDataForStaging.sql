@@ -62,6 +62,23 @@ DELETE FROM device WHERE id IN (SELECT id FROM devices_to_delete);
 
 -- Insertion des données
 
+-- Ajout des devices
+
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (26, '352016707855243', 'Teltonika Test 1', 'Teltonika', 'FMT100', null, null, true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (27, '352016707855102', 'Teltonika Test 2', 'Teltonika', 'FMT100', null, null, true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (28, '350612077599288', 'FY-176-AH ROUEN', 'Teltonika', 'FMT100', '1132560894', '8944477100002170861', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (29, '350612075545846', 'GJ-185-DL ROUEN', 'Teltonika', 'FMT100', '1131607689', '8944477100002173402', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (30, '350612073596577', 'GF-325-QV ROUEN', 'Teltonika', 'FMT100', '1131607689', '8944477100002173402', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (31, '350612073596569', 'GS-188-ZZ ROUEN', 'Teltonika', 'FMT100', '1131765337', '8944477100002168691', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (32, '350612077593463', 'GA-850-VG LE HAVRE', 'Teltonika', 'FMT100', '1132560919', '8944477100002171018', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (33, '350612077179404', 'FX-385-QY LE HAVRE', 'Teltonika', 'FMT100', '1132340585', '8944477100002171174', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (34, '350612077610416', 'EW-642-JM LE HAVRE', 'Teltonika', 'FMT100', '1132560796', '8944477100002171307', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (35, '350612077605135', 'FL-482-KL CAEN', 'Teltonika', 'FMT100', '1132560868', '8944477100002172164', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (36, '350612077598264', 'GA-164-RH CAEN', 'Teltonika', 'FMT100', '1132560989', '8944477100002171877', true, null, null, null, true);
+INSERT INTO public.device (id, imei, label, manufacturer, model, serialnumber, simnumber, gateway_enabled, last_data_date, comment, last_communication_date, enabled) VALUES (37, '350612077175915', 'EJ-714-PG CAEN', 'Teltonika', 'FMT100', '1132336182', '8944477100002171059', true, null, null, null, true);
+
+
+
 -- Insérer le véhicule
 INSERT INTO vehicle (id, energy, engine, externalid, licenseplate, category_id, validated)
 VALUES ('29', 'Hybrid', 'EngineTypeD', '350612075545846','GJ-183-DL',1,TRUE),

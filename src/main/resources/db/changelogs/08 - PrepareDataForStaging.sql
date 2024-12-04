@@ -77,7 +77,7 @@ VALUES (29, 'Kevin','PLANTEC',NULL),
        (31, 'Steven','HAMELET',NULL),
        (35, 'Guillaume','BISSON',NULL),
        (37, 'Mickael','MENANT',NULL),
-       (39, 'Samuel','LEBAILLIF',NULL);
+       (36, 'Samuel','LEBAILLIF',NULL);
 
 -- Associer le conducteur
 INSERT INTO vehicle_driver (vehicle_id, driver_id, start_date,end_date)
@@ -85,7 +85,7 @@ VALUES ('29',29,NOW(),NULL),
        ('31',31,NOW(),NULL),
        ('35',35,NOW(),NULL),
        ('37',37,NOW(),NULL),
-       ('39',39,NOW(),NULL);
+       ('36',36,NOW(),NULL);
 
 -- Associer le véhicule avec son device
 INSERT INTO device_vehicle_install (device_id, vehicle_id, start_date, end_date, fitment_odometer, fitment_operator, fitment_device_location, fitment_supply_location, fitment_supply_type )
@@ -93,6 +93,19 @@ VALUES (29, '29', NOW(), NULL, NULL, NULL,NULL, NULL, NULL),
     (31, '31', NOW(), NULL, NULL, NULL,NULL, NULL, NULL),
     (35, '35', NOW(), NULL, NULL, NULL,NULL, NULL, NULL),
     (37, '37', NOW(), NULL, NULL, NULL,NULL, NULL, NULL),
-    (39, '39', NOW(), NULL, NULL, NULL,NULL, NULL, NULL);
+    (36, '36', NOW(), NULL, NULL, NULL,NULL, NULL, NULL);
 
 
+INSERT INTO vehicle_team (vehicle_id, team_id, start_date) VALUES
+    ('29', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21'),
+    ('31', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+    ('35', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+    ('37', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+    ('36', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21');
+
+INSERT INTO driver_team (driver_id, team_id, start_date) VALUES
+    ('29', (SELECT id FROM team WHERE label = 'Service Technique Rouen'), '2023-11-21'),
+    ('31', (SELECT id FROM team WHERE label = 'Service Technique Caen'), '2023-11-21'),
+    ('35', (SELECT id FROM team WHERE label = 'Service Technique Le Havre'), '2023-11-21'),
+    ('37', (SELECT id FROM team WHERE label = 'Service Technique Cherbourg'), '2023-11-21'),
+    ('36', (SELECT id FROM team WHERE label = 'Service Technique Dieppe'), '2023-11-21');

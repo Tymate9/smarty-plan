@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
--- changeset smarty_plan:3 context:dev or prod
+-- changeset smarty_plan:3 context:prod,dev
 
 -- Insertion des catégories dans point_of_interest_category
 INSERT INTO point_of_interest_category (label, color)

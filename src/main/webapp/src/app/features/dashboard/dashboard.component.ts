@@ -50,7 +50,37 @@ import {DatePipe} from "@angular/common";
             'OFF': rowData.vehicle.device.deviceDataState.state === 'OFF',
             'STOP': rowData.vehicle.device.deviceDataState.state === 'STOP',
             'NO_COM': rowData.vehicle.device.deviceDataState.state === 'NO_COM'
-          }">{{ rowData.vehicle.device.deviceDataState.state }}</td>
+          }">
+            <!-- Icon and text -->
+            <ng-container [ngSwitch]="rowData.vehicle.device.deviceDataState.state">
+              <!-- Roulant -->
+              <span *ngSwitchCase="'MOVING'" class="status-icon">
+                 Roulant
+                 <i class="pi pi-play"></i> <!-- Replace with your icon -->
+
+              </span>
+
+              <!-- A l'arrêt -->
+              <span *ngSwitchCase="'STOP'" class="status-icon">
+                À l'arrêt
+                 <i class="pi pi-step-forward"></i> <!-- Replace with your icon -->
+
+                </span>
+
+              <!-- Arrêté -->
+              <span *ngSwitchCase="'OFF'" class="status-icon">
+                Arrêté
+                 <i class="pi pi-stop"></i> <!-- Replace with your icon -->
+
+             </span>
+
+              <!-- Default Case -->
+              <span *ngSwitchDefault class="status-icon">
+                 Inconnu
+                <i class="pi pi-times"></i> <!-- Replace with your icon -->
+                </span>
+            </ng-container>
+          </td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'shortTime'  }}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.distance || '50 km' }}</td>
@@ -67,11 +97,13 @@ import {DatePipe} from "@angular/common";
       background-color: #007ad9 !important;
       color: white !important;
       text-align: left !important;
-      padding: 8px !important;
+      //padding: 1px !important;
+      padding: 2px 8px !important;
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
-      padding: 8px !important;
+      //padding: 1px !important;
+      padding: 2px 8px !important;
       border-bottom: 1px solid #ddd !important;
       width: auto;
     }
@@ -79,12 +111,12 @@ import {DatePipe} from "@angular/common";
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
       background-color: var(--gray-200) !important;
       color: white !important;
-      font-weight: bold;
+      font-weight: 500;
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.has-vehicle {
       background-color: var(--gray-200) !important;
-      font-weight: bold;
+      font-weight: 500;
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr:hover {
@@ -93,9 +125,17 @@ import {DatePipe} from "@angular/common";
     :host ::ng-deep .p-treetable.custom-tree-table .root-node {
       background-color: var(--gray-200);
       color: var(--blue-800);
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
+      border-radius: 20px 20px 0 0 !important;
+      border: none !important;
+      width: 80% !important;
+      margin: 0 auto !important;
+      box-shadow: 0 2px 4px #0000001a !important;
+      display: inline-block !important; /* Ensure width is respected */
+      font-weight: bold; /* Optional: Make the text bold */
 
+    }
+    :host ::ng-deep .p-treetable.custom-tree-table .root-node td {
+      padding: 12px; /* Adjust padding for better appearance */
     }
 
     :host ::ng-deep .p-treetable.custom-tree-table .MOVING {
@@ -117,6 +157,21 @@ import {DatePipe} from "@angular/common";
       background-color: #E5E5E5;
       color: white;
     }
+
+    .status-icon {
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+      justify-content: space-between;
+      color: white;
+    }
+
+    .status-icon i {
+      font-size: 1.2rem; /* Adjust icon size */
+      color: white;
+      margin-left: 0.5rem;
+    }
+
 
   `]
 })

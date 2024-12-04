@@ -8,7 +8,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty
 class SmsServiceConfiguration {
     @Produces
     @Named("smsService")
-    fun smsService( @ConfigProperty(name = "quarkus.sms-sender.url") baseUrl : String
+    fun smsService( @ConfigProperty(name = "sms-sender") baseUrl : String
     ): SmsService {
         return SmsService(baseUrl)
     }

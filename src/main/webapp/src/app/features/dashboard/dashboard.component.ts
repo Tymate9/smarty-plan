@@ -12,11 +12,21 @@ import {DatePipe} from "@angular/common";
 @Component({
   selector: 'app-dashboard',
   template: `
-    <h1>Dashboard</h1>
-    <div>
-      <p><strong>Agences sélectionnées :</strong> {{ selectedTags['agencies'].join(', ') || 'Aucune' }}</p>
-      <p><strong>Véhicules sélectionnés :</strong> {{ selectedTags['vehicles'].join(', ') || 'Aucune' }}</p>
-      <p><strong>Conducteurs sélectionnés :</strong> {{ selectedTags['drivers'].join(', ') || 'Aucune' }}</p>
+<!--    <h1>Dashboard</h1>-->
+    <div class="status-buttons">
+      <button
+        *ngFor="let status of vehicleStatusCounts"
+        pButton
+        [ngStyle]="{ '--button-color': getButtonColor(status.state) }"
+        class="custom-status-button"
+        (click)="filterByStatus(status.state)"
+      >
+    <span>
+      <span class="status-count">{{ status.count }}</span>
+      <span class="status-text">{{ getStatusDisplayName(status.state) }}</span>
+      <span class="icon"><i class="pi" [ngClass]="getStatusIcon(status.state)"></i></span>
+    </span>
+      </button>
     </div>
     <p-treeTable *ngIf="vehiclesTree.length"
                  [value]="vehiclesTree"
@@ -188,7 +198,81 @@ import {DatePipe} from "@angular/common";
       margin-left: 0.5rem;
 
     }
+    .status-buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      justify-content: center;
+      align-items: center;
+    }
 
+    .custom-status-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 30px;
+      font-size: 25px;
+      font-weight: bold;
+      border: none;
+      width: 100%;
+      flex: 1 1 170px; /* Flex-grow, flex-shrink, and initial width */
+      height: 90px;
+      box-sizing: border-box; /* Include padding and border in width */
+      position: relative;
+      border-radius: 20px;
+      color: #333;
+      background: white;
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+      white-space: nowrap;
+
+    }
+
+    .custom-status-button i {
+      margin-right: 10px; /* Space between icon and text */
+      font-size: 35px; /* Adjust icon size */
+      color: var(--button-color, #007bff);
+      margin-left: auto;
+
+    }
+
+    .custom-status-button:hover {
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+      transform: translateY(-2px); /* Subtle lift effect */
+    }
+
+    .custom-status-button::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 30%; /* 30% colored area */
+      background: var(--button-color, #007bff); /* Use dynamic color */
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+
+    .custom-status-button span {
+      position: relative; /* Prevent content from being under the gradient */
+      z-index: 1; /* Ensure text is above gradient */
+      display: flex;
+      flex: 1;
+      justify-content: space-between; /* Space text and count */
+      padding-left: 10px; /* Space from the gradient */
+    }
+
+    .custom-status-button .status-count {
+      color: white; /* Count inside the colored area */
+      padding: 0 5px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .custom-status-button .status-text {
+      color: var(--button-color, #007bff); /* Text outside the colored area */
+    }
 
   `]
 })
@@ -197,9 +281,9 @@ export class DashboardComponent implements OnInit {
   protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : ";
   vehicles: VehicleSummaryDTO[] = [];
   vehiclesTree: TreeNode[] = [];
+  vehicleStatusCounts: { state: string; count: number }[] = [];
   teamHierarchy:TeamHierarchyNode[];
   today = new Date().toISOString().split('T')[0].replaceAll('-', '');
-
 
   constructor(
     private filterService: FilterService,
@@ -226,6 +310,15 @@ export class DashboardComponent implements OnInit {
       // Fetch the filtered vehicles based on the selected filters
       this.vehicleService.getFilteredVehiclesDashboard(agencies, vehicles, drivers).subscribe(filteredVehicles => {
         this.vehiclesTree=this.transformToTreeNodes(filteredVehicles)
+
+        const stateCounts = this.calculateStatusCounts(filteredVehicles);
+        this.vehicleStatusCounts = [
+          { state: 'MOVING', count: stateCounts['MOVING'] || 0 },
+          { state: 'OFF', count: stateCounts['OFF'] || 0 },
+          { state: 'STOP', count: stateCounts['STOP'] || 0 },
+          { state: 'NO_COM', count: stateCounts['NO_COM'] || 0 },
+        ];
+
       });
     })
   };
@@ -257,11 +350,40 @@ export class DashboardComponent implements OnInit {
           }))
         ]
       }
-
       ;
     });
   }
 
+  calculateStatusCounts(teams: TeamHierarchyNode[]): Record<string, number> {
+    const counts: Record<string, number> = {};
+
+    function traverseTeams(teamNodes: TeamHierarchyNode[]): void {
+      teamNodes.forEach((team) => {
+        // Count states from the vehicles at this team level
+        team.vehicles.forEach((vehicle) => {
+          const state = vehicle.device?.deviceDataState?.state;
+          if (state) {
+            counts[state] = (counts[state] || 0) + 1;
+          }
+        });
+
+        // Recursively process child teams
+        if (team.children && team.children.length > 0) {
+          traverseTeams(team.children);
+        }
+      });
+    }
+
+    // Start traversing from the root teams
+    traverseTeams(teams);
+
+    return counts;
+  }
+
+  filterByStatus(state: string) {
+    // Implement filtering logic here, or update the vehiclesTree based on the selected status
+    console.log(`Filtering vehicles by status: ${state}`);
+  }
 
   private displayFilteredVehiclesOnDashboard(vehicles: any[]): void {
     this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";
@@ -276,6 +398,48 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  getButtonColor(state: string): string {
+    switch (state) {
+      case 'MOVING':
+        return '#21A179';
+      case 'OFF':
+        return '#C71400';
+      case 'STOP':
+        return '#FE8F2B';
+      case 'NO_COM':
+        return '#E0E0E0';
+      default:
+        return '#E0E0E0';
+    }
+  }
+
+  getStatusDisplayName(state: string): string {
+    const stateDisplayNames: Record<string, string> = {
+      MOVING: 'ROULANT',
+      OFF: 'ARRÊTÉ',
+      STOP: 'À L\'ARRÊT',
+      NO_COM: 'SANS SIGNAL',
+    };
+    return stateDisplayNames[state] || 'UNKNOWN';
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'MOVING':
+        return 'pi-play';
+      case 'OFF':
+        return 'pi-stop';
+      case 'STOP':
+        return 'pi-step-forward';
+      case 'NO_COM':
+        return 'pi-times';
+      default:
+        return 'pi-exclamation-circle';
+    }
+  }
+
   protected readonly DatePipe = DatePipe;
 }
+
+
 

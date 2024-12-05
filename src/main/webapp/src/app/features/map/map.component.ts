@@ -5,7 +5,7 @@ import {PoiService} from "../poi/poi.service";
 import {VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import 'leaflet.markercluster';
-import { interval, Subscription } from 'rxjs';
+import {interval, Subscription} from 'rxjs';
 import {MapManager} from "../../core/cartography/map/map.manager";
 import {GeocodingService} from "../../commons/geo/geo-coding.service";
 import {FilterService} from "../../commons/navbar/filter.service";
@@ -57,7 +57,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 9);
+    this.map = L.map('map', {attributionControl: false, zoomControl: false}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
     //Todo(Ajouter au mapmgm)
@@ -95,6 +95,14 @@ export class MapComponent implements OnInit, OnDestroy {
 
           // Handle the filtered vehicles here, for example by updating the map markers
           this.displayFilteredVehiclesOnMap(filteredVehicles);
+          this.mapManager.handleLayerEvent(
+            {
+              type: LayerEventType.SetViewAroundMarkerType,
+              payload:
+                {
+                  markerType: EntityType.VEHICLE
+                }
+            }, null)
         });
     });
   }

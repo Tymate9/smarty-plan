@@ -1,12 +1,9 @@
 import {ViewContainerRef} from '@angular/core';
 import * as L from "leaflet";
 import {MapPopupComponent} from "../../../features/map/popUp/map-popup.component";
-import {EntityType, MarkerFactory, CustomMarker, CustomMarkerImpl} from "../marker/MarkerFactory";
+import {CustomMarker, EntityType, MarkerFactory} from "../marker/MarkerFactory";
 import {LayerManager} from "../layer/layer.manager";
-import {LayerEventType} from "../layer/layer.event";
-import {LayerEvent} from "../layer/layer.event";
-import {dto} from "../../../../habarta/dto";
-import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import {LayerEvent, LayerEventType} from "../layer/layer.event";
 import {catchError, forkJoin, of} from "rxjs";
 import {GeocodingService} from "../../../commons/geo/geo-coding.service";
 import {PopUpConfig} from "../marker/pop-up-config";
@@ -75,6 +72,11 @@ export class MapManager {
       case LayerEventType.ZoomToHighlightedMarkersIncludingCoords:
         const { lat, lng } = event.payload;
         this.zoomToHighlightedMarkersIncludingCoords(lat, lng);
+        break;
+
+      case LayerEventType.SetViewAroundMarkerType:
+        const {markerType}  = event.payload;
+        this.zoomAroundMarker(markerType)
         break;
 
       case LayerEventType.POICreated:
@@ -198,6 +200,23 @@ export class MapManager {
     }
   }
 
+  public zoomAroundMarker(type: EntityType) : void{
+    const featureGroup: L.FeatureGroup = new L.FeatureGroup();
+    this.layerManagers.forEach(
+      layerManager => {
+        if(layerManager.entityType === type)
+        {
+          layerManager.markersMap.forEach(
+            marker =>
+              marker.addTo(featureGroup)
+          )
+        }
+      }
+    )
+
+    this.map.fitBounds(featureGroup.getBounds())
+  }
+
   private zoomToCoordinates(coordinates: [number, number], zoomLevel: number = 19): void {
     const [lng, lat] = coordinates;
     this.map.setView([lat, lng], zoomLevel);
@@ -311,7 +330,7 @@ export class MapManager {
   // Export Button
 
   public addExportButton(): void {
-    const exportButton = new L.Control({ position: 'bottomright' });
+    const exportButton = new L.Control({ position: 'topleft' });
 
     exportButton.onAdd = () => {
       const button = L.DomUtil.create('button', 'export-csv-button');

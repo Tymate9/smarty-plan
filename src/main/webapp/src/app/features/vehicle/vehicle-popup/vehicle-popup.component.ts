@@ -14,10 +14,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
       <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
         <!-- Onglet Information -->
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
-          <h4>{{ entity.licenseplate }}</h4>
           <div class="p-field">
             <label><strong>Conducteur:</strong></label>
             <span>{{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}</span>
+          </div>
+          <div class="p-field">
+            <label><strong>Plaque d'immatriculation:</strong></label>
+            <span>{{entity.licenseplate || "Aucune plaque d'immatriculation" }}</span>
           </div>
           <div class="p-field">
             <label><strong>Équipe:</strong></label>

@@ -22,5 +22,6 @@ export enum LayerEventType {
   PopupClosed = 'POPUP_CLOSED',
   RemoveMarker = 'REMOVE_MARKER',
   DeleteAllMarkers='DELETE_ALL_MARKERS',
-  UpdateMarkerPosition='UPDATE_MARKER_POSITION'
+  UpdateMarkerPosition='UPDATE_MARKER_POSITION',
+  SetViewAroundMarkerType = "SET_VIEW_AROUND_MARKER_TYPE"
 }

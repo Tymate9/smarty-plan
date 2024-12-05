@@ -34,6 +34,7 @@ import {NotificationService} from "../notification/notification.service";
             <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>
             <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
             <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
+            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></button>
             <p-button (onClick)="saveFilters()" icon="pi pi-save" class="transparent-blur-bg save-filters-button"></p-button>
           </div>
         </div>
@@ -210,6 +211,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.filterService.updateFilters(newFilters);
     }
   }
+
 
   private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
     return JSON.stringify(filters1) === JSON.stringify(filters2);
@@ -390,6 +392,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
       this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
     }
+  }
+
+
+  resetFilters(): void {
+    this.agencySelected = [];
+    this.vehicleSelected = [];
+    this.driverSelected = [];
+
+    this.filterVehiclesAndDrivers();
+    this.updateFilteredOptionsAfterLoading();
+    this.emitSelectedTags();
   }
 
   ngOnDestroy() {

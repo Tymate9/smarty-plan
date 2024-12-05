@@ -40,48 +40,57 @@ import {DatePipe} from "@angular/common";
             {{ rowData.label }}
           </td>
 
-          <td *ngIf="rowData.vehicle">{{ rowData.label }}</td>
+
           <td *ngIf="rowData.vehicle">
             {{ (rowData.vehicle.driver.lastName || 'Non spécifié') + ' ' + (rowData.vehicle.driver.firstName || 'Non spécifié') }}
           </td>
+          <td *ngIf="rowData.vehicle">{{ rowData.label }}</td>
           <td *ngIf="rowData.vehicle"
               [ngClass]="{
             'MOVING': rowData.vehicle.device.deviceDataState.state === 'MOVING',
             'OFF': rowData.vehicle.device.deviceDataState.state === 'OFF',
             'STOP': rowData.vehicle.device.deviceDataState.state === 'STOP',
-            'NO_COM': rowData.vehicle.device.deviceDataState.state === 'NO_COM'
+            'NO_COM': rowData.vehicle.device.deviceDataState.state === 'NO_COM',
+            'DEFAULT': rowData.vehicle.device.deviceDataState.state === null,
           }">
             <!-- Icon and text -->
             <ng-container [ngSwitch]="rowData.vehicle.device.deviceDataState.state">
               <!-- Roulant -->
               <span *ngSwitchCase="'MOVING'" class="status-icon">
                  Roulant
-                 <i class="pi pi-play"></i> <!-- Replace with your icon -->
+                 <i class="pi pi-play"></i>
 
               </span>
 
               <!-- A l'arrêt -->
               <span *ngSwitchCase="'STOP'" class="status-icon">
                 À l'arrêt
-                 <i class="pi pi-step-forward"></i> <!-- Replace with your icon -->
+                 <i class="pi pi-step-forward"></i>
 
                 </span>
 
               <!-- Arrêté -->
               <span *ngSwitchCase="'OFF'" class="status-icon">
                 Arrêté
-                 <i class="pi pi-stop"></i> <!-- Replace with your icon -->
+                 <i class="pi pi-stop"></i>
+
+             </span>
+
+              <!-- Non C -->
+              <span *ngSwitchCase="'NO_COM'" class="status-icon">
+                Aucun signal
+                 <i class="pi pi-times"></i>
 
              </span>
 
               <!-- Default Case -->
               <span *ngSwitchDefault class="status-icon">
                  Inconnu
-                <i class="pi pi-times"></i> <!-- Replace with your icon -->
+                <i class="pi pi-question"></i>
                 </span>
             </ng-container>
           </td>
-          <td *ngIf="rowData.vehicle">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'shortTime'  }}</td>
+          <td *ngIf="rowData.vehicle">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm'  }}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>
           <td *ngIf="rowData.vehicle">{{ rowData.vehicle.distance || '50 km' }}</td>
           <td *ngIf="rowData.vehicle"><p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar" class="transparent-blur-bg"></p-button></td>
@@ -102,7 +111,6 @@ import {DatePipe} from "@angular/common";
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
-      //padding: 1px !important;
       padding: 2px 8px !important;
       border-bottom: 1px solid #ddd !important;
       width: auto;
@@ -125,17 +133,19 @@ import {DatePipe} from "@angular/common";
     :host ::ng-deep .p-treetable.custom-tree-table .root-node {
       background-color: var(--gray-200);
       color: var(--blue-800);
-      border-radius: 20px 20px 0 0 !important;
+      border-radius: 15px 15px 0 0 !important;
       border: none !important;
-      width: 80% !important;
+      width: 100% !important;
       margin: 0 auto !important;
       box-shadow: 0 2px 4px #0000001a !important;
-      display: inline-block !important; /* Ensure width is respected */
-      font-weight: bold; /* Optional: Make the text bold */
+      display: inline-block !important;
+      font-weight: bold;
+
 
     }
     :host ::ng-deep .p-treetable.custom-tree-table .root-node td {
       padding: 12px; /* Adjust padding for better appearance */
+      border-width: 0px;
     }
 
     :host ::ng-deep .p-treetable.custom-tree-table .MOVING {
@@ -154,6 +164,12 @@ import {DatePipe} from "@angular/common";
     }
 
     :host ::ng-deep .p-treetable.custom-tree-table .NO_COM {
+      //background-color: #E5E5E5;
+      background-color:var(--gray-400);
+      color: white;
+    }
+
+    :host ::ng-deep .p-treetable.custom-tree-table .DEFAULT {
       background-color: #E5E5E5;
       color: white;
     }
@@ -167,9 +183,10 @@ import {DatePipe} from "@angular/common";
     }
 
     .status-icon i {
-      font-size: 1.2rem; /* Adjust icon size */
+      font-size: 1.2rem;
       color: white;
       margin-left: 0.5rem;
+
     }
 
 

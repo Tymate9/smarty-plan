@@ -1,4 +1,4 @@
-import {Component,OnInit,ViewContainerRef} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewContainerRef} from '@angular/core';
 import * as L from 'leaflet';
 import {EntityType} from '../../core/cartography/marker/MarkerFactory';
 import {PoiService} from "../poi/poi.service";
@@ -27,12 +27,14 @@ import {NotificationService} from "../../commons/notification/notification.servi
     }
   `]
 })
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnDestroy {
 
   private map!: L.Map;
   private mapManager : MapManager;
   protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
   private filters : { agencies : string[], vehicles : string[], drivers : string[] };
+  private updateSubscription?: Subscription;
+  private filterSubscription?: Subscription;
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
@@ -44,9 +46,13 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.initMap();
     this.loadPOIs();
-    this.subscribeToFilterChanges();
-    this.startVehiclePositionUpdater();
+    this.filterSubscription = this.subscribeToFilterChanges();
+    this.updateSubscription = this.startVehiclePositionUpdater();
+  }
 
+  ngOnDestroy(): void {
+    this.filterSubscription?.unsubscribe();
+    this.updateSubscription?.unsubscribe();
   }
 
   private initMap(): void {
@@ -79,49 +85,8 @@ export class MapComponent implements OnInit {
     });
   }
 
-  private loadVehicles(): void {
-    this.vehicleService.getAllVehicles().subscribe({
-      next: (vehicles: dto.VehicleSummaryDTO[]) => {
-        vehicles.forEach(vehicle => {
-          if (vehicle.device && vehicle.device.coordinate) {
-            // Ajouter le véhicule à la carte
-            this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
-          }
-          else {
-              this.unTrackedVehicle += `${vehicle.licenseplate} /// `
-          }
-        });
-      },
-      error: (error) => {
-        console.error('Erreur lors de la récupération des véhicules:', error);
-      }
-    });
-  }
-
-  private loadFilteredVehicles(): void {
-    this.filterService.filters$.subscribe((filters) => {
-      this.vehicleService.getFilteredVehicles(filters['teamLabels'], filters['vehicleIds'], filters['driverNames']).subscribe({
-        next: (vehicles: dto.VehicleSummaryDTO[]) => {
-          vehicles.forEach(vehicle => {
-            if (vehicle.device && vehicle.device.coordinate) {
-
-              const marker = this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
-            }
-            else {
-              this.unTrackedVehicle += `${vehicle.licenseplate} /// `
-            }
-          });
-        },
-        error: (error) => {
-          console.error('Erreur lors de la récupération des véhicules:', error);
-        }
-      });
-    });
-
-  }
-
-  private subscribeToFilterChanges(): void {
-    this.filterService.filters$.subscribe(filters => {
+  private subscribeToFilterChanges(): Subscription {
+    return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies : string[], vehicles : string[], drivers : string[] };
 
       // Call getFilteredVehicles each time filters change
@@ -162,11 +127,9 @@ export class MapComponent implements OnInit {
 
   }
 
-  private updateSubscription?: Subscription;
-
-  private startVehiclePositionUpdater(): void {
+  private startVehiclePositionUpdater(): Subscription {
     // Créer un intervalle qui émet toutes les 5 minutes (300000 ms)
-    this.updateSubscription = interval(300000).subscribe(() => {
+    return interval(300000).subscribe(() => {
       this.updateVehiclePositions();
     });
   }

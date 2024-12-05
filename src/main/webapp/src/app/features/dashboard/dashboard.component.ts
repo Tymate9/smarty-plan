@@ -7,6 +7,7 @@ import {Router} from "@angular/router";
 import {DatePipe} from "@angular/common";
 import {TreeTable} from "primeng/treetable";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-dashboard',
@@ -154,8 +155,10 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
       </ng-template>
     </p-treeTable>
 
+
   `,
   styles: [`
+
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
       background-color: #007ad9 !important;
       color: white !important;
@@ -165,6 +168,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
+      //padding: 1px !important;
       padding: 2px 8px !important;
       border-bottom: 1px solid #ddd !important;
       width: auto;
@@ -422,8 +426,8 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 
   `]
 })
-export class DashboardComponent implements OnInit {
-  selectedTags: { [key: string]: string[] } = {};
+export class DashboardComponent implements OnInit, OnDestroy {
+  filters: { agencies : string[], vehicles : string[], drivers : string[] };
   protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : ";
   vehicles: VehicleSummaryDTO[] = [];
   vehiclesTree: TreeNode[] = [];
@@ -438,6 +442,7 @@ export class DashboardComponent implements OnInit {
     const randomIndex = Math.floor(Math.random() * this.randomColors.length);
     return this.randomColors[randomIndex];
   }
+  private filtersSubscription?: Subscription
 
   // Assign a random color to each rowNode
   getRowStyles(isRootNode: boolean): { [key: string]: string } | null {
@@ -474,24 +479,20 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     // S'abonner aux filtres partagés
-      this.filterService.filters$.subscribe(filters => {
-      this.selectedTags = filters;
-      this.subscribeToFilterChanges();
-      this.filterService.reset$.subscribe(() => {
-          this.resetTreeNode();
-        });
-
-    });
-
+    this.filtersSubscription = this.subscribeToFilterChanges();
   }
 
-  private subscribeToFilterChanges(): void {
-    this.filterService.filters$.subscribe(filters => {
-      const {agencies, vehicles, drivers} = filters;
+  ngOnDestroy(): void {
+    this.filtersSubscription?.unsubscribe()
+  }
+
+  private subscribeToFilterChanges(): Subscription {
+    return this.filterService.filters$.subscribe(filters => {
+      this.filters = filters as { agencies : string[], vehicles : string[], drivers : string[] };
 
       // Fetch the filtered vehicles based on the selected filters
-      this.vehicleService.getFilteredVehiclesDashboard(agencies, vehicles, drivers).subscribe(filteredVehicles => {
-        this.teamHierarchy=filteredVehicles
+      this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+        .subscribe(filteredVehicles => {
         this.vehiclesTree=this.transformToTreeNodes(filteredVehicles)
         //this.expandAllNodes(this.vehiclesTree);
 

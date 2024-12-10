@@ -35,7 +35,7 @@ import TripEventType = dto.TripEventType;
               <p>{{ tripData!.tripAmount }}</p>
             </p-card>
             <p-card header="Distance totale">
-              <p>{{ tripData!.drivingDistance }} Km</p>
+              <p>{{ tripData!.drivingDistance.toFixed(2) }} Km</p>
             </p-card>
             <p-card header="Nb de POI visités">
               <p>{{ tripData!.poiAmount }}</p>
@@ -63,7 +63,8 @@ import TripEventType = dto.TripEventType;
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
-              > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }} : {{ event.start?.toLocaleTimeString() }}
+              > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
+                : {{ event.start?.toLocaleTimeString() }}
                 -> {{ event.end?.toLocaleTimeString() }} {{ event.duration }}
               </div>
             </ng-template>
@@ -222,7 +223,9 @@ export class TripMapComponent {
           return
         }
 
-        L.geoJson(geoJSON, {style: {fillColor: 'blue'}}).addTo(this.featureGroup);
+        L.geoJson(geoJSON,
+          {style: {color: tripEvent.color || 'blue'}}
+        ).addTo(this.featureGroup);
       }
     });
 

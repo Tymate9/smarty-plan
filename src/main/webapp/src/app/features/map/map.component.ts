@@ -16,7 +16,7 @@ import {NotificationService} from "../../commons/notification/notification.servi
 @Component({
   selector: 'app-map',
   template: `
-    <p>{{unTrackedVehicle}}</p>
+<!--    <p>{{unTrackedVehicle}}</p>-->
     <button (click)="refreshVehiclePositions()">Mettre à jour les positions</button>
     <div id="map"></div>
   `,

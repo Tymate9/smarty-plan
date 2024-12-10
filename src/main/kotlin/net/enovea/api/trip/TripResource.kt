@@ -31,7 +31,7 @@ class TripResource(
     fun getTripsByVehicleIdAndDate(
         @PathParam("vehicleId") vehicleId: String,
         @PathParam("date") date: String // format %Y%m%d
-    ): TripEventsDTO {
+    ): TripEventsDTO? {
         return tripService.computeTripEventsDTO(vehicleId, date)
     }
 

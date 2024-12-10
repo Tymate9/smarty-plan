@@ -10,6 +10,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {catchError, forkJoin, of} from "rxjs";
 import {GeocodingService} from "../../../commons/geo/geo-coding.service";
 import {PopUpConfig} from "../marker/pop-up-config";
+import {downloadAsCsv} from "../../csv/csv.downloader";
 
 export class MapManagerConfig {
   canExtract: boolean;
@@ -388,23 +389,8 @@ export class MapManager {
         const address = addressResults[index].adresse;
         return this.convertVehicleToCSVRow(vehicle, address);
       });
-
-      // Combiner les en-têtes et les lignes
-      const csvContent = [headers.join(','), ...csvRows].join('\n');
-
-      // Créer un blob à partir du contenu CSV
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
-      // Générer un lien temporaire pour le téléchargement
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
       const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, "-");
-      link.setAttribute('download', `export_vehicles_${timestamp}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      downloadAsCsv([headers.join(','), ...csvRows], `export_vehicles_${timestamp}.csv`)
     }, error => {
       console.error('Erreur lors de l\'exportation CSV:', error);
       alert('Une erreur est survenue lors de l\'exportation CSV.');

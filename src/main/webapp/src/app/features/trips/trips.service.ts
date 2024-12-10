@@ -17,14 +17,23 @@ export class TripsService {
     return this.http.get<TripDTO[]>(`${this.apiUrl}/vehicle/${vehicleId}`);
   }
 
-  getTripByDateAndVehicle(vehicleId: string, date: string): Observable<TripEventsDTO> {
-    return this.http.get<TripEventsDTO>(`${this.apiUrl}/vehicle/${vehicleId}/${date}`).pipe(map(this.decodeTripEventsDTO));
+  getTripByDateAndVehicle(vehicleId: string, date: string): Observable<TripEventsDTO | null> {
+    return this.http.get<TripEventsDTO | null>(`${this.apiUrl}/vehicle/${vehicleId}/${date}`).pipe(map(this.decodeTripEventsDTO));
   }
 
-  private decodeTripEventsDTO(tripEventsDto: TripEventsDTO): TripEventsDTO {
-    tripEventsDto.tripEvents = tripEventsDto.tripEvents.map(tripEvent => {
+  private decodeTripEventsDTO(tripEventsDto: TripEventsDTO | null): TripEventsDTO | null {
+    if (!tripEventsDto) {
+      return null;
+    }
+    tripEventsDto.tripEvents = tripEventsDto.tripEvents.map((tripEvent, _, tripEvents) => {
       tripEvent.start = tripEvent.start && new Date(tripEvent.start);
       tripEvent.end = tripEvent.end && new Date(tripEvent.end);
+      // set color for trips (select colors on the hue circle while ignoring greeny colors)
+      if (tripEvent.eventType === dto.TripEventType.TRIP) {
+        const hue = 240 / tripEvents.length * tripEvent.index;
+        const adjustedHue = hue < 60 ? hue : hue + 120;
+        tripEvent.color = `hsl(${adjustedHue} 75% 40%)`;
+      }
       return tripEvent;
     });
     return tripEventsDto;

@@ -14,7 +14,7 @@ class TripService(
     private val spatialService: SpatialService<PointOfInterestEntity>
 ) {
 
-    fun computeTripEventsDTO(vehicleId: String, date: String): TripEventsDTO {
+    fun computeTripEventsDTO(vehicleId: String, date: String): TripEventsDTO? {
 
         val geometryFactory = GeometryFactory()
 
@@ -23,6 +23,11 @@ class TripService(
             vehicleId,
             LocalDate.parse(date, BASIC_ISO_DATE)
         )
+
+        if (trips.isEmpty()) {
+            return null
+        }
+
         val tripEvents = trips
             .reversed()
             .windowed(2, partialWindows = true)

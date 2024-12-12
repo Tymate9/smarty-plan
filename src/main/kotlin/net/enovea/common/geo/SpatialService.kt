@@ -167,7 +167,7 @@ class SpatialService<T : PanacheEntityBase>(
             FROM $tableName e
             WHERE ST_Intersects(
                 e.$areaColumnName::geography,
-                e.$coordinateColumnName::geography
+                ST_GeomFromText(:pointWKT, 4326)::geography
             )
             ORDER BY ST_Distance(
                 e.$coordinateColumnName::geography,

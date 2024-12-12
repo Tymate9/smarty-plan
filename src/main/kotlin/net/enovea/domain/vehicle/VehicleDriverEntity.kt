@@ -39,15 +39,27 @@ data class VehicleDriverEntity (
 
         @Transactional
         fun getForVehicleAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleDriverEntity? = find(
-            """SELECT vd FROM VehicleDriverEntity vd 
-                JOIN FETCH vd.driver d
-                JOIN FETCH vd.vehicle v
-                LEFT JOIN VehicleUntrackedPeriodEntity vup ON vup.id.vehicleId = v.id AND vup.id.startDate <= :date AND (vup.endDate IS NULL OR vup.endDate >= :date)        
-                WHERE v.id = :vehicleId AND vd.id.startDate <= :date AND (vd.endDate IS NULL OR vd.endDate >= :date) AND vup.id.startDate IS NULL
+            """
+                SELECT vd 
+                FROM VehicleDriverEntity vd 
+                    JOIN FETCH vd.driver d
+                    JOIN FETCH vd.vehicle v
+                    LEFT JOIN VehicleUntrackedPeriodEntity vup 
+                        ON vup.id.vehicleId = v.id 
+                        AND vup.id.startDate <= :date 
+                        AND (vup.endDate IS NULL OR vup.endDate >= :date)    
+                    LEFT JOIN DriverUntrackedPeriodEntity dup 
+                        ON dup.id.driverId = d.id 
+                        AND dup.id.startDate <= :date 
+                        AND (dup.endDate IS NULL OR dup.endDate >= :date)      
+                WHERE v.id = :vehicleId 
+                    AND vd.id.startDate <= :date 
+                    AND (vd.endDate IS NULL OR vd.endDate >= :date) 
+                    AND vup.id.startDate IS NULL
+                    AND dup.id.startDate IS NULL
                 """.trimIndent(),
             mapOf("vehicleId" to vehicleId, "date" to date.atStartOfDay())
         ).firstResult()
-        // todo : check
     }
 }
 

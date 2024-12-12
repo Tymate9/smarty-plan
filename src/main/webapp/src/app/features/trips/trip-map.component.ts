@@ -206,31 +206,35 @@ export class TripMapComponent {
     }
 
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {
-      // add start marker
-      if (tripEvent.eventType === TripEventType.STOP && tripEvent.lat !== null && tripEvent.lng !== null) {
-        new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(
-          L.divIcon({
-            html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30px" height="45px" fill="${tripEvent.color || 'black'}">
+
+      // todo : use full marker creation
+      if (tripEvent.lat !== null && tripEvent.lng !== null) {
+        if (tripEvent.eventType === TripEventType.STOP) {
+          new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(
+            L.divIcon({
+              html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30px" height="45px" fill="${tripEvent.color || 'black'}">
                   <path fill-rule="evenodd" d="M24,4.5A14.82,14.82,0,0,0,9.18,19.32h0c0,.34,0,.68,0,1v.08C9.78,28.52,16.52,35.05,24,43.5,31.81,34.68,38.82,28,38.82,19.32h0A14.82,14.82,0,0,0,24,4.5Zm0,7.7a7.13,7.13,0,1,1-7.13,7.12A7.13,7.13,0,0,1,24,12.2Z" />
                 </svg>`,
-            /*iconSize: [30, 45],*/
-            iconAnchor: [15, 45],
-            className: 'custom-poi-icon',
-          })
-        ).addTo(this.featureGroup).bindPopup(
-          `<b>${tripEvent.poiLabel ? tripEvent.poiLabel + ' ' + tripEvent.address : tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
-        );
-      } else if (tripEvent.eventType === TripEventType.VEHICLE_RUNNING) {
-        MarkerFactory.getVehicleIcon({
-          device: {state: 'MOVING'},
-          category: {label: 'vgp'}
-        }).addTo(this.featureGroup);
-      } else if (tripEvent.eventType === TripEventType.VEHICLE_IDLE) {
-        MarkerFactory.getVehicleIcon({
-          device: {state: 'OFF'},
-          category: {label: 'vgp'}
-        }).addTo(this.featureGroup);
+              /*iconSize: [30, 45],*/
+              iconAnchor: [15, 45],
+              className: 'custom-poi-icon',
+            })
+          ).addTo(this.featureGroup).bindPopup(
+            `<b>${tripEvent.poiLabel ? tripEvent.poiLabel + ' ' + tripEvent.address : tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
+          );
+        } else if (tripEvent.eventType === TripEventType.VEHICLE_RUNNING) {
+          new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(MarkerFactory.getVehicleIcon({
+            device: {state: 'MOVING'},
+            category: {label: 'vgp'}
+          })).addTo(this.featureGroup);
+        } else if (tripEvent.eventType === TripEventType.VEHICLE_IDLE) {
+          new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(MarkerFactory.getVehicleIcon({
+            device: {state: 'OFF'},
+            category: {label: 'vgp'}
+          })).addTo(this.featureGroup);
+        }
       }
+
 
       // add trace to map
       if (tripEvent.eventType === TripEventType.TRIP && tripEvent.wktTrace) {

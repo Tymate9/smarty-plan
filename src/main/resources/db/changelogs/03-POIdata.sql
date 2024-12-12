@@ -1,4 +1,4 @@
---liquibase formatted sql
+/*--liquibase formatted sql
 
 -- changeset smarty_plan:3 context:prod,dev
 
@@ -388,3 +388,4 @@ VALUES
 
 
 
+*/

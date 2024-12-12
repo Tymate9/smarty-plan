@@ -30,7 +30,12 @@ import {Router} from "@angular/router";
               <label>Catégorie :</label>
               <span>{{ entity.category.label }}</span>
             </div>
+            <div class="p-field">
+              <label>Coordonné :</label>
+              <span>Latitude :  {{ entity.coordinate.coordinates[1] }} <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
+            </div>
           </div>
+
         </p-tabPanel>
 
         <!-- Onglet Proximité -->
@@ -269,7 +274,7 @@ export class PoiPopupComponent implements OnInit {
   }
 
   navigateToPoiEdit() {
-    this.router.navigate(['/poiedit', this.entity.client_label]);
+    this.router.navigate(['/poiedit'], { queryParams: { labels: this.entity.client_label } });
   }
 
   onTabChange(event: any) {
@@ -334,7 +339,8 @@ export class PoiPopupComponent implements OnInit {
       clientLabel: this.updatedPoi.clientLabel,
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
-      WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry)
+      WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry),
+      adresse:"adresse Inconne"
     };
 
     this.poiService.updatePOI(this.entity.id, updatedData).subscribe({

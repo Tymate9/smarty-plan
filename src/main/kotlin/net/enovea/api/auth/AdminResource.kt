@@ -1,7 +1,6 @@
-package com.example
+package net.enovea.api.auth
 
-import com.fasterxml.jackson.databind.JsonNode
-import jakarta.annotation.security.PermitAll
+import io.quarkus.security.Authenticated
 import jakarta.annotation.security.RolesAllowed
 import jakarta.inject.Inject
 import jakarta.ws.rs.GET
@@ -25,7 +24,7 @@ class AdminResource {
         lateinit var jwt: JsonWebToken
 
         @GET
-        @RolesAllowed("admin")
+        @Authenticated
         @Produces(MediaType.TEXT_PLAIN)
         fun adminEndpoint(@Context ctx: SecurityContext): String {
             // Extraire les rôles depuis realm_access.roles en tant que Map

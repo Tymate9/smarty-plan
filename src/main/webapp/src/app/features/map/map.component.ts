@@ -16,8 +16,10 @@ import {NotificationService} from "../../commons/notification/notification.servi
 @Component({
   selector: 'app-map',
   template: `
-<!--    <p>{{unTrackedVehicle}}</p>-->
-    <button (click)="refreshVehiclePositions()">Mettre à jour les positions</button>
+    <div id="header">
+      <p>{{ this.no_comm_vehicle}}</p>
+      <button (click)="refreshVehiclePositions()">Mettre à jour les positions</button>
+    </div>
     <div id="map"></div>
   `,
   styles: [`
@@ -31,7 +33,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private map!: L.Map;
   private mapManager : MapManager;
-  protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
+  protected no_comm_vehicle : String = "Liste des véhicules non-communicant ou sans statut : "
   private filters : { agencies : string[], vehicles : string[], drivers : string[] };
   private updateSubscription?: Subscription;
   private filterSubscription?: Subscription;
@@ -119,17 +121,17 @@ export class MapComponent implements OnInit, OnDestroy {
     this.mapManager.handleLayerEvent(event,null)
 
     // Reset unTrackedVehicle list for each filter change
-    this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";
+    this.no_comm_vehicle = "Liste des véhicules non-communicant ou sans statut : ";
 
     // Display new markers on the map based on the filtered vehicles
     vehicles.forEach(vehicle => {
 
       if (vehicle.device && vehicle.device.coordinate) {
 
-        const marker = this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
-      }
-      else {
-        this.unTrackedVehicle += `${vehicle.licenseplate} /// `
+        this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
+        if (vehicle.device.state === "" || vehicle.device.state === "NO_COM"){
+          this.no_comm_vehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
+        }
       }
     });
 

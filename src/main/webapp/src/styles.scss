@@ -17,18 +17,33 @@ $color-brown-tertiary: #EEE3D4;      // Marron clair, fond tertiaire
   background-color: rgba(255, 255, 255, 0.3);  // Couleur de fond blanche avec une opacité de 30%
   backdrop-filter: blur(10px);  // Applique un flou de 10px aux éléments en arrière-plan
   -webkit-backdrop-filter: blur(10px);  // Compatibilité avec Safari  <!! Non testé !!>
-  border-radius: 10px;  // Optionnel : arrondi des coins, à ajuster selon les besoins
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  // Optionnel : légère ombre pour un effet de profondeur
   display: inline-block;
 
 }
 
-
-body {
+html, body {
   font-family: 'Arial', sans-serif;
   //background: $color-gray-secondary;
   background: linear-gradient(to right, var(--red-100), var(--red-50), var(--bluegray-50), var(--surface-50) , var(--surface-0) , var(--red-50), var(--red-100)) !important;
   color: $color-primary-dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }
 
 .custom-vehicle-icon {
@@ -130,3 +145,7 @@ body {
   z-index: 9999 !important;
 }
 
+.p-inputtext {
+  margin: 0;
+  width: 100%;
+}

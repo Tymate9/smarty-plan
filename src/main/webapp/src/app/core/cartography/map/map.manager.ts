@@ -330,7 +330,7 @@ export class MapManager {
   // Export Button
 
   public addExportButton(): void {
-    const exportButton = new L.Control({ position: 'topleft' });
+    const exportButton = new L.Control({ position: 'topright' });
 
     exportButton.onAdd = () => {
       const button = L.DomUtil.create('button', 'export-csv-button');

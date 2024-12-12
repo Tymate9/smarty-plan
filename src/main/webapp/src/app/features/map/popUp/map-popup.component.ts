@@ -24,7 +24,7 @@ import {GeoJSONGeometry} from "wellknown";
       >
         POI
       </button>
-      <button onclick="window.location.href='/poiedit'">Créer un POI</button>
+      <button (click)="redirectToPoiEditWithCoords()">Créer un POI</button>
     </div>
 
     <div class="tab-content">
@@ -123,7 +123,6 @@ export class MapPopupComponent implements OnInit {
   loadingVehicles: boolean = false;
   nearbyPOIs: any[] = [];
   loadingPOIs: boolean = false;
-  // Gestion des états de surbrillance des marqueurs
   highlightedStates: { [markerId: string]: boolean } = {};
 
   constructor(
@@ -206,7 +205,8 @@ export class MapPopupComponent implements OnInit {
       clientLabel: this.poiName,
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
-      WKTPolygon: wktPolygon
+      WKTPolygon: wktPolygon,
+      adresse:this.address
     };
     // Appeler le service pour créer le POI
     this.poiService.createPOI(poiData).subscribe({
@@ -305,4 +305,10 @@ export class MapPopupComponent implements OnInit {
     this.onRadiusChange(50);
     this.poiRadius = 50
   }
+
+  redirectToPoiEditWithCoords() {
+    const url = `/poiedit?coords=${this.latitude},${this.longitude}`;
+    window.location.href = url;
+  }
+
 }

@@ -1,4 +1,4 @@
---liquibase formatted sql
+/*--liquibase formatted sql
 
 -- changeset smarty_plan:2 context:prod,dev
 
@@ -258,3 +258,4 @@ INSERT INTO driver_untracked_period (driver_id, start_date, end_date) VALUES
 
 
 
+*/

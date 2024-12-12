@@ -17,5 +17,8 @@ data class PointOfInterestForm(
     var WKTPolygon: String,
 
     @field:NotBlank
-    var WKTPoint: String
+    var WKTPoint: String,
+
+    @field:NotBlank
+    var adresse: String
 )

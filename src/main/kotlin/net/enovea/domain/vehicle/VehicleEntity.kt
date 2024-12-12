@@ -8,6 +8,7 @@ import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.device.DeviceEntity
 import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.vehicle_category.VehicleCategoryEntity
+import java.time.LocalDate
 
 /**
  * Représente un véhicule

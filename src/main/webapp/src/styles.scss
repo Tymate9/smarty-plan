@@ -52,10 +52,10 @@ body {
 // Définir les keyframes pour l'animation de saut
 @keyframes grow {
   from {
-    transform: scale3d(1, 1, 1);
+    transform: scale3d(0.66, 0.66, 0.66);
   }
   to {
-    transform: scale3d(1.3, 1.3, 1.3);
+    transform: scale3d(1.1, 1.1, 1.1);
   }
 }
 

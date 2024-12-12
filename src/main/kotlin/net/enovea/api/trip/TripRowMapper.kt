@@ -20,8 +20,19 @@ class TripRowMapper : RowMapper<TripDTO> {
             startLat = rs.getDouble("start_lat"),
             endLng = rs.getDouble("end_lng"),
             endLat = rs.getDouble("end_lat"),
+            tripStatus = TripStatus.valueOf(rs.getString("trip_status")),
             trace = rs.getString("trace"),
             wktTrace = rs.getString("wkt_trace")
+        )
+    }
+}
+
+class TripDailyStatsRowMapper: RowMapper<TripDailyStatsDTO> {
+    override fun map(rs: ResultSet, ctx: StatementContext): TripDailyStatsDTO {
+        return TripDailyStatsDTO(
+            vehicleId = rs.getString("vehicle_id"),
+            distance = rs.getDouble("distance"),
+            firstTripStart = rs.getObject("first_trip_start", LocalDateTime::class.java).toLocalTime()
         )
     }
 }

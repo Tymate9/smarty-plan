@@ -1,6 +1,7 @@
 package net.enovea.api.trip
 
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 data class TripDTO(
     val vehicleId: String,
@@ -15,12 +16,34 @@ data class TripDTO(
     val startLat: Double,
     val endLng: Double,
     val endLat: Double,
+    val tripStatus: TripStatus,
     val trace: String?,
     val wktTrace: String?,
 )
 
+enum class TripStatus(
+    val value: String
+) {
+    COMPLETED("COMPLETED"),
+    RUNNING("RUNNING"),
+    IDLE("IDLE")
+}
+
+data class TripDailyStatsDTO(
+    val vehicleId: String,
+    val distance: Double,
+    val firstTripStart: LocalTime?,
+)
+
+data class TripDailyStats(
+    val distance: Double,
+    val firstTripStart: LocalTime?,
+)
+
 data class TripEventsDTO(
     val vehicleId: String,
+    val licensePlate: String,
+    val driverName: String,
     val range: Int,
     val stopDuration: Long,
     val drivingDuration: Long,
@@ -32,7 +55,9 @@ data class TripEventsDTO(
 
 enum class TripEventType {
     TRIP,
-    STOP
+    STOP,
+    VEHICLE_RUNNING,
+    VEHICLE_IDLE
 }
 
 data class TripEventDTO(

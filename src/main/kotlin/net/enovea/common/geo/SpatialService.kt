@@ -147,7 +147,7 @@ class SpatialService<T : PanacheEntityBase>(
         return address
     }
 
-    fun getNearestEntityWithinRadius(point: Point, radius: Double): T? {
+    fun getNearestEntityWithinArea(point: Point): T? {
         val wktPoint = point.toText()
 
         val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
@@ -155,16 +155,19 @@ class SpatialService<T : PanacheEntityBase>(
 
         val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
             ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
-        val columnAnnotation = coordinateField.getAnnotation(Column::class.java)
-        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
+
+        val coordinateColumnName = coordinateField.getAnnotation(Column::class.java)?.name ?: "coordinate"
+
+        val areaField = entityClass.java.declaredFields.firstOrNull { it.name == "area" }
+            ?: throw IllegalArgumentException("Le champ 'area' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
+        val areaColumnName = areaField.getAnnotation(Column::class.java)?.name ?: "coordinate"
 
         val query = """
             SELECT e.*
             FROM $tableName e
-            WHERE ST_DWithin(
-                e.$coordinateColumnName::geography,
-                ST_GeomFromText(:pointWKT, 4326)::geography,
-                :radius
+            WHERE ST_Intersects(
+                e.$areaColumnName::geography,
+                ST_GeomFromText(:pointWKT, 4326)::geography
             )
             ORDER BY ST_Distance(
                 e.$coordinateColumnName::geography,
@@ -175,7 +178,6 @@ class SpatialService<T : PanacheEntityBase>(
 
         val resultList = entityManager.createNativeQuery(query, entityClass.java)
             .setParameter("pointWKT", wktPoint)
-            .setParameter("radius", radius)
             .resultList
 
         @Suppress("UNCHECKED_CAST")

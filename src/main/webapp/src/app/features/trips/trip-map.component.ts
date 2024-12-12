@@ -1,9 +1,10 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as L from 'leaflet';
 import {TripsService} from './trips.service';
 import {dto} from "../../../habarta/dto";
 import {parse as WKTParse} from "wellknown";
-import {CustomMarkerImpl} from "../../core/cartography/marker/MarkerFactory";
+import {CustomMarkerImpl, MarkerFactory} from "../../core/cartography/marker/MarkerFactory";
+import {MapManager} from "../../core/cartography/map/map.manager";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
@@ -35,7 +36,7 @@ import TripEventType = dto.TripEventType;
               <p>{{ tripData!.tripAmount }}</p>
             </p-card>
             <p-card header="Distance totale">
-              <p>{{ tripData!.drivingDistance }} Km</p>
+              <p>{{ tripData!.drivingDistance.toFixed(2) }} Km</p>
             </p-card>
             <p-card header="Nb de POI visités">
               <p>{{ tripData!.poiAmount }}</p>
@@ -47,6 +48,12 @@ import TripEventType = dto.TripEventType;
                     class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
                     [style]="{ 'background-color': event.color }">
                       <i class="pi pi-map-marker"></i>
+              </span>
+              <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
+                <img src="../../../assets/icon/vgp-vert.svg" alt="{{ tripData!.driverName }}"/>
+              </span>
+              <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
+                <img src="../../../assets/icon/vgp-orange.svg" alt="{{ tripData!.driverName }}"/>
               </span>
             </ng-template>
             <ng-template pTemplate="content" let-event>
@@ -63,7 +70,8 @@ import TripEventType = dto.TripEventType;
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
-              > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }} : {{ event.start?.toLocaleTimeString() }}
+              > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
+                : {{ event.start?.toLocaleTimeString() }}
                 -> {{ event.end?.toLocaleTimeString() }} {{ event.duration }}
               </div>
             </ng-template>
@@ -198,21 +206,35 @@ export class TripMapComponent {
     }
 
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {
-      // add start marker
-      if (tripEvent.eventType === TripEventType.STOP && tripEvent.lat !== null && tripEvent.lng !== null) {
-        new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(
-          L.divIcon({
-            html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30px" height="45px" fill="${tripEvent.color || 'black'}">
+
+      // todo : use full marker creation
+      if (tripEvent.lat !== null && tripEvent.lng !== null) {
+        if (tripEvent.eventType === TripEventType.STOP) {
+          new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(
+            L.divIcon({
+              html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30px" height="45px" fill="${tripEvent.color || 'black'}">
                   <path fill-rule="evenodd" d="M24,4.5A14.82,14.82,0,0,0,9.18,19.32h0c0,.34,0,.68,0,1v.08C9.78,28.52,16.52,35.05,24,43.5,31.81,34.68,38.82,28,38.82,19.32h0A14.82,14.82,0,0,0,24,4.5Zm0,7.7a7.13,7.13,0,1,1-7.13,7.12A7.13,7.13,0,0,1,24,12.2Z" />
                 </svg>`,
-            /*iconSize: [30, 45],*/
-            iconAnchor: [15, 45],
-            className: 'custom-poi-icon',
-          })
-        ).addTo(this.featureGroup).bindPopup(
-          `<b>${tripEvent.poiLabel ? tripEvent.poiLabel + ' ' + tripEvent.address : tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
-        );
+              /*iconSize: [30, 45],*/
+              iconAnchor: [15, 45],
+              className: 'custom-poi-icon',
+            })
+          ).addTo(this.featureGroup).bindPopup(
+            `<b>${tripEvent.poiLabel ? tripEvent.poiLabel + ' ' + tripEvent.address : tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
+          );
+        } else if (tripEvent.eventType === TripEventType.VEHICLE_RUNNING) {
+          new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(MarkerFactory.getVehicleIcon({
+            device: {state: 'MOVING'},
+            category: {label: 'vgp'}
+          })).addTo(this.featureGroup);
+        } else if (tripEvent.eventType === TripEventType.VEHICLE_IDLE) {
+          new CustomMarkerImpl([tripEvent.lat, tripEvent.lng]).setIcon(MarkerFactory.getVehicleIcon({
+            device: {state: 'OFF'},
+            category: {label: 'vgp'}
+          })).addTo(this.featureGroup);
+        }
       }
+
 
       // add trace to map
       if (tripEvent.eventType === TripEventType.TRIP && tripEvent.wktTrace) {
@@ -222,7 +244,9 @@ export class TripMapComponent {
           return
         }
 
-        L.geoJson(geoJSON, {style: {fillColor: 'blue'}}).addTo(this.featureGroup);
+        L.geoJson(geoJSON,
+          {style: {color: tripEvent.color || 'blue'}}
+        ).addTo(this.featureGroup);
       }
     });
 

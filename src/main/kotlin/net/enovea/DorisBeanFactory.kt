@@ -8,6 +8,7 @@ import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.SpatialService
 import net.enovea.repository.TripRepository
+import net.enovea.service.VehicleService
 import javax.sql.DataSource
 import io.quarkus.agroal.DataSource as AgroalDataSource
 
@@ -27,5 +28,5 @@ class DorisBeanFactory {
     @Produces
     @ApplicationScoped
     @Named("tripService")
-    fun tripService(tripRepository: TripRepository, spatialService: SpatialService<PointOfInterestEntity>): TripService = TripService(tripRepository, spatialService)
+    fun tripService(tripRepository: TripRepository, spatialService: SpatialService<PointOfInterestEntity>, vehicleService: VehicleService): TripService = TripService(tripRepository, spatialService, vehicleService)
 }

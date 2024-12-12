@@ -17,18 +17,22 @@ import {TripsService} from "./trips.service";
             <th>Durée arrêt</th>
             <th>Durée trajet</th>
             <th>Distance</th>
-            <th>Vitesse moyenne</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-tripEvent>
           <tr>
-            <td>{{ tripEvent.eventType === TripEventType.STOP ? (tripEvent.address || tripEvent.poiLabel) : 'Trajet' }}</td>
+            <td>
+              <span *ngIf="tripEvent.eventType === TripEventType.STOP">
+                <span *ngIf="tripEvent.poiLabel"><b>{{ tripEvent.poiLabel }}</b><br/> {{ tripEvent.address }}</span>
+                <span *ngIf="!tripEvent.poiLabel">{{ tripEvent.address }}</span>
+              </span>
+              <span *ngIf="tripEvent.eventType === TripEventType.TRIP">Trajet</span>
+            </td>
             <td>{{ tripEvent.start | date: 'HH:mm' }}</td>
             <td>{{ tripEvent.end | date: 'HH:mm' }}</td>
             <td>{{ tripEvent.eventType === TripEventType.STOP ? (tripsService.formatDuration(tripEvent.duration)) : '-' }}</td>
             <td>{{ tripEvent.eventType === TripEventType.TRIP ? (tripsService.formatDuration(tripEvent.duration)) : '-' }}</td>
-            <td>{{ tripEvent.distance?.toFixed(1) }} Km</td>
-            <td>{{ (tripEvent.distance?.toFixed(1) ?? 0) / ((tripEvent.duration?.toFixed(1) ?? 1) / 3600) }} Km/h</td>
+            <td>{{ tripEvent.eventType === TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-' }}</td>
           </tr>
         </ng-template>
       </p-table>

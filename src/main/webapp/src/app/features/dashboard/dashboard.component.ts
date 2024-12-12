@@ -254,6 +254,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
       display: flex;
       gap: 15px;
       margin-bottom: 20px;
+      margin-top: 20px;
       justify-content: center;
       align-items: center;
     }

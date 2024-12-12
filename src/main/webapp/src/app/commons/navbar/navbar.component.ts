@@ -18,31 +18,32 @@ import {NotificationService} from "../notification/notification.service";
 @Component({
   selector: 'app-navbar',
   template: `
-    <p-menubar [style]="{'border': 'none', 'width': '100%'}" class="p-menubar transparent-blur-bg full-width">
+    <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}" class="p-menubar transparent-blur-bg full-width ">
       <ng-template pTemplate="start">
         <div class="nav-container">
           <div class="nav-buttons">
             <div class="nav-buttons-row">
-              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" class="transparent-blur-bg"></p-button>
-              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" class="transparent-blur-bg"></p-button>
+              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" styleClass="custom-button-bg"></p-button>
+              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg"></p-button>
+              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg"></p-button>
             </div>
-            <div class="nav-button-center">
-              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-plus" class="transparent-blur-bg"></p-button>
-            </div>
+<!--            <div class="nav-button-center">-->
+<!--              -->
+<!--            </div>-->
           </div>
           <div class="filters center">
             <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>
             <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
             <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
-            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></button>
-            <p-button (onClick)="saveFilters()" icon="pi pi-save" class="transparent-blur-bg save-filters-button"></p-button>
+            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()" class="custom-button-bg"></button>
+            <p-button (onClick)="saveFilters()" icon="pi pi-save" styleClass="custom-button-bg"></p-button>
           </div>
         </div>
       </ng-template>
       <ng-template pTemplate="end">
         <div class="user-info compact">
-          <p-button icon="pi pi-cog" class="user-settings transparent-blur-bg"></p-button>
-          <p-button (onClick)="logout()" icon="pi pi-power-off" class="transparent-blur-bg" [disabled]="!logoutURL"></p-button>
+          <p-button icon="pi pi-cog" class="user-settings" styleClass="custom-button-bg"></p-button>
+          <p-button (onClick)="logout()" icon="pi pi-power-off" styleClass="custom-button-bg" [disabled]="!logoutURL"></p-button>
         </div>
       </ng-template>
     </p-menubar>
@@ -103,13 +104,37 @@ import {NotificationService} from "../notification/notification.service";
         background: transparent;
         border: none;
       }
-      .p-menubar {
+
+      .p-menubar{
         padding: 0.5rem;
-        color: #495057;
+        color: transparent !important;
         border: 1px solid #dee2e6;
         border-radius: 3px;
         width: 100%;
+        background:transparent !important;
+        z-index:1000;
+        position:relative;
       }
+
+      ::ng-deep .p-menubar.p-component
+      {
+        background:transparent !important;
+      }
+
+
+
+      ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-bg {
+        background-color: #aa001f !important;
+        border-color: #aa001f !important;
+        color: white !important;
+      }
+      .p-button {
+        background-color: #aa001f !important;
+        border-color: #aa001f !important;
+        color: white !important;
+
+      }
+
     `,
   ],
 })
@@ -148,6 +173,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   updateAgencies(tags: string[]) {
     const previouslySelectedAgencies = [...this.agencySelected];
     this.agencySelected = tags;
+
+
 
     // Gérer uniquement les suppressions d'agences
     if (this.agencySelected.length < previouslySelectedAgencies.length) {

@@ -57,7 +57,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
           'has-vehicle': rowData.vehicle
         }">
-          <td *ngIf="!rowData.vehicle" colspan="7">
+          <td *ngIf="!rowData.vehicle" colspan="8">
             <p-treeTableToggler [rowNode]="rowNode"  />
             {{ rowData.label }}
           </td>
@@ -70,6 +70,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
           <td>Immatriculation</td>
           <td>État</td>
           <td>Dernière communication</td>
+          <td>Premier départ</td>
           <td>Adresse</td>
           <td>Distance</td>
           <td>Trajet détaillé</td>
@@ -105,6 +106,9 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
           </td>
           <td
             class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
+          </td>
+          <td
+            class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm' }}
           </td>
           <!--          <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>-->
 

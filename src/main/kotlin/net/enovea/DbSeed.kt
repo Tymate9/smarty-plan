@@ -210,10 +210,12 @@ class DbSeed {
                 val lastName = cols[nomIndex].trim()
                 val firstName = cols[prenomIndex].trim()
                 val rawPlate = cols[vehiculeIndex].trim()
+                val now = Timestamp(System.currentTimeMillis())
 
-                if (agence.isEmpty() || lastName.isEmpty() || firstName.isEmpty() || rawPlate.isEmpty()) {
-                    return@forEach
-                }
+
+                /*                if (agence.isEmpty() || lastName.isEmpty() || firstName.isEmpty() || rawPlate.isEmpty()) {
+                                    return@forEach
+                                }*/
 
                 val normalizedPlate = rawPlate.replace("-", "").uppercase()
 
@@ -235,10 +237,16 @@ class DbSeed {
 
                 if (driver == null) {
                     LOG.warn("Aucun driver trouvé pour $firstName $lastName pour créer les liens.")
+                    val vtId = VehicleTeamId(vehicleId = vehicle.id!!, teamId = team.id, startDate = now)
+                    val vehicleTeam = VehicleTeamEntity(
+                        id = vtId,
+                        endDate = null,
+                        vehicle = vehicle,
+                        team = team
+                    )
+                    vehicleTeam.persistAndFlush()
                     return@forEach
                 }
-
-                val now = Timestamp(System.currentTimeMillis())
 
                 // Créer VehicleTeam
                 val vtId = VehicleTeamId(vehicleId = vehicle.id!!, teamId = team.id, startDate = now)

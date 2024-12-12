@@ -1,14 +1,16 @@
-/*--liquibase formatted sql
+--liquibase formatted sql
 
 -- changeset smarty_plan:3 context:prod,dev
 
 -- Insertion des catégories dans point_of_interest_category
 INSERT INTO point_of_interest_category (label, color)
-VALUES ('Agence NM', '#FF5733'),
-       ('Fournisseur', '#3357FF'),
-       ('Client', '#A833FF'),
-       ('Station Service', '#33A8FF'),
-       ('Hôtel/Restaurant', '#A8FF33');
+VALUES ('Agence NM', '#FF5733'), -- Bureau dépot
+       ('Fournisseur', '#3357FF'), --  Fournisseur
+       ('Client', '#A833FF'), -- Client / chantier
+       ('Station Service', '#33A8FF'), -- Station
+       ('Hôtel/Restaurant', '#A8FF33'); -- Hotel/restaurant
+       -- ( Autre )
+       -- ('Domicile', gris foncé) -- Domicile
 
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
@@ -388,4 +390,3 @@ VALUES
 
 
 
-*/

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {HttpClient, HttpParams} from "@angular/common/http";
 
 @Injectable({
@@ -10,6 +10,11 @@ export class FilterService {
 
   // Utilisation de BehaviorSubject pour stocker les filtres
   private selectedFilters: BehaviorSubject<{ [key: string]: string[] }>;
+
+  private resetSubject = new Subject<void>();
+  reset$ = this.resetSubject.asObservable();
+
+
 
   // Observable pour suivre les changements
   filters$: Observable<{ [key: string]: string[] }>;
@@ -49,6 +54,18 @@ export class FilterService {
   saveFiltersToLocalStorage(): void {
     const filters = this.getCurrentFilters();
     localStorage.setItem(this.localStorageKey, JSON.stringify(filters));
+  }
+
+  // Méthode pour reset les filtres
+  resetFilters(): void {
+    // Clear the selected filters
+    const resetFilters = {};
+    this.selectedFilters.next(resetFilters);
+
+  }
+
+  triggerReset() {
+    this.resetSubject.next();
   }
 }
 

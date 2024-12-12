@@ -19,13 +19,15 @@ $color-brown-tertiary: #EEE3D4;      // Marron clair, fond tertiaire
   -webkit-backdrop-filter: blur(10px);  // Compatibilité avec Safari  <!! Non testé !!>
   border-radius: 10px;  // Optionnel : arrondi des coins, à ajuster selon les besoins
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  // Optionnel : légère ombre pour un effet de profondeur
+  display: inline-block;
+
 }
 
 
 body {
   font-family: 'Arial', sans-serif;
   //background: $color-gray-secondary;
-  background: linear-gradient(to right, var(--cyan-200), var(--teal-200), var(--cyan-100), var(--teal-100)) !important;
+  background: linear-gradient(to right, var(--red-100), var(--red-50), var(--bluegray-50), var(--surface-50) , var(--surface-0)) !important;
   color: $color-primary-dark;
 }
 

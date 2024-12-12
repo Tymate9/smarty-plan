@@ -400,6 +400,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.vehicleSelected = [];
     this.driverSelected = [];
 
+    this.filterService.resetFilters();
+    this.filterService.triggerReset();
+
     this.filterVehiclesAndDrivers();
     this.updateFilteredOptionsAfterLoading();
     this.emitSelectedTags();

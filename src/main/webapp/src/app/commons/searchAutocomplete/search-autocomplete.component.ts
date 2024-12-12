@@ -81,7 +81,7 @@
       width: 100%;
       max-height: 150px;
       overflow-y: auto;
-      z-index: 10;
+
     }
 
     .autocomplete-list li {

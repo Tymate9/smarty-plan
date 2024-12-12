@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from "@angular/core";
 
 export interface Option {
   label: string;
@@ -17,6 +17,7 @@ export interface Option {
             type="text"
             [(ngModel)]="searchText"
             (input)="onSearch()"
+            (focus)="openDropdown()"
             placeholder="Filtrer {{ label }}..."
             [ngStyle]="{'background-color': 'white'}"
           />
@@ -25,7 +26,7 @@ export interface Option {
       </div>
 
       <!-- Display a flat list or hierarchical list based on data structure -->
-      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
+      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" (blur)="closeDropdown()">
         <ng-container *ngFor="let option of filteredOptions">
           <li>
             <div (click)="selectOption(option.label)" [class.selected]="isSelected(option.label)">
@@ -111,7 +112,6 @@ export interface Option {
       width: 100%;
       max-height: 150px;
       overflow-y: auto;
-      z-index: 10;
     }
 
     .autocomplete-list li {
@@ -129,6 +129,7 @@ export class TeamTreeComponent implements OnChanges{
   @Input() options: Option[] = [];
   @Input() selectedItems: string[] = [];
   @Output() selectedTagsChange = new EventEmitter<string[]>();  // Emit selected tags
+
 
   searchText = '';
   selectedTags: string[] = [];
@@ -176,11 +177,23 @@ export class TeamTreeComponent implements OnChanges{
     this.filterOptions();
   }
 
+  openDropdown() {
+    this.dropdownVisible = true;
+    //this.dropdown.focus()
+    document.getElementById('dropdown')?.focus()
+
+  }
+
+  closeDropdown() {
+    this.dropdownVisible = false;
+  }
+
   // Toggle dropdown visibility
   toggleDropdown() {
     this.dropdownVisible = !this.dropdownVisible;
     if (this.dropdownVisible) {
       this.filterOptions();
+      document.getElementById('dropdown')?.focus()
     }
   }
 

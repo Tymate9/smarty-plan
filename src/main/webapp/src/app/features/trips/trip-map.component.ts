@@ -1,9 +1,10 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as L from 'leaflet';
 import {TripsService} from './trips.service';
 import {dto} from "../../../habarta/dto";
 import {parse as WKTParse} from "wellknown";
-import {CustomMarkerImpl} from "../../core/cartography/marker/MarkerFactory";
+import {CustomMarkerImpl, MarkerFactory} from "../../core/cartography/marker/MarkerFactory";
+import {MapManager} from "../../core/cartography/map/map.manager";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
@@ -47,6 +48,12 @@ import TripEventType = dto.TripEventType;
                     class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
                     [style]="{ 'background-color': event.color }">
                       <i class="pi pi-map-marker"></i>
+              </span>
+              <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
+                <img src="../../../assets/icon/vgp-vert.svg" alt="{{ tripData!.driverName }}"/>
+              </span>
+              <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
+                <img src="../../../assets/icon/vgp-orange.svg" alt="{{ tripData!.driverName }}"/>
               </span>
             </ng-template>
             <ng-template pTemplate="content" let-event>
@@ -213,6 +220,16 @@ export class TripMapComponent {
         ).addTo(this.featureGroup).bindPopup(
           `<b>${tripEvent.poiLabel ? tripEvent.poiLabel + ' ' + tripEvent.address : tripEvent.address}</b><br>${tripEvent.end?.toLocaleTimeString()}`
         );
+      } else if (tripEvent.eventType === TripEventType.VEHICLE_RUNNING) {
+        MarkerFactory.getVehicleIcon({
+          device: {state: 'MOVING'},
+          category: {label: 'vgp'}
+        }).addTo(this.featureGroup);
+      } else if (tripEvent.eventType === TripEventType.VEHICLE_IDLE) {
+        MarkerFactory.getVehicleIcon({
+          device: {state: 'OFF'},
+          category: {label: 'vgp'}
+        }).addTo(this.featureGroup);
       }
 
       // add trace to map

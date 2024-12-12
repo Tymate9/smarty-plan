@@ -7,13 +7,15 @@ import io.mockk.mockk
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.SpatialService
 import net.enovea.repository.TripRepository
+import net.enovea.service.VehicleService
 import java.time.LocalDateTime
 
 class TripServiceTest : StringSpec({
 
     val tripRepository = mockk<TripRepository>()
     val spatialService = mockk<SpatialService<PointOfInterestEntity>>()
-    val tripService = TripService(tripRepository, spatialService)
+    val vehicleService = mockk<VehicleService>()
+    val tripService = TripService(tripRepository, spatialService, vehicleService)
 
     "computeTripMapDTO should return correct TripMapDTO" {
         val vehicleId = "1"
@@ -34,23 +36,24 @@ class TripServiceTest : StringSpec({
                 endLng = 1.0,
                 endLat = 1.0,
                 trace = null,
+                tripStatus = TripStatus.COMPLETED,
                 wktTrace = null
             )
         )
 
         every { tripRepository.findByVehicleIdAndDate(vehicleId, any()) } returns trips
-        every { spatialService.getNearestEntityWithinRadius(any(), any()) } returns null
+        every { spatialService.getNearestEntityWithinArea(any()) } returns null
         every { spatialService.getAddressFromEntity(any()) } returns "Some Address"
 
         val result = tripService.computeTripEventsDTO(vehicleId, date)
 
-        result.vehicleId shouldBe vehicleId
-        result.tripAmount shouldBe 1
-        result.drivingDistance shouldBe 10.0
-        result.drivingDuration shouldBe 3600
-        result.stopDuration shouldBe 0
-        result.poiAmount shouldBe 0
-        result.tripEvents.size shouldBe 1
-        result.tripEvents[0].address shouldBe "Some Address"
+        result?.vehicleId shouldBe vehicleId
+        result?.tripAmount shouldBe 1
+        result?.drivingDistance shouldBe 10.0
+        result?.drivingDuration shouldBe 3600
+        result?.stopDuration shouldBe 0
+        result?.poiAmount shouldBe 0
+        result?.tripEvents?.size shouldBe 1
+        result?.tripEvents[0]?.address shouldBe "Some Address"
     }
 })

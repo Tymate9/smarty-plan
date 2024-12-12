@@ -2,9 +2,11 @@ package net.enovea.domain.vehicle
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import jakarta.transaction.Transactional
 import net.enovea.domain.driver.DriverEntity
 import java.io.Serializable
 import java.sql.Timestamp
+import java.time.LocalDate
 
 @Entity(name = VehicleDriverEntity.ENTITY_NAME)
 @Table(name = VehicleDriverEntity.TABLE_NAME)
@@ -35,6 +37,17 @@ data class VehicleDriverEntity (
         const val ENTITY_NAME = "VehicleDriverEntity"
         const val TABLE_NAME = "vehicle_driver"
 
+        @Transactional
+        fun getForVehicleAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleDriverEntity? = find(
+            """SELECT vd FROM VehicleDriverEntity vd 
+                JOIN FETCH vd.driver d
+                JOIN FETCH vd.vehicle v
+                LEFT JOIN VehicleUntrackedPeriodEntity vup ON vup.id.vehicleId = v.id AND vup.id.startDate <= :date AND (vup.endDate IS NULL OR vup.endDate >= :date)        
+                WHERE v.id = :vehicleId AND vd.id.startDate <= :date AND (vd.endDate IS NULL OR vd.endDate >= :date) AND vup.id.startDate IS NULL
+                """.trimIndent(),
+            mapOf("vehicleId" to vehicleId, "date" to date.atStartOfDay())
+        ).firstResult()
+        // todo : check
     }
 }
 

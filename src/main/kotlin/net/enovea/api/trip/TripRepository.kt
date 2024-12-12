@@ -2,9 +2,12 @@ package net.enovea.repository
 
 import net.enovea.DorisJdbiContext
 import net.enovea.api.trip.TripDTO
+import net.enovea.api.trip.TripDailyStatsDTO
 import java.time.LocalDate
 
 class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
+
+    // todo : replace "trips_test_smarty_plan" with "trips_vehicle_view"
 
     fun findById(tripId: String): TripDTO? {
         return dorisJdbiContext.jdbi.withHandle<TripDTO, Exception> { handle ->
@@ -41,5 +44,21 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 .mapTo(TripDTO::class.java)
                 .list()
         }
+    }
+
+    fun aggregateDailyStats(): List<TripDailyStatsDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<TripDailyStatsDTO>, Exception> { handle ->
+            handle.createQuery(
+                """
+                    SELECT vehicle_id, sum(distance) as distance, min(start_date) as first_trip_start
+                    FROM trips_test_smarty_plan
+                    GROUP BY vehicle_id, date(start_date)
+                    WHERE date(start_date) = date(now())
+                """.trimIndent()
+            )
+                .mapTo(TripDailyStatsDTO::class.java)
+                .list()
+        }
+
     }
 }

@@ -98,7 +98,7 @@ class PointOfInterestResource (
         val point: Point = geometryFactory.createPoint(Coordinate(longitude, latitude))
 
         return try {
-            val poi = pointOfInterestSpatialService.getNearestEntityWithinRadius(point,200.0)
+            val poi = pointOfInterestSpatialService.getNearestEntityWithinArea(point)
             Response.ok(mapOf("poi" to poi)).build()
         } catch (e: Exception) {
             Response.status(Response.Status.BAD_REQUEST)

@@ -1,6 +1,7 @@
 package net.enovea
 
 import mu.KotlinLogging
+import net.enovea.api.trip.TripDailyStatsRowMapper
 import net.enovea.api.trip.TripRowMapper
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.statement.SqlLogger
@@ -39,5 +40,6 @@ class DorisJdbiContext(dataSource: DataSource) {
     private fun registerRowMappers(jdbi: Jdbi) {
         jdbi
             .registerRowMapper(TripRowMapper())
+            .registerRowMapper(TripDailyStatsRowMapper())
     }
 }

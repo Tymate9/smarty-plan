@@ -5,11 +5,13 @@ import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
+import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
+import java.time.LocalDate
 
 class VehicleService (
     private val vehicleMapper: VehicleMapper,
@@ -57,6 +59,14 @@ class VehicleService (
         }
     }
 
+    fun getVehicleDriverDetailsOnDayIfTracked(vehicleId: String, date: LocalDate) : Pair<String, String>? {
+        // Get the driver for the vehicle at the given date
+        val driver = VehicleDriverEntity.getForVehicleAtDateIfTracked(vehicleId, date)
+        if (driver != null) {
+            return Pair(driver.vehicle!!.licenseplate, "${driver.driver!!.firstName} ${driver.driver!!.lastName}")
+        }
+        return null
+    }
 
 // TODO seperate the data treatment method
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
@@ -81,7 +91,7 @@ class VehicleService (
                 try {
                     // Try to fetch POI using spatial service
                     val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                        spatialService.getNearestEntityWithinRadius(it, 200.0)
+                        spatialService.getNearestEntityWithinArea(it)
                     }
                     if (poi != null) {
                         vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label

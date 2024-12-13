@@ -41,7 +41,7 @@ build:
   image: maven:3.9.9-eclipse-temurin-21
   script:
     - DOCKER_TAG=$(echo "${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHORT_SHA}" | sed "s|\/|-|g")
-    - mvn $MAVEN_CLI_OPTS -Dquarkus.container-image.additional-tags=${DOCKER_TAG} deploy
+    - mvn $MAVEN_CLI_OPTS -Dquarkus.container-image.additional-tags=${DOCKER_TAG} clean deploy
     - echo "Image pushed to registry ${APP_REGISTRY_IMAGE}:${DOCKER_TAG}"
   tags:
     - smarty-road-runner

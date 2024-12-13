@@ -12,6 +12,7 @@ data class VehicleTableDTO (
     val driver: DriverDTO?,
     val device: DeviceDataDTO,
     var lastPositionAddress: String?,
+    var lastPositionAdresseType: String?,
     val team: TeamDTO,
     val distance : Number?,
     val teamHierarchy: String? = null

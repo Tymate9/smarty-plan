@@ -36,9 +36,6 @@ data class DeviceEntity (
     @Column(name = "simnumber", nullable = true)
     var simNumber: String? = null,
 
-    @Column(name = "gateway_enabled", nullable = false)
-    var gatewayEnabled: Boolean? = true,
-
     @Column(name = "last_data_date", nullable = true)
     var lastDataDate: Timestamp? = null,
 

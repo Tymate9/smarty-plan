@@ -24,5 +24,4 @@ data class PointOfInterestCategoryEntity(
         const val TABLE_NAME = "point_of_interest_category"
 
     }
-
 }

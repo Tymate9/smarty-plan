@@ -5,6 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.event.Observes
 import jakarta.inject.Named
 import jakarta.transaction.Transactional
+import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
+import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.domain.device.DeviceEntity
 import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.driver.DriverTeamEntity
@@ -15,6 +17,9 @@ import net.enovea.domain.vehicle.*
 import net.enovea.domain.vehicle_category.VehicleCategoryEntity
 import org.apache.commons.io.IOUtils
 import org.jboss.logging.Logger
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
+import org.locationtech.jts.geom.Polygon
 import java.nio.charset.StandardCharsets
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -33,12 +38,27 @@ class DbSeed {
 
     private val exportCsv = "/db/export.csv"
     private val parcAutoCsv = "/db/parc_auto.csv"
+    private val poiExportCsv = "/db/poi-export.csv"
 
     private lateinit var vehicleCategoryEntities: List<VehicleCategoryEntity>
     private lateinit var teamCategoryEntities: List<TeamCategoryEntity>
     private lateinit var persistedTeams: List<TeamEntity>
     private lateinit var persistedVehicles: List<VehicleEntity>
     private lateinit var persistedDrivers: List<DriverEntity>
+
+    // === Variables pour l'import POI ===
+    private val poiCategoriesToCreate = listOf(
+        "Hôtel/Restaurant" to "#FF5733",
+        "Autre" to "#C70039",
+        "Domicile" to "#900C3F",
+        "Client" to "#FFC300",
+        "Agence NM" to "#DAF7A6",
+        "Fournisseur" to "#581845",
+        "Station Service" to "#1ABC9C"
+    )
+    private var poiClientCodeCounter = 1
+    private val poiDenominationCount = mutableMapOf<String, Int>()
+    // === Fin variables import POI ===
 
     @Transactional
     fun onStart(@Observes ev: StartupEvent) {
@@ -144,8 +164,184 @@ class DbSeed {
         // Créer les lignes driver_untracked_period pour les conducteurs avec GEOLOC O/N = NON
         createDriverUntrackedPeriods(parcAutoLines)
 
+        // === Début import POI ===
+        importPOIFromCsv(poiExportCsv)
+        // === Fin import POI ===
+
         LOG.info("Chargement des données initiales terminé.")
     }
+
+    // Fonction pour déterminer la catégorie POI en fonction du libellé
+    fun mapLibelleToCategory(libelle: String): String {
+        return when (libelle) {
+            "Restaurant / Hôtel" -> "Hôtel/Restaurant"
+            "Domicile" -> "Domicile"
+            "Client / Chantier" -> "Client"
+            "Bureau / Dépôt" -> "Agence NM"
+            "Fournisseur" -> "Fournisseur"
+            "Station Service" -> "Station Service"
+            else -> "Autre"
+        }
+    }
+
+    // === Méthode d'import des POI ===
+    @Transactional
+    fun importPOIFromCsv(resourcePath: String) {
+        val lines = readLinesFromCsv(resourcePath)
+        if (lines.isEmpty()) {
+            LOG.warn("Le fichier $resourcePath est vide ou introuvable.")
+            return
+        }
+
+        // Insérer les catégories POI si elles n'existent pas déjà
+        val existingPoiCategories = PointOfInterestCategoryEntity.listAll().associateBy { it.label }
+        val poiCategoriesCreated = mutableMapOf<String, PointOfInterestCategoryEntity>()
+
+        for ((catLabel, catColor) in poiCategoriesToCreate) {
+            val existing = existingPoiCategories[catLabel]
+            if (existing == null) {
+                val cat = PointOfInterestCategoryEntity(
+                    id = -1,
+                    label = catLabel,
+                    color = catColor
+                )
+                cat.persistAndFlush()
+                poiCategoriesCreated[catLabel] = cat
+            } else {
+                poiCategoriesCreated[catLabel] = existing
+            }
+        }
+
+        // Indices colonnes
+        val header = lines.first().split(",").map { it.trim() }
+        val denomIndex = header.indexOf("Dénomination")
+        val typeIndex = header.indexOf("Type")
+        val adresseIndex = header.indexOf("Adresse")
+        val cpIndex = header.indexOf("Code Postal")
+        val villeIndex = header.indexOf("Ville")
+        val longitudeIndex = header.indexOf("Longitude")
+        val latitudeIndex = header.indexOf("Latitude")
+        val rayonIndex = header.indexOf("Rayon(m)")
+
+        if (denomIndex == -1 || typeIndex == -1 || adresseIndex == -1 || cpIndex == -1 ||
+            villeIndex == -1 || longitudeIndex == -1 || latitudeIndex == -1 || rayonIndex == -1) {
+            LOG.warn("Impossible d'importer les POI, certaines colonnes sont introuvables.")
+            return
+        }
+
+        // Insertion des POI
+        lines.drop(1).forEach { line ->
+            val cols = line.split(",")
+            if (cols.size <= rayonIndex) return@forEach
+
+            val denom = cols[denomIndex].trim()
+            val libelle = cols[typeIndex].trim()
+            val adr = cols[adresseIndex].trim()
+            val cp = cols[cpIndex].trim()
+            val ville = cols[villeIndex].trim()
+            val pays = if (header.contains("Pays")) cols[header.indexOf("Pays")].trim() else ""
+            val longStr = cols[longitudeIndex].trim()
+            val latStr = cols[latitudeIndex].trim()
+            val rayonStr = cols[rayonIndex].trim()
+
+            if (denom.isEmpty()) {
+                // Sauter si pas de dénomination
+                return@forEach
+            }
+            // Déterminer la catégorie
+            val categoryLabel = mapLibelleToCategory(libelle)
+            val poiCategory = poiCategoriesCreated[categoryLabel]
+            if (poiCategory == null) {
+                LOG.warn("Catégorie POI introuvable pour le libellé $libelle (défaut = Autre)")
+                // Par défaut "Autre"
+            }
+
+            val finalCategory = poiCategory ?: poiCategoriesCreated["Autre"]!!
+
+            // Génération client_code
+            val currentCode = "CC${poiClientCodeCounter}"
+            poiClientCodeCounter++
+
+            // Génération client_label
+            // On détermine d'abord combien de fois on a déjà rencontré cette dénomination dans l'import actuel.
+            val denomCount = poiDenominationCount.getOrDefault(denom.uppercase(), 0)
+
+            // Génère un libellé provisoire
+            val provisionalLabel = if (denomCount == 0) denom else "$denom-${denomCount + 1}"
+
+            // Vérifier dans la base si ce provisionalLabel existe déjà.
+            var finalLabel = provisionalLabel
+            var currentCount = denomCount
+            while (PointOfInterestEntity.find("client_label", finalLabel).firstResult() != null) {
+                // ce label existe déjà en base, on incrémente le compteur
+                currentCount++
+                finalLabel = "$denom-${currentCount + 1}"
+            }
+
+            // Mettre à jour le compteur dans la map
+            poiDenominationCount[denom.uppercase()] = currentCount + 1
+
+
+            // Adresse
+            val finalAddress = if (adr.isEmpty() && cp.isEmpty() && ville.isEmpty()) {
+                "Adresse inconnu"
+            } else {
+                listOf(adr, cp, ville).filter { it.isNotEmpty() }.joinToString(" ")
+                    .ifEmpty { "Adresse inconnu" }
+            }
+
+            // Coordonnées
+            val longitude = longStr.toDoubleOrNull() ?: 0.0
+            val latitude = latStr.toDoubleOrNull() ?: 0.0
+
+            val geometryFactory = GeometryFactory()
+            val point = geometryFactory.createPoint(Coordinate(longitude, latitude))
+
+            // Rayon
+            val rayon = rayonStr.toDoubleOrNull()
+            val finalRayon = if (rayon == null || rayon == 0.0 || rayon == -1.0) 80.0 else rayon
+
+            // Création du polygone approximant un cercle
+            val polygon = createCirclePolygon(longitude, latitude, finalRayon, geometryFactory)
+
+            val poi = PointOfInterestEntity(
+                category = finalCategory,
+                client_code = currentCode,
+                client_label = finalLabel,
+                coordinate = point,
+                address = finalAddress,
+                area = polygon
+            )
+            poi.persistAndFlush()
+        }
+    }
+
+    /**
+     * Crée un polygone approximant un cercle à partir d'un centre (lon, lat) et d'un rayon en mètres.
+     * On utilise 16 points.
+     */
+    private fun createCirclePolygon(lon: Double, lat: Double, radiusMeters: Double, geometryFactory: GeometryFactory): Polygon {
+        val nbPoints = 16
+        val coords = Array(nbPoints + 1) { Coordinate() }
+
+        // Convertir le rayon en degré approximatif. On suppose une approximation : 1° ~ 111320 m
+        // (Ce n'est pas exact, mais suffisant pour un exemple)
+        val degPerMeter = 1.0 / 111320.0
+        val radiusDeg = radiusMeters * degPerMeter
+
+        for (i in 0 until nbPoints) {
+            val angle = 2.0 * Math.PI * i / nbPoints
+            val x = lon + radiusDeg * Math.cos(angle)
+            val y = lat + radiusDeg * Math.sin(angle)
+            coords[i] = Coordinate(x, y)
+        }
+        coords[nbPoints] = coords[0]
+
+        val linearRing = geometryFactory.createLinearRing(coords)
+        return geometryFactory.createPolygon(linearRing, null)
+    }
+
+    // === Fin méthode import POI ===
 
     private fun createDriverUntrackedPeriods(lines: List<String>) {
         if (lines.size <= 1) return

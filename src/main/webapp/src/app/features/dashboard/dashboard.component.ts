@@ -70,10 +70,10 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
           <td>Immatriculation</td>
           <td>État</td>
           <td>Dernière communication</td>
-          <td>Premier départ</td>
+          <td>Heure de départ</td>
           <td>Adresse</td>
-          <td>Distance</td>
-          <td>Trajet détaillé</td>
+          <td>Distance totale</td>
+          <td>Fiche journalière</td>
         </tr>
 
         <tr [ttRow]="rowNode"
@@ -110,17 +110,6 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
           <td
             class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm' }}
           </td>
-          <!--          <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>-->
-
-          <!--          <td *ngIf="rowData.vehicle">-->
-          <!--            <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"-->
-          <!--                  [ngStyle]="{ 'color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"-->
-          <!--                  class="poi-icon">-->
-          <!--              <i class="pi pi-map-marker"></i>-->
-          <!--            </span>-->
-          <!--                      {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}-->
-          <!--          </td>-->
-
 
           <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
             <!-- Icon on the left -->
@@ -137,10 +126,6 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
             <!-- Address text in the middle -->
             {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}
 
-            <!-- Triangle on the right -->
-            <!--            <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"-->
-            <!--                  [ngStyle]="{ 'background-color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"-->
-            <!--                  class="poi-triangle"></span>-->
           </td>
 
 
@@ -283,6 +268,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
       cursor: pointer;
       transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
       white-space: nowrap;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
 
     }
 
@@ -353,27 +339,12 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
       background-color: #4a4a9d;
     }
 
-
-
-    //:host ::ng-deep .p-treeTable-toggler.p-link{
-    //  color: white;
-    //}
-    //
-    //
-    //:host ::ng-deep .p-treeTable.custom-tree-table.p-treetable-toggler.pi-link.p-highlight {
-    //  background-color: white;
-    //}
-
-
-    //:host ::ng-deep .p-treetable.custom-tree-table.p-treetable-toggler .pi {
-    //  color: white;
-    //}
-
     .button-cell {
       width: 1%; /* Shrink-wrap the column width to its content */
       white-space: nowrap; /* Prevent wrapping in case of larger content */
       text-align: center; /* Align the button in the center of the cell */
       padding: 0; /* Optional: Remove padding for a tighter fit */
+      align-items: center
     }
     .table-header {
       background-color: var(--gray-500);
@@ -406,19 +377,6 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
       width: 1.3rem;
       height:1.3rem;
     }
-
-
-
-    //
-    //:host ::ng-deep .p-treetable.custom-tree-table .poi-triangle {
-    //  width: 16px;
-    //  height: 16px;
-    //  margin-left: 8px;
-    //  display: inline-block;
-    //  clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
-    //  background-color: var(--color);
-    //}
-
 
   `]
 })
@@ -456,7 +414,7 @@ export class DashboardComponent implements OnInit {
     'Fournisseur': '#3357FF',
     'Client': '#A833FF',
     'Station Service': '#33A8FF',
-    'Restaurant': '#A8FF33',
+    'Hotel/Restaurant': '#A8FF33',
     'route':'#000000'
   };
 
@@ -649,7 +607,7 @@ export class DashboardComponent implements OnInit {
 
   convertToCSV(data: TeamHierarchyNode[]): string {
     const rows: string[] = [];
-    const headers = ['Véhicule','Immatriculation','Marque','Modèle','Etat','Energie','Conducteur','Date Heure','Numéro d\'embarqué','Adresse','Type d\'adresse de référence','Distance parcourue','Entité Conducteur', 'Entité Véhicule','Groupe de salarié'];
+    const headers = ['Véhicule','Immatriculation','Marque','Modèle','Etat','Energie','Conducteur','Date Heure','Numéro d\'embarqué','Adresse','Type d\'adresse de référence','Distance totale','Entité Conducteur', 'Entité Véhicule','Groupe de salarié'];
     rows.push(headers.join(','));
 
 
@@ -685,9 +643,6 @@ export class DashboardComponent implements OnInit {
       }));
     }
   }
-
-
-
 
   protected readonly DatePipe = DatePipe;
 }

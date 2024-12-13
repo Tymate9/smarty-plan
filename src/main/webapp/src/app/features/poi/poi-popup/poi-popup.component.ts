@@ -19,15 +19,15 @@ import {Router} from "@angular/router";
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
           <div class="p-fluid">
             <div class="p-field">
-              <label>Dénomination :</label>
+              <label><h4>Dénomination :</h4></label>
               <span>{{entity.client_code}}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
-              <label>Adresse :</label>
+              <label><h4>Adresse :</h4></label>
               <span>{{ entity.address }}</span>
             </div>
             <div class="p-field">
-              <label>Catégorie :</label>
+              <label><h4>Catégorie :</h4></label>
               <span>{{ entity.category.label }}</span>
             </div>
           </div>

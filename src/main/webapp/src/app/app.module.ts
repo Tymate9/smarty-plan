@@ -44,6 +44,7 @@ import {ToggleButtonModule} from "primeng/togglebutton";
 import {TimelineModule} from "primeng/timeline";
 import {TripsComponent} from "./features/trips/trips.component";
 import {CalendarModule} from "primeng/calendar";
+import {PanelModule} from "primeng/panel";
 
 @NgModule({
   declarations: [
@@ -66,26 +67,27 @@ import {CalendarModule} from "primeng/calendar";
     TripListComponent,
     TripMapComponent
   ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    AppRoutingModule,
-    KeycloakAngularModule,
-    HttpClientModule,
-    ButtonModule,
-    TableModule,
-    TreeTableModule,
-    DropdownModule,
-    TabViewModule,
-    ProgressSpinnerModule,
-    ReactiveFormsModule,
-    ToastModule,
-    MenubarModule,
-    CardModule,
-    ToggleButtonModule,
-    TimelineModule,
-    CalendarModule,
-  ],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        AppRoutingModule,
+        KeycloakAngularModule,
+        HttpClientModule,
+        ButtonModule,
+        TableModule,
+        TreeTableModule,
+        DropdownModule,
+        TabViewModule,
+        ProgressSpinnerModule,
+        ReactiveFormsModule,
+        ToastModule,
+        MenubarModule,
+        CardModule,
+        ToggleButtonModule,
+        TimelineModule,
+        CalendarModule,
+        PanelModule,
+    ],
   providers: [
     MessageService,
     ConfigService,

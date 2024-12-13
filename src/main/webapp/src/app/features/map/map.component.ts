@@ -16,15 +16,47 @@ import {NotificationService} from "../../commons/notification/notification.servi
 @Component({
   selector: 'app-map',
   template: `
-<!--    <p>{{unTrackedVehicle}}</p>-->
-    <button (click)="refreshVehiclePositions()">Mettre à jour les positions</button>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <p-button
+          label="{{ unTrackedVehicle }}"
+          icon="{{ isCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up' }}"
+          [raised]="true" severity="info"
+          (onClick)="toggleDiv()"
+          styleClass="custom-button-red">
+        </p-button>
+        <p-button label="Mettre à jour les positions" [raised]="true" severity="info" (click)="refreshVehiclePositions()" styleClass="custom-button-red"></p-button>
+    </div>
+    <div [ngClass]="{ 'hidden': isCollapsed }" class="collapsible-content">
+      <p>{{ unTrackedVehicle }}</p>
+    </div>
     <div id="map"></div>
   `,
   styles: [`
     #map {
-      height: 100vh;
+      height: 87vh;
       width: 100%;
     }
+    .hidden {
+      display: none;
+    }
+
+    .collapsible-content {
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: var(--gray-100);
+    }
+
+    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red  {
+      background-color:#aa001f !important;
+      border-color:#aa001f !important;
+      color: white !important;
+      font-weight:600;
+    }
+    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red:focus {
+    //  //outline: none !important;
+    //  //box-shadow: none !important; /* Removes any shadow from the focus */
+    //  border-color: var(--gray-500) !important;
+    //}
   `]
 })
 export class MapComponent implements OnInit {
@@ -33,6 +65,7 @@ export class MapComponent implements OnInit {
   private mapManager : MapManager;
   protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
   private filters : { agencies : string[], vehicles : string[], drivers : string[] };
+  isCollapsed: boolean = true;
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
@@ -207,6 +240,10 @@ export class MapComponent implements OnInit {
     this.updateVehiclePositions();
     // Redémarrer le minuteur
     this.startVehiclePositionUpdater();
+  }
+
+  toggleDiv() {
+    this.isCollapsed = !this.isCollapsed;
   }
 }
 

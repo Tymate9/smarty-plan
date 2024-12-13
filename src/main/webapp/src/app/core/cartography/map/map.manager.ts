@@ -316,7 +316,7 @@ export class MapManager {
     exportButton.onAdd = () => {
       const button = L.DomUtil.create('button', 'export-csv-button');
       button.innerText = 'Exporter CSV';
-      button.style.backgroundColor = '#4CAF50';
+      button.style.backgroundColor = '#aa001f';
       button.style.color = 'white';
       button.style.border = 'none';
       button.style.padding = '10px';

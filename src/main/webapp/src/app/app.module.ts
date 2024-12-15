@@ -45,6 +45,8 @@ import {TimelineModule} from "primeng/timeline";
 import {TripsComponent} from "./features/trips/trips.component";
 import {CalendarModule} from "primeng/calendar";
 import {PanelModule} from "primeng/panel";
+import { InputTextModule } from 'primeng/inputtext';
+
 
 @NgModule({
   declarations: [
@@ -87,6 +89,7 @@ import {PanelModule} from "primeng/panel";
         TimelineModule,
         CalendarModule,
         PanelModule,
+      InputTextModule,
     ],
   providers: [
     MessageService,

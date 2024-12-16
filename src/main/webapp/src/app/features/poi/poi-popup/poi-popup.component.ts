@@ -9,6 +9,7 @@ import {GeoJSONGeometry} from "wellknown";
 import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 import {Router} from "@angular/router";
+import {style} from "@angular/animations";
 
 @Component({
   selector: 'app-poi-popup',
@@ -47,12 +48,13 @@ import {Router} from "@angular/router";
                 <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
               </div>
               <div class="vehicle-actions">
-                <button pButton label="Zoom" icon="pi pi-search-plus" (click)="centerMapOnVehicle(vehicle.second)"></button>
+                <button pButton label="Zoom" icon="pi pi-search-plus" (click)="centerMapOnVehicle(vehicle.second)" style="background-color: #aa001f; border:#aa001f;"></button>
                 <button
                   pButton
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+                  style="background-color: #515151; border:#515151"
                 ></button>
               </div>
             </div>
@@ -136,6 +138,8 @@ import {Router} from "@angular/router";
                   label="Mettre à jour"
                   icon="pi pi-check"
                   [disabled]="!poiForm.form.valid"
+                  style="background-color: #aa001f; border: #aa001f;"
+
                 ></button>
                 <button
                   pButton
@@ -143,6 +147,7 @@ import {Router} from "@angular/router";
                   label="Supprimer le POI"
                   icon="pi pi-trash"
                   (click)="deletePOI()"
+                  style="background-color: #aa001f; border: #aa001f;"
                 ></button>
               </div>
               <div class="button-row">
@@ -152,6 +157,7 @@ import {Router} from "@angular/router";
                   label="Aller à l'Édition POI"
                   icon="pi pi-external-link"
                   (click)="navigateToPoiEdit()"
+                  style="background-color: #515151; border: #515151;"
                 ></button>
               </div>
             </div>
@@ -437,5 +443,7 @@ export class PoiPopupComponent implements OnInit {
   isMarkerHighlighted(markerId: string): boolean {
     return this.highlightedStates[markerId] || false;
   }
+
+  protected readonly style = style;
 }
 

@@ -34,9 +34,9 @@ import {window} from "rxjs";
             <p-button
               [raised]="true"
               (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-              styleClass="custom-button-blue"
+              styleClass="custom-button-gray"
               [class.active]="highlightedStates['vehicle-' + vehicle.second.id]">
-              {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Désurligner' : 'Surligner' }}
+              {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Surbrillance' : 'Surbrillance' }}
             </p-button>
           </li>
         </ul>
@@ -62,9 +62,9 @@ import {window} from "rxjs";
             <p-button
               [raised]="true"
               (click)="toggleHighlightMarker('poi-' + poi.second.id)"
-              styleClass="custom-button-blue"
+              styleClass="custom-button-gray"
               [class.active]="highlightedStates['poi-' + poi.second.id]">
-              {{ highlightedStates['poi-' + poi.second.id] ? 'Désurligner' : 'Surligner' }}
+              {{ highlightedStates['poi-' + poi.second.id] ? 'Surbrillance' : 'Surbrillance' }}
             </p-button>
           </li>
         </ul>
@@ -180,7 +180,7 @@ import {window} from "rxjs";
 <!--            <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}-->
 <!--            <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>-->
 <!--            <p-button label="Zoom" [raised]="true" (click)="centerMapOnVehicle(vehicle.second)" styleClass="custom-button-red"></p-button>-->
-<!--            <p-button [raised]="true" (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)" styleClass="custom-button-blue" [class.active]="highlightedStates['vehicle-' + vehicle.second.id]">-->
+<!--            <p-button [raised]="true" (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)" styleClass="custom-button-gray" [class.active]="highlightedStates['vehicle-' + vehicle.second.id]">-->
 <!--              {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Désurligner' : 'Surligner' }}-->
 <!--            </p-button>-->
 <!--            &lt;!&ndash;            <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>&ndash;&gt;-->
@@ -209,7 +209,7 @@ import {window} from "rxjs";
 <!--            <span> ({{ poi.first | number:'1.2-2' }} km)</span>-->
 <!--            <p-button label="Zoom" [raised]="true" (click)="centerMapOnPOI(poi.second)" styleClass="custom-button-red"></p-button>-->
 <!--&lt;!&ndash;            <button (click)="centerMapOnPOI(poi.second)">Zoom</button>&ndash;&gt;-->
-<!--            <p-button [raised]="true" (click)="toggleHighlightMarker('poi-' + poi.second.id)" styleClass="custom-button-blue" [class.active]="highlightedStates['poi-' + poi.second.id]">-->
+<!--            <p-button [raised]="true" (click)="toggleHighlightMarker('poi-' + poi.second.id)" styleClass="custom-button-gray" [class.active]="highlightedStates['poi-' + poi.second.id]">-->
 <!--              {{ highlightedStates['poi-' + poi.second.id] ? 'Désurligner' : 'Surligner' }}-->
 <!--            </p-button>-->
 <!--&lt;!&ndash;            <button&ndash;&gt;-->
@@ -256,9 +256,9 @@ import {window} from "rxjs";
       font-weight:600;
       padding:0.2rem;
     }
-    ::ng-deep .p-button.p-component.p-button-raised.custom-button-blue  {
-      background-color:#007bff  !important;
-      border-color:#007bff  !important;
+    ::ng-deep .p-button.p-component.p-button-raised.custom-button-gray  {
+      background-color:var(--gray-400)  !important;
+      border-color:var(--gray-400)  !important;
       color: white !important;
       font-weight:600;
       padding:0.2rem;

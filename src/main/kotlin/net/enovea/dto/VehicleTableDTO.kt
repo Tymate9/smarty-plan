@@ -1,6 +1,5 @@
 package net.enovea.dto
-
-import java.awt.Point
+import java.time.LocalTime
 
 data class VehicleTableDTO (
     val id: String,
@@ -14,6 +13,7 @@ data class VehicleTableDTO (
     var lastPositionAddress: String?,
     var lastPositionAdresseType: String?,
     val team: TeamDTO,
-    val distance : Number?,
+    var distance : Number?,
+    var firstTripStart : LocalTime?,
     val teamHierarchy: String? = null
 )

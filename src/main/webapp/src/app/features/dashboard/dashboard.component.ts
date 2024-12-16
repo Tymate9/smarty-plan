@@ -108,14 +108,15 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
             class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
           <td
-            class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm' }}
+            class="button-cell">{{ rowData.vehicle.firstTripStart | date: 'HH:mm' }}
           </td>
 
           <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
-            <!-- Icon on the left -->
-            <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"
-                  [ngStyle]="{ 'color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"
-                  class="poi-icon">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <!-- Icon on the left -->
+              <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"
+                    [ngStyle]="{ 'color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"
+                    class="poi-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30"
                    [ngStyle]="{ 'fill': getPoiColor(rowData.vehicle.lastPositionAdresseType) }">
                 <path
@@ -123,13 +124,14 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
               </svg>
             </span>
 
-            <!-- Address text in the middle -->
+              <span>
             {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}
-
+              </span>
+            </div>
           </td>
 
 
-          <td class="button-cell">{{ rowData.vehicle.distance || '50 km' }}</td>
+          <td class="button-cell">{{ rowData.vehicle.distance || '0 km' }}</td>
           <td class="button-cell">
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
@@ -382,7 +384,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 })
 export class DashboardComponent implements OnInit {
   selectedTags: { [key: string]: string[] } = {};
-  protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : ";
+  protected unTrackedVehicle : String = "Liste des véhicules non-communicants : ";
   vehicles: VehicleSummaryDTO[] = [];
   vehiclesTree: TreeNode[] = [];
   @ViewChild(TreeTable) treeTable: TreeTable;
@@ -550,7 +552,7 @@ export class DashboardComponent implements OnInit {
 
 
   private displayFilteredVehiclesOnDashboard(vehicles: any[]): void {
-    this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";
+    this.unTrackedVehicle = "Liste des véhicules non-communicants ";
     this.vehicles = vehicles;  // Assign filtered vehicles to vehicles array
 
     vehicles.forEach(vehicle => {
@@ -607,7 +609,7 @@ export class DashboardComponent implements OnInit {
 
   convertToCSV(data: TeamHierarchyNode[]): string {
     const rows: string[] = [];
-    const headers = ['Véhicule','Immatriculation','Marque','Modèle','Etat','Energie','Conducteur','Date Heure','Numéro d\'embarqué','Adresse','Type d\'adresse de référence','Distance totale','Entité Conducteur', 'Entité Véhicule','Groupe de salarié'];
+    const headers = ['Véhicule','Immatriculation','Marque','Modèle','Etat','Energie','Conducteur','Dernière communication','Heure de départ','Adresse','Type d\'adresse de référence','Distance totale','Entité Conducteur', 'Entité Véhicule','Groupe de salarié'];
     rows.push(headers.join(','));
 
 
@@ -615,7 +617,7 @@ export class DashboardComponent implements OnInit {
       const teamLabel = node.label;
       if (node.vehicles) {
         for (const vehicle of node.vehicles) {
-          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device.deviceDataState?.lastPositionTime),100,vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
+          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device.deviceDataState?.lastPositionTime),formatDateTime(vehicle.firstTripStart),vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
         }
       }
 

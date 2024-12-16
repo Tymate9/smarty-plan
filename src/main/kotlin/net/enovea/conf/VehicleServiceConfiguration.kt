@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
 import jakarta.persistence.EntityManager
 import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.vehicle.VehicleMapper
@@ -18,18 +19,21 @@ class VehicleServiceConfiguration {
     @Produces
     @Named("vehicleService")
     fun vehicleService(
+
         vehicleMapper: VehicleMapper,
         vehicleTableMapper: VehicleTableMapper,
         spatialService: SpatialService<PointOfInterestEntity>,
         geoCodingService: GeoCodingService,
-        entityManager: EntityManager
+        entityManager: EntityManager,
+        tripService: TripService
     ): VehicleService {
         return VehicleService(
             vehicleMapper,
             vehicleTableMapper,
             spatialService,
             geoCodingService,
-            entityManager
+            entityManager,
+            tripService
         )
     }
 

@@ -63,7 +63,7 @@ export class MapComponent implements OnInit {
 
   private map!: L.Map;
   private mapManager : MapManager;
-  protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : "
+  protected unTrackedVehicle : String = "Liste des véhicules non-communicants"
   private filters : { agencies : string[], vehicles : string[], drivers : string[] };
   isCollapsed: boolean = true;
 
@@ -179,7 +179,7 @@ export class MapComponent implements OnInit {
     this.mapManager.handleLayerEvent(event,null)
 
     // Reset unTrackedVehicle list for each filter change
-    this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";
+    this.unTrackedVehicle = "Liste des véhicules non-communicants ";
 
     // Display new markers on the map based on the filtered vehicles
     vehicles.forEach(vehicle => {

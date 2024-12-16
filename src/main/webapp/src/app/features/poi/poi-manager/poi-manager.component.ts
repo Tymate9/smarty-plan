@@ -141,13 +141,12 @@ export class PoiPanel {
 <!--          </button>-->
 
           <p-button
-            label="Ajouter POI"
+            label="Créer un brouillon de POI"
             (onClick)="addNewPoi()"
             [disabled]="isAddPoiDisabled()"
-            icon="pi pi-plus"
             [raised]="true"
             severity="info"
-            class="custom-button-red">
+            styleClass="custom-button-red">
           </p-button>
 
         </div>
@@ -197,26 +196,29 @@ export class PoiPanel {
                 <!-- Champ Catégorie -->
                 <label>
                   Catégorie:
-<!--                  <select-->
-<!--                    [(ngModel)]="poiPanel.selectedCategoryId"-->
-<!--                    (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"-->
-<!--                    name="category{{poiPanel.poi.id}}"-->
-<!--                    required-->
-<!--                  >-->
-<!--                    <option *ngFor="let category of poiCategories" [ngValue]="category.id">-->
-<!--                      {{ category.label }}-->
-<!--                    </option>-->
-<!--                  </select>-->
-
-                  <p-dropdown
+                  <div class="custom-dropdown">
+                  <select
                     [(ngModel)]="poiPanel.selectedCategoryId"
-                    [options]="poiCategories"
-                    (onChange)="onCategoryChange($event.value, poiPanel); poiPanel.isModified = true"
+                    (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"
                     name="category{{poiPanel.poi.id}}"
-                    optionLabel="label"
-                    optionValue="id"
-                    placeholder="Select a category">
-                  </p-dropdown>
+                    required
+                  >
+                    <option *ngFor="let category of poiCategories" [ngValue]="category.id">
+                      {{ category.label }}
+                    </option>
+                  </select>
+                  </div>
+
+<!--                  <p-dropdown-->
+<!--                    [(ngModel)]="poiPanel.selectedCategoryId"-->
+<!--                    [options]="poiCategories"-->
+<!--                    (onChange)="onCategoryChange($event.value, poiPanel); poiPanel.isModified = true; "-->
+<!--                    name="category{{poiPanel.poi.id}}"-->
+<!--                    optionLabel="label"-->
+<!--                    optionValue="id"-->
+<!--                    placeholder="Select a category">-->
+<!--                  </p-dropdown>-->
+
 
                 </label>
 
@@ -279,7 +281,7 @@ export class PoiPanel {
                 </div>
 
                 <!-- Boutons pour ajouter une zone -->
-                <div class="zone-buttons" style="display: flex; gap: 1rem; align-items: center;">
+                <div class="zone-buttons" style="margin-top: 1rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
 <!--                  <button type="button" (click)="startPolygonDrawing(poiPanel)">-->
 <!--                    Dessiner un Polygone-->
 <!--                  </button>-->
@@ -305,7 +307,7 @@ export class PoiPanel {
                 </div>
 
                 <!-- Boutons de soumission -->
-                <div *ngIf="poiPanel.poi.id < 0" style="margin-top: 1rem; display: flex; justify-content: center; align-items: center; height: 100vh;">
+                <div *ngIf="poiPanel.poi.id < 0" style="margin-top: 1rem; display: flex; justify-content: center; align-items: center;">
 <!--                  <button-->
 <!--                    type="submit"-->
 <!--                    [disabled]="!isFormValid(poiPanel)"-->
@@ -319,7 +321,7 @@ export class PoiPanel {
                     icon="pi pi-plus"
                     [raised]="true"
                     severity="info"
-                    class="custom-button-red">
+                    styleClass="custom-button-red">
                   </p-button>
                 </div>
                 <div *ngIf="poiPanel.poi.id >= 0" style="margin-top: 1rem; display: flex; gap: 1rem;">
@@ -498,6 +500,47 @@ export class PoiPanel {
       color: white !important;
       font-weight:600;
     }
+    /* Container for the select dropdown */
+    .custom-dropdown {
+      position: relative;
+      display: inline-block;
+      width: 100%; /* Adjust width as needed */
+      max-width: 300px;
+    }
+
+    /* Style the native select element */
+    .custom-dropdown select {
+      appearance: none; /* Removes native dropdown arrow */
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      background-color: #ffffff; /* White background */
+      border: 1px solid #ccc; /* Border style */
+      border-radius: 4px; /* Rounded corners */
+      padding: 10px 40px 10px 12px; /* Padding to create space for the arrow */
+      font-size: 14px; /* Adjust font size */
+      width: 100%;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+      cursor: pointer;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    /* Add hover and focus effects */
+    .custom-dropdown select:hover {
+      border-color: #007ad9; /* Blue border on hover */
+    }
+
+    .custom-dropdown select:focus {
+      border-color: #007ad9;
+      box-shadow: 0px 0px 5px rgba(0, 122, 217, 0.5); /* Blue glow on focus */
+      outline: none; /* Remove outline */
+    }
+
+    .custom-dropdown select:disabled {
+      background-color: #f9f9f9;
+      border-color: #e0e0e0;
+      cursor: not-allowed;
+    }
+
 
 
   `]

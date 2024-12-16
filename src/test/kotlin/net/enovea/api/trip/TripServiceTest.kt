@@ -25,19 +25,18 @@ class TripServiceTest : StringSpec({
             TripDTO(
                 vehicleId = vehicleId,
                 tripId = "1",
-                computeDate = LocalDateTime.parse("2020-01-01T00:00:00"),
-                startDate = LocalDateTime.parse("2020-01-01T00:00:00"),
-                endDate = LocalDateTime.parse("2020-01-01T01:00:00"),
+                lastComputeDate = LocalDateTime.parse("2020-01-01T00:00:00"),
+                startTime = LocalDateTime.parse("2020-01-01T00:00:00"),
+                endTime = LocalDateTime.parse("2020-01-01T01:00:00"),
                 distance = 10.0,
                 duration = 3600,
-                datapoints = 100,
+                datapointCount = 100,
                 startLng = 0.0,
                 startLat = 0.0,
                 endLng = 1.0,
                 endLat = 1.0,
                 trace = null,
                 tripStatus = TripStatus.COMPLETED,
-                wktTrace = null
             )
         )
 

@@ -6,27 +6,27 @@ import java.time.LocalTime
 data class TripDTO(
     val vehicleId: String,
     val tripId: String,
-    val computeDate: LocalDateTime,
-    val startDate: LocalDateTime,
-    val endDate: LocalDateTime,
+    val lastComputeDate: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val distance: Double?,
     val duration: Long?,
-    val datapoints: Long?,
+    val datapointCount: Long?,
     val startLng: Double,
     val startLat: Double,
     val endLng: Double,
     val endLat: Double,
     val tripStatus: TripStatus,
     val trace: String?,
-    val wktTrace: String?,
 )
 
+
 enum class TripStatus(
-    val value: String
+    val value: Int
 ) {
-    COMPLETED("COMPLETED"),
-    RUNNING("RUNNING"),
-    IDLE("IDLE")
+    COMPLETED(0),
+    DRIVING(1),
+    IDLE(2)
 }
 
 data class TripDailyStatsDTO(
@@ -73,5 +73,5 @@ data class TripEventDTO(
     var duration: Long? = null,
     val lat: Double? = null,
     val lng: Double? = null,
-    val wktTrace: String? = null,
+    val trace: String? = null,
 )

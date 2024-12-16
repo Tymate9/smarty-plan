@@ -10,19 +10,18 @@ class TripRowMapper : RowMapper<TripDTO> {
         return TripDTO(
             vehicleId = rs.getString("vehicle_id"),
             tripId = rs.getString("trip_id"),
-            computeDate = rs.getObject("compute_date", LocalDateTime::class.java),
-            startDate = rs.getObject("start_date", LocalDateTime::class.java),
-            endDate = rs.getObject("end_date", LocalDateTime::class.java),
+            lastComputeDate = rs.getObject("last_compute_date", LocalDateTime::class.java),
+            startTime = rs.getObject("start_time", LocalDateTime::class.java),
+            endTime = rs.getObject("end_time", LocalDateTime::class.java),
             distance = rs.getDouble("distance").takeIf { !rs.wasNull() },
             duration = rs.getLong("duration").takeIf { !rs.wasNull() },
-            datapoints = rs.getLong("datapoints").takeIf { !rs.wasNull() },
+            datapointCount = rs.getLong("datapoint_count").takeIf { !rs.wasNull() },
             startLng = rs.getDouble("start_lng"),
             startLat = rs.getDouble("start_lat"),
             endLng = rs.getDouble("end_lng"),
             endLat = rs.getDouble("end_lat"),
-            tripStatus = TripStatus.valueOf(rs.getString("trip_status")),
-            trace = rs.getString("trace"),
-            wktTrace = rs.getString("wkt_trace")
+            tripStatus = TripStatus.entries.getOrNull(rs.getInt("trip_status")) ?: TripStatus.COMPLETED,
+            trace = rs.getString("trace")
         )
     }
 }

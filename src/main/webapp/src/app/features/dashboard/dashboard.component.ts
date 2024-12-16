@@ -108,7 +108,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
             class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
           <td
-            class="button-cell">{{ rowData.vehicle.firstTripStart | date: 'HH:mm' }}
+            class="button-cell">{{ rowData.vehicle.firstTripStart}}
           </td>
 
           <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
@@ -131,7 +131,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
           </td>
 
 
-          <td class="button-cell">{{ rowData.vehicle.distance || '0 km' }}</td>
+          <td class="button-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
           <td class="button-cell">
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
@@ -617,7 +617,7 @@ export class DashboardComponent implements OnInit {
       const teamLabel = node.label;
       if (node.vehicles) {
         for (const vehicle of node.vehicles) {
-          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device.deviceDataState?.lastPositionTime),formatDateTime(vehicle.firstTripStart),vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
+          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device.deviceDataState?.lastPositionTime),vehicle.firstTripStart,vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
         }
       }
 

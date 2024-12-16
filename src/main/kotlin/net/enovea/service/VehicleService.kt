@@ -76,26 +76,26 @@ class VehicleService(
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
         val allVehicles = vehicles ?: VehicleEntity.listAll()
-       // val tripStats = tripService.getTripDailyStats()
+        val tripStats = tripService.getTripDailyStats()
 
-        val allVehicleDataDTO = allVehicles.map { vehicle ->
-            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-        }
+//        val allVehicleDataDTO = allVehicles.map { vehicle ->
+//            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+//        }
 
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
-//        val allVehicleDataDTO = allVehicles.map { vehicle ->
-//            // Convert to VehicleTableDTO
-//            val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-//
-//            // Enrich the DTO with trip statistics if available
-//            tripStats[vehicle.id]?.let { stats ->
-//                vehicleDTO.distance = stats.distance
-//                vehicleDTO.firstTripStart = stats.firstTripStart
-//            }
-//
-//            vehicleDTO
-//        }
+        val allVehicleDataDTO = allVehicles.map { vehicle ->
+            // Convert to VehicleTableDTO
+            val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+
+            // Enrich the DTO with trip statistics if available
+            tripStats[vehicle.id]?.let { stats ->
+                vehicleDTO.distance = (stats.distance)/1000
+                vehicleDTO.firstTripStart = stats.firstTripStart
+            }
+
+            vehicleDTO
+        }
 
 
         // Replace the last position for the untracked vehicles/drivers by null

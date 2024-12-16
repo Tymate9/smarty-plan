@@ -66,8 +66,8 @@ import TripEventType = dto.TripEventType;
                 <div class="p-3 bg-black-alpha-20 border-round cursor-pointer"
                      [style]="{ 'background-color': event.color }"></div>
 
-                {{ event.duration }} : {{ event.start.toLocaleTimeString() }}
-                -> {{ event.end.toLocaleTimeString() }} {{ event.distance }}
+                {{((event.duration)/60).toFixed(0) }} : {{ event.start?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                -> {{ event.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }} {{ event.distance.toFixed(0) }} Km
               </div>
               <div
                 class="p-3 bg-black-alpha-20 border-round cursor-pointer"
@@ -76,8 +76,8 @@ import TripEventType = dto.TripEventType;
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
               > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
-                : {{ event.start?.toLocaleTimeString() }}
-                -> {{ event.end?.toLocaleTimeString() }} {{ event.duration }}
+                : {{ event.start?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                -> {{ event.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }} {{ ((event.duration)/60).toFixed(0) }}
               </div>
             </ng-template>
           </p-timeline>

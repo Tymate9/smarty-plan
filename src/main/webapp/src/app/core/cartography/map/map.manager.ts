@@ -1,5 +1,6 @@
 import {ViewContainerRef} from '@angular/core';
 import * as L from "leaflet";
+import 'leaflet-responsive-popup';
 import {MapPopupComponent} from "../../../features/map/popUp/map-popup.component";
 import {CustomMarker, EntityType, MarkerFactory} from "../marker/MarkerFactory";
 import {LayerManager} from "../layer/layer.manager";
@@ -29,6 +30,7 @@ export class MapManager {
     private readonly geocodingService: GeocodingService,
     private readonly config: MapManagerConfig = new MapManagerConfig()
   ) {
+    window.L = L;
     const poiLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.POI);
     const vehicleLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.VEHICLE);
     this.layerManagers.push(poiLayerManager, vehicleLayerManager);
@@ -239,13 +241,19 @@ export class MapManager {
     // Ajoute le composant Angular dans le conteneur DOM
     container.appendChild((contextMenuPopUpComponentRef.hostView as any).rootNodes[0]);
 
-    // Crée la popup Leaflet et ajoute le conteneur
-    L.popup()
+    // Crée le popup Leaflet et ajoute le conteneur
+    L.responsivePopup({
+      offset: [10, 10],
+      autoPan: true,
+      autoPanPadding: [20, 20],
+      keepInView: true
+    })
       .setLatLng([lat, lng])
       .setContent(container)
       .openOn(this.map);
 
-    // Nettoie le composant et réinitialise la croix quand la popup est fermée
+
+    // Nettoie le composant et réinitialise la croix quand le popup est fermée
     this.map.on('popupclose', () => {
       contextMenuPopUpComponentRef.destroy();
       this.resetCrossMarker()

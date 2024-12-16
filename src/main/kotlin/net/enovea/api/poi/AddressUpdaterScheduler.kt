@@ -21,11 +21,11 @@ class AddressUpdaterScheduler(
         updateAddresses()
     }
 
-    // Exécute le scheduler au démarrage de l'application
+/*    // Exécute le scheduler au démarrage de l'application
     fun onStart(@Observes event: StartupEvent) {
         logger.info("Application started. Running initial address update...")
         updateAddresses()
-    }
+    }*/
 
     fun updateAddresses() {
         val pointsOfInterest = PointOfInterestEntity.listAll()

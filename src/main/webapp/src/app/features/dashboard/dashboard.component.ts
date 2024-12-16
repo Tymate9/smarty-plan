@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
 import {TeamHierarchyNode, VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
@@ -90,18 +90,20 @@ import {Subscription} from "rxjs";
           <td>{{ rowData.label }}</td>
           <td
             [ngClass]="{
-            'MOVING': rowData.vehicle.device.deviceDataState.state === 'MOVING',
-            'OFF': rowData.vehicle.device.deviceDataState.state === 'OFF',
-            'STOP': rowData.vehicle.device.deviceDataState.state === 'STOP',
+            'DRIVING': rowData.vehicle.device.deviceDataState.state === 'DRIVING',
+            'PARKED': rowData.vehicle.device.deviceDataState.state === 'PARKED',
+            'IDLE': rowData.vehicle.device.deviceDataState.state === 'IDLE',
             'NO_COM': rowData.vehicle.device.deviceDataState.state === 'NO_COM',
+            'UNPLUGGED': rowData.vehicle.device.deviceDataState.state === 'UNPLUGGED',
             'DEFAULT': rowData.vehicle.device.deviceDataState.state === null,
           }">
             <!-- Icon and text -->
             <ng-container [ngSwitch]="rowData.vehicle.device.deviceDataState.state">
-              <span *ngSwitchCase="'MOVING'" class="status-icon">Roulant<i class="pi pi-play"></i></span>
-              <span *ngSwitchCase="'STOP'" class="status-icon">À l'arrêt<i class="pi pi-step-forward"></i></span>
-              <span *ngSwitchCase="'OFF'" class="status-icon">Arrêté<i class="pi pi-stop"></i></span>
+              <span *ngSwitchCase="'DRIVING'" class="status-icon">Roulant<i class="pi pi-play"></i></span>
+              <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt<i class="pi pi-step-forward"></i></span>
+              <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté<i class="pi pi-stop"></i></span>
               <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal<i class="pi pi-times"></i></span>
+              <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté<i class="pi pi-ban"></i></span>
               <span *ngSwitchDefault class="status-icon">Inconnu<i class="pi pi-question"></i></span>
             </ng-container>
           </td>
@@ -111,17 +113,6 @@ import {Subscription} from "rxjs";
           <td
             class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm' }}
           </td>
-          <!--          <td *ngIf="rowData.vehicle">{{ rowData.vehicle.lastPositionAddress ?? 'Inconnu'}}</td>-->
-
-          <!--          <td *ngIf="rowData.vehicle">-->
-          <!--            <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"-->
-          <!--                  [ngStyle]="{ 'color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"-->
-          <!--                  class="poi-icon">-->
-          <!--              <i class="pi pi-map-marker"></i>-->
-          <!--            </span>-->
-          <!--                      {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}-->
-          <!--          </td>-->
-
 
           <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
             <!-- Icon on the left -->
@@ -137,11 +128,6 @@ import {Subscription} from "rxjs";
 
             <!-- Address text in the middle -->
             {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}
-
-            <!-- Triangle on the right -->
-            <!--            <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"-->
-            <!--                  [ngStyle]="{ 'background-color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"-->
-            <!--                  class="poi-triangle"></span>-->
           </td>
 
 
@@ -211,17 +197,17 @@ import {Subscription} from "rxjs";
       font-weight: 700 !important;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .MOVING {
+    :host ::ng-deep .p-treetable.custom-tree-table .DRIVING {
       background-color: #21A179;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .STOP {
+    :host ::ng-deep .p-treetable.custom-tree-table .IDLE {
       background-color: #FE8F2B;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .OFF {
+    :host ::ng-deep .p-treetable.custom-tree-table .PARKED {
       background-color: #C71400;
       color: white;
     }
@@ -357,22 +343,6 @@ import {Subscription} from "rxjs";
       background-color: #4a4a9d;
     }
 
-
-
-    //:host ::ng-deep .p-treeTable-toggler.p-link{
-    //  color: white;
-    //}
-    //
-    //
-    //:host ::ng-deep .p-treeTable.custom-tree-table.p-treetable-toggler.pi-link.p-highlight {
-    //  background-color: white;
-    //}
-
-
-    //:host ::ng-deep .p-treetable.custom-tree-table.p-treetable-toggler .pi {
-    //  color: white;
-    //}
-
     .button-cell {
       width: 1%; /* Shrink-wrap the column width to its content */
       white-space: nowrap; /* Prevent wrapping in case of larger content */
@@ -410,19 +380,10 @@ import {Subscription} from "rxjs";
       width: 1.3rem;
       height:1.3rem;
     }
-
-
-
-    //
-    //:host ::ng-deep .p-treetable.custom-tree-table .poi-triangle {
-    //  width: 16px;
-    //  height: 16px;
-    //  margin-left: 8px;
-    //  display: inline-block;
-    //  clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
-    //  background-color: var(--color);
-    //}
-
+    :host ::ng-deep .p-treetable.custom-tree-table .UNPLUGGED {
+      background-color: #A020F0;
+      color: white;
+    }
 
   `]
 })
@@ -496,14 +457,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.vehiclesTree=this.transformToTreeNodes(filteredVehicles)
         //this.expandAllNodes(this.vehiclesTree);
 
-        const stateCounts = this.calculateStatusCounts(filteredVehicles);
-        this.vehicleStatusCounts = [
-          { state: 'MOVING', count: stateCounts['MOVING'] || 0 },
-          { state: 'OFF', count: stateCounts['OFF'] || 0 },
-          { state: 'STOP', count: stateCounts['STOP'] || 0 },
-          { state: 'NO_COM', count: stateCounts['NO_COM'] || 0 },
-        ];
-
+          const stateCounts = this.calculateStatusCounts(filteredVehicles);
+          this.vehicleStatusCounts = [
+            { state: 'DRIVING', count: stateCounts['DRIVING'] || 0 },
+            { state: 'PARKED', count: stateCounts['PARKED'] || 0 },
+            { state: 'IDLE', count: stateCounts['IDLE'] || 0 },
+            { state: 'NO_COM', count: stateCounts['NO_COM'] || 0 },
+            { state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0 },
+          ];
       });
     })
   };
@@ -607,10 +568,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getStatusDetails(state: string): { color: string; displayName: string; icon: string } {
     const statusDetails: Record<string, { color: string; displayName: string; icon: string }> = {
-      MOVING: { color: '#21A179', displayName: 'ROULANT(S)', icon: 'pi-play' },
-      OFF: { color: '#C71400', displayName: 'ARRÊTÉ', icon: 'pi-stop' },
-      STOP: { color: '#FE8F2B', displayName: 'À L\'ARRÊT', icon: 'pi-step-forward' },
+      DRIVING: { color: '#21A179', displayName: 'ROULANT(S)', icon: 'pi-play' },
+      PARKED: { color: '#C71400', displayName: 'ARRÊTÉ', icon: 'pi-stop' },
+      IDLE: { color: '#FE8F2B', displayName: 'À L\'ARRÊT', icon: 'pi-step-forward' },
       NO_COM: { color: '#E0E0E0', displayName: 'SANS SIGNAL', icon: 'pi-times' },
+      UNPLUGGED: { color: '#A020F0', displayName: 'DÉCONNECTE', icon: 'pi-ban' },
     };
 
     return statusDetails[state] || {
@@ -687,12 +649,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-
-
-
   protected readonly DatePipe = DatePipe;
 }
-
 function formatDateTime(dateString: Date | null | undefined): string {
   if (!dateString) return '';
 

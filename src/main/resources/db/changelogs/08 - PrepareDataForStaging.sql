@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
--- changeset smarty_plan:8 context:dev,prod
+-- changeset smarty_plan:8 context: prod
 
 -- Suppression des drivers
 WITH drivers_to_delete AS (SELECT id

@@ -60,7 +60,7 @@ class DbSeed {
     private val poiDenominationCount = mutableMapOf<String, Int>()
     // === Fin variables import POI ===
 
-    @Transactional
+/*    @Transactional
     fun onStart(@Observes ev: StartupEvent) {
         LOG.info("Démarrage de l'application - Chargement des données initiales.")
 
@@ -169,7 +169,7 @@ class DbSeed {
         // === Fin import POI ===
 
         LOG.info("Chargement des données initiales terminé.")
-    }
+    }*/
 
     // Fonction pour déterminer la catégorie POI en fonction du libellé
     fun mapLibelleToCategory(libelle: String): String {
@@ -316,10 +316,11 @@ class DbSeed {
         }
     }
 
-    /**
+/**
      * Crée un polygone approximant un cercle à partir d'un centre (lon, lat) et d'un rayon en mètres.
      * On utilise 16 points.
      */
+
     private fun createCirclePolygon(lon: Double, lat: Double, radiusMeters: Double, geometryFactory: GeometryFactory): Polygon {
         val nbPoints = 16
         val coords = Array(nbPoints + 1) { Coordinate() }
@@ -409,9 +410,10 @@ class DbSeed {
                 val now = Timestamp(System.currentTimeMillis())
 
 
-                /*                if (agence.isEmpty() || lastName.isEmpty() || firstName.isEmpty() || rawPlate.isEmpty()) {
+                if (agence.isEmpty() || lastName.isEmpty() || firstName.isEmpty() || rawPlate.isEmpty()) {
                                     return@forEach
-                                }*/
+                                }
+
 
                 val normalizedPlate = rawPlate.replace("-", "").uppercase()
 

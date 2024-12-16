@@ -103,9 +103,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
             handle.createQuery(
                 """
                     SELECT vehicle_id, sum(distance) as distance, min(start_time) as first_trip_start
-                    FROM trips_test_smarty_plan
+                    FROM trips_vehicle_view
+                    WHERE date(start_time) = date(now()) and vehicle_id is not null
                     GROUP BY vehicle_id, date(start_time)
-                    WHERE date(start_time) = date(now())
                 """.trimIndent()
             )
                 .mapTo(TripDailyStatsDTO::class.java)

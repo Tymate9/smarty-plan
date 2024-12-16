@@ -36,7 +36,7 @@ import TripEventType = dto.TripEventType;
               <p>{{ tripData!.tripAmount }}</p>
             </p-card>
             <p-card header="Distance totale">
-              <p>{{ tripData!.drivingDistance.toFixed(2) }} Km</p>
+              <p>{{ tripData!.drivingDistance.toFixed(0) }} Km</p>
             </p-card>
             <p-card header="Nb de POI visités">
               <p>{{ tripData!.poiAmount }}</p>
@@ -61,7 +61,12 @@ import TripEventType = dto.TripEventType;
                 *ngIf="event.eventType === TripEventType.TRIP"
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
-              > {{ event.duration }} : {{ event.start.toLocaleTimeString() }}
+              >
+<!--                color round -->
+                <div class="p-3 bg-black-alpha-20 border-round cursor-pointer"
+                     [style]="{ 'background-color': event.color }"></div>
+
+                {{ event.duration }} : {{ event.start.toLocaleTimeString() }}
                 -> {{ event.end.toLocaleTimeString() }} {{ event.distance }}
               </div>
               <div

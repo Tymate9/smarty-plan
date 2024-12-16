@@ -7,11 +7,29 @@ import java.time.LocalDate
 
 class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
 
-    // todo : replace "trips_test_smarty_plan" with "trips_vehicle_view"
-
     fun findById(tripId: String): TripDTO? {
         return dorisJdbiContext.jdbi.withHandle<TripDTO, Exception> { handle ->
-            handle.createQuery("SELECT *, st_astext(st_geometryfromwkb(trace)) as wkt_trace FROM trips_test_smarty_plan WHERE trip_id = :tripId")
+            handle.createQuery(
+                """
+                SELECT 
+                    vehicle_id, 
+                    trip_id,
+                    last_compute_date,
+                    start_time,
+                    end_time,
+                    distance,
+                    duration,
+                    datapoint_count,
+                    s2_longitude(start_location) AS start_lng,
+                    s2_latitude(start_location) AS start_lat,
+                    s2_longitude(end_location) AS end_lng,
+                    s2_latitude(end_location) AS end_lat,
+                    trip_status,
+                    st_astext(st_geometryfromwkb(trace)) as trace 
+                FROM trips_vehicle_view 
+                WHERE trip_id = :tripId
+                """.trimIndent()
+            )
                 .bind("tripId", tripId)
                 .mapTo(TripDTO::class.java)
                 .findOne()
@@ -21,7 +39,27 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
 
     fun findByVehicleId(vehicleId: String): List<TripDTO> {
         return dorisJdbiContext.jdbi.withHandle<List<TripDTO>, Exception> { handle ->
-            handle.createQuery("SELECT *, st_astext(st_geometryfromwkb(trace)) as wkt_trace FROM trips_test_smarty_plan WHERE vehicle_id = :vehicleId")
+            handle.createQuery(
+                """
+                SELECT 
+                    vehicle_id, 
+                    trip_id,
+                    last_compute_date,
+                    start_time,
+                    end_time,
+                    distance,
+                    duration,
+                    datapoint_count,
+                    s2_longitude(start_location) AS start_lng,
+                    s2_latitude(start_location) AS start_lat,
+                    s2_longitude(end_location) AS end_lng,
+                    s2_latitude(end_location) AS end_lat,
+                    trip_status,
+                    st_astext(st_geometryfromwkb(trace)) as trace 
+                FROM trips_vehicle_view 
+                WHERE coalesce(vehicle_id, '') = :vehicleId
+            """.trimIndent()
+            )
                 .bind("vehicleId", vehicleId)
                 .mapTo(TripDTO::class.java)
                 .list()
@@ -32,11 +70,25 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
         return dorisJdbiContext.jdbi.withHandle<List<TripDTO>, Exception> { handle ->
             handle.createQuery(
                 """
-                    SELECT *, st_astext(st_geometryfromwkb(trace)) as wkt_trace 
-                    FROM trips_test_smarty_plan 
-                    WHERE vehicle_id = :vehicleId 
-                    AND date_trunc(start_date, 'day') = :date
-                    ORDER BY start_date
+                    SELECT 
+                        vehicle_id, 
+                        trip_id,
+                        last_compute_date,
+                        start_time,
+                        end_time,
+                        distance,
+                        duration,
+                        datapoint_count,
+                        s2_longitude(start_location) AS start_lng,
+                        s2_latitude(start_location) AS start_lat,
+                        s2_longitude(end_location) AS end_lng,
+                        s2_latitude(end_location) AS end_lat,
+                        trip_status,
+                        st_astext(st_geometryfromwkb(trace)) as trace 
+                    FROM trips_vehicle_view 
+                    WHERE coalesce(vehicle_id, '') = :vehicleId 
+                    AND date_trunc(start_time, 'day') = :date
+                    ORDER BY start_time
                 """.trimIndent()
             )
                 .bind("vehicleId", vehicleId)
@@ -50,10 +102,10 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
         return dorisJdbiContext.jdbi.withHandle<List<TripDailyStatsDTO>, Exception> { handle ->
             handle.createQuery(
                 """
-                    SELECT vehicle_id, sum(distance) as distance, min(start_date) as first_trip_start
+                    SELECT vehicle_id, sum(distance) as distance, min(start_time) as first_trip_start
                     FROM trips_test_smarty_plan
-                    GROUP BY vehicle_id, date(start_date)
-                    WHERE date(start_date) = date(now())
+                    GROUP BY vehicle_id, date(start_time)
+                    WHERE date(start_time) = date(now())
                 """.trimIndent()
             )
                 .mapTo(TripDailyStatsDTO::class.java)

@@ -60,21 +60,21 @@ class TripService(
                         poiLabel = poiAtStart?.getDenomination(),
                         address = addressAtStart ?: poiAtStart?.address,
                         duration = precedingTrip?.let {
-                            trip.startDate.toEpochSecond(ZoneOffset.of("Z")) - it.endDate.toEpochSecond(
+                            trip.startTime.toEpochSecond(ZoneOffset.of("Z")) - it.endTime.toEpochSecond(
                                 ZoneOffset.of("Z")
                             )
                         },
-                        start = precedingTrip?.endDate,
-                        end = trip.startDate
+                        start = precedingTrip?.endTime,
+                        end = trip.startTime
                     ),
                     TripEventDTO(
                         index = index * 2 + 1,
                         eventType = TripEventType.TRIP,
                         distance = trip.distance,
                         duration = trip.duration,
-                        start = trip.startDate,
-                        end = trip.endDate,
-                        wktTrace = trip.wktTrace,
+                        start = trip.startTime,
+                        end = trip.endTime,
+                        trace = trip.trace,
                         color = null,
                         poiId = null,
                         poiLabel = null,
@@ -87,7 +87,7 @@ class TripService(
         val lastTrip = trips.last()
         var poiAtEnd: PointOfInterestEntity? = null
         var addressAtEnd: String? = null
-        if (lastTrip.tripStatus == TripStatus.COMPLETED) {
+        if (lastTrip.tripStatus != TripStatus.DRIVING) {
             // if stop, compute end POI/address
             val endPoint = geometryFactory.createPoint(Coordinate(lastTrip.endLng, lastTrip.endLat))
             poiAtEnd = spatialService.getNearestEntityWithinArea(endPoint)
@@ -99,7 +99,7 @@ class TripService(
                 index = tripEvents.size,
                 eventType = when (lastTrip.tripStatus) {
                     TripStatus.COMPLETED -> TripEventType.STOP
-                    TripStatus.RUNNING -> TripEventType.VEHICLE_RUNNING
+                    TripStatus.DRIVING -> TripEventType.VEHICLE_RUNNING
                     TripStatus.IDLE -> TripEventType.VEHICLE_IDLE
                 },
                 distance = null,
@@ -110,7 +110,7 @@ class TripService(
                 lat = poiAtEnd?.coordinate?.y ?: lastTrip.endLat,
                 lng = poiAtEnd?.coordinate?.x ?: lastTrip.endLng,
                 duration = null,
-                start = lastTrip.endDate,
+                start = lastTrip.endTime,
                 end = null
             )
         )
@@ -119,8 +119,8 @@ class TripService(
             vehicleId = vehicleId,
             licensePlate = licensePlate,
             driverName = driverName,
-            range = lastTrip.endDate.toEpochSecond(ZoneOffset.of("Z")).toInt()
-                    - trips.first().startDate.toEpochSecond(ZoneOffset.of("Z")).toInt(),
+            range = lastTrip.endTime.toEpochSecond(ZoneOffset.of("Z")).toInt()
+                    - trips.first().startTime.toEpochSecond(ZoneOffset.of("Z")).toInt(),
             tripAmount = trips.size,
             stopDuration = tripEvents.filter { it.eventType == TripEventType.STOP }.sumOf { it.duration ?: 0 },
             drivingDuration = trips.sumOf { it.duration ?: 0 },

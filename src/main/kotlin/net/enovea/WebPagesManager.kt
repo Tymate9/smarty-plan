@@ -31,7 +31,6 @@ class WebPagesManager {
         @PathParam("path") path: String,
         @Context uriInfo: UriInfo,
     ): Response {
-        println("Méthode index invoquée")
         val indexHtmlAsStream =
             Thread.currentThread().contextClassLoader.getResourceAsStream("/META-INF/resources/index.html")
         return if (indexHtmlAsStream == null) {

@@ -2,6 +2,7 @@ package net.enovea.common.geo
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import mu.KotlinLogging
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import kotlin.reflect.KClass
@@ -12,6 +13,8 @@ class SpatialService<T : PanacheEntityBase>(
     private val entityManager: EntityManager,
     private val geoCodingService: GeoCodingService
 ) {
+    val logger = KotlinLogging.logger {}
+
     fun getNearestEntity(point: Point, limit: Int): List<T> {
         val wktPoint = point.toText()
 
@@ -142,7 +145,8 @@ class SpatialService<T : PanacheEntityBase>(
     fun getAddressFromEntity(point: Point): String {
         val address = geoCodingService.reverseGeocode(point)
         requireNotNull(address){
-            throw IllegalArgumentException("Impossible de géocoder la coordonnée fournie : {${point.x}, ${point.y}}")
+            logger.warn("Impossible de géocoder la coordonnée fournie : {${point.x}, ${point.y}}")
+            return "${point.y}, ${point.x}"
         }
         return address
     }

@@ -70,7 +70,7 @@ class TripService(
                     TripEventDTO(
                         index = index * 2 + 1,
                         eventType = TripEventType.TRIP,
-                        distance = trip.distance,
+                        distance = trip.distance?.div(1000),
                         duration = trip.duration,
                         start = trip.startTime,
                         end = trip.endTime,
@@ -124,7 +124,7 @@ class TripService(
             tripAmount = trips.size,
             stopDuration = tripEvents.filter { it.eventType == TripEventType.STOP }.sumOf { it.duration ?: 0 },
             drivingDuration = trips.sumOf { it.duration ?: 0 },
-            drivingDistance = trips.sumOf { it.distance ?: 0.0 },
+            drivingDistance = trips.sumOf { it.distance ?: 0.0 } / 1000,
             poiAmount = tripEvents.count { it.poiId != null } + (poiAtEnd?.let { 1 } ?: 0),
             tripEvents = tripEvents,
         )

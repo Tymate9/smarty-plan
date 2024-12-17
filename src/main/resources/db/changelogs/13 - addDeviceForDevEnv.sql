@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset smarty_plan:13 context:dev
+-- changeset smarty_plan:13 context:dev,prod
 
 DELETE FROM device_data_state;
 DELETE FROM device;

@@ -7,6 +7,7 @@ import {TripListComponent} from "./features/trips/trip-list.component";
 import {TripMapComponent} from "./features/trips/trip-map.component";
 import {PoiManagerComponent} from "./features/poi/poi-manager/poi-manager.component";
 import {TripsComponent} from "./features/trips/trips.component";
+import {PoiMapComponent} from "./features/poi/workInProgress/poi-map/poi-map.component";
 
 const routes: Routes = [
   {
@@ -15,8 +16,7 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
-      { path: 'poiedit/:label', component: PoiManagerComponent},
-      { path: 'poiedit', component: PoiManagerComponent},
+      { path: 'poiedit', component: PoiMapComponent},
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]

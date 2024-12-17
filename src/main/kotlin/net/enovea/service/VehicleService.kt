@@ -13,14 +13,14 @@ import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
 import java.time.LocalDate
 
-class VehicleService (
+class VehicleService(
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
     private val spatialService: SpatialService<PointOfInterestEntity>,
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
-    ){
-    fun filterVehicle( vehicles: List<VehicleEntity>): List<VehicleEntity> {
+) {
+    fun filterVehicle(vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
@@ -48,18 +48,17 @@ class VehicleService (
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
         return vehicles.map { vehicle ->
-            if(vehicle.id in untrackedVehicleIds || VehicleEntity.getCurrentDriver(vehicle.vehicleDrivers)?.id in untrackedDriverIds ) {
-                entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
+            if (vehicle.id in untrackedVehicleIds || VehicleEntity.getCurrentDriver(vehicle.vehicleDrivers)?.id in untrackedDriverIds) {
+                VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.also { entityManager.detach(it) }
                 VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.coordinate = null
-            }
-            else {
-                entityManager.detach(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState)
+            } else {
+                VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.also { entityManager.detach(it) }
             }
             vehicle
         }
     }
 
-    fun getVehicleDriverDetailsOnDayIfTracked(vehicleId: String, date: LocalDate) : Pair<String, String>? {
+    fun getVehicleDriverDetailsOnDayIfTracked(vehicleId: String, date: LocalDate): Pair<String, String>? {
         // Get the driver for the vehicle at the given date
         val driver = VehicleDriverEntity.getForVehicleAtDateIfTracked(vehicleId, date)
         if (driver != null) {
@@ -68,14 +67,14 @@ class VehicleService (
         return null
     }
 
-// TODO seperate the data treatment method
+    // TODO seperate the data treatment method
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
         // Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
         val allVehicles = vehicles ?: VehicleEntity.listAll()
-        val allVehicleDataDTO = allVehicles.map { vehicle ->
+        val allVehicleDataDTO = allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }.map { vehicle ->
             vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
         }
 
@@ -95,19 +94,19 @@ class VehicleService (
                     }
                     if (poi != null) {
                         vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label
-                        vehicleDataDTO.lastPositionAdresseType=poi.category.label
+                        vehicleDataDTO.lastPositionAdresseType = poi.category.label
                     } else {
                         // If no POI, try to fetch address using geocoding service
                         val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
                             geoCodingService.reverseGeocode(it)
                         }
                         vehicleDataDTO.lastPositionAddress = address
-                        vehicleDataDTO.lastPositionAdresseType="route"
+                        vehicleDataDTO.lastPositionAdresseType = "route"
                     }
                 } catch (e: Exception) {
                     // Handle any errors during POI lookup or reverse geocoding
                     vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
-                    vehicleDataDTO.lastPositionAdresseType="Error retrieving location data"
+                    vehicleDataDTO.lastPositionAdresseType = "Error retrieving location data"
                 }
             }
         }
@@ -117,7 +116,7 @@ class VehicleService (
             val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
-        val teamHierarchy=buildTeamHierarchyForest(vehiclesWithHierarchy)
+        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy)
         return teamHierarchy
     }
 
@@ -171,7 +170,6 @@ class VehicleService (
     }
 
 
-
     @Transactional
     fun getVehiclesList(agencyIds: List<String>?): List<VehicleSummaryDTO> {
 
@@ -183,7 +181,7 @@ class VehicleService (
     """
 
         // Extend the query only if agencyIds are provided
-       if (!agencyIds.isNullOrEmpty()) {
+        if (!agencyIds.isNullOrEmpty()) {
 
             baseQuery += """
             JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
@@ -194,13 +192,15 @@ class VehicleService (
                     OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds)
                     )
             """
-           params["agencyIds"] = agencyIds
+            params["agencyIds"] = agencyIds
         }
 
 
         val panacheQuery = VehicleEntity.find(baseQuery, params)
 
-        return panacheQuery.list().map { vehicleMapper.toVehicleDTOSummary(it) }
+        return panacheQuery.list()
+            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+            .map { vehicleMapper.toVehicleDTOSummary(it) }
     }
 
     //Function returns the list of vehicles based on the filters provided
@@ -229,7 +229,7 @@ class VehicleService (
 
         if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
 
-            query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))"+
+            query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))" +
                     " AND (v.licenseplate IN :vehicleIds OR CONCAT(d.lastName, ' ', d.firstName) IN :driverNames)"
 
             params["teamLabels"] = teamLabels

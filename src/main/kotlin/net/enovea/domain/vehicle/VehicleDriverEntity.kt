@@ -10,7 +10,6 @@ import java.time.LocalDate
 
 @Entity(name = VehicleDriverEntity.ENTITY_NAME)
 @Table(name = VehicleDriverEntity.TABLE_NAME)
-
 data class VehicleDriverEntity (
 
     @EmbeddedId

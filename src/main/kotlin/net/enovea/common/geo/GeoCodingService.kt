@@ -2,9 +2,13 @@ package net.enovea.common.geo
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.smallrye.faulttolerance.api.RateLimit
+import net.enovea.api.poi.AddressUpdaterScheduler
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import org.eclipse.microprofile.faulttolerance.Retry
+import org.jboss.logging.Logger
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
@@ -12,7 +16,10 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 class GeoCodingService {
+    private val logger: Logger = Logger.getLogger(AddressUpdaterScheduler::class.java)
 
+    @Retry(maxRetries = 10)
+    @RateLimit(value = 45, window = 1000)
     fun geocode(adresse: String): GeoCodeResponse? {
         val encodedAddress = URLEncoder.encode(adresse, StandardCharsets.UTF_8.name())
         val url = "https://api-adresse.data.gouv.fr/search/?q=$encodedAddress&limit=1"
@@ -48,7 +55,10 @@ class GeoCodingService {
         return null
     }
 
+    @Retry(maxRetries = 10)
+    @RateLimit(value = 45, window = 1000)
     fun reverseGeocode(point : Point): String? {
+        logger.warn("Reverse reverse of geocode: $point")
         val longitude = point.x
         val latitude = point.y
         val url = "https://api-adresse.data.gouv.fr/reverse/?lon=$longitude&lat=$latitude"
@@ -69,10 +79,11 @@ class GeoCodingService {
                     val firstFeature = features[0]
                     val properties = firstFeature["properties"]
                     val label = properties["label"].asText()
+                    logger.warn("Adresse found for : $point : $label")
                     return label
                 }
             } else {
-                throw RuntimeException("Erreur lors de la requête de géocodage inverse : statut $status")
+                throw RuntimeException("Erreur lors de la requête de géocodage inverse : statut $status / ${response.entity}")
             }
         }
         return null

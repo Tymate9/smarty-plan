@@ -191,7 +191,8 @@ class PointOfInterestResource (
                 client_label = poiForm.clientLabel,
                 category = category,
                 coordinate = pointGeometry, // Coordonnées indépendantes de la zone
-                area = polygonGeometry
+                area = polygonGeometry,
+                address = poiForm.adresse
             )
 
             // 5. Persister l'entité
@@ -260,6 +261,7 @@ class PointOfInterestResource (
             existingPOI.category = category
             existingPOI.coordinate = coordinatePoint
             existingPOI.area = areaPolygon
+            existingPOI.address = poiForm.adresse
 
             // 6. Persister les changements
             existingPOI.persist()
@@ -351,7 +353,7 @@ class PointOfInterestResource (
         }
 
         return try {
-            val pois = PointOfInterestEntity.find("label ILIKE ?1", "%$label%").list()
+            val pois = PointOfInterestEntity.find("client_label ILIKE ?1", "%$label%").list()
             Response.ok(pois).build()
         } catch (e: Exception) {
             Response.status(Response.Status.INTERNAL_SERVER_ERROR)

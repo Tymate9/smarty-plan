@@ -73,7 +73,6 @@ interface VehicleMapper {
             TimestampRange(startDate, endDate) to DeviceMapper.INSTANCE.toDto(it.device!!)
         }
 
-
     //Map VehicleTeamEntity to TeamDTOs with start and end date
     fun mapVehicleTeamsToTeamsDTO(vehicleTeams: List<VehicleTeamEntity>):Map<TimestampRange, TeamDTO> =
         vehicleTeams.associate {
@@ -91,8 +90,6 @@ interface VehicleMapper {
         .filter { it.endDate == null }
         .maxByOrNull { it.id.startDate }
         ?.let { it.device?.deviceDataState?.coordinate }
-
-
 
     companion object {
         val INSTANCE: VehicleMapper = Mappers.getMapper(VehicleMapper::class.java)

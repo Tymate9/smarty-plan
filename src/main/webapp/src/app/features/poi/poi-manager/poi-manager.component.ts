@@ -16,6 +16,7 @@ import {GeoJSONGeometry} from "wellknown";
 import {GeoUtils} from "../../../commons/geo/geo-utils";
 import { PopUpConfig } from 'src/app/core/cartography/marker/pop-up-config';
 import {ActivatedRoute} from '@angular/router';
+import {NotificationService} from "../../../commons/notification/notification.service";
 
 
 export class PoiPanel {
@@ -426,7 +427,8 @@ export class PoiManagerComponent implements OnInit {
     private readonly poiService: PoiService,
     private readonly geocodingService: GeocodingService,
     private readonly viewContainerRef: ViewContainerRef,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly notificationService:NotificationService
   ) {}
 
   // Methods Related to Map Initialization and Control
@@ -833,15 +835,15 @@ export class PoiManagerComponent implements OnInit {
       // Géocoder l'adresse pour obtenir les coordonnées
       this.geocodingService.geocodeAddress(poiPanel.modifiedAddress).subscribe(
         (result) => {
-          console.log(result)
+          console.log("Les modification en fonction de result c'est ici")
           latitude = result.latitude;
           longitude = result.longitude;
           // Procéder à la création ou mise à jour du POI
           this.createOrUpdatePoi(poiPanel, poi, longitude, latitude);
         },
         (error) => {
-          console.error("Erreur lors du géocodage de l'adresse :", error);
-          // Gérer l'erreur (afficher un message à l'utilisateur, etc.)
+          console.error("Erreur lors du géocodage de l'adresse :", error.error);
+          this.notificationService.error("Erreur lors du géocodage de l'adresse", error.error.error)
         }
       );
     } else if (poiPanel.inputType === 'coordonnees' && GeoUtils.isValidCoordinate(poiPanel.modifiedLatitude!, poiPanel.modifiedLongitude!)) {
@@ -879,6 +881,7 @@ export class PoiManagerComponent implements OnInit {
       type: poi.category.id,
       WKTPoint: wktPoint, // Utiliser la chaîne WKT générée à partir de poi.coordinate
       WKTPolygon: wktPolygon, // Utiliser la chaîne WKT générée à partir de poi.area
+      adresse:poiPanel.address || "Adresse Inconnue"
     };
 
     if (poi.id <= -1) {

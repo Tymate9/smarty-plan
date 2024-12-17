@@ -15,6 +15,7 @@ export interface PointOfInterestForm {
   type: number;
   WKTPoint: string;
   WKTPolygon: string;
+  adresse: string;
 }
 
 @Injectable({
@@ -72,10 +73,6 @@ export class PoiService {
       })
     );
   }
-
-
-
-
 
   getPOIsInPolygon(polygonWKT: string): Observable<any> {
     const params = { polygonWKT };

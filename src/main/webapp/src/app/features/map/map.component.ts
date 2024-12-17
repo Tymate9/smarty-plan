@@ -18,7 +18,7 @@ import {NotificationService} from "../../commons/notification/notification.servi
   template: `
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <p-button
-        label="{{ noComVehicle }}"
+        label="Alerting véhicules"
         icon="{{ isCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up' }}"
         [raised]="true" severity="info"
         (onClick)="toggleDiv()"

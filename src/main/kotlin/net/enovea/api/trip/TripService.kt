@@ -43,7 +43,7 @@ class TripService(
             .flatMapIndexed { index, trips ->
                 val trip = trips.first()
                 val precedingTrip = trips.getOrNull(1)
-                val startPoint = geometryFactory.createPoint(Coordinate(trip.startLng, trip.startLat))
+                val startPoint = geometryFactory.createPoint(Coordinate(trip.startLat, trip.startLng))
                 val poiAtStart = spatialService.getNearestEntityWithinArea(startPoint)
                 val addressAtStart = if (poiAtStart == null) {
                     spatialService.getAddressFromEntity(startPoint)
@@ -89,7 +89,7 @@ class TripService(
         var addressAtEnd: String? = null
         if (lastTrip.tripStatus != TripStatus.DRIVING) {
             // if stop, compute end POI/address
-            val endPoint = geometryFactory.createPoint(Coordinate(lastTrip.endLng, lastTrip.endLat))
+            val endPoint = geometryFactory.createPoint(Coordinate(lastTrip.endLat, lastTrip.endLng))
             poiAtEnd = spatialService.getNearestEntityWithinArea(endPoint)
             if (poiAtEnd == null)
                 addressAtEnd = spatialService.getAddressFromEntity(endPoint)

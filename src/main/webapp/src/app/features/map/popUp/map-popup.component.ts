@@ -12,22 +12,6 @@ import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
   selector: 'app-map-popup',
   template: `
     <div class="mapContextMenu">
-      <div class="tabs">
-        <button
-          [class.active]="activeTab === 'vehicule'"
-          (click)="selectTab('vehicule')"
-        >
-          Véhicule
-        </button>
-        <button
-          [class.active]="activeTab === 'poi'"
-          (click)="selectTab('poi')"
-        >
-          POI
-        </button>
-        <button onclick="redirectToPoiEditWithCoords()">Créer un POI</button>
-      </div>
-
       <p-tabView>
         <!-- Véhicule Tab -->
         <p-tabPanel header="Véhicule">
@@ -86,53 +70,7 @@ import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
         </p-tabPanel>
 
         <!-- Create POI Tab -->
-        <p-tabPanel header="Créer un POI">
-          <h4>Créer un POI</h4>
-          <form (ngSubmit)="submitPOI()">
-            <div class="p-fluid">
-              <div class="field">
-                <label for="poiName">Nom du POI:</label>
-                <input
-                  pInputText
-                  type="text"
-                  id="poiName"
-                  placeholder="Nom du POI"
-                  [(ngModel)]="poiName"
-                  name="poiName"
-                  required/>
-              </div>
-              <div class="field">
-                <label for="poiCategory">Type de POI:</label>
-                <p-dropdown
-                  id="poiCategory"
-                  [options]="categories"
-                  [(ngModel)]="selectedCategoryId"
-                  optionLabel="label"
-                  name="poiCategory"
-                  placeholder="Sélectionner une catégorie">
-                </p-dropdown>
-              </div>
-              <div class="field">
-                <label for="poiRadius">Rayon (mètres):</label>
-                <input
-                  pInputText
-                  type="number"
-                  id="poiRadius"
-                  placeholder="Rayon en mètres"
-                  [(ngModel)]="poiRadius"
-                  name="poiRadius"
-                  (ngModelChange)="onRadiusChange($event)"
-                  required/>
-              </div>
-              <p-button
-                type="submit"
-                label="Soumettre"
-                [raised]="true"
-                styleClass="custom-button-red">
-              </p-button>
-            </div>
-          </form>
-        </p-tabPanel>
+        <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
       </p-tabView>
     </div>
 
@@ -280,8 +218,8 @@ import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
     }
 
     .mapContextMenu {
-      width: 200px;
-      height: 200px;
+      width: 300px;
+      height: 300px;
       overflow: auto;
     }
   `]

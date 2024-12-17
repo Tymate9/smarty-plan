@@ -163,7 +163,7 @@ export class MapComponent implements OnInit, OnDestroy {
       if (vehicle.device && vehicle.device.coordinate) {
 
         this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
-        if (vehicle.device.state === "" || vehicle.device.state === "NO_COM"){
+        if (vehicle.device.state === "" || vehicle.device.state === "NO_COM" || vehicle.device?.state === null){
           this.noComVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
         }
         if (vehicle.device.state === "UNPLUGGED"){

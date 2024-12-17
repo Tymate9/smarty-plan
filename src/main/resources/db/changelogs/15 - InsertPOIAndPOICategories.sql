@@ -12,7 +12,7 @@ values  (1, 'Agence NM', '#FF5733'),
         (2, 'Fournisseur', '#3357FF'),
         (3, 'Client', '#A833FF'),
         (4, 'Station Service', '#33A8FF'),
-        (5, 'Hôtel/Restaurant', '#A8FF33'),
+        (5, 'Hotel/Restaurant', '#A8FF33'),
         (6, 'Autre', '#C70039'),
         (7, 'Domicile', '#900C3F');
 

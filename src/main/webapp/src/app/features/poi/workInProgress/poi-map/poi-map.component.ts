@@ -17,7 +17,7 @@ import {PoiService} from "../../poi.service";
 @Component({
   selector: 'app-poi-map',
   template: `
-    <div class="transparent-blur-bg">
+    <div class="transparent-blur-bg" style="width: 100%">
       <div class="poi-map-container">
         <div class="map-container" id="map"></div>
         <div class="side-panel">

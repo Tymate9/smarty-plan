@@ -90,15 +90,15 @@ import {Subscription} from "rxjs";
           <td>{{ rowData.label }}</td>
           <td
             [ngClass]="{
-            'DRIVING': rowData.vehicle.device.deviceDataState.state === 'DRIVING',
-            'PARKED': rowData.vehicle.device.deviceDataState.state === 'PARKED',
-            'IDLE': rowData.vehicle.device.deviceDataState.state === 'IDLE',
-            'NO_COM': rowData.vehicle.device.deviceDataState.state === 'NO_COM',
-            'UNPLUGGED': rowData.vehicle.device.deviceDataState.state === 'UNPLUGGED',
-            'DEFAULT': rowData.vehicle.device.deviceDataState.state === null,
+            'DRIVING': rowData.vehicle.device?.deviceDataState?.state === 'DRIVING',
+            'PARKED': rowData.vehicle.device?.deviceDataState?.state === 'PARKED',
+            'IDLE': rowData.vehicle.device?.deviceDataState?.state === 'IDLE',
+            'NO_COM': rowData.vehicle.device?.deviceDataState?.state === 'NO_COM',
+            'UNPLUGGED': rowData.vehicle.device?.deviceDataState?.state === 'UNPLUGGED',
+            'DEFAULT': rowData.vehicle.device?.deviceDataState?.state === null,
           }">
             <!-- Icon and text -->
-            <ng-container [ngSwitch]="rowData.vehicle.device.deviceDataState.state">
+            <ng-container [ngSwitch]="rowData.vehicle.device?.deviceDataState?.state">
               <span *ngSwitchCase="'DRIVING'" class="status-icon">Roulant<i class="pi pi-play"></i></span>
               <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt<i class="pi pi-step-forward"></i></span>
               <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté<i class="pi pi-stop"></i></span>
@@ -108,10 +108,10 @@ import {Subscription} from "rxjs";
             </ng-container>
           </td>
           <td
-            class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
+            class="button-cell">{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
           <td
-            class="button-cell">{{ rowData.vehicle.device.deviceDataState.lastCommTime | date: 'HH:mm' }}
+            class="button-cell">{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm' }}
           </td>
 
           <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
@@ -537,9 +537,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ...team,
       children: team.children?.map((child) => ({
         ...child,
-        vehicles: child.vehicles.filter((vehicle) => vehicle.device.deviceDataState?.state === state),
+        vehicles: child.vehicles.filter((vehicle) => vehicle.device?.deviceDataState?.state === state),
       })).filter((child) => child.vehicles.length > 0), // Remove child nodes without vehicles
-      vehicles: team.vehicles.filter((vehicle) => vehicle.device.deviceDataState?.state === state), // Filter vehicles at the team level
+      vehicles: team.vehicles.filter((vehicle) => vehicle.device?.deviceDataState?.state === state), // Filter vehicles at the team level
     })).filter((team) =>
       (team.children?.length || 0) > 0 || team.vehicles.length > 0 // Keep teams with vehicles or children
     );
@@ -620,7 +620,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const teamLabel = node.label;
       if (node.vehicles) {
         for (const vehicle of node.vehicles) {
-          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device.deviceDataState?.lastPositionTime),100,vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
+          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device?.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device?.deviceDataState?.lastPositionTime),100,vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
         }
       }
 

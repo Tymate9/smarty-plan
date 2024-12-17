@@ -429,7 +429,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     'Client': '#A833FF',
     'Station Service': '#33A8FF',
     'Hotel/Restaurant': '#A8FF33',
-    'route':'#000000'
+    'Autre':'#C70039',
+    'Domicile':'#900C3F'
   };
 
 // Helper function to get the color for the POI label

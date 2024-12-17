@@ -244,10 +244,10 @@ create table vehicle_maintenance
    ======================== */
 
 CREATE TABLE vehicle_untracked_period (
-                                          vehicle_id          VARCHAR(36)        NOT NULL references vehicle,
-                                          start_date TIMESTAMP NOT NULL,
-                                          end_date TIMESTAMP,
-                                          primary key (vehicle_id, start_date)
+    vehicle_id          VARCHAR(36)        NOT NULL references vehicle,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    primary key (vehicle_id, start_date)
 );
 
 /* ========================
@@ -255,10 +255,10 @@ CREATE TABLE vehicle_untracked_period (
    ======================== */
 
 CREATE TABLE driver_untracked_period (
-                                         driver_id          INT        NOT NULL references driver,
-                                         start_date TIMESTAMP NOT NULL,
-                                         end_date TIMESTAMP,
-                                         primary key (driver_id, start_date)
+    driver_id          INT        NOT NULL references driver,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    primary key (driver_id, start_date)
 );
 
 -- ===================================================

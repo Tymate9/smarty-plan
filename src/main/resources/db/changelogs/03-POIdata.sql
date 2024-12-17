@@ -8,7 +8,7 @@ VALUES ('Agence NM', '#FF5733'),
        ('Fournisseur', '#3357FF'),
        ('Client', '#A833FF'),
        ('Station Service', '#33A8FF'),
-       ('Hotel/Restaurant', '#A8FF33');
+       ('Hôtel/Restaurant', '#A8FF33');
 
 
 INSERT INTO point_of_interest (label, type, coordinate, area)
@@ -33,43 +33,43 @@ VALUES ('Agence NM HYDRECO',
         ST_SetSRID(ST_MakePoint(0.3551,49.5401 ), 4326),
         ST_Buffer(ST_SetSRID(ST_MakePoint(0.3551,49.5401), 4326)::geography, 90)),
        (
-           'Agence NM Barentin',
+        'Agence NM Barentin',
            1,
            ST_SetSRID(ST_MakePoint(0.96762, 49.1840), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(0.96762, 49.1840), 4326)::geography, 30)
        ),
        (
-           'Agence NM DIEPPE',
+        'Agence NM DIEPPE',
            1,
            ST_SetSRID(ST_MakePoint(1.0881,49.9198 ), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(1.0881,49.9198 ), 4326)::geography, 40)
        ),
        (
-           'Agence NM Rouen',
+        'Agence NM Rouen',
            1,
            ST_SetSRID(ST_MakePoint(1.06288,49.43512), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(1.06288,49.43512), 4326)::geography, 50)
        ),
        (
-           'Agence NM Incarville',
+        'Agence NM Incarville',
            1,
            ST_SetSRID(ST_MakePoint(1.16821,49.23334), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(1.16821,49.23334), 4326)::geography, 60)
        ),
        (
-           'Agence NM Caen',
+        'Agence NM Caen',
            1,
            ST_SetSRID(ST_MakePoint(-0.3800, 49.1930), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(-0.3800, 49.1930), 4326)::geography, 30)
        ),
        (
-           'Agence-2 NM Rouen',
+        'Agence-2 NM Rouen',
            1,
            ST_SetSRID(ST_MakePoint(1.1090, 49.4530), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(1.1090, 49.4530), 4326)::geography, 50)
        ),
        (
-           'Agence NM Saint-Étienne-du-Rouvray',
+        'Agence NM Saint-Étienne-du-Rouvray',
            1,
            ST_SetSRID(ST_MakePoint(1.10492,49.36676), 4326),
            ST_Buffer(ST_SetSRID(ST_MakePoint(1.10492,49.36676), 4326)::geography, 70)

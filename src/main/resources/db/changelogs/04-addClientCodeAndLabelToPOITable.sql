@@ -18,12 +18,12 @@ SET client_code = CONCAT('CPI-', id);
 UPDATE point_of_interest
 SET client_label = CONCAT(client_label, '-', id)
 WHERE client_label IN (SELECT client_label
-                       FROM point_of_interest
-                       GROUP BY client_label
-                       HAVING COUNT(*) > 1);
+                FROM point_of_interest
+                GROUP BY client_label
+                HAVING COUNT(*) > 1);
 
 ALTER TABLE point_of_interest
     ALTER COLUMN client_code SET NOT NULL,
-    ALTER COLUMN client_label SET NOT NULL,
+ALTER COLUMN client_label SET NOT NULL,
     ADD CONSTRAINT unique_client_code UNIQUE (client_code),
     ADD CONSTRAINT unique_client_label UNIQUE (client_label);

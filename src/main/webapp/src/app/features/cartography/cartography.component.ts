@@ -4,7 +4,6 @@ import {FilterService} from "../../commons/navbar/filter.service";
 @Component({
   selector: 'app-cartography',
   template: `
-    <h1>Cartographie</h1>
     <div>
       <app-map></app-map>
     </div>

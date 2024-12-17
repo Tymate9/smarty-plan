@@ -8,7 +8,7 @@ VALUES ('Agence NM', '#FF5733'),
        ('Fournisseur', '#3357FF'),
        ('Client', '#A833FF'),
        ('Station Service', '#33A8FF'),
-       ('Hôtel/Restaurant', '#A8FF33');
+       ('Hotel/Restaurant', '#A8FF33');
 
 
 INSERT INTO point_of_interest (label, type, coordinate, area)

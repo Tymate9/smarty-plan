@@ -16,27 +16,59 @@ import {NotificationService} from "../../commons/notification/notification.servi
 @Component({
   selector: 'app-map',
   template: `
-    <div id="header">
-      <p>{{ this.no_comm_vehicle}}</p>
-      <p>{{ this.unplugged_vehicle}}</p>
-      <button (click)="refreshVehiclePositions()">Mettre à jour les positions</button>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <p-button
+        label="{{ noComVehicle }}"
+        icon="{{ isCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up' }}"
+        [raised]="true" severity="info"
+        (onClick)="toggleDiv()"
+        styleClass="custom-button-red">
+      </p-button>
+      <p-button label="Mettre à jour les positions" [raised]="true" severity="info" (click)="refreshVehiclePositions()"
+                styleClass="custom-button-red"></p-button>
+    </div>
+    <div [ngClass]="{ 'hidden': isCollapsed }" class="collapsible-content">
+      <p>{{ noComVehicle }}</p>
+      <p>{{ unpluggedVehicle }}</p>
     </div>
     <div id="map"></div>
   `,
   styles: [`
     #map {
-      height: 100vh;
+      height: 87vh;
       width: 100%;
     }
+    .hidden {
+      display: none;
+    }
+
+    .collapsible-content {
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: var(--gray-100);
+    }
+
+    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red  {
+      background-color:#aa001f !important;
+      border-color:#aa001f !important;
+      color: white !important;
+      font-weight:600;
+    }
+    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red:focus {
+    //  //outline: none !important;
+    //  //box-shadow: none !important; /* Removes any shadow from the focus */
+    //  border-color: var(--gray-500) !important;
+    //}
   `]
 })
 export class MapComponent implements OnInit, OnDestroy {
 
   private map!: L.Map;
   private mapManager : MapManager;
-  protected no_comm_vehicle : String = "Liste des véhicules non-communicant ou sans statut : "
-  protected unplugged_vehicle : String = "Liste des véhicules dont le boitier est déconnecté : "
+  protected noComVehicle : String = "Liste des véhicules non-communicant ou sans statut : "
+  protected unpluggedVehicle : String = "Liste des véhicules dont le boitier est déconnecté : "
   private filters : { agencies : string[], vehicles : string[], drivers : string[] };
+  isCollapsed: boolean = true;
   private updateSubscription?: Subscription;
   private filterSubscription?: Subscription;
 
@@ -123,7 +155,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.mapManager.handleLayerEvent(event,null)
 
     // Reset unTrackedVehicle list for each filter change
-    this.no_comm_vehicle = "Liste des véhicules non-communicant ou sans statut : ";
+    this.noComVehicle = "Liste des véhicules non-communicant ou sans statut : ";
 
     // Display new markers on the map based on the filtered vehicles
     vehicles.forEach(vehicle => {
@@ -132,10 +164,10 @@ export class MapComponent implements OnInit, OnDestroy {
 
         this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
         if (vehicle.device.state === "" || vehicle.device.state === "NO_COM"){
-          this.no_comm_vehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
+          this.noComVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
         }
         if (vehicle.device.state === "UNPLUGGED"){
-          this.unplugged_vehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
+          this.unpluggedVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
         }
       }
     });
@@ -185,6 +217,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this.updateVehiclePositions();
     // Redémarrer le minuteur
     this.startVehiclePositionUpdater();
+  }
+
+  toggleDiv() {
+    this.isCollapsed = !this.isCollapsed;
   }
 }
 

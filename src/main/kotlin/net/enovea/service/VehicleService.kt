@@ -3,6 +3,7 @@ package net.enovea.service
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.driver.DriverEntity
@@ -19,6 +20,7 @@ class VehicleService(
     private val spatialService: SpatialService<PointOfInterestEntity>,
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
+    private val tripService: TripService,
 ) {
     fun filterVehicle(vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
@@ -74,9 +76,28 @@ class VehicleService(
         val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
 
         val allVehicles = vehicles ?: VehicleEntity.listAll()
-        val allVehicleDataDTO = allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }.map { vehicle ->
-            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-        }
+        val tripStats = tripService.getTripDailyStats()
+
+//        val allVehicleDataDTO = allVehicles.map { vehicle ->
+//            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+//        }
+
+
+        // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
+        val allVehicleDataDTO =
+            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+                .map { vehicle ->
+                    // Convert to VehicleTableDTO
+                    val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+
+                    // Enrich the DTO with trip statistics if available
+                    tripStats[vehicle.id]?.let { stats ->
+                        vehicleDTO.distance = (stats.distance) / 1000
+                        vehicleDTO.firstTripStart = stats.firstTripStart
+                    }
+
+                    vehicleDTO
+                }
 
         // Replace the last position for the untracked vehicles/drivers by null
         allVehicleDataDTO.forEach { vehicleDataDTO ->

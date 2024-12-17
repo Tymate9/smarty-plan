@@ -44,13 +44,14 @@ import {ToggleButtonModule} from "primeng/togglebutton";
 import {TimelineModule} from "primeng/timeline";
 import {TripsComponent} from "./features/trips/trips.component";
 import {CalendarModule} from "primeng/calendar";
-import { PoiMapComponent } from './features/poi/workInProgress/poi-map/poi-map.component';
-import { PoiSearchComponent } from './features/poi/workInProgress/poi-search/poi-search.component';
-import { PoiListComponent } from './features/poi/workInProgress/poi-list/poi-list.component';
+import {PanelModule} from "primeng/panel";
+import {InputTextModule} from 'primeng/inputtext';
+import {PoiMapComponent} from './features/poi/workInProgress/poi-map/poi-map.component';
+import {PoiSearchComponent} from './features/poi/workInProgress/poi-search/poi-search.component';
+import {PoiListComponent} from './features/poi/workInProgress/poi-list/poi-list.component';
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {InputNumberModule} from "primeng/inputnumber";
 import {SelectButtonModule} from "primeng/selectbutton";
-import {InputTextModule} from "primeng/inputtext";
 
 @NgModule({
   declarations: [
@@ -95,10 +96,11 @@ import {InputTextModule} from "primeng/inputtext";
         ToggleButtonModule,
         TimelineModule,
         CalendarModule,
+        PanelModule,
+        InputTextModule,
         AutoCompleteModule,
         InputNumberModule,
         SelectButtonModule,
-        InputTextModule,
     ],
   providers: [
     MessageService,

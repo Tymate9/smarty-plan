@@ -14,6 +14,7 @@ class AddressUpdaterScheduler(
 ) {
     private val logger: Logger = Logger.getLogger(AddressUpdaterScheduler::class.java)
 
+
     // Exécute le scheduler le deuxième dimanche de chaque mois
     @Scheduled(cron = "0 0 0 ? * 7#2")
     fun scheduledUpdate() {

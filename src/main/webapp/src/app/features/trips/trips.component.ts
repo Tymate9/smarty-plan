@@ -26,7 +26,8 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         </p-tabPanel>
         <p-button id="download-csv-button" (click)="downloadCsv()"
                   title="Télécharger un CSV des trajets de la journée de ce véhicule"
-                  icon="pi pi-download">
+                  icon="pi pi-download"
+                  >
         </p-button>
         <p-calendar #calendar
                     id="date-selector"

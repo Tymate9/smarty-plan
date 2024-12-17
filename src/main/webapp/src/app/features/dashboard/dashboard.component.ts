@@ -71,10 +71,10 @@ import {Subscription} from "rxjs";
           <td>Immatriculation</td>
           <td>État</td>
           <td>Dernière communication</td>
-          <td>Premier départ</td>
+          <td>Heure de départ</td>
           <td>Adresse</td>
-          <td>Distance</td>
-          <td>Trajet détaillé</td>
+          <td>Distance totale</td>
+          <td>Fiche journalière</td>
         </tr>
 
         <tr [ttRow]="rowNode"
@@ -111,14 +111,15 @@ import {Subscription} from "rxjs";
             class="button-cell">{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
           <td
-            class="button-cell">{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm' }}
+            class="button-cell">{{ rowData.vehicle.firstTripStart}}
           </td>
 
           <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
-            <!-- Icon on the left -->
-            <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"
-                  [ngStyle]="{ 'color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"
-                  class="poi-icon">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <!-- Icon on the left -->
+              <span *ngIf="poiIcons[rowData.vehicle.lastPositionAdresseType]"
+                    [ngStyle]="{ 'color': getPoiColor(rowData.vehicle.lastPositionAdresseType) }"
+                    class="poi-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30"
                    [ngStyle]="{ 'fill': getPoiColor(rowData.vehicle.lastPositionAdresseType) }">
                 <path
@@ -126,12 +127,14 @@ import {Subscription} from "rxjs";
               </svg>
             </span>
 
-            <!-- Address text in the middle -->
+              <span>
             {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}
+              </span>
+            </div>
           </td>
 
 
-          <td class="button-cell">{{ rowData.vehicle.distance || '50 km' }}</td>
+          <td class="button-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
           <td class="button-cell">
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
@@ -141,10 +144,8 @@ import {Subscription} from "rxjs";
       </ng-template>
     </p-treeTable>
 
-
   `,
   styles: [`
-
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
       background-color: #007ad9 !important;
       color: white !important;
@@ -154,7 +155,6 @@ import {Subscription} from "rxjs";
     }
 
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
-      //padding: 1px !important;
       padding: 2px 8px !important;
       border-bottom: 1px solid #ddd !important;
       width: auto;
@@ -229,6 +229,10 @@ import {Subscription} from "rxjs";
       vertical-align: middle;
     }
 
+    :host ::ng-deep .p-treetable.custom-tree-table .UNPLUGGED {
+      background-color: var(--gray-400);
+      color: white;
+    }
 
     .status-icon {
       display: flex;
@@ -273,6 +277,7 @@ import {Subscription} from "rxjs";
       cursor: pointer;
       transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
       white-space: nowrap;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
 
     }
 
@@ -348,6 +353,7 @@ import {Subscription} from "rxjs";
       white-space: nowrap; /* Prevent wrapping in case of larger content */
       text-align: center; /* Align the button in the center of the cell */
       padding: 0; /* Optional: Remove padding for a tighter fit */
+      align-items: center
     }
     .table-header {
       background-color: var(--gray-500);
@@ -380,16 +386,16 @@ import {Subscription} from "rxjs";
       width: 1.3rem;
       height:1.3rem;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .UNPLUGGED {
-      background-color: #A020F0;
-      color: white;
-    }
 
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  filters: { agencies : string[], vehicles : string[], drivers : string[] };
-  protected unTrackedVehicle : String = "Liste des véhicules non-géolocalisés : ";
+  filters: { agencies : string[], vehicles : string[], drivers : string[] } = {
+    agencies: [],
+    vehicles: [],
+    drivers: []
+  };
+  protected unTrackedVehicle : String = "Liste des véhicules non-communicants : ";
   vehicles: VehicleSummaryDTO[] = [];
   vehiclesTree: TreeNode[] = [];
   @ViewChild(TreeTable) treeTable: TreeTable;
@@ -422,7 +428,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     'Fournisseur': '#3357FF',
     'Client': '#A833FF',
     'Station Service': '#33A8FF',
-    'Restaurant': '#A8FF33',
+    'Hotel/Restaurant': '#A8FF33',
     'route':'#000000'
   };
 
@@ -554,7 +560,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
   private displayFilteredVehiclesOnDashboard(vehicles: any[]): void {
-    this.unTrackedVehicle = "Liste des véhicules non-géolocalisés : ";
+    this.unTrackedVehicle = "Liste des véhicules non-communicants ";
     this.vehicles = vehicles;  // Assign filtered vehicles to vehicles array
 
     vehicles.forEach(vehicle => {
@@ -572,7 +578,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       PARKED: { color: '#C71400', displayName: 'ARRÊTÉ', icon: 'pi-stop' },
       IDLE: { color: '#FE8F2B', displayName: 'À L\'ARRÊT', icon: 'pi-step-forward' },
       NO_COM: { color: '#E0E0E0', displayName: 'SANS SIGNAL', icon: 'pi-times' },
-      UNPLUGGED: { color: '#A020F0', displayName: 'DÉCONNECTE', icon: 'pi-ban' },
+      UNPLUGGED: { color: '#E0E0E0', displayName: 'DÉCONNECTE', icon: 'pi-ban' },
     };
 
     return statusDetails[state] || {
@@ -612,7 +618,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   convertToCSV(data: TeamHierarchyNode[]): string {
     const rows: string[] = [];
-    const headers = ['Véhicule','Immatriculation','Marque','Modèle','Etat','Energie','Conducteur','Date Heure','Numéro d\'embarqué','Adresse','Type d\'adresse de référence','Distance parcourue','Entité Conducteur', 'Entité Véhicule','Groupe de salarié'];
+    const headers = ['Véhicule','Immatriculation','Marque','Modèle','Etat','Energie','Conducteur','Dernière communication','Heure de départ','Adresse','Type d\'adresse de référence','Distance totale','Entité Conducteur', 'Entité Véhicule','Groupe de salarié'];
     rows.push(headers.join(','));
 
 
@@ -620,7 +626,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const teamLabel = node.label;
       if (node.vehicles) {
         for (const vehicle of node.vehicles) {
-          rows.push([vehicle.driver?.lastName+'-'+vehicle.licenseplate,vehicle.licenseplate,vehicle.category.label,vehicle.category.label,vehicle.device?.deviceDataState?.state,vehicle.energy,vehicle.driver?.lastName+' '+vehicle.driver?.firstName,formatDateTime(vehicle.device?.deviceDataState?.lastPositionTime),100,vehicle.lastPositionAddress,vehicle.lastPositionAdresseType,vehicle.distance,vehicle.driver?.team.label,parentLabel || teamLabel, teamLabel, ].join(','));
+          rows.push([
+            vehicle.driver?.lastName+'-'+vehicle.licenseplate,
+            vehicle.licenseplate,
+            vehicle.category.label,
+            vehicle.category.label,
+            vehicle.device?.deviceDataState?.state,
+            vehicle.energy,
+            vehicle.driver?.lastName+' '+vehicle.driver?.firstName,
+            formatDateTime(vehicle.device?.deviceDataState?.lastPositionTime),
+            vehicle.firstTripStart,
+            vehicle.lastPositionAddress,
+            vehicle.lastPositionAdresseType,
+            vehicle.distance,
+            vehicle.driver?.team.label,
+            parentLabel || teamLabel,
+            teamLabel,
+          ].join(','));
         }
       }
 

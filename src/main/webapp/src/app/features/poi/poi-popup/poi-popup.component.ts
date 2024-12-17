@@ -19,23 +19,22 @@ import {Router} from "@angular/router";
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
           <div class="p-fluid">
             <div class="p-field">
-              <label>Dénomination :</label>
-              <span>{{ entity.client_code }}-{{ entity.client_label }}</span>
+              <label><h4>Dénomination :</h4></label>
+              <span>{{entity.client_code}}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
-              <label>Adresse :</label>
+              <label><h4>Adresse :</h4></label>
               <span>{{ entity.address }}</span>
             </div>
             <div class="p-field">
-              <label>Catégorie :</label>
+              <label><h4>Catégorie :</h4></label>
               <span>{{ entity.category.label }}</span>
             </div>
             <div class="p-field">
-              <label>Coordonné :</label>
+              <label>Coordonnées :</label>
               <span>Latitude :  {{ entity.coordinate.coordinates[1] }} <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
             </div>
           </div>
-
         </p-tabPanel>
 
         <!-- Onglet Proximité -->
@@ -54,12 +53,13 @@ import {Router} from "@angular/router";
               </div>
               <div class="vehicle-actions">
                 <button pButton label="Zoom" icon="pi pi-search-plus"
-                        (click)="centerMapOnVehicle(vehicle.second)"></button>
+                        (click)="centerMapOnVehicle(vehicle.second)" style="background-color: #aa001f; border:#aa001f;"></button>
                 <button
                   pButton
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+                  style="background-color: #515151; border:#515151"
                 ></button>
               </div>
             </div>
@@ -143,6 +143,8 @@ import {Router} from "@angular/router";
                   label="Mettre à jour"
                   icon="pi pi-check"
                   [disabled]="!poiForm.form.valid"
+                  style="background-color: #aa001f; border: #aa001f;"
+
                 ></button>
                 <button
                   pButton
@@ -150,6 +152,7 @@ import {Router} from "@angular/router";
                   label="Supprimer le POI"
                   icon="pi pi-trash"
                   (click)="deletePOI()"
+                  style="background-color: #aa001f; border: #aa001f;"
                 ></button>
               </div>
               <div class="button-row">
@@ -159,6 +162,7 @@ import {Router} from "@angular/router";
                   label="Aller à l'Édition POI"
                   icon="pi pi-external-link"
                   (click)="navigateToPoiEdit()"
+                  style="background-color: #515151; border: #515151;"
                 ></button>
               </div>
             </div>

@@ -62,12 +62,10 @@ import TripEventType = dto.TripEventType;
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
               >
-<!--                color round -->
-                <div class="p-3 bg-black-alpha-20 border-round cursor-pointer"
-                     [style]="{ 'background-color': event.color }"></div>
+                <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
                 {{ event.duration }} : {{ event.start.toLocaleTimeString() }}
-                -> {{ event.end.toLocaleTimeString() }} {{ event.distance }}
+                -> {{ event.end.toLocaleTimeString() }} {{ event.distance.toFixed(0) }}
               </div>
               <div
                 class="p-3 bg-black-alpha-20 border-round cursor-pointer"
@@ -133,6 +131,14 @@ import TripEventType = dto.TripEventType;
         position: relative;
         margin-top: 10%;
         width: 39px;
+      }
+
+      .trip-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
       }
     }
 

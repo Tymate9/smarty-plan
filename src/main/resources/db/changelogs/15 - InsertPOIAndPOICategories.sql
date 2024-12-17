@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset smarty_plan:14 context:dev, prod
+-- changeset smarty_plan:14 context:dev,prod
 
 DELETE FROM point_of_interest;
 

@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset smarty_plan:14 context:dev, prod
+-- changeset smarty_plan:14 context:dev,prod
 
 -- Insert Teams
 insert into public.team (id, label, parent_id, category_id, path)

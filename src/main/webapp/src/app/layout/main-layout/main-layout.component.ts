@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-main-layout',
   template: `
     <app-navbar ></app-navbar>
-    <router-outlet></router-outlet> <!-- Affiche les composants enfants (Dashboard ou Cartography) -->
+    <router-outlet></router-outlet>
   `,
   styles: [`
     :host {

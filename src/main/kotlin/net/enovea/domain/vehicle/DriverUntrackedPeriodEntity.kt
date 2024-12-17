@@ -1,6 +1,5 @@
 package net.enovea.domain.vehicle
 
-
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
@@ -10,7 +9,6 @@ import java.time.LocalDateTime
 
 @Entity(name = DriverUntrackedPeriodEntity.ENTITY_NAME)
 @Table(name = DriverUntrackedPeriodEntity.TABLE_NAME)
-
 data class DriverUntrackedPeriodEntity(
     @EmbeddedId
     val id: DriverUntrackedPeriodId =DriverUntrackedPeriodId() ,

@@ -20,21 +20,21 @@ import java.time.LocalDate
 data class VehicleEntity(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
-    var id: String ?= "",
+    var id: String? = "",
 
     @Column(name = "energy", nullable = true)
-    var energy: String ?= null,
+    var energy: String? = null,
 
     @Column(name = "engine", nullable = true)
-    var engine: String ?= null,
+    var engine: String? = null,
 
     @Column(name = "externalid", nullable = true)
-    var externalId: String ?= null,
+    var externalId: String? = null,
 
     @Column(name = "licenseplate", nullable = false)
-    var licenseplate: String ="",
+    var licenseplate: String = "",
 
     @Column(name = "validated", nullable = false)
     var validated: Boolean = false,

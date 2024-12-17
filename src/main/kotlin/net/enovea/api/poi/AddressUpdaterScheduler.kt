@@ -14,11 +14,6 @@ class AddressUpdaterScheduler(
 ) {
     private val logger: Logger = Logger.getLogger(AddressUpdaterScheduler::class.java)
 
-    // Exécute le scheduler au démarrage de l'application
-    fun onStart(@Observes event: StartupEvent) {
-        logger.info("Application started. Running initial address update...")
-        updateAddresses()
-    }
 
     // Exécute le scheduler le deuxième dimanche de chaque mois
     @Scheduled(cron = "0 0 0 ? * 7#2")
@@ -27,15 +22,26 @@ class AddressUpdaterScheduler(
         updateAddresses()
     }
 
-    @Transactional
+/*    // Exécute le scheduler au démarrage de l'application
+    fun onStart(@Observes event: StartupEvent) {
+        logger.info("Application started. Running initial address update...")
+        updateAddresses()
+    }*/
+
     fun updateAddresses() {
-        // Exemple : Récupérer toutes les lignes et mettre à jour les adresses
         val pointsOfInterest = PointOfInterestEntity.listAll()
         pointsOfInterest.forEach { poi ->
-            val newAddress = geoCodingService.reverseGeocode(poi.coordinate)
-            poi.address = newAddress?: "Adresse inconnu"
+            updateAdresse(poi)
         }
-        PointOfInterestEntity.persist(pointsOfInterest)
         logger.info("Updated ${pointsOfInterest.size} addresses.")
+    }
+
+    @Transactional
+    fun updateAdresse(poiDetached: PointOfInterestEntity) {
+        logger.warn("Traitement du POI : " + poiDetached.client_code)
+        val poi = PointOfInterestEntity.findById(poiDetached.id)
+        val newAddress = geoCodingService.reverseGeocode(poi!!.coordinate)
+        poi.address = newAddress ?: "Adresse inconnu"
+        PointOfInterestEntity.persist(poi)
     }
 }

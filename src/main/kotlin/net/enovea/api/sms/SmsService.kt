@@ -7,13 +7,10 @@ import org.apache.http.client.methods.*
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
-import org.eclipse.microprofile.config.inject.ConfigProperty
 
 class SmsService(
     val baseUrl: String
 ) {
-
-
     private val mapper = jacksonObjectMapper()
     private val httpClient = HttpClients.createDefault()
 

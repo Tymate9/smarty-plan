@@ -9,14 +9,13 @@ import java.sql.Timestamp
 
 @Entity(name = DriverTeamEntity.ENTITY_NAME)
 @Table(name = DriverTeamEntity.TABLE_NAME)
-
 data class DriverTeamEntity (
 
     @EmbeddedId
     val id: DriverTeamId = DriverTeamId(),
 
     @Column(name = "end_date", nullable = true)
-    val endDate: Timestamp=Timestamp(System.currentTimeMillis()),
+    val endDate : Timestamp? = Timestamp(System.currentTimeMillis()),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("driverId")

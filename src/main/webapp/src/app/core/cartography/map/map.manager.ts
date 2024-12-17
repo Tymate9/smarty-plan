@@ -1,12 +1,10 @@
 import {ViewContainerRef} from '@angular/core';
 import * as L from "leaflet";
+import 'leaflet-responsive-popup';
 import {MapPopupComponent} from "../../../features/map/popUp/map-popup.component";
-import {EntityType, MarkerFactory, CustomMarker, CustomMarkerImpl} from "../marker/MarkerFactory";
+import {CustomMarker, EntityType, MarkerFactory} from "../marker/MarkerFactory";
 import {LayerManager} from "../layer/layer.manager";
-import {LayerEventType} from "../layer/layer.event";
-import {LayerEvent} from "../layer/layer.event";
-import {dto} from "../../../../habarta/dto";
-import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import {LayerEvent, LayerEventType} from "../layer/layer.event";
 import {catchError, forkJoin, of} from "rxjs";
 import {GeocodingService} from "../../../commons/geo/geo-coding.service";
 import {PopUpConfig} from "../marker/pop-up-config";
@@ -32,6 +30,7 @@ export class MapManager {
     private readonly geocodingService: GeocodingService,
     private readonly config: MapManagerConfig = new MapManagerConfig()
   ) {
+    window.L = L;
     const poiLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.POI);
     const vehicleLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.VEHICLE);
     this.layerManagers.push(poiLayerManager, vehicleLayerManager);
@@ -75,6 +74,11 @@ export class MapManager {
       case LayerEventType.ZoomToHighlightedMarkersIncludingCoords:
         const { lat, lng } = event.payload;
         this.zoomToHighlightedMarkersIncludingCoords(lat, lng);
+        break;
+
+      case LayerEventType.SetViewAroundMarkerType:
+        const {markerType}  = event.payload;
+        this.zoomAroundMarker(markerType)
         break;
 
       case LayerEventType.POICreated:
@@ -198,6 +202,23 @@ export class MapManager {
     }
   }
 
+  public zoomAroundMarker(type: EntityType) : void{
+    const featureGroup: L.FeatureGroup = new L.FeatureGroup();
+    this.layerManagers.forEach(
+      layerManager => {
+        if(layerManager.entityType === type)
+        {
+          layerManager.markersMap.forEach(
+            marker =>
+              marker.addTo(featureGroup)
+          )
+        }
+      }
+    )
+
+    this.map.fitBounds(featureGroup.getBounds())
+  }
+
   private zoomToCoordinates(coordinates: [number, number], zoomLevel: number = 19): void {
     const [lng, lat] = coordinates;
     this.map.setView([lat, lng], zoomLevel);
@@ -220,13 +241,19 @@ export class MapManager {
     // Ajoute le composant Angular dans le conteneur DOM
     container.appendChild((contextMenuPopUpComponentRef.hostView as any).rootNodes[0]);
 
-    // Crée la popup Leaflet et ajoute le conteneur
-    L.popup()
+    // Crée le popup Leaflet et ajoute le conteneur
+    L.responsivePopup({
+      offset: [10, 10],
+      autoPan: true,
+      autoPanPadding: [20, 20],
+      keepInView: true
+    })
       .setLatLng([lat, lng])
       .setContent(container)
       .openOn(this.map);
 
-    // Nettoie le composant et réinitialise la croix quand la popup est fermée
+
+    // Nettoie le composant et réinitialise la croix quand le popup est fermée
     this.map.on('popupclose', () => {
       contextMenuPopUpComponentRef.destroy();
       this.resetCrossMarker()
@@ -311,12 +338,12 @@ export class MapManager {
   // Export Button
 
   public addExportButton(): void {
-    const exportButton = new L.Control({ position: 'bottomright' });
+    const exportButton = new L.Control({ position: 'topright' });
 
     exportButton.onAdd = () => {
       const button = L.DomUtil.create('button', 'export-csv-button');
       button.innerText = 'Exporter CSV';
-      button.style.backgroundColor = '#4CAF50';
+      button.style.backgroundColor = '#aa001f';
       button.style.color = 'white';
       button.style.border = 'none';
       button.style.padding = '10px';

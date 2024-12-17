@@ -41,13 +41,17 @@ class VehicleResource(
     ): Response {
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
         val vehicleSummaries = vehicleService.removeLocalizationToUntrackedVehicle(filteredVehicles)
-        return Response.ok(formatResponse(format ?: VehicleFormat.RESUME, vehicleSummaries)).build()
+        // TODO(Ceci est une rustine il faut la retravailler)
+        val vehicleFinale = vehicleSummaries
+            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+        return Response.ok(formatResponse(format ?: VehicleFormat.RESUME, vehicleFinale)).build()
     }
 
     private fun formatResponse(vehicleFormat: VehicleFormat, vehicles : List<VehicleEntity>) : Any {
         return when(vehicleFormat)
         {
             VehicleFormat.FULL -> vehicles.map{ vehicle ->
+                println()
                 vehicleMapper.toVehicleDTO(vehicle)
             }
             VehicleFormat.RESUME -> vehicles.map{ vehicle ->

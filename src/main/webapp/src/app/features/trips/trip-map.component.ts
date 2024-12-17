@@ -62,12 +62,20 @@ import TripEventType = dto.TripEventType;
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
               >
-<!--                color round -->
-                <div class="p-3 bg-black-alpha-20 border-round cursor-pointer"
-                     [style]="{ 'background-color': event.color }"></div>
+                <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
-                {{ event.duration }} : {{ event.start.toLocaleTimeString() }}
-                -> {{ event.end.toLocaleTimeString() }} {{ event.distance }}
+                {{ ((event.duration) / 60).toFixed(0) }} min : {{
+                  event.start?.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                }}
+                -> {{
+                  event.end?.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                }} {{ event.distance.toFixed(0) }} Km
               </div>
               <div
                 class="p-3 bg-black-alpha-20 border-round cursor-pointer"
@@ -76,8 +84,13 @@ import TripEventType = dto.TripEventType;
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
               > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
-                : {{ event.start?.toLocaleTimeString() }}
-                -> {{ event.end?.toLocaleTimeString() }} {{ event.duration }}
+                : {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
+                -> {{
+                  event.end?.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                }} {{ ((event.duration) / 60).toFixed(0) }} min
               </div>
             </ng-template>
           </p-timeline>
@@ -133,6 +146,14 @@ import TripEventType = dto.TripEventType;
         position: relative;
         margin-top: 10%;
         width: 39px;
+      }
+
+      .trip-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
       }
     }
 

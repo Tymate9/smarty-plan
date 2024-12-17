@@ -94,6 +94,8 @@ class TripService(
             if (poiAtEnd == null)
                 addressAtEnd = spatialService.getAddressFromEntity(endPoint)
         }
+        // todo : add last vehicle position instead of trip status +
+        //  new trip status = dashed line between last trip and last vehicle position
         tripEvents.add(
             TripEventDTO(
                 index = tripEvents.size,

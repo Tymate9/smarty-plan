@@ -19,16 +19,20 @@ import {Router} from "@angular/router";
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
           <div class="p-fluid">
             <div class="p-field">
-              <label>Dénomination :</label>
+              <label><h4>Dénomination :</h4></label>
               <span>{{entity.client_code}}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
-              <label>Adresse :</label>
+              <label><h4>Adresse :</h4></label>
               <span>{{ entity.address }}</span>
             </div>
             <div class="p-field">
-              <label>Catégorie :</label>
+              <label><h4>Catégorie :</h4></label>
               <span>{{ entity.category.label }}</span>
+            </div>
+            <div class="p-field">
+              <label>Coordonnées :</label>
+              <span>Latitude :  {{ entity.coordinate.coordinates[1] }} <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
             </div>
           </div>
         </p-tabPanel>
@@ -43,16 +47,19 @@ import {Router} from "@angular/router";
           <div *ngIf="!loadingProximity && proximityVehicles.length > 0">
             <div *ngFor="let vehicle of proximityVehicles" class="vehicle-item">
               <div>
-                <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
+                <strong>{{ vehicle.second.driver?.firstName }} {{ vehicle.second.driver?.lastName }}-{{ vehicle.second.licenseplate }}</strong>
+                - {{ vehicle.second.category.label }}
                 <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
               </div>
               <div class="vehicle-actions">
-                <button pButton label="Zoom" icon="pi pi-search-plus" (click)="centerMapOnVehicle(vehicle.second)"></button>
+                <button pButton label="Zoom" icon="pi pi-search-plus"
+                        (click)="centerMapOnVehicle(vehicle.second)" style="background-color: #aa001f; border:#aa001f;"></button>
                 <button
                   pButton
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+                  style="background-color: #515151; border:#515151"
                 ></button>
               </div>
             </div>
@@ -69,10 +76,10 @@ import {Router} from "@angular/router";
           <div *ngIf="!loadingDessus && dessusVehicles.length > 0">
             <div *ngFor="let vehicle of dessusVehicles" class="vehicle-item">
               <div>
-                <strong>{{ vehicle.licenseplate }}</strong> - {{ vehicle.category.label }}
+                Conducteur: {{ vehicle.driver?.firstName + " " + vehicle.driver?.lastName || 'Aucun conducteur' }}
               </div>
               <div>
-                Conducteur: {{ vehicle.driver?.firstName || 'Aucun conducteur' }}
+                <strong>{{ vehicle.licenseplate }}</strong> - {{ vehicle.category.label }}
               </div>
               <div>
                 Équipe: {{ vehicle.team.label }} ({{ vehicle.team.category.label }})
@@ -136,6 +143,8 @@ import {Router} from "@angular/router";
                   label="Mettre à jour"
                   icon="pi pi-check"
                   [disabled]="!poiForm.form.valid"
+                  style="background-color: #aa001f; border: #aa001f;"
+
                 ></button>
                 <button
                   pButton
@@ -143,6 +152,7 @@ import {Router} from "@angular/router";
                   label="Supprimer le POI"
                   icon="pi pi-trash"
                   (click)="deletePOI()"
+                  style="background-color: #aa001f; border: #aa001f;"
                 ></button>
               </div>
               <div class="button-row">
@@ -152,6 +162,7 @@ import {Router} from "@angular/router";
                   label="Aller à l'Édition POI"
                   icon="pi pi-external-link"
                   (click)="navigateToPoiEdit()"
+                  style="background-color: #515151; border: #515151;"
                 ></button>
               </div>
             </div>
@@ -267,7 +278,7 @@ export class PoiPopupComponent implements OnInit {
   }
 
   navigateToPoiEdit() {
-    this.router.navigate(['/poiedit', this.entity.client_label]);
+    this.router.navigate(['/poiedit'], { queryParams: { labels: this.entity.client_label } });
   }
 
   onTabChange(event: any) {
@@ -332,7 +343,8 @@ export class PoiPopupComponent implements OnInit {
       clientLabel: this.updatedPoi.clientLabel,
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
-      WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry)
+      WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry),
+      adresse:"adresse Inconne"
     };
 
     this.poiService.updatePOI(this.entity.id, updatedData).subscribe({

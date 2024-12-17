@@ -14,10 +14,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
       <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
         <!-- Onglet Information -->
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
-          <h4>{{ entity.licenseplate }}</h4>
           <div class="p-field">
             <label><strong>Conducteur:</strong></label>
             <span>{{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}</span>
+          </div>
+          <div class="p-field">
+            <label><strong>Plaque d'immatriculation:</strong></label>
+            <span>{{entity.licenseplate || "Aucune plaque d'immatriculation" }}</span>
           </div>
           <div class="p-field">
             <label><strong>Équipe:</strong></label>
@@ -48,12 +51,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
               </div>
               <div class="poi-actions">
                 <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus"
-                        (click)="centerMapOnPOI(poi.poi)"></button>
+                        (click)="centerMapOnPOI(poi.poi)"
+                        style="background-color: #aa001f; border: #aa001f;"></button>
                 <button
                   pButton
                   [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
+                  style="background-color: #515151; border: #515151;"
                 ></button>
               </div>
             </div>
@@ -94,7 +99,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
                 Veuillez entrer un nombre supérieur ou égal à 1.
               </div>
             </div>
-            <button pButton type="submit" label="Acheter" [disabled]="smsPackFormGroup.invalid"></button>
+            <button pButton type="submit" label="Acheter" [disabled]="smsPackFormGroup.invalid" style="background-color: #aa001f; border: #aa001f;"></button>
           </form>
         </p-tabPanel>
 
@@ -139,7 +144,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
                 </div>
               </div>
             </div>
-            <button pButton type="submit" label="Envoyer" [disabled]="smsFormGroup.invalid"></button>
+            <button pButton type="submit" label="Envoyer" [disabled]="smsFormGroup.invalid" style="background-color: #aa001f; border: #aa001f;"></button>
           </form>
         </p-tabPanel>
 

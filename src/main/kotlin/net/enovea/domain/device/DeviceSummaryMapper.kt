@@ -19,10 +19,22 @@ interface DeviceSummaryMapper {
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
 
     @Named("coordinateMapper")
-    fun coordinateMapper(deviceDataState: DeviceDataStateEntity): Point? = deviceDataState.coordinate
+    fun coordinateMapper(deviceDataState: DeviceDataStateEntity?): Point?{
+        return if(deviceDataState != null){
+            deviceDataState.coordinate
+        } else {
+            null
+        }
+    }
 
     @Named("stateMapper")
-    fun stateMapper(deviceDataState: DeviceDataStateEntity): String? = deviceDataState.state
+    fun stateMapper(deviceDataState: DeviceDataStateEntity?): String?{
+        return if(deviceDataState != null){
+            deviceDataState.state
+        } else {
+            null
+        }
+    }
 
     companion object {
         val INSTANCE: DeviceSummaryMapper = Mappers.getMapper(DeviceSummaryMapper::class.java)

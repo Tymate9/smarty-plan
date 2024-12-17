@@ -9,7 +9,7 @@ data class VehicleTableDTO (
     val licenseplate:String,
     val category: VehicleCategoryDTO,
     val driver: DriverDTO?,
-    val device: DeviceDataDTO,
+    val device: DeviceDataDTO, //TODO can be null ?
     var lastPositionAddress: String?,
     var lastPositionAdresseType: String?,
     val team: TeamDTO,

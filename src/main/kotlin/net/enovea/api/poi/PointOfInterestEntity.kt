@@ -32,6 +32,7 @@ data class PointOfInterestEntity(
 
     var address: String = "NOT_COMPUTED",
 
+    @Column(name = "area")
     var area: Polygon = run {
         val coordinates = arrayOf(
             Coordinate(0.0, 0.0),

@@ -14,8 +14,7 @@ class TripServiceTest : StringSpec({
 
     val tripRepository = mockk<TripRepository>()
     val spatialService = mockk<SpatialService<PointOfInterestEntity>>()
-    val vehicleService = mockk<VehicleService>()
-    val tripService = TripService(tripRepository, spatialService, vehicleService)
+    val tripService = TripService(tripRepository, spatialService)
 
     "computeTripMapDTO should return correct TripMapDTO" {
         val vehicleId = "1"

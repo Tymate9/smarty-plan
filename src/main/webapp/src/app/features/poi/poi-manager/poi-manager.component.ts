@@ -505,35 +505,35 @@ export class PoiPanel {
     .custom-dropdown {
       position: relative;
       display: inline-block;
-      width: 100%; /* Adjust width as needed */
+      width: 100%;
       max-width: 300px;
     }
 
     /* Style the native select element */
     .custom-dropdown select {
-      appearance: none; /* Removes native dropdown arrow */
+      appearance: none;
       -moz-appearance: none;
       -webkit-appearance: none;
-      background-color: #ffffff; /* White background */
-      border: 1px solid #ccc; /* Border style */
-      border-radius: 4px; /* Rounded corners */
-      padding: 10px 40px 10px 12px; /* Padding to create space for the arrow */
-      font-size: 14px; /* Adjust font size */
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px 40px 10px 12px;
+      font-size: 14px;
       width: 100%;
-      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
       cursor: pointer;
       transition: border-color 0.3s, box-shadow 0.3s;
     }
 
     /* Add hover and focus effects */
     .custom-dropdown select:hover {
-      border-color: #007ad9; /* Blue border on hover */
+      border-color: #007ad9;
     }
 
     .custom-dropdown select:focus {
       border-color: #007ad9;
-      box-shadow: 0px 0px 5px rgba(0, 122, 217, 0.5); /* Blue glow on focus */
-      outline: none; /* Remove outline */
+      box-shadow: 0px 0px 5px rgba(0, 122, 217, 0.5);
+      outline: none;
     }
 
     .custom-dropdown select:disabled {

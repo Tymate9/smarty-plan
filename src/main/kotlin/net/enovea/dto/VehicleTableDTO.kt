@@ -1,4 +1,5 @@
 package net.enovea.dto
+import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import java.time.LocalTime
 
 data class VehicleTableDTO (
@@ -11,7 +12,7 @@ data class VehicleTableDTO (
     val driver: DriverDTO?,
     val device: DeviceDataDTO, //TODO can be null ?
     var lastPositionAddress: String?,
-    var lastPositionAdresseType: String?,
+    var lastPositionAddressInfo:  PointOfInterestCategoryEntity?,
     val team: TeamDTO,
     var distance : Number?,
     var firstTripStart : LocalTime?,

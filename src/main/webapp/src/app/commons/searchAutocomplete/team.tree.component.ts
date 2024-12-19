@@ -11,7 +11,7 @@ export interface Option {
       <div class="input-container">
         <div class="tags">
           <span *ngFor="let tag of selectedTags" class="tag">
-            {{ tag }} <button (click)="removeTag(tag)">x</button>
+            {{ tag }} <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
           </span>
           <input
             type="text"
@@ -61,6 +61,7 @@ export interface Option {
     .search-autocomplete {
       position: relative;
       width: 300px;
+
     }
 
     .input-container {
@@ -70,6 +71,7 @@ export interface Option {
       flex-wrap: wrap;
       align-items: center;
       background-color: white;
+
     }
 
     .tags {
@@ -117,11 +119,28 @@ export interface Option {
     .autocomplete-list li {
       padding: 5px;
       cursor: pointer;
-    }
+      margin-left: 10px;
 
-    .autocomplete-list li:hover {
+    }
+    .autocomplete-list div.selected {
+      background-color: #d0e8ff;
+    }
+    .autocomplete-list div:hover {
       background-color: #f0f0f0;
     }
+    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close{
+      background-color:#aa001f !important;
+      border-color:#aa001f !important;
+      color: white !important;
+      font-weight:600;
+      margin-left:4px;
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+      padding: 2px;
+
+    }
+
   `]
 })
 export class TeamTreeComponent implements OnChanges{

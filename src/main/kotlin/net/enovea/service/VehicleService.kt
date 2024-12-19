@@ -78,10 +78,6 @@ class VehicleService(
         val allVehicles = vehicles ?: VehicleEntity.listAll()
         val tripStats = tripService.getTripDailyStats()
 
-//        val allVehicleDataDTO = allVehicles.map { vehicle ->
-//            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-//        }
-
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         val allVehicleDataDTO =
@@ -115,19 +111,19 @@ class VehicleService(
                     }
                     if (poi != null) {
                         vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label
-                        vehicleDataDTO.lastPositionAdresseType = poi.category.label
+                        vehicleDataDTO.lastPositionAddressInfo = poi.category
                     } else {
                         // If no POI, try to fetch address using geocoding service
                         val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
                             geoCodingService.reverseGeocode(it)
                         }
                         vehicleDataDTO.lastPositionAddress = address
-                        vehicleDataDTO.lastPositionAdresseType = "route"
+                        // vehicleDataDTO.lastPositionAdresseInfo = "route"
                     }
                 } catch (e: Exception) {
                     // Handle any errors during POI lookup or reverse geocoding
                     vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
-                    vehicleDataDTO.lastPositionAdresseType = "Error retrieving location data"
+                    // vehicleDataDTO.lastPositionAdresseInfo = "Error retrieving location data"
                 }
             }
         }
@@ -150,8 +146,15 @@ class VehicleService(
             hierarchy.add(currentTeam.label)
             currentTeam = currentTeam.parentTeam
         }
-        return hierarchy.reversed().joinToString(" > ")
+        // If the hierarchy is only one level, add "Interne" as the second level
+        if (hierarchy.size == 1) {
+            val teamLabel = hierarchy.first()
+            hierarchy.add("$teamLabel Interne")
+            return hierarchy.joinToString(" > ")
+        } else
+            return hierarchy.reversed().joinToString(" > ")
     }
+
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers
     fun getVehiclesDetails(): List<VehicleDTO> {
@@ -298,19 +301,28 @@ fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarch
         if (teamHierarchy != null) {
             for (teamLabel in teamHierarchy) {
                 val node = teamNodes.getOrPut(teamLabel) { TeamHierarchyNode(teamLabel) }
-
                 // Link the current node to its parent if it exists
                 if (currentNode != null && !currentNode.children.contains(node)) {
                     currentNode.children.add(node)
                 }
-
                 currentNode = node
             }
         }
 
         // Add the vehicle to the leaf node
         currentNode?.vehicles?.add(vehicle)
+
+        // Add "Interne" node if the hierarchy has only one level
+//        if (teamHierarchy != null && teamHierarchy.size == 1) {
+//            val interneLabel = "${teamHierarchy.first()} > Interne"
+//            val interneNode = teamNodes.getOrPut(interneLabel) { TeamHierarchyNode("Interne") }
+//            if (!currentNode?.children?.contains(interneNode) == true) {
+//                currentNode.children.add(interneNode)
+//            }
+//        }
+//
     }
+
 
     // Collect the top-level nodes (those that are not children of any other node)
     val allNodes = teamNodes.values.toSet()

@@ -27,9 +27,6 @@ import {NotificationService} from "../notification/notification.service";
               <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg"></p-button>
               <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg"></p-button>
             </div>
-<!--            <div class="nav-button-center">-->
-<!--              -->
-<!--            </div>-->
           </div>
           <div class="filters center">
             <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>

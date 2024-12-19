@@ -36,23 +36,13 @@ data class DeviceEntity (
     @Column(name = "simnumber", nullable = true)
     var simNumber: String? = null,
 
-    @Column(name = "last_data_date", nullable = true)
-    var lastDataDate: Timestamp? = null,
-
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     var comment: String? = null,
 
-    @Column(name = "last_communication_date", nullable = true)
-    var lastCommunicationDate: Timestamp? = null,
 
     @Column(name = "enabled", nullable = false)
     var enabled: Boolean? = true,
 
-/*    @Column(name = "coordinate")
-    var coordinate: Point = Point(
-        CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),
-        GeometryFactory()
-    ),*/
     //TODO(Voir si on ne peux utiliser un objet par défaut)
     @OneToOne(
         fetch = FetchType.LAZY,
@@ -61,12 +51,6 @@ data class DeviceEntity (
         orphanRemoval = true
     )
     var deviceDataState: DeviceDataStateEntity? = null
-
-//    @OneToMany(
-//        fetch = FetchType.LAZY,
-//        mappedBy = "device",
-//        cascade = [CascadeType.ALL], orphanRemoval = true)
-//    var deviceDataStates: MutableList<DeviceDataStateEntity>? = mutableListOf()
 
     ): PanacheEntityBase {
 

@@ -31,6 +31,11 @@ data class DeviceDataStateEntity (
     @Column(name = "last_received_data_time", nullable = true)
     var lastReceivedDataTime: Timestamp? = null,
 
+    @Column(name = "state_time", nullable = true)
+    var stateTime: Timestamp? = null,
+
+    @Column(name = "address", nullable = true)
+    var address: String? = null,
 
     @Column(name = "last_position")
     //TODO(Modifier ça par coordonné)

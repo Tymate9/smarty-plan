@@ -7,16 +7,26 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
+import java.sql.Timestamp
 
 @Mapper
 interface DeviceSummaryMapper {
 
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "lastCommunicationDate", source = "lastCommunicationDate")
+    @Mapping(target = "lastCommunicationDate", source = "deviceDataState", qualifiedByName = ["lastCommunicationDateMapper"])
     @Mapping(target = "enabled", source = "enabled")
     @Mapping(target = "coordinate", source = "deviceDataState", qualifiedByName = ["coordinateMapper"])
     @Mapping(target="state", source = "deviceDataState", qualifiedByName = ["stateMapper"])
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
+
+    @Named("lastCommunicationDateMapper")
+    fun lastCommunicationDateMapper(deviceDataState: DeviceDataStateEntity?): Timestamp?{
+        return if(deviceDataState != null){
+            deviceDataState.lastCommTime
+        } else {
+            null
+        }
+    }
 
     @Named("coordinateMapper")
     fun coordinateMapper(deviceDataState: DeviceDataStateEntity?): Point?{

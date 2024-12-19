@@ -770,7 +770,8 @@ export class PoiManagerComponent implements OnInit {
   addMarkerToMap(poi: PointOfInterestEntity) {
     // Créer une instance de PopUpConfig avec uniquement l'onglet 'information' activé
     const poiPopUpConfig = new PopUpConfig({
-      poiPopupTabs: new Set(['information']) // Seul l'onglet 'information' est activé
+      poiPopupTabs: new Set(['information']),
+      isAreaDynamic: true // Seul l'onglet 'information' est activé
     });
     this.mapManager.addMarker(EntityType.POI, poi, poiPopUpConfig);
   }
@@ -812,7 +813,8 @@ export class PoiManagerComponent implements OnInit {
           payload: {
             poi: poi,
             popUpConfig:new PopUpConfig({
-              poiPopupTabs: new Set(['information']) // Seul l'onglet 'information' est activé
+              poiPopupTabs: new Set(['information']),
+              isAreaDynamic : false// Seul l'onglet 'information' est activé
             })
           },
         };
@@ -828,7 +830,8 @@ export class PoiManagerComponent implements OnInit {
           payload: {
             poi: poi,
             popUpConfig:new PopUpConfig({
-              poiPopupTabs: new Set(['information']) // Seul l'onglet 'information' est activé
+              poiPopupTabs: new Set(['information']),
+              isAreaDynamic : false
             })
           },
         };

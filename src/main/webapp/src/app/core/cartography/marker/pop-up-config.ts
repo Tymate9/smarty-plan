@@ -6,10 +6,12 @@ export type VehiclePopupTab = 'information' | 'poi';
 export class PopUpConfig {
   poiPopupTabs: Set<PoiPopupTab>;
   vehiclePopupTabs: Set<VehiclePopupTab>;
+  isAreaDynamic: boolean;
 
   constructor(config?: Partial<PopUpConfig>) {
-    this.poiPopupTabs = config?.poiPopupTabs || new Set(['information', 'proximite', 'dessus', 'editer']);
-    this.vehiclePopupTabs = config?.vehiclePopupTabs || new Set(['information', 'poi']);
+    this.poiPopupTabs = config?.poiPopupTabs? config.poiPopupTabs : new Set(['information', 'proximite', 'dessus', 'editer']);
+    this.vehiclePopupTabs = config?.vehiclePopupTabs? config.vehiclePopupTabs : new Set(['information', 'poi']);
+    this.isAreaDynamic = config?.isAreaDynamic? config.isAreaDynamic : true;
   }
 
   isTabEnabled(entityType: EntityType, tab: string): boolean {

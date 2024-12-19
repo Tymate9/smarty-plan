@@ -176,7 +176,9 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
   }
 
   onPoiMarkerAdded(poi: PointOfInterestEntity) {
-    const config = new PopUpConfig({ poiPopupTabs: new Set(['information']) });
+    const config = { poiPopupTabs: new Set(['information']), isAreaDynamic: false } as PopUpConfig;
+    console.log("je suis dans le onPOIMarkerAdded")
+    console.log(config)
     this.mapManager.addMarker(EntityType.POI, poi, config);
   }
 

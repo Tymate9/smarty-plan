@@ -7,12 +7,13 @@ import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
+import {TabViewChangeEvent} from "primeng/tabview";
 
 @Component({
   selector: 'app-map-popup',
   template: `
     <div class="mapContextMenu">
-      <p-tabView>
+      <p-tabView (onChange)="selectTab($event)">
         <!-- Véhicule Tab -->
         <p-tabPanel header="Véhicule">
           <h4>Adresse : {{ address }}</h4>
@@ -73,128 +74,6 @@ import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
         <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
       </p-tabView>
     </div>
-
-    <!--&lt;!&ndash;    <p-tabView>&ndash;&gt;-->
-    <!--&lt;!&ndash;      &lt;!&ndash; Vehicule Tab &ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;      <p-tabPanel header="Véhicule" [selected]="activeTab === 'vehicule'" (click)="selectTab('vehicule')">&ndash;&gt;-->
-    <!--&lt;!&ndash;        &lt;!&ndash; Content for Vehicule Tab &ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;        <p>Véhicule content goes here...</p>&ndash;&gt;-->
-    <!--&lt;!&ndash;      </p-tabPanel>&ndash;&gt;-->
-
-    <!--&lt;!&ndash;      &lt;!&ndash; POI Tab &ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;      <p-tabPanel header="POI" [selected]="activeTab === 'poi'" (click)="selectTab('poi')">&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;        &lt;!&ndash; Content for POI Tab &ndash;&gt;&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;        <p>POI content goes here...</p>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;      </p-tabPanel>&ndash;&gt;&ndash;&gt;-->
-
-    <!--&lt;!&ndash;&lt;!&ndash;      &lt;!&ndash; Créer un POI Button &ndash;&gt;&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;      <p-tabPanel>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;        <p-button label="Créer un POI" icon="pi pi-plus" [routerLink]="['/poiedit']" styleClass="custom-button-red"></p-button>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;      </p-tabPanel>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;    </p-tabView>&ndash;&gt;-->
-
-
-    <!--    <div class="tabs">-->
-    <!--&lt;!&ndash;      <p-button label="Véhicule" [class.active]="activeTab === 'vehicule'" [raised]="true" (click)="selectTab('vehicule')" styleClass="custom-button-red"></p-button>&ndash;&gt;-->
-    <!--&lt;!&ndash;      <p-button label="POI" [class.active]="activeTab === 'poi'" [raised]="true" (click)="selectTab('poi')" styleClass="custom-button-red"></p-button>&ndash;&gt;-->
-    <!--&lt;!&ndash;      <p-button label="Créer un POI" [class.active]="activeTab === 'poi'" [raised]="true" [routerLink]="['/poiedit']" styleClass="custom-button-red"></p-button>&ndash;&gt;-->
-
-    <!--            <button-->
-    <!--        [class.active]="activeTab === 'vehicule'"-->
-    <!--        (click)="selectTab('vehicule')"-->
-    <!--      >-->
-    <!--        Véhicule-->
-    <!--      </button>-->
-
-    <!--      <button-->
-    <!--        [class.active]="activeTab === 'poi'"-->
-    <!--        (click)="selectTab('poi')"-->
-    <!--      >-->
-    <!--        POI-->
-    <!--      </button>-->
-    <!--      <button onclick="window.location.href='/poiedit'">Créer un POI</button>-->
-    <!--    </div>-->
-
-    <!--    <div class="tab-content">-->
-    <!--      <h4>Adresse : {{ address }}</h4>-->
-    <!--      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>-->
-
-    <!--      &lt;!&ndash; Onglet Véhicule &ndash;&gt;-->
-    <!--      <div *ngIf="activeTab === 'vehicule'">-->
-    <!--        <h4>Véhicules les Plus Proches</h4>-->
-    <!--        <div *ngIf="loadingVehicles">-->
-    <!--          Chargement des véhicules proches...-->
-    <!--        </div>-->
-    <!--        <div *ngIf="!loadingVehicles && nearbyVehicles.length === 0">-->
-    <!--          Aucun véhicule trouvé à proximité.-->
-    <!--        </div>-->
-    <!--        <ul *ngIf="!loadingVehicles && nearbyVehicles.length > 0">-->
-    <!--          <li *ngFor="let vehicle of nearbyVehicles">-->
-    <!--            <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}-->
-    <!--            <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>-->
-    <!--            <p-button label="Zoom" [raised]="true" (click)="centerMapOnVehicle(vehicle.second)" styleClass="custom-button-red"></p-button>-->
-    <!--            <p-button [raised]="true" (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)" styleClass="custom-button-gray" [class.active]="highlightedStates['vehicle-' + vehicle.second.id]">-->
-    <!--              {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Désurligner' : 'Surligner' }}-->
-    <!--            </p-button>-->
-    <!--            &lt;!&ndash;            <button (click)="centerMapOnVehicle(vehicle.second)">Zoom</button>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <button&ndash;&gt;-->
-    <!--&lt;!&ndash;              (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"&ndash;&gt;-->
-    <!--&lt;!&ndash;              [class.active]="highlightedStates['vehicle-' + vehicle.second.id]"&ndash;&gt;-->
-    <!--&lt;!&ndash;            >&ndash;&gt;-->
-    <!--&lt;!&ndash;              {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Désactiver surbrillance' : 'Mettre en surbrillance' }}&ndash;&gt;-->
-    <!--&lt;!&ndash;            </button>&ndash;&gt;-->
-    <!--          </li>-->
-    <!--        </ul>-->
-    <!--      </div>-->
-
-    <!--      &lt;!&ndash; Onglet POI &ndash;&gt;-->
-    <!--      <div *ngIf="activeTab === 'poi'">-->
-    <!--        <h4>POIs les Plus Proches</h4>-->
-    <!--        <div *ngIf="loadingPOIs">-->
-    <!--          Chargement des POIs proches...-->
-    <!--        </div>-->
-    <!--        <div *ngIf="!loadingPOIs && nearbyPOIs.length === 0">-->
-    <!--          Aucun POI trouvé à proximité.-->
-    <!--        </div>-->
-    <!--        <ul *ngIf="!loadingPOIs && nearbyPOIs.length > 0">-->
-    <!--          <li *ngFor="let poi of nearbyPOIs">-->
-    <!--            <strong>{{ poi.second.label }}</strong> - {{ poi.second.category.label }}-->
-    <!--            <span> ({{ poi.first | number:'1.2-2' }} km)</span>-->
-    <!--            <p-button label="Zoom" [raised]="true" (click)="centerMapOnPOI(poi.second)" styleClass="custom-button-red"></p-button>-->
-    <!--&lt;!&ndash;            <button (click)="centerMapOnPOI(poi.second)">Zoom</button>&ndash;&gt;-->
-    <!--            <p-button [raised]="true" (click)="toggleHighlightMarker('poi-' + poi.second.id)" styleClass="custom-button-gray" [class.active]="highlightedStates['poi-' + poi.second.id]">-->
-    <!--              {{ highlightedStates['poi-' + poi.second.id] ? 'Désurligner' : 'Surligner' }}-->
-    <!--            </p-button>-->
-    <!--&lt;!&ndash;            <button&ndash;&gt;-->
-    <!--&lt;!&ndash;              (click)="toggleHighlightMarker('poi-' + poi.second.id)"&ndash;&gt;-->
-    <!--&lt;!&ndash;              [class.active]="highlightedStates['poi-' + poi.second.id]"&ndash;&gt;-->
-    <!--&lt;!&ndash;            >&ndash;&gt;-->
-    <!--&lt;!&ndash;              {{ highlightedStates['poi-' + poi.second.id] ? 'Désurligner' : 'Surligner' }}&ndash;&gt;-->
-    <!--&lt;!&ndash;            </button>&ndash;&gt;-->
-    <!--          </li>-->
-    <!--        </ul>-->
-    <!--      </div>-->
-
-    <!--      &lt;!&ndash; Onglet Création &ndash;&gt;-->
-    <!--      <div *ngIf="activeTab === 'creation'">-->
-    <!--        <h4>Créer un POI</h4>-->
-    <!--        <form (ngSubmit)="submitPOI()">-->
-    <!--          <label for="poiName">Nom du POI:</label>-->
-    <!--          <input type="text" id="poiName" placeholder="Nom du POI" [(ngModel)]="poiName" name="poiName" required><br/>-->
-
-    <!--          <label for="poiCategory">Type de POI:</label>-->
-    <!--          <select id="poiCategory" [(ngModel)]="selectedCategoryId" name="poiCategory" required>-->
-    <!--            <option *ngFor="let category of categories" [value]="category.id">-->
-    <!--              {{ category.label }}-->
-    <!--            </option>-->
-    <!--          </select><br/>-->
-
-    <!--          <label for="poiRadius">Rayon (mètres):</label>-->
-    <!--          <input type="number" id="poiRadius" placeholder="Rayon en mètres" [(ngModel)]="poiRadius" name="poiRadius" (ngModelChange)="onRadiusChange($event)" required><br/>-->
-    <!--          <button type="submit">Soumettre</button>-->
-    <!--        </form>-->
-    <!--      </div>-->
-    <!--    </div>-->
   `,
   styles: [`
     .active {
@@ -268,7 +147,7 @@ export class MapPopupComponent implements OnInit {
       }
     });
 
-    this.selectTab('vehicule');
+    this.selectTab();
   }
 
   onRadiusChange(newRadius: number) {
@@ -343,17 +222,15 @@ export class MapPopupComponent implements OnInit {
     });
   }
 
-  selectTab(tab: string) {
+  selectTab(tab? : TabViewChangeEvent) {
     this.onButtonClick();
-    this.activeTab = tab;
-    if (tab === 'vehicule' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
+    this.activeTab = tab?.index.toString() || '0';
+    console.log(this.activeTab)
+    if (this.activeTab === '0' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
       this.loadNearbyVehicles();
     }
-    if (tab === 'poi' && this.nearbyPOIs.length === 0 && !this.loadingPOIs) {
+    if (this.activeTab === '1' && this.nearbyPOIs.length === 0 && !this.loadingPOIs) {
       this.loadNearbyPOIs();
-    }
-    if (tab === 'creation') {
-      this.addPOI();
     }
   }
 

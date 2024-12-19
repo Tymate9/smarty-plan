@@ -14,7 +14,7 @@ import TripEventType = dto.TripEventType;
   template: `
     <div id="trip-container">
       <div id="map"></div>
-      <div id="side-panel" class="w-1/4 h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
+      <div id="side-panel" class="h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
         <p-toggleButton
           [(ngModel)]="showSidePanel"
           onIcon="pi pi-angle-right"
@@ -219,7 +219,6 @@ export class TripMapComponent {
     if (!tripEventsDTO) {
       return;
     }
-    console.log(tripEventsDTO);
     this._tripData = tripEventsDTO;
 
     // init map
@@ -227,7 +226,8 @@ export class TripMapComponent {
       this.featureGroup.clearLayers();
     } else {
       this.map = L.map('map', {
-        attributionControl: false
+        attributionControl: false,
+        zoomDelta: 0.5,
       }).setView([tripEventsDTO.tripEvents[0].lat ?? 0, tripEventsDTO.tripEvents[0].lng ?? 0], 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -272,7 +272,12 @@ export class TripMapComponent {
     // set page up and zoom
     this.featureGroup.addTo(this.map);
     this.showTimeline = true;
-    this.map.flyToBounds(this.featureGroup.getBounds());
+    this.map.flyToBounds(
+      this.featureGroup.getBounds().pad(0.1),
+      {
+        paddingBottomRight: [this.showSidePanel ? this.map.getSize().x * 0.35 - 39: 0, 0]
+      }
+    );
   }
 
   get tripData(): TripEventsDTO | null {
@@ -280,7 +285,7 @@ export class TripMapComponent {
   }
 
   onTripEventMouseEnter(event: TripEventDTO): void {
-    let layer = this.featureGroup.getLayers()[event.index]
+    const layer = this.featureGroup.getLayers()[event.index]
     if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
       layer.setStyle({fillColor: 'blue', weight: 5});
     } else if (layer instanceof L.Marker) {
@@ -289,7 +294,7 @@ export class TripMapComponent {
   }
 
   onTripEventMouseLeave(event: TripEventDTO): void {
-    let layer = this.featureGroup.getLayers()[event.index]
+    const layer = this.featureGroup.getLayers()[event.index]
     if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
       layer.setStyle({fillColor: 'blue', weight: 3});
     } else if (layer instanceof L.Marker) {
@@ -298,9 +303,16 @@ export class TripMapComponent {
   }
 
   onTripEventClick(event: TripEventDTO): void {
-    let layer = this.featureGroup.getLayers()[event.index]
+    const layer = this.featureGroup.getLayers()[event.index]
     if (layer instanceof L.Marker) {
-      this.map?.flyTo(layer.getLatLng(), this.map?.getZoom() || 13);
+      const latLng = layer.getLatLng();
+      const zoom = this.map!.getZoom()
+      const bounds = this.map!.getBounds();
+      this.map!.flyTo(
+        [
+          latLng.lat,
+          latLng.lng + (this.showSidePanel ? (bounds.getEast() - bounds.getWest()) * 0.175 : 0)
+        ], zoom);
       layer.openPopup();
     }
   }

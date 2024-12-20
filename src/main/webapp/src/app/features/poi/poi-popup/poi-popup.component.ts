@@ -20,7 +20,7 @@ import {Router} from "@angular/router";
           <div class="p-fluid">
             <div class="p-field">
               <label><h4>Dénomination :</h4></label>
-              <span>{{entity.client_code}}-{{ entity.client_label }}</span>
+              <span>{{entity.client_code?? "0000"}}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
               <label><h4>Adresse :</h4></label>
@@ -31,7 +31,7 @@ import {Router} from "@angular/router";
               <span>{{ entity.category.label }}</span>
             </div>
             <div class="p-field">
-              <label>Coordonnées :</label>
+              <label><h4>Coordonnées :</h4></label>
               <span>Latitude :  {{ entity.coordinate.coordinates[1] }} <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
             </div>
           </div>
@@ -253,7 +253,7 @@ export class PoiPopupComponent implements OnInit {
 
     // Initialiser updatedPoi avec les valeurs actuelles du POI
     this.updatedPoi = {
-      clientCode: this.entity.client_code,
+      clientCode: this.entity.client_code?? '0000',
       clientLabel: this.entity.client_label
     };
 

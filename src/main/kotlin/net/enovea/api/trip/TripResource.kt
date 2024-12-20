@@ -1,5 +1,6 @@
 package net.enovea.api.trip
 
+import io.quarkus.security.Authenticated
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
@@ -12,6 +13,7 @@ import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 
 @Path("/api/trips")
+@Authenticated
 class TripResource(
     private val tripRepository: TripRepository,
     private val spatialService: SpatialService<PointOfInterestEntity>,

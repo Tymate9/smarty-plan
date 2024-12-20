@@ -46,7 +46,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           <div *ngIf="!loadingNearbyPOIs && nearbyPOIs.length > 0">
             <div *ngFor="let poi of nearbyPOIs" class="poi-item">
               <div>
-                <strong>{{ poi.poi.client_code + "" + poi.poi.client_label }}</strong> - {{ poi.poi.category.label }} - Distance
+                <strong>{{ (poi.poi.client_code?? '0000') + "" + poi.poi.client_label }}</strong> - {{ poi.poi.category.label }} - Distance
                 : {{ poi.distance | number:'1.0-2' }} km
               </div>
               <div class="poi-actions">
@@ -67,28 +67,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
         <p-tabPanel header="Achat de SMS">
           <h4>Achat d'un pack SMS</h4>
-
-          <!-- Tableau des statistiques -->
-          <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Total SMS achetés</th>
-                <th>Total SMS envoyés</th>
-                <th>SMS disponibles</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-stat>
-              <tr>
-                <td>{{ stat.totalPurchasedSms }}</td>
-                <td>{{ stat.totalSentSms }}</td>
-                <td>{{ stat.smsAvailable }}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-
-          <!-- Message de chargement si les statistiques ne sont pas encore disponibles -->
-          <p *ngIf="!smsStatistics">Chargement des statistiques...</p>
-
           <!-- Formulaire d'achat de SMS -->
           <form [formGroup]="smsPackFormGroup" (ngSubmit)="buySmsPack()">
             <div class="p-field">
@@ -105,6 +83,24 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
         <!-- Onglet Envoyer un SMS -->
         <p-tabPanel header="Envoyer un SMS">
+            <h4>Forfait SMS Enovea</h4>
+
+            <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Total SMS achetés</th>
+                  <th>Total SMS envoyés</th>
+                  <th>SMS disponibles</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-stat>
+                <tr>
+                  <td>{{ stat.totalPurchasedSms }}</td>
+                  <td>{{ stat.totalSentSms }}</td>
+                  <td>{{ stat.smsAvailable }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
           <h4>Envoyer un SMS à {{ entity.driver?.firstName + " " + entity.driver?.lastName }}</h4>
           <form [formGroup]="smsFormGroup" (ngSubmit)="sendSms()">
             <!-- Ligne pour l'indicatif et le numéro de téléphone -->

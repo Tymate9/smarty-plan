@@ -5,7 +5,7 @@
 @api_host = localhost:8080
 @realm = NormandieManutention
 
-@username_admin = test@test.com
+@username_admin = admin
 @password_admin = root
 
 

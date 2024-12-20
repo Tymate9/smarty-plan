@@ -1,5 +1,6 @@
 package net.enovea.api.GeoCoding
 
+import io.quarkus.security.Authenticated
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.QueryParam
@@ -9,6 +10,7 @@ import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 
 @Path("/api")
+@Authenticated
 class GeoCodingResource(
     private val geoCodingService: GeoCodingService
 ) {

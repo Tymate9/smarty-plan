@@ -104,15 +104,31 @@ class VehicleService(
                         spatialService.getNearestEntityWithinArea(it)
                     }
                     if (poi != null) {
-                        vehicleDataDTO.lastPositionAddress = poi.client_code + " - " + poi.client_label
+                        vehicleDataDTO.lastPositionAddress = (poi.client_code?: "0000") + " - " + poi.client_label
                         vehicleDataDTO.lastPositionAdresseType = poi.category.label
                     } else {
-                        // If no POI, try to fetch address using geocoding service
-                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                            geoCodingService.reverseGeocode(it)
-                        }
-                        vehicleDataDTO.lastPositionAddress = address
+                        // Cannot find POI so Adress Type is "route"
                         vehicleDataDTO.lastPositionAdresseType = "route"
+                        // Get adress from device DataState or geocoding
+                        if(vehicleDataDTO.device.deviceDataState?.address == null)
+                        {
+                            val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+                                geoCodingService.reverseGeocode(it)
+                            }
+                            vehicleDataDTO.lastPositionAddress = address
+                        }
+                        else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty())
+                        {
+                            vehicleDataDTO.lastPositionAddress = "Adresse Inconnu"
+                        }
+                        else
+                        {
+                            vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
+
+                        }
+
+                        // If no POI, try to fetch address using geocoding service
+
                     }
                 } catch (e: Exception) {
                     // Handle any errors during POI lookup or reverse geocoding

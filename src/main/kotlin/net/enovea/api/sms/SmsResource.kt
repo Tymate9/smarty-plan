@@ -2,6 +2,7 @@ package net.enovea.api.sms
 
 import com.enovea.api.SMSForm
 import com.enovea.api.SmsPackForm
+import io.quarkus.security.Authenticated
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -9,6 +10,7 @@ import jakarta.ws.rs.core.Response
 @Path("/api/sms")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Authenticated
 class SmsResource(
     private val smsService: SmsService
 )

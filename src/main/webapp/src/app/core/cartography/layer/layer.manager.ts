@@ -413,11 +413,36 @@ export class LayerManager {
   }
 
   // Méthode pour mettre à jour la position d'un marqueur existant
-  public updateMarkerPosition(markerId: string, newCoordinates: any): void {
+  public updateMarkerPosition(markerId: string, newCoordinates: any, state:String | null): void {
     const marker = this.markersMap.get(markerId);
     if (marker) {
       // Mettre à jour la position du marqueur
       marker.setLatLng(new L.LatLng(newCoordinates.coordinates[1], newCoordinates.coordinates[0]));
+      // Définir la couleur en fonction du state
+      let color: string = "gris";
+      console.log(state)
+      switch (state) {
+        case "NO_COM":
+          color = 'gris';
+          break;
+        case "PARKED":
+          color = 'rouge';
+          break;
+        case "IDLE":
+          color = 'orange';
+          break;
+        case "DRIVING":
+          color = 'vert';
+          break;
+      }
+
+      // Retourner l'icône avec le chemin basé sur la couleur sélectionnée
+      marker.setIcon(L.divIcon({
+        html: `<img src="../../../assets/icon/${marker.entity.category.label.toLowerCase()}-${color}.svg" alt="${marker.entity.category.label}"/>`,
+        iconSize: [30, 45],
+        iconAnchor: [15, 45],
+        className: 'custom-vehicle-icon',
+      }))
     } else {
       console.warn(`Le marqueur avec l'ID ${markerId} n'a pas été trouvé.`);
     }

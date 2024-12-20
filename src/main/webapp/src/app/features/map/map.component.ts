@@ -54,11 +54,6 @@ import {NotificationService} from "../../commons/notification/notification.servi
       color: white !important;
       font-weight:600;
     }
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red:focus {
-    //  //outline: none !important;
-    //  //box-shadow: none !important; /* Removes any shadow from the focus */
-    //  border-color: var(--gray-500) !important;
-    //}
   `]
 })
 export class MapComponent implements OnInit, OnDestroy {

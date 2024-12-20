@@ -13,13 +13,14 @@
             type="text"
             [(ngModel)]="searchText"
             (input)="onSearch()"
+            (focus)="openDropdown()"
+            (blur)="onInputBlur()"
             placeholder="Filtrer {{ label }}..."
             [ngStyle]="{'background-color': 'white'}"
           />
-          <button class="dropdown-button" (click)="toggleDropdown()">&#9662;</button> <!-- Bouton pour afficher les options -->
         </div>
       </div>
-      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
+      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" >
         <li *ngFor="let option of filteredOptions" (click)="selectOption(option)">
           {{ option }}
         </li>
@@ -47,6 +48,10 @@
       align-items: center;
       flex-grow: 1;
       background-color: white;
+      max-height: 50px;
+      overflow-y: auto;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .tag {
@@ -56,6 +61,9 @@
       margin-right: 5px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .input-container input {
@@ -64,6 +72,7 @@
       flex-grow: 1;
       min-width: 150px;
       background-color: white;
+      border-radius: 5px;
     }
 
     .dropdown-button {
@@ -152,6 +161,19 @@ export class SearchAutocompleteComponent implements OnChanges{
     this.filterOptions();
   }
 
+  openDropdown() {
+    this.dropdownVisible = true;
+    //this.dropdown.focus()
+    document.getElementById('dropdown')?.focus()
+
+  }
+
+  closeDropdown() {
+    this.dropdownVisible = false;
+  }
+
+
+
   // Retire une étiquette
   removeTag(tag: string) {
     this.selectedTags = this.selectedTags.filter(t => t !== tag);
@@ -165,6 +187,19 @@ export class SearchAutocompleteComponent implements OnChanges{
     if (this.dropdownVisible) {
       this.filterOptions();
     }
+  }
+  onInputBlur(): void {
+    setTimeout(() => {
+      if (!this.isDropdownClicked) {
+        this.closeDropdown();
+      }
+      this.filterOptions();
+      this.isDropdownClicked = false;  // Reset after checking
+    }, 100);
+  }
+  isDropdownClicked: boolean = false;
+  onDropdownClick(): void {
+    this.isDropdownClicked = true;
   }
 }
 

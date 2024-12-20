@@ -452,6 +452,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   //TODO make it more general (>3 levels)
   //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
   transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {
+    // Helper function to sort by label alphabetically
+    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
+      a.data.label.localeCompare(b.data.label);
+
+    // Helper function to sort vehicles by driver's lastName and firstName
+    const sortByDriverName = (
+      a: { data: { vehicle: dto.VehicleTableDTO } },
+      b: { data: { vehicle: dto.VehicleTableDTO } }
+    ) => {
+      const driverA = a.data.vehicle?.driver || { lastName: '', firstName: '' };
+      const driverB = b.data.vehicle?.driver || { lastName: '', firstName: '' };
+
+      // First compare by lastName
+      const lastNameComparison = driverA.lastName.localeCompare(driverB.lastName);
+      if (lastNameComparison !== 0) {
+        return lastNameComparison;
+      }
+
+      // If lastName is the same, compare by firstName
+      return driverA.firstName.localeCompare(driverB.firstName);
+    };
+
     return teamNodes.map((team) => {
       return {
         data: {
@@ -475,12 +497,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 expanded: true,
                 children: []
               }))
+                .sort(sortByDriverName),
             ]
           }))
+            .sort(sortByLabel),
         ]
-      }
-        ;
-    });
+      };
+    }).sort(sortByLabel);
   }
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
@@ -525,7 +548,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       (team.children?.length || 0) > 0 || team.vehicles.length > 0 // Keep teams with vehicles or children
     );
     // Transformer en TreeNode
-    this.teamHierarchy=filteredHierarchy;
+    this.teamHierarchy = filteredHierarchy;
     console.log(this.teamHierarchy);
     this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
 

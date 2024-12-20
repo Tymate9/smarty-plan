@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewCh
 
 export interface Option {
   label: string;
-  children?: Option[];  // Nested structure for child options
+  children?: Option[];
 }
 @Component({
   selector: 'app-team-tree',
@@ -18,15 +18,15 @@ export interface Option {
             [(ngModel)]="searchText"
             (input)="onSearch()"
             (focus)="openDropdown()"
+            (blur)="onInputBlur()"
             placeholder="Filtrer {{ label }}..."
             [ngStyle]="{'background-color': 'white'}"
           />
-          <button class="dropdown-button" (click)="toggleDropdown()">&#9662;</button> <!-- Bouton pour afficher les options -->
         </div>
       </div>
 
       <!-- Display a flat list or hierarchical list based on data structure -->
-      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" (blur)="closeDropdown()">
+      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" >
         <ng-container *ngFor="let option of filteredOptions">
           <li>
             <div (click)="selectOption(option.label)" [class.selected]="isSelected(option.label)">
@@ -80,6 +80,10 @@ export interface Option {
       align-items: center;
       flex-grow: 1;
       background-color: white;
+      max-height: 50px;
+      overflow-y: auto;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .tag {
@@ -89,6 +93,9 @@ export interface Option {
       margin-right: 5px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .input-container input {
@@ -97,6 +104,7 @@ export interface Option {
       flex-grow: 1;
       min-width: 150px;
       background-color: white;
+      border-radius: 5px;
     }
 
     .dropdown-button {
@@ -219,5 +227,18 @@ export class TeamTreeComponent implements OnChanges{
   // Check if option is selected
   isSelected(option: string): boolean {
     return this.selectedTags.includes(option);
+  }
+  onInputBlur(): void {
+    // Delay the closing to give time for the click event to be handled
+    setTimeout(() => {
+      if (!this.isDropdownClicked) {
+        this.closeDropdown();
+      }
+      this.isDropdownClicked = false;  // Reset after checking
+    }, 100);
+  }
+  isDropdownClicked: boolean = false;
+  onDropdownClick(): void {
+    this.isDropdownClicked = true;
   }
 }

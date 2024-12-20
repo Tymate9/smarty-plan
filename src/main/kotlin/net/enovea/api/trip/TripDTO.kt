@@ -16,6 +16,8 @@ data class TripDTO(
     val startLat: Double,
     val endLng: Double,
     val endLat: Double,
+    val idleCount: Int,
+    val idleDuration: Long,
     val tripStatus: TripStatus,
     val trace: String?,
 )
@@ -48,6 +50,7 @@ data class TripEventsDTO(
     val stopDuration: Long,
     val drivingDuration: Long,
     val tripAmount: Int,
+    val idleDuration: Long,
     val drivingDistance: Double,
     val poiAmount: Int,
     val tripEvents: List<TripEventDTO>,

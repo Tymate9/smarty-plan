@@ -34,6 +34,8 @@ class TripServiceTest : StringSpec({
                 startLat = 0.0,
                 endLng = 1.0,
                 endLat = 1.0,
+                idleCount = 0,
+                idleDuration = 0,
                 trace = null,
                 tripStatus = TripStatus.COMPLETED,
             )

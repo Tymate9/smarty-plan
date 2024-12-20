@@ -100,6 +100,7 @@ class TripService(
         } else {
             // if device state, add trip expectation
             lastPosition = lastDeviceState.coordinate
+            addressAtEnd = lastDeviceState.address ?: lastPosition?.let { spatialService.getAddressFromEntity(it) }
             if (lastDeviceState.lastPositionTime != null) {
                 lastPositionTime = lastDeviceState.lastPositionTime!!.toLocalDateTime()
             }
@@ -149,6 +150,7 @@ class TripService(
             stopDuration = tripEvents.filter { it.eventType == TripEventType.STOP }.sumOf { it.duration ?: 0 },
             drivingDuration = trips.sumOf { it.duration ?: 0 },
             drivingDistance = trips.sumOf { it.distance ?: 0.0 } / 1000,
+            idleDuration = trips.sumOf { it.idleDuration },
             poiAmount = tripEvents.count { it.poiId != null } + (poiAtEnd?.let { 1 } ?: 0),
             tripEvents = tripEvents,
         )

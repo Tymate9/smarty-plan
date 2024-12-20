@@ -36,6 +36,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
                     [readonlyInput]="true"
                     [showButtonBar]="true"
                     [maxDate]="now"
+                    (onClickOutside)="hideCalendar($event)"
                     dateFormat="yymmdd"></p-calendar>
       </p-tabView>
       <div *ngIf="!tripData" class="no-data">
@@ -179,20 +180,23 @@ export class TripsComponent implements OnInit {
       'Distance',
       'Allure moyenne'
     ]
-    const dataRows = this.tripData?.tripEvents.map(tripEvent => [
-      tripEvent.eventType === dto.TripEventType.STOP ? tripEvent.poiLabel ? `${tripEvent.poiLabel} ${tripEvent.address}` : tripEvent.address : 'Trajet',
-      tripEvent.start?.toLocaleTimeString() || '',
-      tripEvent.end?.toLocaleTimeString() || '',
-      tripEvent.eventType === dto.TripEventType.STOP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
-      tripEvent.eventType === dto.TripEventType.TRIP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
-      tripEvent.eventType === dto.TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-',
-      tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance || 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
-    ].join(',')) || [];
+    const dataRows = this.tripData?.tripEvents
+      .filter(tripEvent => tripEvent.eventType !== dto.TripEventType.TRIP_EXPECTATION)
+      .map(tripEvent => [
+        tripEvent.eventType !== dto.TripEventType.TRIP ? tripEvent.poiLabel ? `${tripEvent.poiLabel} ${tripEvent.address}` : tripEvent.address : 'Trajet',
+        tripEvent.start?.toLocaleTimeString() || '',
+        tripEvent.end?.toLocaleTimeString() || '',
+        tripEvent.eventType === dto.TripEventType.STOP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
+        tripEvent.eventType === dto.TripEventType.TRIP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
+        tripEvent.eventType === dto.TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-',
+        tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance || 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
+      ].join(',')) || [];
     downloadAsCsv([headers.join(','), ...dataRows], `trips_${this.vehicleId}_${this.date}.csv`);
   }
 
   protected hideCalendar(event: Event) {
     console.log(event);
+    console.log(this.calendar)
     this.calendar.hideOverlay()
   }
 }

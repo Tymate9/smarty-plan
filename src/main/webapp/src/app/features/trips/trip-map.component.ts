@@ -32,8 +32,8 @@ import TripEventType = dto.TripEventType;
             <p-card header="Conduite">
               <p>{{ tripsService.formatDuration(tripData!.drivingDuration) }}</p>
             </p-card>
-            <p-card header="Nb de trajets">
-              <p>{{ tripData!.tripAmount }}</p>
+            <p-card header="Durée estimée d'arrêt moteur tournant">
+              <p>{{ tripsService.formatDuration(tripData!.idleDuration) }}</p>
             </p-card>
             <p-card header="Distance totale">
               <p>{{ tripData!.drivingDistance.toFixed(0) }} Km</p>
@@ -90,7 +90,7 @@ import TripEventType = dto.TripEventType;
                     hour: '2-digit',
                     minute: '2-digit'
                   })
-                }} {{ ((event.duration) / 60).toFixed(0) }} min
+                }} {{ tripsService.formatDuration(event.duration) }}
               </div>
             </ng-template>
           </p-timeline>

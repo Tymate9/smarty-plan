@@ -854,7 +854,7 @@ export class PoiManagerComponent implements OnInit {
             this.newPoiAddress = result.adresse
             const latitude = result.latitude;
             const longitude = result.longitude;
-            const label = `Nouveau POI à l'adresse ${this.newPoiAddress}`;
+            const label = `${this.newPoiAddress}`;
             this.createPoi(label, this.newPoiAddress, latitude, longitude);
           },
           (error) => {
@@ -875,7 +875,7 @@ export class PoiManagerComponent implements OnInit {
         this.geocodingService.reverseGeocode(latitude, longitude).subscribe(
           (result) => {
             const address = result.adresse;
-            const label = `Nouveau POI à l'adresse ${address}`;
+            const label = `${address}`;
             this.createPoi(label, address, latitude, longitude);
           },
           (error) => {

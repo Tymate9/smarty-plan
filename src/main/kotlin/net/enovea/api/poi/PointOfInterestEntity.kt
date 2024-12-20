@@ -48,7 +48,7 @@ data class PointOfInterestEntity(
     },
 
 ) : PanacheEntityBase {
-    fun getDenomination(): String = "${client_code}-${client_label}"
+    fun getDenomination(): String = "${if(client_code.isNullOrEmpty()){"0000"}else{client_code}}-${client_label}"
 
     companion object : PanacheCompanionBase<PointOfInterestEntity, Int> {
         const val ID_SEQUENCE = "point_of_interest_id_seq"

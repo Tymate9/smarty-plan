@@ -399,16 +399,17 @@ export class PoiListComponent implements OnInit {
   isFormValid(poiPanel: PoiPanel): boolean {
     const poi = poiPanel.poi;
     const isLabelValid = poi.client_label !== '';
+    const isClientCodeValid = poi.client_code !== '';
     const isCategoryValid = poi.category && poi.category.id !== undefined;
 
     if (poiPanel.inputType === 'adresse') {
       const isAddressValid = poi.address !== '' && poi.address.trim() !== '';
-      return isLabelValid && isCategoryValid && isAddressValid;
+      return isLabelValid && isCategoryValid && isAddressValid && isClientCodeValid;
     } else if (poiPanel.inputType === 'coordonnees') {
       const lat = poi.coordinate.coordinates[1];
       const lng = poi.coordinate.coordinates[0];
       const areCoordinatesValid = GeoUtils.isValidCoordinate(lat, lng);
-      return isLabelValid && isCategoryValid && areCoordinatesValid;
+      return isLabelValid && isCategoryValid && areCoordinatesValid && isClientCodeValid;
     }
     return false;
   }
@@ -434,7 +435,7 @@ export class PoiListComponent implements OnInit {
         const newPoi: PointOfInterestEntity = {
           id: -1,
           client_code: "0000",
-          client_label: `Nouveau POI à l'adresse ${adresse}`,
+          client_label: `${adresse}`,
           denomination: "",
           category: defaultCategory,
           address: adresse,
@@ -481,7 +482,7 @@ export class PoiListComponent implements OnInit {
     const newPoi: PointOfInterestEntity = {
       id: -1,
       client_code: "0000",
-      client_label: `Nouveau POI à l'adresse ${address}`,
+      client_label: `${address}`,
       denomination: "",
       category: defaultCategory,
       address: address,

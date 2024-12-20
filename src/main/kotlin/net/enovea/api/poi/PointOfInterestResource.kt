@@ -258,7 +258,7 @@ class PointOfInterestResource (
             val coordinatePoint: Point = pointGeometry
 
             // 5. Mettre à jour les champs de l'entité POI
-            existingPOI.client_code = poiForm.clientCode
+            existingPOI.client_code = if(poiForm.clientCode == "0000") null else poiForm.clientCode
             existingPOI.client_label = poiForm.clientLabel
             existingPOI.category = category
             existingPOI.coordinate = coordinatePoint

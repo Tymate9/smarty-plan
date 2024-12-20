@@ -71,6 +71,7 @@ export interface Option {
       flex-wrap: wrap;
       align-items: center;
       background-color: white;
+      border-radius:5px;
 
     }
 

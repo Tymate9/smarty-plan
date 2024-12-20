@@ -93,7 +93,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {attributionControl: false, zoomControl: false}).setView(normandyCoordinates, 9);
+    this.map = L.map('map', {attributionControl: false, zoomControl: false, zoomDelta: 0.5}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
     //Todo(Ajouter au mapmgm)

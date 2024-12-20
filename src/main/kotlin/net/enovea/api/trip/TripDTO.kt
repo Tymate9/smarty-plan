@@ -16,6 +16,8 @@ data class TripDTO(
     val startLat: Double,
     val endLng: Double,
     val endLat: Double,
+    val idleCount: Int,
+    val idleDuration: Long,
     val tripStatus: TripStatus,
     val trace: String?,
 )
@@ -48,6 +50,7 @@ data class TripEventsDTO(
     val stopDuration: Long,
     val drivingDuration: Long,
     val tripAmount: Int,
+    val idleDuration: Long,
     val drivingDistance: Double,
     val poiAmount: Int,
     val tripEvents: List<TripEventDTO>,
@@ -55,22 +58,23 @@ data class TripEventsDTO(
 
 enum class TripEventType {
     TRIP,
+    TRIP_EXPECTATION,
     STOP,
     VEHICLE_RUNNING,
-    VEHICLE_IDLE
+    VEHICLE_IDLE,
 }
 
 data class TripEventDTO(
     val index: Int,
     val eventType: TripEventType,
-    val distance: Double?,
-    val color: String?,
-    val poiId: Int?,
-    val poiLabel: String?,
-    val address: String?,
-    var start: LocalDateTime? = null,
-    var end: LocalDateTime? = null,
-    var duration: Long? = null,
+    val distance: Double? = null,
+    val color: String? = null,
+    val poiId: Int? = null,
+    val poiLabel: String? = null,
+    val address: String? = null,
+    val start: LocalDateTime? = null,
+    val end: LocalDateTime? = null,
+    val duration: Long? = null,
     val lat: Double? = null,
     val lng: Double? = null,
     val trace: String? = null,

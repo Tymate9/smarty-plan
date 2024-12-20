@@ -20,6 +20,8 @@ class TripRowMapper : RowMapper<TripDTO> {
             startLat = rs.getDouble("start_lat"),
             endLng = rs.getDouble("end_lng"),
             endLat = rs.getDouble("end_lat"),
+            idleCount = rs.getInt("idle_count"),
+            idleDuration = rs.getLong("idle_duration"),
             tripStatus = TripStatus.entries.getOrNull(rs.getInt("trip_status")) ?: TripStatus.COMPLETED,
             trace = rs.getString("trace")
         )

@@ -77,31 +77,31 @@ import {SelectButtonModule} from "primeng/selectbutton";
     PoiSearchComponent,
     PoiListComponent,
   ],
-    imports: [
-        BrowserModule,
-        FormsModule,
-        AppRoutingModule,
-        KeycloakAngularModule,
-        HttpClientModule,
-        ButtonModule,
-        TableModule,
-        TreeTableModule,
-        DropdownModule,
-        TabViewModule,
-        ProgressSpinnerModule,
-        ReactiveFormsModule,
-        ToastModule,
-        MenubarModule,
-        CardModule,
-        ToggleButtonModule,
-        TimelineModule,
-        CalendarModule,
-        PanelModule,
-        InputTextModule,
-        AutoCompleteModule,
-        InputNumberModule,
-        SelectButtonModule,
-    ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    AppRoutingModule,
+    KeycloakAngularModule,
+    HttpClientModule,
+    ButtonModule,
+    TableModule,
+    TreeTableModule,
+    DropdownModule,
+    TabViewModule,
+    ProgressSpinnerModule,
+    ReactiveFormsModule,
+    ToastModule,
+    MenubarModule,
+    CardModule,
+    ToggleButtonModule,
+    TimelineModule,
+    CalendarModule,
+    PanelModule,
+    InputTextModule,
+    AutoCompleteModule,
+    InputNumberModule,
+    SelectButtonModule,
+  ],
   providers: [
     MessageService,
     ConfigService,
@@ -112,10 +112,11 @@ import {SelectButtonModule} from "primeng/selectbutton";
       deps: [KeycloakService, ConfigService],
       multi: true
     }, {
-    provide: HTTP_INTERCEPTORS,
-    useClass: CacheInterceptor,
-    multi: true
-  }],
+      provide: HTTP_INTERCEPTORS,
+      useClass: CacheInterceptor,
+      multi: true
+    }],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

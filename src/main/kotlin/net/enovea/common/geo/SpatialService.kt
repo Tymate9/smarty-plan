@@ -164,7 +164,7 @@ class SpatialService<T : PanacheEntityBase>(
 
         val areaField = entityClass.java.declaredFields.firstOrNull { it.name == "area" }
             ?: throw IllegalArgumentException("Le champ 'area' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
-        val areaColumnName = areaField.getAnnotation(Column::class.java)?.name ?: "coordinate"
+        val areaColumnName = areaField.getAnnotation(Column::class.java)?.name ?: "area"
 
         val query = """
             SELECT e.*

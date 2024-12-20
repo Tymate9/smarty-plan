@@ -12,10 +12,7 @@ data class DeviceDTO (
     var serialNumber : String?,
     var simNumber : String?,
     var gatewayEnabled :Boolean,
-    var lastDataDate : Timestamp?,
     var comment: String?,
-    var lastCommunicationDate: Timestamp?,
     var enabled : Boolean,
-/*    var coordinate: Point?,*/
     var deviceDataState: DeviceDataStateDTO?
 )

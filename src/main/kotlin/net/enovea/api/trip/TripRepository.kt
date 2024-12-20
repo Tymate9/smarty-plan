@@ -24,6 +24,8 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     s2_latitude(start_location) AS start_lat,
                     s2_longitude(end_location) AS end_lng,
                     s2_latitude(end_location) AS end_lat,
+                    idle_duration,
+                    idle_count,
                     trip_status,
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
@@ -54,6 +56,8 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     s2_latitude(start_location) AS start_lat,
                     s2_longitude(end_location) AS end_lng,
                     s2_latitude(end_location) AS end_lat,
+                    idle_duration,
+                    idle_count,
                     trip_status,
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
@@ -83,6 +87,8 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         s2_latitude(start_location) AS start_lat,
                         s2_longitude(end_location) AS end_lng,
                         s2_latitude(end_location) AS end_lat,
+                        idle_duration,
+                        idle_count,
                         trip_status,
                         st_astext(st_geometryfromwkb(trace)) as trace 
                     FROM trips_vehicle_view 

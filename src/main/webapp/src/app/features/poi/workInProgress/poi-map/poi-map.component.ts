@@ -116,7 +116,7 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
 
   private initMap(): void {
     const normandyCenter: L.LatLngExpression = [49.1817, 0.3714];
-    this.map = L.map('map', { attributionControl: false }).setView(normandyCenter, 9);
+    this.map = L.map('map', { attributionControl: false, zoomDelta: 0.5}).setView(normandyCenter, 9);
     this.map.setMaxZoom(19);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -176,7 +176,9 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
   }
 
   onPoiMarkerAdded(poi: PointOfInterestEntity) {
-    const config = new PopUpConfig({ poiPopupTabs: new Set(['information']) });
+    const config = { poiPopupTabs: new Set(['information']), isAreaDynamic: false } as PopUpConfig;
+    console.log("je suis dans le onPOIMarkerAdded")
+    console.log(config)
     this.mapManager.addMarker(EntityType.POI, poi, config);
   }
 

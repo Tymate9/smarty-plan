@@ -24,6 +24,6 @@ export class ConfigService {
 
   // Méthode pour récupérer la configuration Keycloak
   getKeycloakConfig(): Observable<AppConfig> {
-    return this.http.get<AppConfig>(`${this.baseUrl}/keycloak`);
+    return this.http.get<AppConfig>(`${this.baseUrl}`);
   }
 }

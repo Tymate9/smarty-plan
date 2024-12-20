@@ -61,21 +61,35 @@ import TripEventType = dto.TripEventType;
                 *ngIf="event.eventType === TripEventType.TRIP"
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
+                style="margin: 10px 0;"
               >
+                <div>
                 <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
-                {{ ((event.duration) / 60).toFixed(0) }} min : {{
-                  event.start?.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })
-                }}
-                -> {{
-                  event.end?.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })
-                }} {{ event.distance.toFixed(0) }} Km
+                Trajet de <strong>{{ ((event.duration) / 60).toFixed(0) }}</strong><strong> min</strong></div>
+
+                <div class="time-oval">
+                  {{
+                    event.start?.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  }}
+                </div>
+                <i class="pi pi-caret-right"></i>
+                <div class="time-oval">
+                  {{
+                    event.end?.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  }}
+                </div>
+
+                <!--                {{ event.distance.toFixed(0) }} Km-->
+                <div class="distance-rectangle small-right">
+                  {{ event.distance.toFixed(0) }} Km
+                </div>
               </div>
               <div
                 class="p-3 bg-black-alpha-20 border-round cursor-pointer"
@@ -85,12 +99,12 @@ import TripEventType = dto.TripEventType;
                 (click)="onTripEventClick(event)"
               > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
                 : {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
-                -> {{
+                <i class="pi pi-caret-right"></i> {{
                   event.end?.toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit'
                   })
-                }} {{ tripsService.formatDuration(event.duration) }}
+                }} <strong>{{ tripsService.formatDuration(event.duration) }}</strong>
               </div>
             </ng-template>
           </p-timeline>
@@ -152,6 +166,24 @@ import TripEventType = dto.TripEventType;
         position: relative;
         margin-top: 10%;
         width: 39px;
+
+
+        ::ng-deep  .p-element.p-button.p-togglebutton.p-component.p-button-icon-only.p-highlight {
+          background-color: #aa001f !important;
+          border-color: #aa001f !important;
+          color: white !important;
+          font-weight: 600;
+        }
+        ::ng-deep  .p-element.p-button.p-togglebutton.p-component.p-button-icon-only {
+          background-color: #aa001f !important;
+          border-color: #aa001f !important;
+          color: white !important;
+          font-weight: 600;
+        }
+        ::ng-deep .pi.p-button-icon.p-button-icon-left.pi-angle-left{
+          color:white !Important;
+        }
+
       }
 
       .trip-dot {
@@ -161,6 +193,38 @@ import TripEventType = dto.TripEventType;
         display: inline-block;
         margin-right: 5px;
       }
+
+      .distance-rectangle {
+        display: flex;
+        padding: 5px 10px;
+        border: 1px solid #BDBDBD;
+        background-color: #BDBDBD ;
+        border-radius: 5px;
+        font-size: 16px;
+        text-align: center;
+        width: 80px;
+        height: 30px;
+        align-items: center;
+        font-weight: bold;
+        color: white;
+      }
+
+      .small-right {
+        float: right;
+        margin-right: 10px;
+        margin-top: 5px;
+      }
+      .time-oval {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 1px solid #d9e0e3;
+        border-radius: 20px;
+        background-color: #d9e0e3;
+        text-align: center;
+      }
+
+
+
     }
 
     #trip-cards {
@@ -174,13 +238,16 @@ import TripEventType = dto.TripEventType;
         height: 25%;
         text-align: center;
         border-radius: 5px;
+        font-weight:bold;
+        font-size: 1.0rem;
 
         .p-card-title {
-          font-size: .6rem;
+          font-size: 1.0rem;
           background-color: lightgray;
           margin: -1rem;
           padding: .5rem 0;
           border-radius: 5px 5px 0 0;
+          font-weight:bold;
         }
       }
     }

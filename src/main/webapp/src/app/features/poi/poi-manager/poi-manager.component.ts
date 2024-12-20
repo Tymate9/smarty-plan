@@ -87,12 +87,6 @@ export class PoiPanel {
             </li>
           </ul>
 
-          <!-- Liste déroulante pour choisir entre Adresse et Coordonnées -->
-<!--          <select [(ngModel)]="inputType">-->
-<!--            <option value="adresse">Adresse</option>-->
-<!--            <option value="coordonnees">Coordonnées</option>-->
-<!--          </select>-->
-
           <p-dropdown
             [options]="inputTypeOptions"
             [(ngModel)]="inputType"
@@ -134,13 +128,6 @@ export class PoiPanel {
           </div>
 
           <!-- Bouton "Ajouter POI" -->
-<!--          <button-->
-<!--            (click)="addNewPoi()"-->
-<!--            [disabled]="isAddPoiDisabled()"-->
-<!--          >-->
-<!--            Ajouter POI-->
-<!--          </button>-->
-
           <p-button
             label="Créer un brouillon de POI"
             (onClick)="addNewPoi()"
@@ -210,26 +197,11 @@ export class PoiPanel {
                   </select>
                   </div>
 
-<!--                  <p-dropdown-->
-<!--                    [(ngModel)]="poiPanel.selectedCategoryId"-->
-<!--                    [options]="poiCategories"-->
-<!--                    (onChange)="onCategoryChange($event.value, poiPanel); poiPanel.isModified = true; "-->
-<!--                    name="category{{poiPanel.poi.id}}"-->
-<!--                    optionLabel="label"-->
-<!--                    optionValue="id"-->
-<!--                    placeholder="Select a category">-->
-<!--                  </p-dropdown>-->
-
-
                 </label>
 
                 <!-- Liste déroulante Modifier -->
                 <label>
                   Modifier :
-<!--                  <select [(ngModel)]="poiPanel.inputType" name="inputType{{poiPanel.poi.id}}" (ngModelChange)="poiPanel.isModified = true">-->
-<!--                    <option value="adresse">Adresse</option>-->
-<!--                    <option value="coordonnees">Coordonnées</option>-->
-<!--                  </select>-->
                   <p-dropdown
                     [(ngModel)]="poiPanel.inputType"
                     name="inputType{{poiPanel.poi.id}}"
@@ -283,12 +255,6 @@ export class PoiPanel {
 
                 <!-- Boutons pour ajouter une zone -->
                 <div class="zone-buttons" style="margin-top: 1rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
-<!--                  <button type="button" (click)="startPolygonDrawing(poiPanel)">-->
-<!--                    Dessiner un Polygone-->
-<!--                  </button>-->
-<!--                  <button type="button" (click)="startCircleDrawing(poiPanel)">-->
-<!--                    Dessiner un Cercle-->
-<!--                  </button>-->
 
                   <p-button
                     type="button"
@@ -309,12 +275,6 @@ export class PoiPanel {
 
                 <!-- Boutons de soumission -->
                 <div *ngIf="poiPanel.poi.id < 0" style="margin-top: 1rem; display: flex; justify-content: center; align-items: center;">
-<!--                  <button-->
-<!--                    type="submit"-->
-<!--                    [disabled]="!isFormValid(poiPanel)"-->
-<!--                  >-->
-<!--                    Ajouter POI-->
-<!--                  </button>-->
                   <p-button
                     type="submit"
                     [disabled]="!isFormValid(poiPanel)"
@@ -326,18 +286,6 @@ export class PoiPanel {
                   </p-button>
                 </div>
                 <div *ngIf="poiPanel.poi.id >= 0" style="margin-top: 1rem; display: flex; gap: 1rem;">
-<!--                  <button-->
-<!--                    type="submit"-->
-<!--                    [disabled]="!isFormValid(poiPanel)"-->
-<!--                  >-->
-<!--                    Mettre à jour-->
-<!--                  </button>-->
-<!--                  <button-->
-<!--                    type="button"-->
-<!--                    (click)="deletePoi(poiPanel)"-->
-<!--                  >-->
-<!--                    Supprimer-->
-<!--                  </button>-->
                   <p-button
                     type="submit"
                     [disabled]="!isFormValid(poiPanel)"
@@ -505,35 +453,35 @@ export class PoiPanel {
     .custom-dropdown {
       position: relative;
       display: inline-block;
-      width: 100%; /* Adjust width as needed */
+      width: 100%;
       max-width: 300px;
     }
 
     /* Style the native select element */
     .custom-dropdown select {
-      appearance: none; /* Removes native dropdown arrow */
+      appearance: none;
       -moz-appearance: none;
       -webkit-appearance: none;
-      background-color: #ffffff; /* White background */
-      border: 1px solid #ccc; /* Border style */
-      border-radius: 4px; /* Rounded corners */
-      padding: 10px 40px 10px 12px; /* Padding to create space for the arrow */
-      font-size: 14px; /* Adjust font size */
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px 40px 10px 12px;
+      font-size: 14px;
       width: 100%;
-      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
       cursor: pointer;
       transition: border-color 0.3s, box-shadow 0.3s;
     }
 
     /* Add hover and focus effects */
     .custom-dropdown select:hover {
-      border-color: #007ad9; /* Blue border on hover */
+      border-color: #007ad9;
     }
 
     .custom-dropdown select:focus {
       border-color: #007ad9;
-      box-shadow: 0px 0px 5px rgba(0, 122, 217, 0.5); /* Blue glow on focus */
-      outline: none; /* Remove outline */
+      box-shadow: 0px 0px 5px rgba(0, 122, 217, 0.5);
+      outline: none;
     }
 
     .custom-dropdown select:disabled {

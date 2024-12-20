@@ -55,12 +55,6 @@ import {NotificationService} from "../../commons/notification/notification.servi
       color: white !important;
       font-weight: 600;
     }
-
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red:focus {
-    //  //outline: none !important;
-    //  //box-shadow: none !important; /* Removes any shadow from the focus */
-    //  border-color: var(--gray-500) !important;
-    //}
   `]
 })
 export class MapComponent implements OnInit, OnDestroy {
@@ -96,7 +90,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {attributionControl: false, zoomDelta: 0.5}).setView(normandyCoordinates, 9);
+    this.map = L.map('map', {attributionControl: false, zoomControl: false, zoomDelta: 0.5}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
     //Todo(Ajouter au mapmgm)
@@ -199,7 +193,6 @@ export class MapComponent implements OnInit, OnDestroy {
           };
           this.mapManager.handleLayerEvent(event, null);
         });
-        console.log(filteredLocalizations)
         // Afficher une notification de succès après la mise à jour
         this.notificationService.success('Mise à jour réussie', 'Les positions des véhicules ont été mises à jour.');
       },

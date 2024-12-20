@@ -2,6 +2,7 @@ package net.enovea.service
 
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
@@ -68,10 +69,6 @@ class VehicleService(
         val allVehicles = vehicles ?: VehicleEntity.listAll()
         val tripStats = tripService.getTripDailyStats()
 
-//        val allVehicleDataDTO = allVehicles.map { vehicle ->
-//            vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-//        }
-
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         val allVehicleDataDTO =
@@ -105,10 +102,13 @@ class VehicleService(
                     }
                     if (poi != null) {
                         vehicleDataDTO.lastPositionAddress = (poi.client_code?: "0000") + " - " + poi.client_label
-                        vehicleDataDTO.lastPositionAdresseType = poi.category.label
+                        vehicleDataDTO.lastPositionAddressInfo = poi.category
                     } else {
                         // Cannot find POI so Adress Type is "route"
-                        vehicleDataDTO.lastPositionAdresseType = "route"
+                        vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
+                            label="route",
+                            color="#000"
+                        )
                         // Get adress from device DataState or geocoding
                         if(vehicleDataDTO.device.deviceDataState?.address == null)
                         {
@@ -126,14 +126,10 @@ class VehicleService(
                             vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
 
                         }
-
-                        // If no POI, try to fetch address using geocoding service
-
                     }
                 } catch (e: Exception) {
                     // Handle any errors during POI lookup or reverse geocoding
                     vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
-                    vehicleDataDTO.lastPositionAdresseType = "Error retrieving location data"
                 }
             }
         }
@@ -156,7 +152,13 @@ class VehicleService(
             hierarchy.add(currentTeam.label)
             currentTeam = currentTeam.parentTeam
         }
-        return hierarchy.reversed().joinToString(" > ")
+        // If the hierarchy is only one level, add "Interne" as the second level
+        if (hierarchy.size == 1) {
+            val teamLabel = hierarchy.first()
+            hierarchy.add("$teamLabel Interne")
+            return hierarchy.joinToString(" > ")
+        } else
+            return hierarchy.reversed().joinToString(" > ")
     }
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers

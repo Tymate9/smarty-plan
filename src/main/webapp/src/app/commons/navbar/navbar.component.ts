@@ -27,9 +27,6 @@ import {NotificationService} from "../notification/notification.service";
               <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg"></p-button>
               <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg"></p-button>
             </div>
-<!--            <div class="nav-button-center">-->
-<!--              -->
-<!--            </div>-->
           </div>
           <div class="filters center">
             <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>
@@ -195,6 +192,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const teamMap = new Map<number, any>();
     const roots: any[] = [];
 
+    const sortByLabel = (a: any, b: any) => a.label.localeCompare(b.label);
     // Mapper toutes les équipes par ID
     teams.forEach(team => {
       teamMap.set(team.id, { ...team, children: [] });
@@ -212,6 +210,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
         roots.push(teamMap.get(team.id));
       }
     });
+
+    teamMap.forEach(team => {
+      team.children.sort(sortByLabel);
+    });
+
+    roots.sort(sortByLabel);
     return roots;
 
   }
@@ -239,7 +243,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-
   private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
     return JSON.stringify(filters1) === JSON.stringify(filters2);
   }
@@ -262,11 +265,23 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
         // Traitement des véhicules
         this.vehicleOptions = vehicles;
-        this.filteredVehicleOptions = vehicles.map(vehicle => vehicle.licenseplate);
+        this.filteredVehicleOptions = vehicles
+          .sort((a, b) => (a.licenseplate || '').localeCompare(b.licenseplate || ''))
+          .map(vehicle => vehicle.licenseplate || '');
+
 
         // Traitement des conducteurs
         this.driverOptions = drivers;
-        this.filteredDriverOptions = drivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+        this.filteredDriverOptions = drivers
+          .sort((a, b) => {
+            const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
+            if (lastNameComparison !== 0) {
+              return lastNameComparison;
+            }
+            return (a.firstName || '').localeCompare(b.firstName || '');
+          })
+          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+
 
         // Charger les filtres initiaux depuis le FilterService
         this.loadInitialFilters();
@@ -295,11 +310,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (this.agencySelected.length > 0) {
 
       this.vehicleService.getVehiclesList(this.agencySelected).subscribe((filteredVehicles) => {
-        this.filteredVehicleOptions = filteredVehicles.map(vehicle => vehicle.licenseplate);
+        this.filteredVehicleOptions = filteredVehicles
+          .sort((a, b) => (a.licenseplate || '').localeCompare(b.licenseplate || ''))
+          .map(vehicle => vehicle.licenseplate || '');
       });
 
       this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
-        this.filteredDriverOptions = filteredDrivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+        this.filteredDriverOptions = filteredDrivers
+          .sort((a, b) => {
+            const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
+            if (lastNameComparison !== 0) {
+              return lastNameComparison;
+            }
+            return (a.firstName || '').localeCompare(b.firstName || '');
+          })
+          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
       });
     } else {
       // Si aucune agence n'est sélectionnée, réinitialiser aux options originales
@@ -401,7 +426,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (this.agencySelected.length > 0) {
       // Filtrer les véhicules
       this.vehicleService.getVehiclesList(this.agencySelected).subscribe((filteredVehicles) => {
-        this.filteredVehicleOptions = filteredVehicles.map(vehicle => vehicle.licenseplate);
+        this.filteredVehicleOptions = filteredVehicles
+          .sort((a, b) => (a.licenseplate || '').localeCompare(b.licenseplate || ''))
+          .map(vehicle => vehicle.licenseplate || '');
 
         // Mettre à jour les sélections de véhicules pour ne conserver que ceux qui sont toujours valides
         this.vehicleSelected = this.vehicleSelected.filter(licensePlate => this.filteredVehicleOptions.includes(licensePlate));
@@ -409,7 +436,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
       // Filtrer les conducteurs
       this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
-        this.filteredDriverOptions = filteredDrivers.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+        this.filteredDriverOptions = filteredDrivers
+          .sort((a, b) => {
+            const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
+            if (lastNameComparison !== 0) {
+              return lastNameComparison;
+            }
+            return (a.firstName || '').localeCompare(b.firstName || '');
+          })
+          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
 
         // Mettre à jour les sélections de conducteurs pour ne conserver que ceux qui sont toujours valides
         this.driverSelected = this.driverSelected.filter(driverName => this.filteredDriverOptions.includes(driverName));
@@ -420,7 +455,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
     }
   }
-
 
   resetFilters(): void {
     this.agencySelected = [];

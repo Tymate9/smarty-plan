@@ -27,6 +27,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         <p-button id="download-csv-button" (click)="downloadCsv()"
                   title="Télécharger un CSV des trajets de la journée de ce véhicule"
                   icon="pi pi-download"
+                  styleClass="custom-button"
                   >
         </p-button>
         <p-calendar #calendar
@@ -36,8 +37,8 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
                     [readonlyInput]="true"
                     [showButtonBar]="true"
                     [maxDate]="now"
-                    (onClickOutside)="hideCalendar($event)"
-                    dateFormat="yymmdd"></p-calendar>
+                    dateFormat="yymmdd"
+                    ></p-calendar>
       </p-tabView>
       <div *ngIf="!tripData" class="no-data">
         Pas de données de trajet pour ce jour
@@ -61,6 +62,23 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         font-size: 1.5rem;
         color: white;
         z-index: 10000;
+      }
+
+      ::ng-deep {
+        .p-button.p-component.p-button-icon-only.custom-button {
+          background-color: #aa001f !important;
+          border-color: #aa001f !important;
+          color: white !important;
+          font-weight: 600;
+
+        }
+
+        .p-calendar .p-button {
+          background-color: #aa001f;
+          border-color: #aa001f !important;
+          color: white !important;
+          font-weight: 600;
+        }
       }
 
       #download-csv-button {

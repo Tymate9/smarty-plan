@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewCh
 
 export interface Option {
   label: string;
-  children?: Option[];  // Nested structure for child options
+  children?: Option[];
 }
 @Component({
   selector: 'app-team-tree',
@@ -11,22 +11,22 @@ export interface Option {
       <div class="input-container">
         <div class="tags">
           <span *ngFor="let tag of selectedTags" class="tag">
-            {{ tag }} <button (click)="removeTag(tag)">x</button>
+            {{ tag }} <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
           </span>
           <input
             type="text"
             [(ngModel)]="searchText"
             (input)="onSearch()"
             (focus)="openDropdown()"
+            (blur)="onInputBlur()"
             placeholder="Filtrer {{ label }}..."
             [ngStyle]="{'background-color': 'white'}"
           />
-          <button class="dropdown-button" (click)="toggleDropdown()">&#9662;</button> <!-- Bouton pour afficher les options -->
         </div>
       </div>
 
       <!-- Display a flat list or hierarchical list based on data structure -->
-      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" (blur)="closeDropdown()">
+      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" >
         <ng-container *ngFor="let option of filteredOptions">
           <li>
             <div (click)="selectOption(option.label)" [class.selected]="isSelected(option.label)">
@@ -61,6 +61,7 @@ export interface Option {
     .search-autocomplete {
       position: relative;
       width: 300px;
+
     }
 
     .input-container {
@@ -70,6 +71,8 @@ export interface Option {
       flex-wrap: wrap;
       align-items: center;
       background-color: white;
+      border-radius:5px;
+
     }
 
     .tags {
@@ -78,6 +81,10 @@ export interface Option {
       align-items: center;
       flex-grow: 1;
       background-color: white;
+      max-height: 50px;
+      overflow-y: auto;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .tag {
@@ -87,6 +94,9 @@ export interface Option {
       margin-right: 5px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .input-container input {
@@ -95,6 +105,7 @@ export interface Option {
       flex-grow: 1;
       min-width: 150px;
       background-color: white;
+      border-radius: 5px;
     }
 
     .dropdown-button {
@@ -117,11 +128,28 @@ export interface Option {
     .autocomplete-list li {
       padding: 5px;
       cursor: pointer;
-    }
+      margin-left: 10px;
 
-    .autocomplete-list li:hover {
+    }
+    .autocomplete-list div.selected {
+      background-color: #d0e8ff;
+    }
+    .autocomplete-list div:hover {
       background-color: #f0f0f0;
     }
+    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close{
+      background-color:#aa001f !important;
+      border-color:#aa001f !important;
+      color: white !important;
+      font-weight:600;
+      margin-left:4px;
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+      padding: 2px;
+
+    }
+
   `]
 })
 export class TeamTreeComponent implements OnChanges{
@@ -200,5 +228,18 @@ export class TeamTreeComponent implements OnChanges{
   // Check if option is selected
   isSelected(option: string): boolean {
     return this.selectedTags.includes(option);
+  }
+  onInputBlur(): void {
+    // Delay the closing to give time for the click event to be handled
+    setTimeout(() => {
+      if (!this.isDropdownClicked) {
+        this.closeDropdown();
+      }
+      this.isDropdownClicked = false;  // Reset after checking
+    }, 100);
+  }
+  isDropdownClicked: boolean = false;
+  onDropdownClick(): void {
+    this.isDropdownClicked = true;
   }
 }

@@ -2,7 +2,7 @@ package net.enovea.api.env
 
 import io.smallrye.config.ConfigMapping
 
-@ConfigMapping(prefix = "keycloak")
+@ConfigMapping(prefix = "smarty-plan.keycloak")
 interface  KeycloakConfig {
     fun redirectUrl(): String
     fun realmName(): String

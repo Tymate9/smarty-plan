@@ -93,7 +93,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {attributionControl: false, zoomControl: false}).setView(normandyCoordinates, 9);
+    this.map = L.map('map', {attributionControl: false}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
     //Todo(Ajouter au mapmgm)
@@ -192,10 +192,12 @@ export class MapComponent implements OnInit, OnDestroy {
               id: markerId,
               entityType: EntityType.VEHICLE,
               newCoordinates: result.lastPosition,
+              newState: result.state
             }
           };
           this.mapManager.handleLayerEvent(event, null);
         });
+        console.log(filteredLocalizations)
         // Afficher une notification de succès après la mise à jour
         this.notificationService.success('Mise à jour réussie', 'Les positions des véhicules ont été mises à jour.');
       },

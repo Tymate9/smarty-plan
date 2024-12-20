@@ -20,7 +20,7 @@ data class PointOfInterestEntity(
     @JoinColumn(name = "type", nullable = false)
     var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
 
-    var client_code : String = "",
+    var client_code : String? = "0000",
 
     var client_label: String = "",
 

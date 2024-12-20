@@ -83,6 +83,7 @@ interface VehicleMapper {
 
     // Vehicle Localization
     @Mapping(target = "lastPosition", source = "vehicleDevices", qualifiedByName = ["localizationLastPositionMapper"])
+    @Mapping(target = "state", source = "vehicleDevices", qualifiedByName = ["localizationStateMapper"])
     fun toVehicleLocalizationDTO(vehicle: VehicleEntity): VehicleLocalizationDTO
 
     @Named("localizationLastPositionMapper")
@@ -90,6 +91,12 @@ interface VehicleMapper {
         .filter { it.endDate == null }
         .maxByOrNull { it.id.startDate }
         ?.let { it.device?.deviceDataState?.coordinate }
+
+    @Named("localizationStateMapper")
+    fun localizationStateMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): String? = vehicleDevices
+        .filter { it.endDate == null }
+        .maxByOrNull { it.id.startDate }
+        ?.let { it.device?.deviceDataState?.state }
 
     companion object {
         val INSTANCE: VehicleMapper = Mappers.getMapper(VehicleMapper::class.java)

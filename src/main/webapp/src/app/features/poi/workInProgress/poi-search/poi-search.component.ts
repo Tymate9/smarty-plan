@@ -8,7 +8,7 @@ import {PoiService} from "../../poi.service";
   selector: 'app-poi-search',
   template: `
     <div class="search-section">
-      <h3>Rechercher ou ajouter un POI</h3>
+      <h3>Rechercher un POI</h3>
 
       <div class="form-group">
         <p-autoComplete
@@ -25,7 +25,7 @@ import {PoiService} from "../../poi.service";
           panelStyleClass="my-autocomplete-panel"
         ></p-autoComplete>
       </div>
-
+      <h3>Ajouter un POI</h3>
       <div class="form-group">
         <p-selectButton
           [options]="inputTypeOptions"

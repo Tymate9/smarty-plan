@@ -906,7 +906,7 @@ export class PoiManagerComponent implements OnInit {
     // Créer le nouvel objet POI avec un polygone valide
     const newPoi: PointOfInterestEntity = {
       id: isTemporary ? this.temporaryPoiId-- : -1,
-      client_code : "-1",
+      client_code : "0000",
       client_label: label,
       denomination: "",
       category: defaultCategory,
@@ -1024,7 +1024,7 @@ export class PoiManagerComponent implements OnInit {
 
     // Construire l'objet poiData avec les chaînes WKT existantes
     const poiData: PointOfInterestForm = {
-      clientCode: poi.client_code,
+      clientCode: poi.client_code?? '0000',
       clientLabel: poi.client_label,
       type: poi.category.id,
       WKTPoint: wktPoint, // Utiliser la chaîne WKT générée à partir de poi.coordinate

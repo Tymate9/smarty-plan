@@ -14,7 +14,7 @@ import TripEventType = dto.TripEventType;
   template: `
     <div id="trip-container">
       <div id="map"></div>
-      <div id="side-panel" class="w-1/4 h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
+      <div id="side-panel" class="h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
         <p-toggleButton
           [(ngModel)]="showSidePanel"
           onIcon="pi pi-angle-right"
@@ -32,8 +32,8 @@ import TripEventType = dto.TripEventType;
             <p-card header="Conduite">
               <p>{{ tripsService.formatDuration(tripData!.drivingDuration) }}</p>
             </p-card>
-            <p-card header="Nb de trajets">
-              <p>{{ tripData!.tripAmount }}</p>
+            <p-card header="Durée estimée d'arrêt moteur tournant">
+              <p>{{ tripsService.formatDuration(tripData!.idleDuration) }}</p>
             </p-card>
             <p-card header="Distance totale">
               <p>{{ tripData!.drivingDistance.toFixed(0) }} Km</p>
@@ -50,10 +50,10 @@ import TripEventType = dto.TripEventType;
                       <i class="pi pi-map-marker"></i>
               </span>
               <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
-                <img src="../../../assets/icon/vgp-vert.svg" alt="{{ tripData!.driverName }}"/>
+                <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName }}"/>
               </span>
               <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
-                <img src="../../../assets/icon/vgp-orange.svg" alt="{{ tripData!.driverName }}"/>
+                <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName }}"/>
               </span>
             </ng-template>
             <ng-template pTemplate="content" let-event>
@@ -93,7 +93,7 @@ import TripEventType = dto.TripEventType;
               </div>
               <div
                 class="p-3 bg-black-alpha-20 border-round cursor-pointer"
-                *ngIf="event.eventType !== TripEventType.TRIP"
+                *ngIf="event.eventType !== TripEventType.TRIP && event.eventType !== TripEventType.TRIP_EXPECTATION"
                 (mouseenter)="onTripEventMouseEnter(event)"
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
@@ -104,7 +104,7 @@ import TripEventType = dto.TripEventType;
                     hour: '2-digit',
                     minute: '2-digit'
                   })
-                }} <strong>{{ ((event.duration) / 60).toFixed(0) }}</strong><strong> min</strong>
+                }} <strong>{{ tripsService.formatDuration(event.duration) }}</strong>
               </div>
             </ng-template>
           </p-timeline>
@@ -126,6 +126,12 @@ import TripEventType = dto.TripEventType;
 
     #map {
       height: 80vh;
+
+      ::ng-deep {
+        .leaflet-control-zoom {
+          margin-top: 70px;
+        }
+      }
     }
 
     #side-panel {
@@ -138,8 +144,6 @@ import TripEventType = dto.TripEventType;
       z-index: 1000;
       display: flex;
       padding: 0 !important;
-
-
 
       .container {
         height: 100%;
@@ -228,7 +232,6 @@ import TripEventType = dto.TripEventType;
       justify-content: space-between;
       margin-bottom: 2rem;
 
-
       ::ng-deep p-card {
         margin: 0.5rem;
         width: 28%;
@@ -283,7 +286,6 @@ export class TripMapComponent {
     if (!tripEventsDTO) {
       return;
     }
-    console.log(tripEventsDTO);
     this._tripData = tripEventsDTO;
 
     // init map
@@ -292,7 +294,7 @@ export class TripMapComponent {
     } else {
       this.map = L.map('map', {
         attributionControl: false,
-        zoomControl: false
+        zoomDelta: 0.5,
       }).setView([tripEventsDTO.tripEvents[0].lat ?? 0, tripEventsDTO.tripEvents[0].lng ?? 0], 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -303,7 +305,9 @@ export class TripMapComponent {
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {
 
       // todo : use full marker creation
-      if (tripEvent.eventType !== TripEventType.TRIP && tripEvent.lat !== null && tripEvent.lng !== null) {
+      if (tripEvent.eventType != TripEventType.TRIP
+        && tripEvent.eventType != TripEventType.TRIP_EXPECTATION
+        && tripEvent.lat !== null && tripEvent.lng !== null) {
         new CustomMarkerImpl([tripEvent.lat, tripEvent.lng])
           .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color))
           .addTo(this.featureGroup)
@@ -313,7 +317,8 @@ export class TripMapComponent {
       }
 
       // add trace to map
-      if (tripEvent.eventType === TripEventType.TRIP && tripEvent.trace) {
+      if ([TripEventType.TRIP, TripEventType.TRIP_EXPECTATION].includes(tripEvent.eventType)
+        && tripEvent.trace) {
         const geoJSON = WKTParse(tripEvent.trace);
         if (geoJSON === null || geoJSON.type !== 'LineString') {
           alert('Erreur lors de la récupération de la trace')
@@ -321,7 +326,12 @@ export class TripMapComponent {
         }
 
         L.geoJson(geoJSON,
-          {style: {color: tripEvent.color || 'blue'}}
+          {
+            style: {
+              color: tripEvent.color || 'blue',
+              dashArray: tripEvent.eventType === TripEventType.TRIP_EXPECTATION ? '4' : undefined
+            }
+          }
         ).addTo(this.featureGroup);
       }
     });
@@ -329,7 +339,12 @@ export class TripMapComponent {
     // set page up and zoom
     this.featureGroup.addTo(this.map);
     this.showTimeline = true;
-    this.map.fitBounds(this.featureGroup.getBounds());
+    this.map.flyToBounds(
+      this.featureGroup.getBounds().pad(0.1),
+      {
+        paddingBottomRight: [this.showSidePanel ? this.map.getSize().x * 0.35 - 39: 0, 0]
+      }
+    );
   }
 
   get tripData(): TripEventsDTO | null {
@@ -337,7 +352,7 @@ export class TripMapComponent {
   }
 
   onTripEventMouseEnter(event: TripEventDTO): void {
-    let layer = this.featureGroup.getLayers()[event.index]
+    const layer = this.featureGroup.getLayers()[event.index]
     if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
       layer.setStyle({fillColor: 'blue', weight: 5});
     } else if (layer instanceof L.Marker) {
@@ -346,7 +361,7 @@ export class TripMapComponent {
   }
 
   onTripEventMouseLeave(event: TripEventDTO): void {
-    let layer = this.featureGroup.getLayers()[event.index]
+    const layer = this.featureGroup.getLayers()[event.index]
     if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
       layer.setStyle({fillColor: 'blue', weight: 3});
     } else if (layer instanceof L.Marker) {
@@ -355,8 +370,16 @@ export class TripMapComponent {
   }
 
   onTripEventClick(event: TripEventDTO): void {
-    let layer = this.featureGroup.getLayers()[event.index]
+    const layer = this.featureGroup.getLayers()[event.index]
     if (layer instanceof L.Marker) {
+      const latLng = layer.getLatLng();
+      const zoom = this.map!.getZoom()
+      const bounds = this.map!.getBounds();
+      this.map!.flyTo(
+        [
+          latLng.lat,
+          latLng.lng + (this.showSidePanel ? (bounds.getEast() - bounds.getWest()) * 0.175 : 0)
+        ], zoom);
       layer.openPopup();
     }
   }
@@ -374,13 +397,13 @@ export class TripMapComponent {
         });
       case TripEventType.VEHICLE_RUNNING:
         return MarkerFactory.getVehicleIcon({
-          device: {state: 'MOVING'},
-          category: {label: 'vgp'}
+          device: {state: 'DRIVING'},
+          category: {label: 'vl'}
         });
       case TripEventType.VEHICLE_IDLE:
         return MarkerFactory.getVehicleIcon({
-          device: {state: 'OFF'},
-          category: {label: 'vgp'}
+          device: {state: 'IDLE'},
+          category: {label: 'vl'}
         })
     }
   }

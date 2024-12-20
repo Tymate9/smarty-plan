@@ -6,6 +6,7 @@ import {ComponentRef, Type, ViewContainerRef} from "@angular/core";
 import {PoiPopupComponent} from "../../../features/poi/poi-popup/poi-popup.component";
 import {VehiclePopupComponent} from "../../../features/vehicle/vehicle-popup/vehicle-popup.component";
 import {PopUpConfig} from "../marker/pop-up-config";
+import {popup} from "leaflet";
 
 export class LayerManager {
   readonly markersMap: Map<string, CustomMarker> = new Map();
@@ -59,6 +60,10 @@ export class LayerManager {
     /// Fermer le contrôle partagé s'il est déjà ouvert
     LayerManager.closeSharedControl();
 
+    // Créer la zone d'effet
+    if (marker.popUpConfig.isAreaDynamic){
+      this.addPOIArea(marker, marker.entity)
+    }
     // Déplacer le marqueur vers le groupe non clusterisé
     this.moveMarkerToUnclusteredGroup(marker);
 
@@ -144,6 +149,10 @@ export class LayerManager {
         LayerManager.currentInstance?.moveMarkerToClusterGroup(LayerManager.currentMarker)
       }
     }
+
+    if (this.currentMarker?.popUpConfig.isAreaDynamic){
+      this.currentMarker?.areaPolygon?.remove()
+    }
     LayerManager.currentInstance?.emitEvent({ type: LayerEventType.RemoveAllHighlights });
 
   }
@@ -174,7 +183,7 @@ export class LayerManager {
   }
 
   // Méthode pour ajouter un marqueur
-  addMarker(entity: any, popUpConfig?: any): void {
+  addMarker(entity: any, popUpConfig?: PopUpConfig): void {
     const marker = MarkerFactory.createMarker(this.entityType, entity);
     if (marker) {
       if (popUpConfig) {
@@ -190,7 +199,10 @@ export class LayerManager {
     this.attachMarkerEvents(marker, entity);
 
     if (this.entityType === EntityType.POI) {
-      this.addPOIArea(marker, entity);
+      console.log("Je suis la et entityArea et égale à = " + marker.popUpConfig.isAreaDynamic)
+      if(!marker.popUpConfig.isAreaDynamic){
+        this.addPOIArea(marker, entity);
+      }
       this.bindTooltip(marker, `${entity.client_code}-${entity.client_label} - ${entity.category.label}`);
     } else if (this.entityType === EntityType.VEHICLE) {
       this.bindTooltip(marker, `${entity.licenseplate} - ${entity.driver ? entity.driver.firstName + ' ' + entity.driver.lastName : 'Aucun conducteur'}`);

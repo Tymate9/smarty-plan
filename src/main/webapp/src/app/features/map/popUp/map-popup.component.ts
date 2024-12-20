@@ -7,12 +7,13 @@ import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
+import {TabViewChangeEvent} from "primeng/tabview";
 
 @Component({
   selector: 'app-map-popup',
   template: `
     <div class="mapContextMenu">
-      <p-tabView>
+      <p-tabView (onChange)="selectTab($event)">
         <!-- Véhicule Tab -->
         <p-tabPanel header="Véhicule">
           <h4>Adresse : {{ address }}</h4>
@@ -73,7 +74,6 @@ import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
         <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
       </p-tabView>
     </div>
-
   `,
   styles: [`
     .active {
@@ -147,7 +147,7 @@ export class MapPopupComponent implements OnInit {
       }
     });
 
-    this.selectTab('vehicule');
+    this.selectTab();
   }
 
   onRadiusChange(newRadius: number) {
@@ -222,17 +222,15 @@ export class MapPopupComponent implements OnInit {
     });
   }
 
-  selectTab(tab: string) {
+  selectTab(tab? : TabViewChangeEvent) {
     this.onButtonClick();
-    this.activeTab = tab;
-    if (tab === 'vehicule' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
+    this.activeTab = tab?.index.toString() || '0';
+    console.log(this.activeTab)
+    if (this.activeTab === '0' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
       this.loadNearbyVehicles();
     }
-    if (tab === 'poi' && this.nearbyPOIs.length === 0 && !this.loadingPOIs) {
+    if (this.activeTab === '1' && this.nearbyPOIs.length === 0 && !this.loadingPOIs) {
       this.loadNearbyPOIs();
-    }
-    if (tab === 'creation') {
-      this.addPOI();
     }
   }
 

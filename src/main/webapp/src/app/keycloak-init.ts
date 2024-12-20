@@ -1,17 +1,17 @@
 import { KeycloakService } from 'keycloak-angular';
-import { ConfigService, KeycloakDTO } from './core/config/config.service';
+import { ConfigService, AppConfig } from './core/config/config.service';
 import { switchMap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export function initializeKeycloak(keycloak: KeycloakService, configService: ConfigService) {
   return () =>
     configService.getKeycloakConfig().pipe(
-      switchMap((config: KeycloakDTO) => {
+      switchMap((config: AppConfig) => {
         return keycloak.init({
           config: {
-            url: config.authServerURL,
-            realm: config.realmName,
-            clientId: config.clientId,
+            url: config.keycloakConfig.authServerURL,
+            realm: config.keycloakConfig.realmName,
+            clientId: config.keycloakConfig.frontendClientId,
           },
           initOptions: {
             onLoad: 'login-required',

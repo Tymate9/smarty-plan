@@ -157,15 +157,18 @@ export class MapManager {
   // Marker Region
   addMarker(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
     const marker = MarkerFactory.createMarker(type, entity);
+    console.log("je suis dans le addMarker")
+    console.log(popUpConfig?.isAreaDynamic)
     if (marker) {
       this.addMarkerToMap(type, entity, popUpConfig);
     }
   }
 
   private addMarkerToMap(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
-    // Configurer la popup en fonction du type
     switch (type) {
       case EntityType.POI:
+        console.log("je suis dans le addMarkerToMap")
+        console.log(popUpConfig?.isAreaDynamic)
         this.layerManagers[0].addMarker(entity, popUpConfig);
         break;
       case EntityType.VEHICLE:

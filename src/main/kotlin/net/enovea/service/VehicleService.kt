@@ -6,7 +6,6 @@ import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
-import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
@@ -58,15 +57,6 @@ class VehicleService(
             }
             vehicle
         }
-    }
-
-    fun getVehicleDriverDetailsOnDayIfTracked(vehicleId: String, date: LocalDate): Pair<String, String>? {
-        // Get the driver for the vehicle at the given date
-        val driver = VehicleDriverEntity.getForVehicleAtDateIfTracked(vehicleId, date)
-        if (driver != null) {
-            return Pair(driver.vehicle!!.licenseplate, "${driver.driver!!.firstName} ${driver.driver!!.lastName}")
-        }
-        return null
     }
 
     // TODO seperate the data treatment method

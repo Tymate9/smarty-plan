@@ -28,5 +28,5 @@ class DorisBeanFactory {
     @Produces
     @ApplicationScoped
     @Named("tripService")
-    fun tripService(tripRepository: TripRepository, spatialService: SpatialService<PointOfInterestEntity>, vehicleService: VehicleService): TripService = TripService(tripRepository, spatialService, vehicleService)
+    fun tripService(tripRepository: TripRepository, spatialService: SpatialService<PointOfInterestEntity>): TripService = TripService(tripRepository, spatialService)
 }

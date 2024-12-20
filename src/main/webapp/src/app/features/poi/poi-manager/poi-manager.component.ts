@@ -544,7 +544,7 @@ export class PoiManagerComponent implements OnInit {
     // Coordonnées approximatives du centre de la Normandie
     const normandyCenter: L.LatLngExpression = [49.1817, 0.3714];
     // Initialiser la carte
-    this.map = L.map('map', {attributionControl: false}).setView(normandyCenter, 9);
+    this.map = L.map('map', {attributionControl: false, zoomDelta: 0.5}).setView(normandyCenter, 9);
     this.map.setMaxZoom(19);
     // Ajouter une couche de tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -718,7 +718,8 @@ export class PoiManagerComponent implements OnInit {
   addMarkerToMap(poi: PointOfInterestEntity) {
     // Créer une instance de PopUpConfig avec uniquement l'onglet 'information' activé
     const poiPopUpConfig = new PopUpConfig({
-      poiPopupTabs: new Set(['information']) // Seul l'onglet 'information' est activé
+      poiPopupTabs: new Set(['information']),
+      isAreaDynamic: true // Seul l'onglet 'information' est activé
     });
     this.mapManager.addMarker(EntityType.POI, poi, poiPopUpConfig);
   }
@@ -760,7 +761,8 @@ export class PoiManagerComponent implements OnInit {
           payload: {
             poi: poi,
             popUpConfig:new PopUpConfig({
-              poiPopupTabs: new Set(['information']) // Seul l'onglet 'information' est activé
+              poiPopupTabs: new Set(['information']),
+              isAreaDynamic : false// Seul l'onglet 'information' est activé
             })
           },
         };
@@ -776,7 +778,8 @@ export class PoiManagerComponent implements OnInit {
           payload: {
             poi: poi,
             popUpConfig:new PopUpConfig({
-              poiPopupTabs: new Set(['information']) // Seul l'onglet 'information' est activé
+              poiPopupTabs: new Set(['information']),
+              isAreaDynamic : false
             })
           },
         };

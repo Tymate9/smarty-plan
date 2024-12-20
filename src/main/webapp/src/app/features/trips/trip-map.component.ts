@@ -7,6 +7,7 @@ import {CustomMarkerImpl, MarkerFactory} from "../../core/cartography/marker/Mar
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
+import {TilesService} from "../../services/tiles.service";
 
 
 @Component({
@@ -211,9 +212,9 @@ export class TripMapComponent {
   private featureGroup: L.FeatureGroup = L.featureGroup();
 
   constructor(
-    protected tripsService: TripsService
-  ) {
-  }
+    protected tripsService: TripsService,
+    protected tilesService: TilesService
+  ) {}
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {
     if (!tripEventsDTO) {
@@ -230,9 +231,16 @@ export class TripMapComponent {
         zoomDelta: 0.5,
       }).setView([tripEventsDTO.tripEvents[0].lat ?? 0, tripEventsDTO.tripEvents[0].lng ?? 0], 13);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(this.map);
+      this.tilesService.getTileUrls().subscribe(tileUrls => {
+        const baseLayers = {
+          "Carte routière": L.tileLayer(tileUrls.satelliteUrl),
+          "Satellite": L.tileLayer(tileUrls.roadmapUrl),
+        };
+
+        L.control.layers(baseLayers).addTo(this.map!);
+
+        baseLayers["Carte routière"].addTo(this.map!);
+      })
     }
 
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {

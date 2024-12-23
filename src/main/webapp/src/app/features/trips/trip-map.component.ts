@@ -99,13 +99,13 @@ import {TilesService} from "../../services/tiles.service";
                 (mouseleave)="onTripEventMouseLeave(event)"
                 (click)="onTripEventClick(event)"
               > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
-                : {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
+                <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
                 <i class="pi pi-caret-right"></i> {{
                   event.end?.toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit'
                   })
-                }} <strong>{{ tripsService.formatDuration(event.duration) }}</strong>
+                }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
               </div>
             </ng-template>
           </p-timeline>

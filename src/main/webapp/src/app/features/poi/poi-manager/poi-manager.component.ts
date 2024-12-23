@@ -17,6 +17,7 @@ import {GeoUtils} from "../../../commons/geo/geo-utils";
 import { PopUpConfig } from 'src/app/core/cartography/marker/pop-up-config';
 import {ActivatedRoute} from '@angular/router';
 import {NotificationService} from "../../../commons/notification/notification.service";
+import {TilesService} from "../../../services/tiles.service";
 
 
 export class PoiPanel {
@@ -521,7 +522,8 @@ export class PoiManagerComponent implements OnInit {
     private readonly geocodingService: GeocodingService,
     private readonly viewContainerRef: ViewContainerRef,
     private readonly route: ActivatedRoute,
-    private readonly notificationService:NotificationService
+    private readonly notificationService:NotificationService,
+    private readonly tilesService: TilesService
   ) {}
 
   // Methods Related to Map Initialization and Control
@@ -546,10 +548,17 @@ export class PoiManagerComponent implements OnInit {
     // Initialiser la carte
     this.map = L.map('map', {attributionControl: false, zoomDelta: 0.5}).setView(normandyCenter, 9);
     this.map.setMaxZoom(19);
-    // Ajouter une couche de tuiles OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(this.map);
+
+    this.tilesService.getTileUrls().subscribe(tileUrls => {
+      const baseLayers = {
+        "Carte routière": L.tileLayer(tileUrls.roadmapUrl),
+        "Satellite": L.tileLayer(tileUrls.satelliteUrl),
+      };
+
+      L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
+
+      baseLayers["Carte routière"].addTo(this.map!);
+    })
 
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geocodingService, new MapManagerConfig(false));
     // Charger les catégories de POI au démarrage

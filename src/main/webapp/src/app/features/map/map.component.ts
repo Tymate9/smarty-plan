@@ -11,6 +11,7 @@ import {GeocodingService} from "../../commons/geo/geo-coding.service";
 import {FilterService} from "../../commons/navbar/filter.service";
 import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
 import {NotificationService} from "../../commons/notification/notification.service";
+import {TilesService} from "../../services/tiles.service";
 
 
 @Component({
@@ -73,6 +74,7 @@ export class MapComponent implements OnInit, OnDestroy {
               private readonly vehicleService: VehicleService,
               private readonly geoCodingService: GeocodingService,
               private readonly filterService: FilterService,
+              private readonly tilesService: TilesService,
               private readonly notificationService: NotificationService) {
   }
 
@@ -93,10 +95,17 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map = L.map('map', {attributionControl: false, zoomControl: false, zoomDelta: 0.5}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
-    //Todo(Ajouter au mapmgm)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(this.map);
+
+    this.tilesService.getTileUrls().subscribe(tileUrls => {
+      const baseLayers = {
+        "Carte routière": L.tileLayer(tileUrls.roadmapUrl),
+        "Satellite": L.tileLayer(tileUrls.satelliteUrl),
+      };
+
+      L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
+
+      baseLayers["Carte routière"].addTo(this.map!);
+    })
 
     this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
       this.mapManager.showPopup(e.latlng.lat, e.latlng.lng);

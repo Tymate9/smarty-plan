@@ -13,6 +13,7 @@ import {GeoUtils} from "../../../../commons/geo/geo-utils";
 import {ActivatedRoute} from "@angular/router";
 import {PoiService} from "../../poi.service";
 import {LatLng, LatLngExpression} from "leaflet";
+import {TilesService} from "../../../../services/tiles.service";
 
 
 @Component({
@@ -80,7 +81,8 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
   constructor(
     private viewContainerRef: ViewContainerRef,
     private route: ActivatedRoute,
-    private poiService: PoiService
+    private poiService: PoiService,
+    private tilesService: TilesService
   ) {}
 
   get displayedPoiIds(): number[] {
@@ -120,9 +122,16 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
     this.map = L.map('map', { attributionControl: false, zoomDelta: 0.5 }).setView(normandyCenter, 9);
     this.map.setMaxZoom(18);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(this.map);
+    this.tilesService.getTileUrls().subscribe(tileUrls => {
+      const baseLayers = {
+        "Carte routière": L.tileLayer(tileUrls.roadmapUrl),
+        "Satellite": L.tileLayer(tileUrls.satelliteUrl),
+      };
+
+      L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
+
+      baseLayers["Carte routière"].addTo(this.map!);
+    })
 
     this.mapManager = new MapManager(this.map, this.viewContainerRef, null!, new MapManagerConfig(false));
   }

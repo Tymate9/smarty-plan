@@ -171,7 +171,7 @@ export class PoiPanel {
                   />
                 </label>
                 <label>
-                  Libéllé client:
+                  Libellé client:
                   <input
                     pInputText
                     type="text"

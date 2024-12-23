@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-logo',
   template: `
     <div class="logo-container">
-      <img src="assets/logo-NM.png" alt="Logo" />
+      <img src="assets/logo-nm.png" alt="Logo" />
     </div>
   `,
   styles: [

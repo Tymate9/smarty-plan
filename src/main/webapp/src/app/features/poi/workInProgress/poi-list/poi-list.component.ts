@@ -40,7 +40,7 @@ import * as L from 'leaflet';
             </label>
 
             <label>
-              Libéllé client:
+              Libellé client:
               <input pInputText type="text"
                      [(ngModel)]="poiPanel.poi.client_label"
                      name="label{{poiPanel.poi.id}}"

@@ -67,7 +67,7 @@ import {TilesService} from "../../services/tiles.service";
                 <div>
                 <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
-                Trajet de <strong>{{ ((event.duration) / 60).toFixed(0) }}</strong><strong> min</strong></div>
+                Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
 
                 <div class="time-oval">
                   {{

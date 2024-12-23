@@ -300,11 +300,11 @@ export class TripMapComponent {
 
       this.tilesService.getTileUrls().subscribe(tileUrls => {
         const baseLayers = {
-          "Carte routière": L.tileLayer(tileUrls.satelliteUrl),
-          "Satellite": L.tileLayer(tileUrls.roadmapUrl),
+          "Carte routière": L.tileLayer(tileUrls.roadmapUrl),
+          "Satellite": L.tileLayer(tileUrls.satelliteUrl),
         };
 
-        L.control.layers(baseLayers).addTo(this.map!);
+        L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
 
         baseLayers["Carte routière"].addTo(this.map!);
       })

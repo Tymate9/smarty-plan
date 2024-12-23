@@ -1,20 +1,14 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
-import {HttpClient} from "@angular/common/http";
 import {switchMap} from "rxjs/operators";
+import {ConfigService} from "../core/config/config.service";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class TilesService {
-  private apiUrl = '/api/tiles';
-
-  constructor(private http: HttpClient) {
-  }
-
-  getTileApiKey(): Observable<{ apiKey: string }> {
-    return this.http.get<{ apiKey: string }>(`${this.apiUrl}/api-key`);
+  constructor(private configService: ConfigService) {
   }
 
   private async refreshOrGetToken(apiKey: string, mapType: string): Promise<string> {
@@ -29,6 +23,10 @@ export class TilesService {
           body: JSON.stringify({mapType: mapType, language: 'fr-FR', region: 'FR'}),
         }
       );
+      if (!data.ok) {
+        alert('Failed to get session token for ${mapType} tiles');
+        return ''
+      }
       const response: {
         session: string
         expiry: string
@@ -44,16 +42,23 @@ export class TilesService {
   }
 
   getTileUrls(): Observable<{ satelliteUrl: string, roadmapUrl: string }> {
-    return this.getTileApiKey().pipe(switchMap(async ({apiKey}): Promise<{
+    return this.configService.getConfig().pipe(switchMap(async ({tilesApiKey}): Promise<{
       satelliteUrl: string,
       roadmapUrl: string
     }> => {
-      const satelliteTilesSessionToken = await this.refreshOrGetToken(apiKey, 'satellite');
-      const roadmapTilesSessionToken = await this.refreshOrGetToken(apiKey, 'roadmap');
+      const satelliteTilesSessionToken = await this.refreshOrGetToken(tilesApiKey, 'satellite');
+      const roadmapTilesSessionToken = await this.refreshOrGetToken(tilesApiKey, 'roadmap');
+
+      if (satelliteTilesSessionToken === '' || roadmapTilesSessionToken === '') {
+        return {
+          satelliteUrl: '',
+          roadmapUrl: ''
+        };
+      }
 
       return {
-        satelliteUrl: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${satelliteTilesSessionToken}&key=${apiKey}`,
-        roadmapUrl: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${roadmapTilesSessionToken}&key=${apiKey}`
+        satelliteUrl: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${satelliteTilesSessionToken}&key=${tilesApiKey}`,
+        roadmapUrl: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${roadmapTilesSessionToken}&key=${tilesApiKey}`
       };
     }));
   }

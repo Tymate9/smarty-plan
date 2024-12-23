@@ -7,7 +7,7 @@ import AppConfigDTO = dto.AppConfigDTO;
 
 export function initializeKeycloak(keycloak: KeycloakService, configService: ConfigService) {
   return () =>
-    configService.getKeycloakConfig().pipe(
+    configService.getConfig().pipe(
       switchMap((config: AppConfigDTO) => {
         return keycloak.init({
           config: {

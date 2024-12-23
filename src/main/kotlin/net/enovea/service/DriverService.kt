@@ -52,7 +52,7 @@ class DriverService(
         }
 
         baseQuery += """
-            WHERE vd.endDate IS NULL
+            ${if (baseQuery.contains("WHERE")) "AND" else "WHERE"} vd.endDate IS NULL
             AND vup.id.startDate IS NULL
             AND dup.id.startDate IS NULL
         """

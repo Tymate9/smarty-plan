@@ -65,22 +65,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           </div>
         </p-tabPanel>
 
-        <p-tabPanel header="Achat de SMS">
-          <h4>Achat d'un pack SMS</h4>
-          <!-- Formulaire d'achat de SMS -->
-          <form [formGroup]="smsPackFormGroup" (ngSubmit)="buySmsPack()">
-            <div class="p-field">
-              <label for="totalSms">Nombre de SMS à acheter :</label>
-              <input id="totalSms" type="number" formControlName="totalSms"/>
-              <div *ngIf="smsPackFormGroup.get('totalSms')?.invalid && smsPackFormGroup.get('totalSms')?.touched"
-                   class="error">
-                Veuillez entrer un nombre supérieur ou égal à 1.
-              </div>
-            </div>
-            <button pButton type="submit" label="Acheter" [disabled]="smsPackFormGroup.invalid" style="background-color: #aa001f; border: #aa001f;"></button>
-          </form>
-        </p-tabPanel>
-
         <!-- Onglet Envoyer un SMS -->
         <p-tabPanel header="Envoyer un SMS">
             <h4>Forfait SMS Enovea</h4>

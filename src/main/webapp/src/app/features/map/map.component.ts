@@ -38,6 +38,7 @@ import {NotificationService} from "../../commons/notification/notification.servi
       height: 87vh;
       width: 100%;
     }
+
     .hidden {
       display: none;
     }
@@ -48,26 +49,21 @@ import {NotificationService} from "../../commons/notification/notification.servi
       background-color: var(--gray-100);
     }
 
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red  {
-      background-color:#aa001f !important;
-      border-color:#aa001f !important;
+    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red {
+      background-color: #aa001f !important;
+      border-color: #aa001f !important;
       color: white !important;
-      font-weight:600;
+      font-weight: 600;
     }
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red:focus {
-    //  //outline: none !important;
-    //  //box-shadow: none !important; /* Removes any shadow from the focus */
-    //  border-color: var(--gray-500) !important;
-    //}
   `]
 })
 export class MapComponent implements OnInit, OnDestroy {
 
   private map!: L.Map;
-  private mapManager : MapManager;
-  protected noComVehicle : String = "Liste des véhicules non-communicant ou sans statut : "
-  protected unpluggedVehicle : String = "Liste des véhicules dont le boitier est déconnecté : "
-  private filters : { agencies : string[], vehicles : string[], drivers : string[] };
+  private mapManager: MapManager;
+  protected noComVehicle: String = "Liste des véhicules non-communicant ou sans statut : "
+  protected unpluggedVehicle: String = "Liste des véhicules dont le boitier est déconnecté : "
+  private filters: { agencies: string[], vehicles: string[], drivers: string[] };
   isCollapsed: boolean = true;
   private updateSubscription?: Subscription;
   private filterSubscription?: Subscription;
@@ -76,8 +72,9 @@ export class MapComponent implements OnInit, OnDestroy {
               private readonly poiService: PoiService,
               private readonly vehicleService: VehicleService,
               private readonly geoCodingService: GeocodingService,
-              private readonly filterService:FilterService,
-              private readonly notificationService: NotificationService) {}
+              private readonly filterService: FilterService,
+              private readonly notificationService: NotificationService) {
+  }
 
   ngOnInit(): void {
     this.initMap();
@@ -109,8 +106,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private loadPOIs(): void {
     this.poiService.getAllPOIs().subscribe({
       next: (pois) => {
-        pois.forEach(poi =>
-          {
+        pois.forEach(poi => {
             this.mapManager.addMarker(EntityType.POI, poi)
           }
         );
@@ -123,7 +119,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
-      this.filters = filters as { agencies : string[], vehicles : string[], drivers : string[] };
+      this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
 
       // Call getFilteredVehicles each time filters change
       this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
@@ -145,14 +141,14 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private displayFilteredVehiclesOnMap(vehicles: dto.VehicleSummaryDTO[]): void {
 
-   // this.mapManager.deleteMarkers();
-    const event : LayerEvent = {
-      type : LayerEventType.DeleteAllMarkers,
-        payload: {
-          markerType :'vehicle'
-        }
+    // this.mapManager.deleteMarkers();
+    const event: LayerEvent = {
+      type: LayerEventType.DeleteAllMarkers,
+      payload: {
+        markerType: 'vehicle'
+      }
     }
-    this.mapManager.handleLayerEvent(event,null)
+    this.mapManager.handleLayerEvent(event, null)
 
     // Reset unTrackedVehicle list for each filter change
     this.noComVehicle = "Liste des véhicules non-communicant ou sans statut : ";
@@ -163,10 +159,10 @@ export class MapComponent implements OnInit, OnDestroy {
       if (vehicle.device && vehicle.device.coordinate) {
 
         this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
-        if (vehicle.device.state === "" || vehicle.device.state === "NO_COM" || vehicle.device?.state === null){
+        if (vehicle.device.state === "" || vehicle.device.state === "NO_COM" || vehicle.device?.state === null) {
           this.noComVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
         }
-        if (vehicle.device.state === "UNPLUGGED"){
+        if (vehicle.device.state === "UNPLUGGED") {
           this.unpluggedVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
         }
       }
@@ -192,6 +188,7 @@ export class MapComponent implements OnInit, OnDestroy {
               id: markerId,
               entityType: EntityType.VEHICLE,
               newCoordinates: result.lastPosition,
+              newState: result.state
             }
           };
           this.mapManager.handleLayerEvent(event, null);

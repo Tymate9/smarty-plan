@@ -1,5 +1,6 @@
 package net.enovea.api.poi
 
+import io.quarkus.security.Authenticated
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
@@ -11,6 +12,7 @@ import org.locationtech.jts.geom.*
 import org.locationtech.jts.io.WKTReader
 
 @Path("/api/poi")
+@Authenticated
 class PointOfInterestResource (
     val pointOfInterestSpatialService: SpatialService<PointOfInterestEntity>,
     val entityManager: EntityManager
@@ -187,7 +189,7 @@ class PointOfInterestResource (
 
             // 4. Créer l'entité POI avec le Polygon et le Point
             val poiEntity = PointOfInterestEntity(
-                client_code = poiForm.clientCode,
+                client_code = if(poiForm.clientCode == "0000") null else poiForm.clientCode,
                 client_label = poiForm.clientLabel,
                 category = category,
                 coordinate = pointGeometry, // Coordonnées indépendantes de la zone
@@ -256,7 +258,7 @@ class PointOfInterestResource (
             val coordinatePoint: Point = pointGeometry
 
             // 5. Mettre à jour les champs de l'entité POI
-            existingPOI.client_code = poiForm.clientCode
+            existingPOI.client_code = if(poiForm.clientCode == "0000") null else poiForm.clientCode
             existingPOI.client_label = poiForm.clientLabel
             existingPOI.category = category
             existingPOI.coordinate = coordinatePoint

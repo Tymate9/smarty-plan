@@ -13,11 +13,13 @@ import {TabViewChangeEvent} from "primeng/tabview";
   selector: 'app-map-popup',
   template: `
     <div class="mapContextMenu">
+      <h4>Adresse : {{ address }}</h4>
+      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
+      <!-- Create POI Tab -->
+      <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
       <p-tabView (onChange)="selectTab($event)">
         <!-- Véhicule Tab -->
         <p-tabPanel header="Véhicule">
-          <h4>Adresse : {{ address }}</h4>
-          <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
           <h4>Véhicules les Plus Proches</h4>
           <div *ngIf="loadingVehicles">Chargement des véhicules proches...</div>
           <div *ngIf="!loadingVehicles && nearbyVehicles.length === 0">Aucun véhicule trouvé à proximité.</div>
@@ -44,8 +46,6 @@ import {TabViewChangeEvent} from "primeng/tabview";
 
         <!-- POI Tab -->
         <p-tabPanel header="POI">
-          <h4>Adresse : {{ address }}</h4>
-          <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
           <h4>POIs les Plus Proches</h4>
           <div *ngIf="loadingPOIs">Chargement des POIs proches...</div>
           <div *ngIf="!loadingPOIs && nearbyPOIs.length === 0">Aucun POI trouvé à proximité.</div>
@@ -69,9 +69,6 @@ import {TabViewChangeEvent} from "primeng/tabview";
             </li>
           </ul>
         </p-tabPanel>
-
-        <!-- Create POI Tab -->
-        <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
       </p-tabView>
     </div>
   `,

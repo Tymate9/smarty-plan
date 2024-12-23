@@ -27,3 +27,5 @@ SELECT v.*
 FROM vehicle v
          LEFT JOIN vehicle_team vt ON vt.vehicle_id = v.id AND vt.end_date IS NULL
 WHERE vt.vehicle_id IS NULL;
+
+

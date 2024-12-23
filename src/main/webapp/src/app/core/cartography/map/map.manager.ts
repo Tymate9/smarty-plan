@@ -142,7 +142,7 @@ export class MapManager {
       case LayerEventType.UpdateMarkerPosition:
         const umpLayerManager = this.getLayerManagerByType(event.payload.entityType);
         if (umpLayerManager) {
-          umpLayerManager.updateMarkerPosition(event.payload.id, event.payload.newCoordinates);
+          umpLayerManager.updateMarkerPosition(event.payload.id, event.payload.newCoordinates, event.payload.newState);
         } else {
           console.warn(`Aucun LayerManager trouvé pour le type d'entité : ${event.payload.entityType}`);
         }

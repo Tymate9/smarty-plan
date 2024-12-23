@@ -7,19 +7,20 @@
       <div class="input-container">
         <div class="tags">
           <span *ngFor="let tag of selectedTags" class="tag">
-            {{ tag }} <button (click)="removeTag(tag)">x</button>
+            {{ tag }}  <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
           </span>
           <input
             type="text"
             [(ngModel)]="searchText"
             (input)="onSearch()"
+            (focus)="openDropdown()"
+            (blur)="onInputBlur()"
             placeholder="Filtrer {{ label }}..."
             [ngStyle]="{'background-color': 'white'}"
           />
-          <button class="dropdown-button" (click)="toggleDropdown()">&#9662;</button> <!-- Bouton pour afficher les options -->
         </div>
       </div>
-      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
+      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" >
         <li *ngFor="let option of filteredOptions" (click)="selectOption(option)">
           {{ option }}
         </li>
@@ -39,6 +40,7 @@
       flex-wrap: wrap;
       align-items: center;
       background-color: white;
+      border-radius:5px;
     }
 
     .tags {
@@ -47,6 +49,10 @@
       align-items: center;
       flex-grow: 1;
       background-color: white;
+      max-height: 50px;
+      overflow-y: auto;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .tag {
@@ -56,6 +62,9 @@
       margin-right: 5px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .input-container input {
@@ -64,6 +73,7 @@
       flex-grow: 1;
       min-width: 150px;
       background-color: white;
+      border-radius: 5px;
     }
 
     .dropdown-button {
@@ -91,6 +101,18 @@
 
     .autocomplete-list li:hover {
       background-color: #f0f0f0;
+    }
+    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close{
+      background-color:#aa001f !important;
+      border-color:#aa001f !important;
+      color: white !important;
+      font-weight:600;
+      margin-left:4px;
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+      padding: 2px;
+
     }
   `]
 })
@@ -140,6 +162,19 @@ export class SearchAutocompleteComponent implements OnChanges{
     this.filterOptions();
   }
 
+  openDropdown() {
+    this.dropdownVisible = true;
+    //this.dropdown.focus()
+    document.getElementById('dropdown')?.focus()
+
+  }
+
+  closeDropdown() {
+    this.dropdownVisible = false;
+  }
+
+
+
   // Retire une étiquette
   removeTag(tag: string) {
     this.selectedTags = this.selectedTags.filter(t => t !== tag);
@@ -153,6 +188,19 @@ export class SearchAutocompleteComponent implements OnChanges{
     if (this.dropdownVisible) {
       this.filterOptions();
     }
+  }
+  onInputBlur(): void {
+    setTimeout(() => {
+      if (!this.isDropdownClicked) {
+        this.closeDropdown();
+      }
+      this.filterOptions();
+      this.isDropdownClicked = false;  // Reset after checking
+    }, 100);
+  }
+  isDropdownClicked: boolean = false;
+  onDropdownClick(): void {
+    this.isDropdownClicked = true;
   }
 }
 

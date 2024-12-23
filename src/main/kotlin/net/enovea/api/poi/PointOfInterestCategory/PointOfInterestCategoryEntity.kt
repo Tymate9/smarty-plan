@@ -2,6 +2,7 @@ package net.enovea.api.poi.PointOfInterestCategory
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+import io.quarkus.security.Authenticated
 import jakarta.persistence.*
 
 @Entity(name = PointOfInterestCategoryEntity.ENTITY_NAME)

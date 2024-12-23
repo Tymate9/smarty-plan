@@ -1,18 +1,8 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-// Définir une interface pour le DTO de la configuration Keycloak
-export interface AppConfig {
-  keycloakConfig: KeycloakAppConfig
-}
-
-export interface KeycloakAppConfig {
-  redirectUrl: string;
-  realmName: string;
-  authServerURL: string;
-  frontendClientId: string;
-}
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {dto} from "../../../habarta/dto";
+import AppConfigDTO = dto.AppConfigDTO;
 
 @Injectable({
   providedIn: 'root',
@@ -20,10 +10,11 @@ export interface KeycloakAppConfig {
 export class ConfigService {
   private readonly baseUrl = '/api/config';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {
+  }
 
   // Méthode pour récupérer la configuration Keycloak
-  getKeycloakConfig(): Observable<AppConfig> {
-    return this.http.get<AppConfig>(`${this.baseUrl}`);
+  getKeycloakConfig(): Observable<AppConfigDTO> {
+    return this.http.get<AppConfigDTO>(`${this.baseUrl}`);
   }
 }

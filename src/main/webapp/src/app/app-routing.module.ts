@@ -14,11 +14,13 @@ const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
+      {path:'work-in-progress', component:PoiManagerComponent},
       { path: 'dashboard', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit', component: PoiMapComponent},
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

@@ -1,15 +1,17 @@
-import { KeycloakService } from 'keycloak-angular';
-import { ConfigService, AppConfig } from './core/config/config.service';
-import { switchMap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import {KeycloakService} from 'keycloak-angular';
+import {ConfigService} from './core/config/config.service';
+import {catchError, switchMap} from 'rxjs/operators';
+import {of} from 'rxjs';
+import {dto} from "../habarta/dto";
+import AppConfigDTO = dto.AppConfigDTO;
 
 export function initializeKeycloak(keycloak: KeycloakService, configService: ConfigService) {
   return () =>
     configService.getKeycloakConfig().pipe(
-      switchMap((config: AppConfig) => {
+      switchMap((config: AppConfigDTO) => {
         return keycloak.init({
           config: {
-            url: config.keycloakConfig.authServerURL,
+            url: config.keycloakConfig.authServerUrl,
             realm: config.keycloakConfig.realmName,
             clientId: config.keycloakConfig.frontendClientId,
           },

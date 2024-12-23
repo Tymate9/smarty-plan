@@ -52,6 +52,7 @@ import {PoiListComponent} from './features/poi/workInProgress/poi-list/poi-list.
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {InputNumberModule} from "primeng/inputnumber";
 import {SelectButtonModule} from "primeng/selectbutton";
+import {LogoComponent} from "./commons/logo/logo.component";
 
 @NgModule({
   declarations: [
@@ -76,6 +77,7 @@ import {SelectButtonModule} from "primeng/selectbutton";
     PoiMapComponent,
     PoiSearchComponent,
     PoiListComponent,
+    LogoComponent,
   ],
   imports: [
     BrowserModule,

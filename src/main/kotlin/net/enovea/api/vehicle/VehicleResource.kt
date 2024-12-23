@@ -1,5 +1,6 @@
 package net.enovea.api.vehicle
 
+import io.quarkus.security.Authenticated
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -20,6 +21,7 @@ import org.locationtech.jts.io.WKTReader
 @Path("/api/vehicles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Authenticated
 class VehicleResource(
     private val vehicleService: VehicleService,
     private val deviceDataStateSpatialService: SpatialService<DeviceDataStateEntity>,

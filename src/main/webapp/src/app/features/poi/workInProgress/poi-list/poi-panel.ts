@@ -15,6 +15,7 @@ export class PoiPanel {
     public address?: string,
     private _inputType: string = 'adresse'
   ) {
+    this.poi.client_code = this.poi.client_code == null ? "0000" : this.poi.client_code;
     this.selectedCategoryId = this.poi.category.id;
     this.originalAddress = this.poi.address;
     this.originalLatitude = this.poi.coordinate.coordinates[1];

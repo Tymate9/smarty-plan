@@ -20,7 +20,7 @@ data class PointOfInterestEntity(
     @JoinColumn(name = "type", nullable = false)
     var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
 
-    var client_code : String = "",
+    var client_code : String? = "0000",
 
     var client_label: String = "",
 
@@ -49,7 +49,7 @@ data class PointOfInterestEntity(
     },
 
 ) : PanacheEntityBase {
-    fun getDenomination(): String = "${client_code}-${client_label}"
+    fun getDenomination(): String = "${if(client_code.isNullOrEmpty()){"0000"}else{client_code}}-${client_label}"
 
     companion object : PanacheCompanionBase<PointOfInterestEntity, Int> {
         const val ID_SEQUENCE = "point_of_interest_id_seq"

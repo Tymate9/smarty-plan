@@ -12,7 +12,7 @@ import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.dto.DriverDTO
 import net.enovea.dto.TeamDTO
 
-class DriverService (
+class DriverService(
     private val driverMapper: DriverMapper,
 ) {
 
@@ -26,6 +26,16 @@ class DriverService (
         var baseQuery = """
         SELECT d
         FROM DriverEntity d
+        JOIN FETCH VehicleDriverEntity vd ON d.id = vd.id.driverId
+        JOIN FETCH VehicleEntity v ON vd.id.vehicleId = v.id
+        LEFT JOIN VehicleUntrackedPeriodEntity vup 
+            ON vup.id.vehicleId = v.id 
+            AND vup.id.startDate <= current_date()
+            AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
+        LEFT JOIN DriverUntrackedPeriodEntity dup 
+            ON dup.id.driverId = d.id 
+            AND dup.id.startDate <= current_date() 
+            AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
     """
 
         // Extend the query only if agencyIds are provided
@@ -41,12 +51,17 @@ class DriverService (
 
         }
 
+        baseQuery += """
+            WHERE vd.endDate IS NULL
+            AND vup.id.startDate IS NULL
+            AND dup.id.startDate IS NULL
+        """
+
         val panacheQuery = DriverEntity.find(baseQuery, params)
 
         return panacheQuery.list().map { driverMapper.toDto(it) }
 
     }
-
 
 
 }

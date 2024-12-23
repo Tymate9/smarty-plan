@@ -6,6 +6,7 @@ import net.enovea.api.trip.TripDailyStatsDTO
 import java.time.LocalDate
 
 class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
+    // todo : replace raw timezone computation with timezone field
 
     fun findById(tripId: String): TripDTO? {
         return dorisJdbiContext.jdbi.withHandle<TripDTO, Exception> { handle ->
@@ -14,9 +15,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 SELECT 
                     vehicle_id, 
                     trip_id,
-                    last_compute_date,
-                    start_time,
-                    end_time,
+                    convert_tz(last_compute_date, 'UTC', 'Europe/Paris') as last_compute_date,
+                    convert_tz(start_time, 'UTC', 'Europe/Paris') as start_time,
+                    convert_tz(end_time, 'UTC', 'Europe/Paris') as end_time,
                     distance,
                     duration,
                     datapoint_count,
@@ -46,9 +47,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 SELECT 
                     vehicle_id, 
                     trip_id,
-                    last_compute_date,
-                    start_time,
-                    end_time,
+                    convert_tz(last_compute_date, 'UTC', 'Europe/Paris') as last_compute_date,
+                    convert_tz(start_time, 'UTC', 'Europe/Paris') as start_time,
+                    convert_tz(end_time, 'UTC', 'Europe/Paris') as end_time,
                     distance,
                     duration,
                     datapoint_count,
@@ -74,27 +75,27 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
         return dorisJdbiContext.jdbi.withHandle<List<TripDTO>, Exception> { handle ->
             handle.createQuery(
                 """
-                    SELECT 
-                        vehicle_id, 
-                        trip_id,
-                        last_compute_date,
-                        start_time,
-                        end_time,
-                        distance,
-                        duration,
-                        datapoint_count,
-                        s2_longitude(start_location) AS start_lng,
-                        s2_latitude(start_location) AS start_lat,
-                        s2_longitude(end_location) AS end_lng,
-                        s2_latitude(end_location) AS end_lat,
-                        idle_duration,
-                        idle_count,
-                        trip_status,
-                        st_astext(st_geometryfromwkb(trace)) as trace 
-                    FROM trips_vehicle_view 
-                    WHERE coalesce(vehicle_id, '') = :vehicleId 
-                    AND date_trunc(start_time, 'day') = :date
-                    ORDER BY start_time
+                SELECT 
+                    vehicle_id, 
+                    trip_id,
+                    convert_tz(last_compute_date, 'UTC', 'Europe/Paris') as last_compute_date,
+                    convert_tz(start_time, 'UTC', 'Europe/Paris') as start_time,
+                    convert_tz(end_time, 'UTC', 'Europe/Paris') as end_time,
+                    distance,
+                    duration,
+                    datapoint_count,
+                    s2_longitude(start_location) AS start_lng,
+                    s2_latitude(start_location) AS start_lat,
+                    s2_longitude(end_location) AS end_lng,
+                    s2_latitude(end_location) AS end_lat,
+                    idle_duration,
+                    idle_count,
+                    trip_status,
+                    st_astext(st_geometryfromwkb(trace)) as trace 
+                FROM trips_vehicle_view 
+                WHERE coalesce(vehicle_id, '') = :vehicleId 
+                AND date_trunc(start_time, 'day') = :date
+                ORDER BY start_time
                 """.trimIndent()
             )
                 .bind("vehicleId", vehicleId)

@@ -62,10 +62,6 @@ class VehicleService(
 
     // TODO seperate the data treatment method
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
-        // Get the IDs of untracked vehicles/drivers
-        val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
-        val untrackedDriverIds = DriverUntrackedPeriodEntity.findDriverIdsWithUntrackedPeriod()
-
         val allVehicles = vehicles ?: VehicleEntity.listAll()
         val tripStats = tripService.getTripDailyStats()
 
@@ -88,49 +84,36 @@ class VehicleService(
 
         // Replace the last position for the untracked vehicles/drivers by null
         allVehicleDataDTO.forEach { vehicleDataDTO ->
-            val driver = vehicleDataDTO.driver
-            val isVehicleTracked = vehicleDataDTO.id !in untrackedVehicleIds
-            val isDriverTracked = driver == null || driver.id !in untrackedDriverIds
-
-            if (!isVehicleTracked || !isDriverTracked) {
-                vehicleDataDTO.device.deviceDataState?.coordinate = null
-            } else {
-                try {
-                    // Try to fetch POI using spatial service
-                    val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                        spatialService.getNearestEntityWithinArea(it)
-                    }
-                    if (poi != null) {
-                        vehicleDataDTO.lastPositionAddress = (poi.client_code?: "0000") + " - " + poi.client_label
-                        vehicleDataDTO.lastPositionAddressInfo = poi.category
-                    } else {
-                        // Cannot find POI so Adress Type is "route"
-                        vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
-                            label="route",
-                            color="#000"
-                        )
-                        // Get adress from device DataState or geocoding
-                        if(vehicleDataDTO.device.deviceDataState?.address == null)
-                        {
-                            val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                                geoCodingService.reverseGeocode(it)
-                            }
-                            vehicleDataDTO.lastPositionAddress = address
-                        }
-                        else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty())
-                        {
-                            vehicleDataDTO.lastPositionAddress = "Adresse Inconnu"
-                        }
-                        else
-                        {
-                            vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
-
-                        }
-                    }
-                } catch (e: Exception) {
-                    // Handle any errors during POI lookup or reverse geocoding
-                    vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
+            try {
+                // Try to fetch POI using spatial service
+                val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+                    spatialService.getNearestEntityWithinArea(it)
                 }
+                if (poi != null) {
+                    vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
+                    vehicleDataDTO.lastPositionAddressInfo = poi.category
+                } else {
+                    // Cannot find POI so Adress Type is "route"
+                    vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
+                        label = "route",
+                        color = "#000"
+                    )
+                    // Get adress from device DataState or geocoding
+                    if (vehicleDataDTO.device.deviceDataState?.address == null) {
+                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+                            geoCodingService.reverseGeocode(it)
+                        }
+                        vehicleDataDTO.lastPositionAddress = address
+                    } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
+                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnu"
+                    } else {
+                        vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
+
+                    }
+                }
+            } catch (e: Exception) {
+                // Handle any errors during POI lookup or reverse geocoding
+                vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
             }
         }
         // Now we build the hierarchy of vehicles based on their teams
@@ -207,6 +190,16 @@ class VehicleService(
         var baseQuery = """
         SELECT v
         FROM VehicleEntity v
+        JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
+        JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
+        LEFT JOIN VehicleUntrackedPeriodEntity vup 
+            ON vup.id.vehicleId = v.id 
+            AND vup.id.startDate <= current_date()
+            AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
+        LEFT JOIN DriverUntrackedPeriodEntity dup 
+            ON dup.id.driverId = d.id 
+            AND dup.id.startDate <= current_date() 
+            AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
     """
 
         // Extend the query only if agencyIds are provided
@@ -223,6 +216,12 @@ class VehicleService(
             """
             params["agencyIds"] = agencyIds
         }
+
+        baseQuery += """
+            WHERE vd.endDate IS NULL
+            AND vup.id.startDate IS NULL
+            AND dup.id.startDate IS NULL
+        """.trimIndent()
 
 
         val panacheQuery = VehicleEntity.find(baseQuery, params)
@@ -251,9 +250,19 @@ class VehicleService(
             LEFT JOIN t.parentTeam parent_team
             JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
             JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
+            LEFT JOIN VehicleUntrackedPeriodEntity vup 
+                ON vup.id.vehicleId = v.id 
+                AND vup.id.startDate <= current_date()
+                AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
+            LEFT JOIN DriverUntrackedPeriodEntity dup 
+                ON dup.id.driverId = d.id 
+                AND dup.id.startDate <= current_date() 
+                AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
             WHERE 1=1
             AND vt.endDate IS NULL
             AND vd.endDate IS NULL
+            AND vup.id.startDate IS NULL
+            AND dup.id.startDate IS NULL
         """
 
         if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {

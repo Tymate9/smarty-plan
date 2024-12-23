@@ -20,7 +20,8 @@ class EnvConfigResource(val keycloakConfig: KeycloakConfig) {
                     keycloakConfig.realmName(),
                     keycloakConfig.authServerUrl(),
                     keycloakConfig.frontendClientId()
-                )
+                ),
+                tilesApiKey = System.getenv("TILES_API_KEY")
             )
         ).build()
     }

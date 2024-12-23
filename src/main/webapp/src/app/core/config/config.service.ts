@@ -13,8 +13,8 @@ export class ConfigService {
   constructor(private readonly http: HttpClient) {
   }
 
-  // Méthode pour récupérer la configuration Keycloak
-  getKeycloakConfig(): Observable<AppConfigDTO> {
+  // Méthode pour récupérer la configuration
+  getConfig(): Observable<AppConfigDTO> {
     return this.http.get<AppConfigDTO>(`${this.baseUrl}`);
   }
 }

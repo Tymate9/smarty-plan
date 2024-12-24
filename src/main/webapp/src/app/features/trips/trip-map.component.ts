@@ -4,10 +4,10 @@ import {TripsService} from './trips.service';
 import {dto} from "../../../habarta/dto";
 import {parse as WKTParse} from "wellknown";
 import {CustomMarkerImpl, MarkerFactory} from "../../core/cartography/marker/MarkerFactory";
+import {TilesService} from "../../services/tiles.service";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
-import {TilesService} from "../../services/tiles.service";
 
 
 @Component({
@@ -300,8 +300,8 @@ export class TripMapComponent {
 
       this.tilesService.getTileUrls().subscribe(tileUrls => {
         const baseLayers = {
-          "Carte routière": L.tileLayer(tileUrls.roadmapUrl),
-          "Satellite": L.tileLayer(tileUrls.satelliteUrl),
+          "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
+          "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
         };
 
         L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);

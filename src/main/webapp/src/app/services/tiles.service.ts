@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {switchMap} from "rxjs/operators";
 import {ConfigService} from "../core/config/config.service";
+import {TileErrorEvent} from "leaflet";
 
 
 @Injectable({
@@ -61,5 +62,13 @@ export class TilesService {
         roadmapUrl: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${roadmapTilesSessionToken}&key=${tilesApiKey}`
       };
     }));
+  }
+
+  onTileError(event: TileErrorEvent) {
+    console.error(event);
+    event.tile.src = event.tile.src.split("?")[0].replace(
+        "https://tile.googleapis.com/v1/2dtiles/",
+        `https://${String.fromCharCode(97 + Math.floor(Math.random() * 3))}.tile.openstreetmap.org/`)
+      + ".png";
   }
 }

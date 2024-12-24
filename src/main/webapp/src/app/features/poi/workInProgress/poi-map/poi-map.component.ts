@@ -124,8 +124,8 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
 
     this.tilesService.getTileUrls().subscribe(tileUrls => {
       const baseLayers = {
-        "Carte routière": L.tileLayer(tileUrls.roadmapUrl),
-        "Satellite": L.tileLayer(tileUrls.satelliteUrl),
+        "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
+        "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
       };
 
       L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);

@@ -943,7 +943,6 @@ export class PoiManagerComponent implements OnInit {
       // Géocoder l'adresse pour obtenir les coordonnées
       this.geocodingService.geocodeAddress(poiPanel.modifiedAddress).subscribe(
         (result) => {
-          console.log("Les modification en fonction de result c'est ici")
           latitude = result.latitude;
           longitude = result.longitude;
           // Procéder à la création ou mise à jour du POI

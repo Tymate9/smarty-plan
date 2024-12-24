@@ -109,7 +109,10 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
         return dorisJdbiContext.jdbi.withHandle<List<TripDailyStatsDTO>, Exception> { handle ->
             handle.createQuery(
                 """
-                    SELECT vehicle_id, sum(distance) as distance, min(start_time) as first_trip_start
+                    SELECT 
+                        vehicle_id, 
+                        sum(distance) as distance, 
+                        convert_tz(min(start_time), 'UTC', 'Europe/Paris') as first_trip_start
                     FROM trips_vehicle_view
                     WHERE date(start_time) = date(now()) and vehicle_id is not null
                     GROUP BY vehicle_id, date(start_time)

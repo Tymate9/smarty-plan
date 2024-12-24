@@ -111,10 +111,12 @@ import {Subscription} from "rxjs";
             class="custom-cell">{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
           <td
-            class="custom-cell">{{ rowData.vehicle.firstTripStart }}
+            class="custom-cell">
+                <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
+                <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
 
-          <td class="poi-cell" [ngStyle]="{ 'white-space': 'nowrap', 'width': 'auto' }">
+          <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
                     class="poi-icon">

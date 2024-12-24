@@ -96,16 +96,19 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.setMaxZoom(18);
     this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
 
-    this.tilesService.getTileUrls().subscribe(tileUrls => {
-      const baseLayers = {
-        "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
-        "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
-      };
-
-      L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
-
-      baseLayers["Carte routière"].addTo(this.map!);
-    })
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(this.map);
+    // this.tilesService.getTileUrls().subscribe(tileUrls => {
+    //   const baseLayers = {
+    //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
+    //     "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
+    //   };
+    //
+    //   L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
+    //
+    //   baseLayers["Carte routière"].addTo(this.map!);
+    // })
 
     this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
       this.mapManager.showPopup(e.latlng.lat, e.latlng.lng);

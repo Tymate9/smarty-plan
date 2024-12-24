@@ -298,16 +298,19 @@ export class TripMapComponent {
         zoomDelta: 0.5,
       }).setView([tripEventsDTO.tripEvents[0].lat ?? 0, tripEventsDTO.tripEvents[0].lng ?? 0], 13);
 
-      this.tilesService.getTileUrls().subscribe(tileUrls => {
-        const baseLayers = {
-          "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
-          "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
-        };
-
-        L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
-
-        baseLayers["Carte routière"].addTo(this.map!);
-      })
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(this.map);
+      // this.tilesService.getTileUrls().subscribe(tileUrls => {
+      //   const baseLayers = {
+      //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
+      //     "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
+      //   };
+      //
+      //   L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
+      //
+      //   baseLayers["Carte routière"].addTo(this.map!);
+      // })
     }
 
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {

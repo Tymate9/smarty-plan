@@ -105,7 +105,7 @@ class VehicleService(
                         }
                         vehicleDataDTO.lastPositionAddress = address
                     } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
-                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnu"
+                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnue"
                     } else {
                         vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
 

@@ -129,7 +129,7 @@ import {Subscription} from "rxjs";
             </span>
 
               <span>
-            {{ rowData.vehicle.lastPositionAddress ?? 'Inconnu' }}
+            {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
               </span>
             </div>
           </td>

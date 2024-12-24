@@ -284,10 +284,10 @@ class DbSeed {
 
             // Adresse
             val finalAddress = if (adr.isEmpty() && cp.isEmpty() && ville.isEmpty()) {
-                "Adresse inconnu"
+                "Adresse inconnue"
             } else {
                 listOf(adr, cp, ville).filter { it.isNotEmpty() }.joinToString(" ")
-                    .ifEmpty { "Adresse inconnu" }
+                    .ifEmpty { "Adresse inconnue" }
             }
 
             // Coordonnées

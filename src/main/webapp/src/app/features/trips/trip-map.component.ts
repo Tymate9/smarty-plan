@@ -23,6 +23,7 @@ import TripEventType = dto.TripEventType;
           id="side-panel-toggle"
         />
         <div class="container">
+          <h3 *ngIf="tripData">{{ tripData.driverName }} - {{ tripData.licensePlate }}</h3>
           <div *ngIf="showTimeline" id="trip-cards" class="flex">
             <p-card header="Amplitude">
               <p>{{ tripsService.formatDuration(tripData!.range) }}</p>
@@ -236,14 +237,17 @@ import TripEventType = dto.TripEventType;
       ::ng-deep p-card {
         margin: 0.5rem;
         width: 28%;
-        height: 25%;
         text-align: center;
         border-radius: 5px;
         font-weight:bold;
         font-size: 1.0rem;
 
+        .p-card {
+          height: 15vh;
+        }
+
         .p-card-title {
-          font-size: 1.0rem;
+          font-size: 0.7rem;
           background-color: lightgray;
           margin: -1rem;
           padding: .5rem 0;

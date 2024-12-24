@@ -88,7 +88,7 @@ class TripService(
         var addressAtEnd: String? = null
         val lastDeviceState = if (parsedDate == LocalDate.now()) // don't get device state if date isn't today
             vehicleDriver.vehicle!!.vehicleDevices.firstOrNull {
-                !listOf("PARKED", null).contains(it.device!!.deviceDataState?.state)
+                !listOf("PARKED", "NO_COM", "UNPLUGGED", "UNKNOWN", null).contains(it.device!!.deviceDataState?.state)
             }?.device?.deviceDataState
         else null
         if (lastDeviceState == null) {

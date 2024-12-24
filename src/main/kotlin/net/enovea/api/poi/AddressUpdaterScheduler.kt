@@ -41,7 +41,7 @@ class AddressUpdaterScheduler(
         logger.warn("Traitement du POI : " + poiDetached.client_code)
         val poi = PointOfInterestEntity.findById(poiDetached.id)
         val newAddress = geoCodingService.reverseGeocode(poi!!.coordinate)
-        poi.address = newAddress ?: "Adresse inconnu"
+        poi.address = newAddress ?: "Adresse inconnue"
         PointOfInterestEntity.persist(poi)
     }
 }

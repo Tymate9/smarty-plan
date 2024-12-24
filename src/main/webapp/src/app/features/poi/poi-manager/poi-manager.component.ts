@@ -870,7 +870,7 @@ export class PoiManagerComponent implements OnInit {
       client_label: label,
       denomination: "",
       category: defaultCategory,
-      address:address ?? "Adresse Inconnu",
+      address:address ?? "Adresse Inconnue",
       coordinate: {
         type: 'Point',
         coordinates: [longitude, latitude],

@@ -16,7 +16,7 @@ import org.locationtech.jts.geom.GeometryFactory
 @Authenticated
 class TripResource(
     private val tripRepository: TripRepository,
-    private val spatialService: SpatialService<PointOfInterestEntity>,
+    private val spatialService: SpatialService,
     private val tripService: TripService
 ) {
 

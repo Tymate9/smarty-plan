@@ -17,7 +17,7 @@ import java.time.LocalDate
 class VehicleService(
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
-    private val spatialService: SpatialService<PointOfInterestEntity>,
+    private val spatialService: SpatialService,
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
@@ -87,7 +87,7 @@ class VehicleService(
             try {
                 // Try to fetch POI using spatial service
                 val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                    spatialService.getNearestEntityWithinArea(it)
+                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity :: class)
                 }
                 if (poi != null) {
                     vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label

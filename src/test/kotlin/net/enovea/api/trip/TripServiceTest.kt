@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 class TripServiceTest : StringSpec({
 
     val tripRepository = mockk<TripRepository>()
-    val spatialService = mockk<SpatialService<PointOfInterestEntity>>()
+    val spatialService = mockk<SpatialService>()
     val tripService = TripService(tripRepository, spatialService)
 
     "computeTripMapDTO should return correct TripMapDTO" {
@@ -42,7 +42,7 @@ class TripServiceTest : StringSpec({
         )
 
         every { tripRepository.findByVehicleIdAndDate(vehicleId, any()) } returns trips
-        every { spatialService.getNearestEntityWithinArea(any()) } returns null
+        every { spatialService.getNearestEntityWithinArea(any(), PointOfInterestEntity :: class) } returns null
         every { spatialService.getAddressFromEntity(any()) } returns "Some Address"
 
         val result = tripService.computeTripEventsDTO(vehicleId, date)
@@ -54,6 +54,6 @@ class TripServiceTest : StringSpec({
         result?.stopDuration shouldBe 0
         result?.poiAmount shouldBe 0
         result?.tripEvents?.size shouldBe 1
-        result?.tripEvents[0]?.address shouldBe "Some Address"
+        result?.tripEvents?.get(0)?.address shouldBe "Some Address"
     }
 })

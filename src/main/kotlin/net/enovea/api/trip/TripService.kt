@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
 
 class TripService(
     private val tripRepository: TripRepository,
-    private val spatialService: SpatialService<PointOfInterestEntity>
+    private val spatialService: SpatialService
 ) {
 
     fun computeTripEventsDTO(vehicleId: String, date: String): TripEventsDTO? {
@@ -46,7 +46,7 @@ class TripService(
                 val trip = trips.first()
                 val precedingTrip = trips.getOrNull(1)
                 val startPoint = geometryFactory.createPoint(Coordinate(trip.startLng, trip.startLat))
-                val poiAtStart = spatialService.getNearestEntityWithinArea(startPoint)
+                val poiAtStart = spatialService.getNearestEntityWithinArea(startPoint, PointOfInterestEntity::class)
                 val addressAtStart = if (poiAtStart == null) {
                     spatialService.getAddressFromEntity(startPoint)
                 } else null
@@ -95,7 +95,7 @@ class TripService(
         if (lastDeviceState == null) {
             // if no device state, compute end POI/address
             lastPosition = geometryFactory.createPoint(Coordinate(lastTrip.endLng, lastTrip.endLat))
-            poiAtEnd = spatialService.getNearestEntityWithinArea(lastPosition)
+            poiAtEnd = spatialService.getNearestEntityWithinArea(lastPosition, PointOfInterestEntity::class)
             if (poiAtEnd == null)
                 addressAtEnd = spatialService.getAddressFromEntity(lastPosition)
         } else {

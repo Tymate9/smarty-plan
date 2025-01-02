@@ -54,6 +54,7 @@ import {InputNumberModule} from "primeng/inputnumber";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {LogoComponent} from "./commons/logo/logo.component";
 import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
+import {DialogModule} from "primeng/dialog";
 
 @NgModule({
   declarations: [
@@ -79,33 +80,33 @@ import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
     PoiSearchComponent,
     PoiListComponent,
     LogoComponent,
-    TestBannerComponent
   ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    AppRoutingModule,
-    KeycloakAngularModule,
-    HttpClientModule,
-    ButtonModule,
-    TableModule,
-    TreeTableModule,
-    DropdownModule,
-    TabViewModule,
-    ProgressSpinnerModule,
-    ReactiveFormsModule,
-    ToastModule,
-    MenubarModule,
-    CardModule,
-    ToggleButtonModule,
-    TimelineModule,
-    CalendarModule,
-    PanelModule,
-    InputTextModule,
-    AutoCompleteModule,
-    InputNumberModule,
-    SelectButtonModule,
-  ],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        AppRoutingModule,
+        KeycloakAngularModule,
+        HttpClientModule,
+        ButtonModule,
+        TableModule,
+        TreeTableModule,
+        DropdownModule,
+        TabViewModule,
+        ProgressSpinnerModule,
+        ReactiveFormsModule,
+        ToastModule,
+        MenubarModule,
+        CardModule,
+        ToggleButtonModule,
+        TimelineModule,
+        CalendarModule,
+        PanelModule,
+        InputTextModule,
+        AutoCompleteModule,
+        InputNumberModule,
+        SelectButtonModule,
+        DialogModule,
+    ],
   providers: [
     MessageService,
     ConfigService,

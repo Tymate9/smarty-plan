@@ -8,7 +8,7 @@ import org.locationtech.jts.geom.Point
  * qui implémentent [IHasArea].
  *
  * Chaque entité concrète (via sa companion) pourra implémenter
- * ces méthodes pour réaliser des requêtes liées à `area`.
+ * cette interface pour réaliser des requêtes liées à `area`.
  */
 interface IHasAreaRepository<E>
         where E : PanacheEntityBase,
@@ -24,16 +24,6 @@ interface IHasAreaRepository<E>
     /**
      * Renvoie la liste de toutes les entités [E] dont
      * la propriété [area] intersecte le [point] fourni.
-     *
-     * L’implémentation habituelle utilisera un `ST_Intersects`,
-     * par exemple :
-     *
-     *  SELECT e.*
-     *  FROM my_table e
-     *  WHERE ST_Intersects(
-     *      e.areaColumnName(),
-     *      ST_GeomFromText(:pointWKT, 4326)
-     *  )
      */
     fun findAllIntersectingArea(point: Point): List<E>
 }

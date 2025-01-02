@@ -42,16 +42,22 @@ import {TilesService} from "../../../../services/tiles.service";
     </div>
   `,
   styles: [`
-    .poi-map-container {
+    :host ::ng-deep .poi-map-container {
       display: flex;
-      height: 88vh;
-      padding:10px;
+      /* soustraire la hauteur de la navbar (ex. 60px) */
+      height: calc(100vh - 75px);
+      padding: 10px;
+      /* Si vous voulez un fond gris clair derrière la carte et le panel :
+         background-color: #f9f9f9; */
     }
 
     .map-container {
       flex: 2;
       position: relative;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+
+      /* Si besoin que la carte prenne toute la place en hauteur : */
+      /* height: 100%; --> Pour que la carte remplisse ce container */
     }
 
     .side-panel {
@@ -60,6 +66,27 @@ import {TilesService} from "../../../../services/tiles.service";
       flex-direction: column;
       padding: 10px;
       gap: 10px;
+
+      /* Permettre le scroll interne si le contenu dépasse */
+      overflow-y: auto;
+      /* On veut que la side-panel ne dépasse pas la hauteur parent */
+      max-height: 100%;
+
+      /* Couleur de fond si désiré */
+      background-color: #f9f9f9;
+      /* Bordure ou autre style */
+      border-left: 1px solid #ccc;
+    }
+
+    /* Facultatif : si vous voulez un léger ombrage sur le side-panel */
+    .side-panel {
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    /* Annule le style inline height: 88vh qui est dans le composant,
+       ou le remplace. Car on utilise 100vh. */
+    :host ::ng-deep .poi-map-container[style] {
+      height: auto !important; /* Ou 100vh !important */
     }
 
   `]

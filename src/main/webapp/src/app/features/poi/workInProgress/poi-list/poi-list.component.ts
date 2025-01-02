@@ -105,7 +105,9 @@ import * as L from 'leaflet';
 
             <div class="zone-buttons">
               <button pButton label="Dessiner un Polygone" type="button" (click)="startPolygonDrawing(poiPanel)"></button>
-              <button pButton label="Dessiner un Cercle" type="button" (click)="startCircleDrawing(poiPanel)"></button>
+              <button pButton label="Dessiner un Cercle" type="button" (click)="startCircleDrawing(poiPanel)" class="hidden"></button>
+              <button pButton label="Dessiner un Cercle" type="button" (click)="openEditAreaDialog(poiPanel)">
+              </button>
             </div>
 
             <div *ngIf="poiPanel.poi.id < 0">
@@ -119,31 +121,64 @@ import * as L from 'leaflet';
         </div>
       </div>
     </div>
+
+    <div class="overlay" *ngIf="circleDialogVisible">
+      <div class="dialog-box">
+        <h3>Modifier l'aire du POI</h3>
+        <div class="dialog-content">
+          <p>Configurer l'aire du POI en cercle :</p>
+
+          <div class="form-group">
+            <label>Rayon (m)</label>
+            <input type="number" [(ngModel)]="circleRadius" placeholder="Rayon"/>
+          </div>
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" disabled [(ngModel)]="circleCenterLat"/>
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" disabled [(ngModel)]="circleCenterLng"/>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button (click)="confirmEditAreaDiv()">Valider</button>
+          <button (click)="cancelEditAreaDiv()">Annuler</button>
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
+    /* Conteneur principal de la liste (scrollable) */
     .poi-list {
       overflow-y: auto;
       max-height: calc(100vh - 200px);
-      flex: 1;
       padding: 10px;
     }
 
+    /* Chaque "panneau" (POI Panel) */
     .poi-panel {
       border: 1px solid #ccc;
       margin-bottom: 10px;
       transition: background-color 0.3s ease, border-color 0.3s ease;
+      background-color: #fff; /* fond blanc par défaut */
+      border-radius: 4px;
     }
 
+    /* Panneau "nouveau" (POI non enregistré) */
     .new-poi-panel {
       border: 2px dashed #4caf50 !important;
       background-color: #eaffea !important;
     }
 
+    /* Panneau "modifié" */
     .modified-panel {
       border-color: #f69b9b !important;
       background-color: #ffe6e6 !important;
     }
 
+    /* En-tête du panel */
     .poi-header {
       background-color: #e0e0e0;
       padding: 10px;
@@ -151,15 +186,18 @@ import * as L from 'leaflet';
       display: flex;
       align-items: center;
       gap: 10px;
+      border-radius: 4px 4px 0 0; /* angles arrondis en haut */
     }
 
     .poi-title {
       font-weight: bold;
       flex: 1;
+      color: #333;
     }
 
     .poi-address {
       flex: 1;
+      color: #555;
     }
 
     .expand-icon {
@@ -174,22 +212,111 @@ import * as L from 'leaflet';
       color: #ff0000;
     }
 
+    /* Corps du panel (zone "formulaire") */
     .poi-body {
       padding: 10px;
+      border-radius: 0 0 4px 4px;
+      background-color: #fafafa;
     }
 
     .poi-body label {
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
     }
 
+    /* Zone où l'on place les deux boutons "Polygone" / "Cercle" / "Modifier l'aire" */
     .zone-buttons {
       margin-bottom: 10px;
+      display: flex;
+      gap: 8px;
     }
 
+    /* Désactiver un bouton */
     button[disabled] {
       background-color: #ccc;
       cursor: not-allowed;
+    }
+
+    /*
+       BOUTONS pButton
+    */
+    :host ::ng-deep .p-button,
+    :host ::ng-deep button.p-button {
+      background-color: #aa001f !important;
+      border-color: #aa001f !important;
+      color: #fff !important;
+      font-weight: 600 !important;
+      transition: background-color 0.2s ease !important;
+    }
+
+    /* Survol des boutons "rouges" */
+    :host ::ng-deep .p-button:hover,
+    :host ::ng-deep button.p-button:hover {
+      background-color: #8e001b !important;
+      border-color: #8e001b !important;
+    }
+
+    /* DIALOG OVERLAY (formulaire de dessin de cercle) */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .dialog-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      min-width: 320px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .dialog-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .dialog-content {
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .dialog-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* Boutons dans l'overlay custom */
+    .dialog-footer button {
+      background-color: #aa001f;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .dialog-footer button:hover {
+      background-color: #8e001b;
     }
   `]
 })
@@ -247,6 +374,46 @@ export class PoiListComponent implements OnInit {
 
   startCircleDrawing(poiPanel: PoiPanel) {
     this.poiDrawingRequested.emit({ poi: poiPanel.poi, shape: 'circle' });
+  }
+
+  circleDialogVisible = false;
+  circleRadius: number = 80;
+  circleCenterLat: number | null = null;
+  circleCenterLng: number | null = null;
+  currentPoiPanel?: PoiPanel;
+
+  openEditAreaDialog(poiPanel: PoiPanel) {
+    this.currentPoiPanel = poiPanel;
+    this.circleDialogVisible = true;
+
+    this.circleRadius = 100;
+    const lat = poiPanel.poi.coordinate.coordinates[1];
+    const lng = poiPanel.poi.coordinate.coordinates[0];
+    this.circleCenterLat = lat;
+    this.circleCenterLng = lng;
+  }
+
+  confirmEditAreaDiv() {
+    if (!this.currentPoiPanel) return;
+    if (this.circleCenterLat == null || this.circleCenterLng == null) return;
+
+    // Leaflet circle => polygone
+    const circle = L.circle([this.circleCenterLat, this.circleCenterLng], {
+      radius: this.circleRadius
+    });
+    const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+    const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+
+    // update poi area
+    this.updatePoiArea(this.currentPoiPanel.poi.id, geoJsonPolygon);
+
+    this.circleDialogVisible = false;
+    this.currentPoiPanel = undefined;
+  }
+
+  cancelEditAreaDiv() {
+    this.circleDialogVisible = false;
+    this.currentPoiPanel = undefined;
   }
 
   onCreate(poiPanel: PoiPanel) {
@@ -611,5 +778,3 @@ export class PoiListComponent implements OnInit {
     input.select();
   }
 }
-
-

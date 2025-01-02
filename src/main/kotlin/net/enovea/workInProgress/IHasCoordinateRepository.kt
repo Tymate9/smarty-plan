@@ -9,7 +9,7 @@ import org.locationtech.jts.geom.Polygon
  * qui implémentent [IHasCoordinate].
  *
  * Chaque entité concrète (via sa companion) pourra implémenter
- * ces méthodes pour réaliser des requêtes spatiales spécifiques.
+ * cette interface pour réaliser des requêtes spatiales spécifiques.
  */
 interface IHasCoordinateRepository<E>
         where E : IHasCoordinate,
@@ -37,17 +37,11 @@ interface IHasCoordinateRepository<E>
      * Trie en mémoire (in-memory) la liste [entities] par distance
      * entre leur [coordinate] et le [point] fourni,
      * du plus proche au plus lointain.
-     *
-     * Idéal pour des volumes de données modérés, lorsque vous disposez
-     * déjà d'une liste (par ex. après un autre filtrage).
-     *
-     * @return Une nouvelle liste triée.
      */
     fun sortByDistance(entities: List<E>, point: Point): List<E>
 
     /**
      * Nom de la colonne en base de données correspondant à la propriété [coordinate].
-
      */
     fun coordinateColumnName(): String = "coordinate"
 }

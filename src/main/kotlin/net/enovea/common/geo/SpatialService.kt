@@ -70,7 +70,6 @@ class SpatialService(
     /**
      * Récupère la nearest entity qui possède un 'area' (Polygon)
      * et un 'coordinate' (pour le ORDER BY distance).
-     * => T doit implémenter les deux interfaces.
      */
     fun <E> getNearestEntityWithinArea(
         point: Point,
@@ -123,7 +122,7 @@ class SpatialService(
     }
 
     // ==================================================================
-    // Fonctions utilitaires internes (inchangées ou adaptées)
+    // Fonctions utilitaires
     // ==================================================================
 
     /**

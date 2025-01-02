@@ -63,7 +63,6 @@ class GeoCodingService {
         val latitude = point.y
         val url = "https://api-adresse.data.gouv.fr/reverse/?lon=$longitude&lat=$latitude"
 
-        // TODO(Ajouter le header)
         val httpClient = HttpClients.createDefault()
         val httpGet = HttpGet(url)
 

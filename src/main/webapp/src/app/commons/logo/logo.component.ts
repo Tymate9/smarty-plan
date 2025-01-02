@@ -17,6 +17,7 @@ import { Component } from '@angular/core';
         width: 100px;
         height: 50px;
         overflow: hidden;
+        pointer-events: none;
       }
 
       .logo-container img {

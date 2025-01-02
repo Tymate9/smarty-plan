@@ -49,4 +49,32 @@ export class GeoUtils {
       longitude <= 180
     );
   }
+
+  static getGMapsRedirectControl(map: L.Map): L.Control {
+    const mapRedirectControl = new L.Control({position: 'bottomleft'})
+    mapRedirectControl.onAdd = function (map: L.Map) {
+      const container = L.DomUtil.create('button');
+      container.setAttribute("style", "background-color: #aa001f;border-color: #aa001f;color: white;border-radius: 5px;cursor: pointer;padding: 5px 10px;");
+      container.innerHTML = "↪ Vue Satellite";
+      L.DomEvent.on(container, 'click', () => {
+        let center = map.getCenter();
+        let hasPopupOpen = false;
+        const zoom = map.getZoom();
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Marker && (layer.isPopupOpen() || layer.getElement()?.classList?.contains('selected-marker'))) {
+            hasPopupOpen = true;
+            center = layer.getLatLng()
+          }
+        });
+        window.open(
+          `https://www.google.com/maps/`
+          + (hasPopupOpen ? `place/${center.lat},${center.lng}/` : '')
+          + `@${center.lat},${center.lng},${zoom}z/data=!3m1!1e3`,
+          '_blank'
+        );
+      })
+      return container;
+    };
+    return mapRedirectControl;
+  }
 }

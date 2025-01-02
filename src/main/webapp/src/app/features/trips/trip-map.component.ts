@@ -8,6 +8,7 @@ import {TilesService} from "../../services/tiles.service";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
+import {GeoUtils} from "../../commons/geo/geo-utils";
 
 
 @Component({
@@ -66,9 +67,9 @@ import TripEventType = dto.TripEventType;
                 style="margin: 10px 0;"
               >
                 <div>
-                <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
+                  <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
-                Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
+                  Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
 
                 <div class="time-oval">
                   {{
@@ -170,20 +171,22 @@ import TripEventType = dto.TripEventType;
         width: 39px;
 
 
-        ::ng-deep  .p-element.p-button.p-togglebutton.p-component.p-button-icon-only.p-highlight {
+        ::ng-deep .p-element.p-button.p-togglebutton.p-component.p-button-icon-only.p-highlight {
           background-color: #aa001f !important;
           border-color: #aa001f !important;
           color: white !important;
           font-weight: 600;
         }
-        ::ng-deep  .p-element.p-button.p-togglebutton.p-component.p-button-icon-only {
+
+        ::ng-deep .p-element.p-button.p-togglebutton.p-component.p-button-icon-only {
           background-color: #aa001f !important;
           border-color: #aa001f !important;
           color: white !important;
           font-weight: 600;
         }
-        ::ng-deep .pi.p-button-icon.p-button-icon-left.pi-angle-left{
-          color:white !Important;
+
+        ::ng-deep .pi.p-button-icon.p-button-icon-left.pi-angle-left {
+          color: white !Important;
         }
 
       }
@@ -200,7 +203,7 @@ import TripEventType = dto.TripEventType;
         display: flex;
         padding: 5px 10px;
         border: 1px solid #BDBDBD;
-        background-color: #BDBDBD ;
+        background-color: #BDBDBD;
         border-radius: 5px;
         font-size: 16px;
         text-align: center;
@@ -216,6 +219,7 @@ import TripEventType = dto.TripEventType;
         margin-right: 10px;
         margin-top: 5px;
       }
+
       .time-oval {
         display: inline-block;
         padding: 5px 10px;
@@ -224,7 +228,6 @@ import TripEventType = dto.TripEventType;
         background-color: #d9e0e3;
         text-align: center;
       }
-
 
 
     }
@@ -239,7 +242,7 @@ import TripEventType = dto.TripEventType;
         width: 28%;
         text-align: center;
         border-radius: 5px;
-        font-weight:bold;
+        font-weight: bold;
         font-size: 1.0rem;
 
         .p-card {
@@ -252,7 +255,7 @@ import TripEventType = dto.TripEventType;
           margin: -1rem;
           padding: .5rem 0;
           border-radius: 5px 5px 0 0;
-          font-weight:bold;
+          font-weight: bold;
         }
       }
     }
@@ -285,7 +288,8 @@ export class TripMapComponent {
   constructor(
     protected tripsService: TripsService,
     protected tilesService: TilesService
-  ) {}
+  ) {
+  }
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {
     if (!tripEventsDTO) {
@@ -298,13 +302,16 @@ export class TripMapComponent {
       this.featureGroup.clearLayers();
     } else {
       this.map = L.map('map', {
-        attributionControl: false,
         zoomDelta: 0.5,
       }).setView([tripEventsDTO.tripEvents[0].lat ?? 0, tripEventsDTO.tripEvents[0].lng ?? 0], 13);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(this.map);
+
+      // add gmaps redirect control
+      GeoUtils.getGMapsRedirectControl(this.map).addTo(this.map);
+
       // this.tilesService.getTileUrls().subscribe(tileUrls => {
       //   const baseLayers = {
       //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
@@ -327,7 +334,7 @@ export class TripMapComponent {
           .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color))
           .addTo(this.featureGroup)
           .bindPopup(
-            `<b>${tripEvent.poiLabel || 'Arrêt'}</b><br>${tripEvent.address}<br>${tripEvent.start?.toLocaleTimeString()} - ${tripEvent.end?.toLocaleTimeString()}`
+            `<b>${tripEvent.poiLabel || 'Arrêt'}</b><br>${tripEvent.address}<br>${tripEvent.start?.toLocaleTimeString() ?? ''} - ${tripEvent.end?.toLocaleTimeString() ?? ''}`
           );
       }
 
@@ -357,7 +364,7 @@ export class TripMapComponent {
     this.map.flyToBounds(
       this.featureGroup.getBounds().pad(0.1),
       {
-        paddingBottomRight: [this.showSidePanel ? this.map.getSize().x * 0.35 - 39: 0, 0]
+        paddingBottomRight: [this.showSidePanel ? this.map.getSize().x * 0.35 - 39 : 0, 0]
       }
     );
   }

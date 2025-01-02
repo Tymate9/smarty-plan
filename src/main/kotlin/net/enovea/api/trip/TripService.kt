@@ -37,6 +37,7 @@ class TripService(
 
         // compute events for each trip and stop between each trip
         val tripEvents = trips
+            .filter { it.trace !== null }
             .reversed()
             .windowed(2, partialWindows = true)
             .reversed()

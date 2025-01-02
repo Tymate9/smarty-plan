@@ -123,6 +123,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
       ::ng-deep {
         .p-tabview-nav-container {
           z-index: 10000;
+          padding: 5px;
         }
 
         .p-tabview-nav {

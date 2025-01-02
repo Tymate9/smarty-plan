@@ -9,6 +9,7 @@ import {catchError, forkJoin, of} from "rxjs";
 import {GeocodingService} from "../../../commons/geo/geo-coding.service";
 import {PopUpConfig} from "../marker/pop-up-config";
 import {downloadAsCsv} from "../../csv/csv.downloader";
+import {GeoUtils} from "../../../commons/geo/geo-utils";
 
 export class MapManagerConfig {
   canExtract: boolean;
@@ -31,6 +32,10 @@ export class MapManager {
     private readonly config: MapManagerConfig = new MapManagerConfig()
   ) {
     window.L = L;
+
+    // add gmaps redirect control
+    GeoUtils.getGMapsRedirectControl(this.map).addTo(this.map);
+
     const poiLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.POI);
     const vehicleLayerManager = new LayerManager(map, this.mapCViewContainerRef, EntityType.VEHICLE);
     this.layerManagers.push(poiLayerManager, vehicleLayerManager);

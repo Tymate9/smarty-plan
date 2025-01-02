@@ -546,10 +546,10 @@ export class PoiManagerComponent implements OnInit {
     // Coordonnées approximatives du centre de la Normandie
     const normandyCenter: L.LatLngExpression = [49.1817, 0.3714];
     // Initialiser la carte
-    this.map = L.map('map', {attributionControl: false, zoomDelta: 0.5}).setView(normandyCenter, 9);
+    this.map = L.map('map', {zoomDelta: 0.5}).setView(normandyCenter, 9);
     this.map.setMaxZoom(19);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
     // this.tilesService.getTileUrls().subscribe(tileUrls => {

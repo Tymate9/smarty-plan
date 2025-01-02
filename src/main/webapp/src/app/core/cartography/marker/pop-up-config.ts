@@ -9,9 +9,9 @@ export class PopUpConfig {
   isAreaDynamic: boolean;
 
   constructor(config?: Partial<PopUpConfig>) {
-    this.poiPopupTabs = config?.poiPopupTabs? config.poiPopupTabs : new Set(['information', 'proximite', 'dessus', 'editer']);
-    this.vehiclePopupTabs = config?.vehiclePopupTabs? config.vehiclePopupTabs : new Set(['information', 'poi']);
-    this.isAreaDynamic = config?.isAreaDynamic? config.isAreaDynamic : true;
+    this.poiPopupTabs = config?.poiPopupTabs ?? new Set(['information', 'proximite', 'dessus', 'editer']);
+    this.vehiclePopupTabs = config?.vehiclePopupTabs ?? new Set(['information', 'poi']);
+    this.isAreaDynamic = config?.isAreaDynamic ?? true;
   }
 
   isTabEnabled(entityType: EntityType, tab: string): boolean {

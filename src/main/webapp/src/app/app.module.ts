@@ -78,6 +78,7 @@ import {DialogModule} from "primeng/dialog";
     PoiSearchComponent,
     PoiListComponent,
     LogoComponent,
+    TestBannerComponent
   ],
     imports: [
         BrowserModule,

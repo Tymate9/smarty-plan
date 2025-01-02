@@ -216,7 +216,12 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
   }
 
   onPoiMarkerAdded(poi: PointOfInterestEntity) {
-    const config = { poiPopupTabs: new Set(['information']), isAreaDynamic: false } as PopUpConfig;
+    const config = new PopUpConfig({
+      poiPopupTabs: new Set(['information']),
+      vehiclePopupTabs : new Set(['information', 'poi']),
+      isAreaDynamic : false
+    })
+    config.isAreaDynamic = false
     this.mapManager.addMarker(EntityType.POI, poi, config);
     this.mapManager.handleLayerEvent(
       {

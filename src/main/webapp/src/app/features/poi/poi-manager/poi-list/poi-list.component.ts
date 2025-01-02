@@ -24,7 +24,8 @@ import * as L from 'leaflet';
           <span class="poi-title">{{ poiPanel.poi.denomination }}</span>
           <span class="poi-address">{{ poiPanel.poi.address }}</span>
           <span class="expand-icon">{{ poiPanel.expanded ? '▼' : '►' }}</span>
-          <button pButton label="✖" class="delete-button" (click)="onRemovePanel(poiPanel); $event.stopPropagation();"></button>
+          <button pButton label="✖" class="delete-button"
+                  (click)="onRemovePanel(poiPanel); $event.stopPropagation();"></button>
         </div>
         <div class="poi-body" [hidden]="!poiPanel.expanded">
           <div>
@@ -77,7 +78,7 @@ import * as L from 'leaflet';
                 <input pInputText type="text"
                        [(ngModel)]="poiPanel.poi.address"
                        name="address{{poiPanel.poi.id}}"
-                       (ngModelChange)="poiPanel.isModified = true" />
+                       (ngModelChange)="poiPanel.isModified = true"/>
               </label>
             </div>
             <div *ngIf="poiPanel.inputType === 'coordonnees'">
@@ -103,19 +104,34 @@ import * as L from 'leaflet';
               </label>
             </div>
 
-            <div class="zone-buttons">
-              <button pButton label="Dessiner un Polygone" type="button" (click)="startPolygonDrawing(poiPanel)"></button>
-              <button pButton label="Dessiner un Cercle" type="button" (click)="startCircleDrawing(poiPanel)" class="hidden"></button>
-              <button pButton label="Dessiner un Cercle" type="button" (click)="openEditAreaDialog(poiPanel)">
+            <!-- Première zone de boutons (dessin) -->
+            <div class="button-area">
+              <!-- Définir un Polygone -->
+              <button pButton label="Définir un Polygone" type="button" icon="pi pi-pencil" (click)="startPolygonDrawing(poiPanel)">
+              </button>
+
+              <!-- Définir un Cercle (peut être masqué si class="hidden") -->
+              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle" (click)="startCircleDrawing(poiPanel)" class="hidden">
+              </button>
+
+              <!-- Définir un Cercle (via Dialog) -->
+              <button pButton  label="Définir un Cercle" type="button" icon="pi pi-circle" (click)="openEditAreaDialog(poiPanel)">
               </button>
             </div>
 
-            <div *ngIf="poiPanel.poi.id < 0">
-              <button pButton label="Ajouter POI" type="button" [disabled]="!isFormValid(poiPanel)" (click)="onCreate(poiPanel)"></button>
-            </div>
-            <div *ngIf="poiPanel.poi.id >= 0">
-              <button pButton label="Mettre à jour" type="button" [disabled]="!isFormValid(poiPanel)" (click)="onUpdate(poiPanel)"></button>
-              <button pButton label="Supprimer" type="button" (click)="deletePoi(poiPanel)"></button>
+            <!-- Seconde zone de boutons (CRUD) -->
+            <div class="button-area">
+              <!-- Ajouter POI -->
+              <button *ngIf="poiPanel.poi.id < 0" pButton label="Ajouter POI" type="button" icon="pi pi-plus" [disabled]="!isFormValid(poiPanel)" (click)="onCreate(poiPanel)">
+              </button>
+
+              <!-- Mettre à jour -->
+              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Mettre à jour" type="button" icon="pi pi-check" [disabled]="!isFormValid(poiPanel)" (click)="onUpdate(poiPanel)">
+              </button>
+
+              <!-- Supprimer -->
+              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Supprimer" type="button" icon="pi pi-trash" (click)="deletePoi(poiPanel)">
+              </button>
             </div>
           </div>
         </div>
@@ -226,11 +242,25 @@ import * as L from 'leaflet';
       font-weight: 500;
     }
 
-    /* Zone où l'on place les deux boutons "Polygone" / "Cercle" / "Modifier l'aire" */
-    .zone-buttons {
+    /* Zone où l'on place une ligne de bouton de bouton */
+    .button-area {
       margin-bottom: 10px;
       display: flex;
       gap: 8px;
+      width: 100%;
+    }
+
+    /* Sélecteur pour cibler tous les boutons
+       directement dans \`.zone-buttons\` */
+    .button-area > button,
+    .button-area > .p-button {
+      flex: 1 1 0;
+
+      /* Pour éviter que le contenu (texte du bouton)
+         ne dépasse s’il est trop long : */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Désactiver un bouton */
@@ -265,7 +295,7 @@ import * as L from 'leaflet';
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0,0,0,0.5);
+      background-color: rgba(0, 0, 0, 0.5);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -277,7 +307,7 @@ import * as L from 'leaflet';
       padding: 20px;
       border-radius: 8px;
       min-width: 320px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .dialog-box h3 {
@@ -303,7 +333,6 @@ import * as L from 'leaflet';
       justify-content: flex-end;
     }
 
-    /* Boutons dans l'overlay custom */
     .dialog-footer button {
       background-color: #aa001f;
       border: none;
@@ -386,7 +415,7 @@ export class PoiListComponent implements OnInit {
     this.currentPoiPanel = poiPanel;
     this.circleDialogVisible = true;
 
-    this.circleRadius = 100;
+    this.circleRadius = 80;
     const lat = poiPanel.poi.coordinate.coordinates[1];
     const lng = poiPanel.poi.coordinate.coordinates[0];
     this.circleCenterLat = lat;

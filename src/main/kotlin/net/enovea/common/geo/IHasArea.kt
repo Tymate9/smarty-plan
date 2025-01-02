@@ -1,4 +1,4 @@
-package net.enovea.workInProgress
+package net.enovea.common.geo
 
 import org.locationtech.jts.geom.Polygon
 

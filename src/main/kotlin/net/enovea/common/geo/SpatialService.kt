@@ -2,10 +2,6 @@ package net.enovea.common.geo
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import mu.KotlinLogging
-import net.enovea.workInProgress.IHasArea
-import net.enovea.workInProgress.IHasAreaRepository
-import net.enovea.workInProgress.IHasCoordinate
-import net.enovea.workInProgress.IHasCoordinateRepository
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import kotlin.reflect.KClass

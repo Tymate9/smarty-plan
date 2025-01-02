@@ -3,8 +3,8 @@ package net.enovea.domain.device
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
-import net.enovea.workInProgress.IHasCoordinate
-import net.enovea.workInProgress.IHasCoordinateRepository
+import net.enovea.common.geo.IHasCoordinate
+import net.enovea.common.geo.IHasCoordinateRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point

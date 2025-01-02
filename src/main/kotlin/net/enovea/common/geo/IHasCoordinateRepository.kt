@@ -1,4 +1,4 @@
-package net.enovea.workInProgress
+package net.enovea.common.geo
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import org.locationtech.jts.geom.Point

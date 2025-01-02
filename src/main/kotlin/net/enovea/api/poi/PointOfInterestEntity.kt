@@ -5,10 +5,10 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import mu.KotlinLogging
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
-import net.enovea.workInProgress.IHasArea
-import net.enovea.workInProgress.IHasAreaRepository
-import net.enovea.workInProgress.IHasCoordinate
-import net.enovea.workInProgress.IHasCoordinateRepository
+import net.enovea.common.geo.IHasArea
+import net.enovea.common.geo.IHasAreaRepository
+import net.enovea.common.geo.IHasCoordinate
+import net.enovea.common.geo.IHasCoordinateRepository
 import org.locationtech.jts.geom.*
 import org.locationtech.jts.geom.impl.CoordinateArraySequence
 import org.locationtech.jts.io.WKTWriter

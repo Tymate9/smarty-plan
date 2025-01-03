@@ -236,7 +236,7 @@ export class TeamTreeComponent implements OnChanges{
         this.closeDropdown();
       }
       this.isDropdownClicked = false;  // Reset after checking
-    }, 100);
+    }, 200);
   }
   isDropdownClicked: boolean = false;
   onDropdownClick(): void {

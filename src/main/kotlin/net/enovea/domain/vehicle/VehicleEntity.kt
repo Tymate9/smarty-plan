@@ -16,7 +16,6 @@ import java.time.LocalDate
 
 @Entity(name = VehicleEntity.ENTITY_NAME )
 @Table(name = VehicleEntity.TABLE_NAME)
-
 data class VehicleEntity(
 
     @Id

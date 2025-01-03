@@ -12,12 +12,14 @@ import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
-import java.time.LocalDate
+import java.time.*
+import java.time.temporal.Temporal
+import java.time.temporal.TemporalUnit
 
 class VehicleService(
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
-    private val spatialService: SpatialService<PointOfInterestEntity>,
+    private val spatialService: SpatialService,
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
@@ -53,8 +55,16 @@ class VehicleService(
             if (vehicle.id in untrackedVehicleIds || VehicleEntity.getCurrentDriver(vehicle.vehicleDrivers)?.id in untrackedDriverIds) {
                 VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.also { entityManager.detach(it) }
                 VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.coordinate = null
+                if(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12)
+                {
+                    VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.state = "NO_COM"
+                }
             } else {
                 VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.also { entityManager.detach(it) }
+                if(VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12)
+                {
+                    VehicleEntity.getCurrentDevice(vehicle.vehicleDevices)?.deviceDataState?.state = "NO_COM"
+                }
             }
             vehicle
         }
@@ -62,7 +72,8 @@ class VehicleService(
 
     // TODO seperate the data treatment method
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
-        val allVehicles = vehicles ?: VehicleEntity.listAll()
+        // TODO
+        val allVehicles = removeLocalizationToUntrackedVehicle(vehicles ?: VehicleEntity.listAll())
         val tripStats = tripService.getTripDailyStats()
 
 
@@ -78,7 +89,6 @@ class VehicleService(
                         vehicleDTO.distance = (stats.distance) / 1000
                         vehicleDTO.firstTripStart = stats.firstTripStart
                     }
-
                     vehicleDTO
                 }
 
@@ -87,7 +97,7 @@ class VehicleService(
             try {
                 // Try to fetch POI using spatial service
                 val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                    spatialService.getNearestEntityWithinArea(it)
+                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity :: class)
                 }
                 if (poi != null) {
                     vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
@@ -337,6 +347,8 @@ fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarch
     return topLevelNodes.toList()
 }
 
-
+fun Instant?.until(duration: Temporal): Duration {
+    return this?.let { Duration.between(this, duration) } ?: Duration.ZERO
+}
 
 

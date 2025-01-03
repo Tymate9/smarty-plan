@@ -222,7 +222,6 @@ export class MapPopupComponent implements OnInit {
   selectTab(tab? : TabViewChangeEvent) {
     this.onButtonClick();
     this.activeTab = tab?.index.toString() || '0';
-    console.log(this.activeTab)
     if (this.activeTab === '0' && this.nearbyVehicles.length === 0 && !this.loadingVehicles) {
       this.loadNearbyVehicles();
     }

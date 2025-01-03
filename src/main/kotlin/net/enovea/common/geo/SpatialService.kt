@@ -1,191 +1,165 @@
 package net.enovea.common.geo
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import jakarta.persistence.*
 import mu.KotlinLogging
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObjectInstance
 
-// TODO(Ajouter l'interface geoEntity)
-class SpatialService<T : PanacheEntityBase>(
-    private val entityClass: KClass<T>,
-    private val entityManager: EntityManager,
+/**
+ * SpatialService refactorisé pour utiliser IHasCoordinate / IHasArea
+ * au lieu de recourir à la réflexion sur les champs "coordinate" et "area".
+ */
+class SpatialService(
     private val geoCodingService: GeoCodingService
 ) {
-    val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
-    fun getNearestEntity(point: Point, limit: Int): List<T> {
-        val wktPoint = point.toText()
-
-        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
-        val tableName = tableAnnotation?.name ?: entityClass.simpleName
-
-
-        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
-        val columnAnnotation = coordinateField?.getAnnotation(Column::class.java)
-        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
-
-        val query = """
-            SELECT e.*, ST_Distance(
-            e.$coordinateColumnName::geography,
-            ST_GeomFromText(:pointWKT, 4326)::geography
-            ) AS distance
-            FROM $tableName e
-            ORDER BY distance
-            LIMIT :limit
-        """.trimIndent()
-
-        val resultList = entityManager.createNativeQuery(query, entityClass.java)
-            .setParameter("pointWKT", wktPoint)
-            .setParameter("limit", limit)
-            .resultList
-
-        @Suppress("UNCHECKED_CAST")
-        return resultList as List<T>
+    /**
+     * Récupère les entités (ayant un 'coordinate') les plus proches d'un [point].
+     */
+    fun <E> getNearestEntity(
+        point: Point,
+        limit: Int,
+        entityClass: KClass<E>
+    ): List<E>
+            where E : PanacheEntityBase,
+                  E : IHasCoordinate
+    {
+        // DÉLÉGATION via réflexion
+        val repo = extractCoordinateRepository(entityClass)
+        return repo.findNearestEntity(point, limit)
     }
 
-    fun getNearestEntityWithDistance(point: Point, limit : Int) : List<Pair<Double, T>>{
-        val wktPoint = point.toText()
-
-        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
-        val tableName = tableAnnotation?.name ?: entityClass.simpleName
-
-        val entityAnnotation = entityClass.java.getAnnotation(Entity::class.java)
-        val entityName = entityAnnotation?.name?.takeIf { it.isNotBlank() } ?: entityClass.simpleName
-
-        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
-            ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
-        val columnAnnotation = coordinateField.getAnnotation(Column::class.java)
-        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
-
-        // Trouver le champ annoté avec @Id
-        val idField = entityClass.java.declaredFields.firstOrNull { it.isAnnotationPresent(Id::class.java) }
-            ?: throw IllegalArgumentException("Aucun champ annoté avec @Id trouvé dans ${entityClass.simpleName}")
-
-        val idFieldName = idField.name
-
-        val query = """
-        SELECT e.$idFieldName, ROUND(ST_Distance(
-            e.$coordinateColumnName::geography,
-            ST_GeomFromText(:pointWKT, 4326)::geography
-        ) ::numeric / 1000.0 , 2) AS distance
-        FROM $tableName e
-        ORDER BY distance
-        LIMIT :limit
-    """.trimIndent()
-
-        val resultList = entityManager.createNativeQuery(query)
-            .setParameter("pointWKT", wktPoint)
-            .setParameter("limit", limit)
-            .resultList
-
-        val idDistanceMap = mutableMapOf<Any, Double>()
-
-        for (result in resultList) {
-            val row = result as Array<Any>
-            val id = row[0]
-            val distance = (row[1] as Number).toDouble()
-            idDistanceMap[id] = distance
-        }
-
-        // Récupérer les entités correspondantes en une seule requête HQL
-        val ids = idDistanceMap.keys
-        val entities = entityManager.createQuery("FROM $entityName WHERE $idFieldName IN :ids", entityClass.java)
-            .setParameter("ids", ids)
-            .resultList
-
-        // Associer les distances aux entités
-        val entitiesWithDistances = entities.map { entity ->
-            idField.isAccessible = true
-            val id = idField.get(entity)
-            val distance = idDistanceMap[id] ?: 0.0
-            Pair(distance, entity)
-        }.sortedBy { it.first }
-
-        return entitiesWithDistances
+    /**
+     * Variante qui renvoie (distance, entité).
+     */
+    fun <E> getNearestEntityWithDistance(
+        point: Point,
+        limit: Int,
+        entityClass: KClass<E>
+    ): List<Pair<Double, E>>
+            where E : PanacheEntityBase,
+                  E : IHasCoordinate
+    {
+        // DÉLÉGATION via réflexion
+        val repo = extractCoordinateRepository(entityClass)
+        return repo.getNearestEntityWithDistance(point, limit)
     }
 
-    fun getEntityInPolygon(polygon: Polygon): List<T> {
-        val polygonWKT = polygon.toText()
-
-        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
-        val tableName = tableAnnotation?.name ?: entityClass.simpleName
-
-        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
-            ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
-        val columnAnnotation = coordinateField.getAnnotation(Column::class.java)
-        val coordinateColumnName = columnAnnotation?.name ?: "coordinate"
-
-        // Écrire la requête SQL
-        val query = """
-            SELECT *
-            FROM $tableName
-            WHERE ST_Intersects(ST_GeogFromText(:polygonWKT), $coordinateColumnName)
-        """.trimIndent()
-
-        // Exécuter la requête
-        val resultList = entityManager.createNativeQuery(query, entityClass.java)
-            .setParameter("polygonWKT", polygonWKT)
-            .resultList
-
-        @Suppress("UNCHECKED_CAST")
-        return resultList as List<T>
+    /**
+     * Récupère les entités dont la 'coordinate' est incluse dans un polygone.
+     */
+    fun <E> getEntityInPolygon(
+        polygon: Polygon,
+        entityClass: KClass<E>
+    ): List<E>
+            where E : PanacheEntityBase,
+                  E : IHasCoordinate
+    {
+        // DÉLÉGATION via réflexion
+        val repo = extractCoordinateRepository(entityClass)
+        return repo.getEntityInPolygon(polygon)
     }
 
-    fun getEntityFromAddress(address: String, limit: Int = 1): List<T> {
+    /**
+     * Récupère la nearest entity qui possède un 'area' (Polygon)
+     * et un 'coordinate' (pour le ORDER BY distance).
+     */
+    fun <E> getNearestEntityWithinArea(
+        point: Point,
+        entityClass: KClass<E>
+    ): E?
+            where E : PanacheEntityBase,
+                  E : IHasCoordinate,
+                  E : IHasArea
+    {
+        // 1) On récupère le repository area
+        val areaRepo = extractAreaRepository(entityClass)
+        // 2) On récupère le repository coordinate
+        val coordinateRepo = extractCoordinateRepository(entityClass)
 
+        // 3) On trouve les entités dont l’area intersecte le point
+        val intersecting = areaRepo.findAllIntersectingArea(point)
+        if (intersecting.isEmpty()) return null
+
+        // 4) On trie ce sous-ensemble par distance
+        val sorted = coordinateRepo.sortByDistance(intersecting, point)
+
+        // 5) On renvoie la première (la plus proche), ou null si la liste est vide
+        return sorted.firstOrNull()
+    }
+
+    // ======================
+    // Méthodes associées au geocoding
+    // ======================
+
+    fun <E> getEntityFromAddress(
+        address: String,
+        limit: Int,
+        entityClass: KClass<E>
+    ): List<E>
+            where E : PanacheEntityBase,
+                  E : IHasCoordinate
+    {
         val result = geoCodingService.geocode(address)
-        requireNotNull(result){
-            throw IllegalArgumentException("Impossible de géocoder l'adresse fournie.")
-        }
-        return getNearestEntity(result.coordinate, limit)
+            ?: throw IllegalArgumentException("Impossible de géocoder l'adresse fournie : $address")
+        return getNearestEntity(result.coordinate, limit, entityClass)
     }
 
     fun getAddressFromEntity(point: Point): String {
         val address = geoCodingService.reverseGeocode(point)
-        requireNotNull(address){
+        requireNotNull(address) {
             logger.warn("Impossible de géocoder la coordonnée fournie : {${point.x}, ${point.y}}")
             return "${point.y}, ${point.x}"
         }
         return address
     }
 
-    fun getNearestEntityWithinArea(point: Point): T? {
-        val wktPoint = point.toText()
+    // ==================================================================
+    // Fonctions utilitaires
+    // ==================================================================
 
-        val tableAnnotation = entityClass.java.getAnnotation(Table::class.java)
-        val tableName = tableAnnotation?.name ?: entityClass.simpleName
-
-        val coordinateField = entityClass.java.declaredFields.firstOrNull { it.name == "coordinate" }
-            ?: throw IllegalArgumentException("Le champ 'coordinate' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
-
-        val coordinateColumnName = coordinateField.getAnnotation(Column::class.java)?.name ?: "coordinate"
-
-        val areaField = entityClass.java.declaredFields.firstOrNull { it.name == "area" }
-            ?: throw IllegalArgumentException("Le champ 'area' n'a pas été trouvé dans la classe ${entityClass.simpleName}")
-        val areaColumnName = areaField.getAnnotation(Column::class.java)?.name ?: "area"
-
-        val query = """
-            SELECT e.*
-            FROM $tableName e
-            WHERE ST_Intersects(
-                e.$areaColumnName::geography,
-                ST_GeomFromText(:pointWKT, 4326)::geography
+    /**
+     * Récupère la companion object via réflexion,
+     * puis la cast en IHasCoordinateRepository<E>.
+     */
+    private fun <E> extractCoordinateRepository(
+        entityClass: KClass<E>
+    ): IHasCoordinateRepository<E>
+            where E : PanacheEntityBase,
+                  E : IHasCoordinate
+    {
+        val companionObj = entityClass.companionObjectInstance
+            ?: throw IllegalArgumentException(
+                "No companion object found for ${entityClass.simpleName}"
             )
-            ORDER BY ST_Distance(
-                e.$coordinateColumnName::geography,
-                ST_GeomFromText(:pointWKT, 4326)::geography
-            )
-            LIMIT 1
-        """.trimIndent()
-
-        val resultList = entityManager.createNativeQuery(query, entityClass.java)
-            .setParameter("pointWKT", wktPoint)
-            .resultList
 
         @Suppress("UNCHECKED_CAST")
-        return resultList.firstOrNull() as T?
+        val repo = companionObj as? IHasCoordinateRepository<E>
+            ?: throw IllegalArgumentException(
+                "Companion of ${entityClass.simpleName} does not implement IHasCoordinateRepository"
+            )
+
+        return repo
+    }
+
+    private fun <E> extractAreaRepository(entityClass: KClass<E>): IHasAreaRepository<E>
+            where E : PanacheEntityBase, E : IHasArea
+    {
+        val companionObj = entityClass.companionObjectInstance
+            ?: throw IllegalArgumentException(
+                "No companion object found for ${entityClass.simpleName}"
+            )
+
+        @Suppress("UNCHECKED_CAST")
+        val repo = companionObj as? IHasAreaRepository<E>
+            ?: throw IllegalArgumentException(
+                "Companion of ${entityClass.simpleName} does not implement IHasAreaRepository"
+            )
+
+        return repo
     }
 }
 

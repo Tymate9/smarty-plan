@@ -24,7 +24,7 @@ import org.locationtech.jts.io.WKTReader
 @Authenticated
 class VehicleResource(
     private val vehicleService: VehicleService,
-    private val deviceDataStateSpatialService: SpatialService<DeviceDataStateEntity>,
+    private val deviceDataStateSpatialService: SpatialService,
 ) {
     private val vehicleMapper: VehicleMapper = VehicleMapper.INSTANCE
 
@@ -92,7 +92,7 @@ class VehicleResource(
 
         val maxResults = limit ?: 10
 
-        val deviceIdList : List<Int> = deviceDataStateSpatialService.getNearestEntity(point, maxResults).map {deviceDataState -> deviceDataState.device_id}
+        val deviceIdList : List<Int> = deviceDataStateSpatialService.getNearestEntity(point, maxResults, DeviceDataStateEntity::class).map {deviceDataState -> deviceDataState.device_id}
 
         val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(deviceIdList))
 
@@ -125,7 +125,7 @@ class VehicleResource(
 
             val polygon = geometry as Polygon
 
-            val devicesIdInPolygon = deviceDataStateSpatialService.getEntityInPolygon(polygon).map {deviceDataState -> deviceDataState.device_id}
+            val devicesIdInPolygon = deviceDataStateSpatialService.getEntityInPolygon(polygon, DeviceDataStateEntity::class).map {deviceDataState -> deviceDataState.device_id}
 
             val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(devicesIdInPolygon)).map {
                 vehicleMapper.toVehicleDTOSummary(it)
@@ -161,7 +161,7 @@ class VehicleResource(
 
         return try {
             // Récupérer la liste des entités Device avec leur distance
-            val deviceWithDistances: List<Pair<Double, DeviceEntity>> = deviceDataStateSpatialService.getNearestEntityWithDistance(point, maxResults).map {pair -> Pair(pair.first, pair.second.device!!)}
+            val deviceWithDistances: List<Pair<Double, DeviceEntity>> = deviceDataStateSpatialService.getNearestEntityWithDistance(point, maxResults, DeviceDataStateEntity::class).map {pair -> Pair(pair.first, pair.second.device!!)}
 
             // Extraire les IDs des devices pour trouver les VehicleEntity correspondants
             val deviceIds = deviceWithDistances.map { it.second.id }
@@ -197,9 +197,4 @@ class VehicleResource(
 
         return vehicles
     }
-
-
-
-
-
 }

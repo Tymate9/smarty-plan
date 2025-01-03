@@ -14,7 +14,7 @@ import org.locationtech.jts.io.WKTReader
 @Path("/api/poi")
 @Authenticated
 class PointOfInterestResource (
-    val pointOfInterestSpatialService: SpatialService<PointOfInterestEntity>,
+    val pointOfInterestSpatialService: SpatialService,
     val entityManager: EntityManager
 ){
     @GET
@@ -45,7 +45,7 @@ class PointOfInterestResource (
 
         val maxResults = limit ?: 10
 
-        return pointOfInterestSpatialService.getNearestEntity(point, maxResults)
+        return pointOfInterestSpatialService.getNearestEntity( point, maxResults, PointOfInterestEntity::class )
     }
 
     @GET
@@ -71,7 +71,7 @@ class PointOfInterestResource (
 
             val polygon = geometry as Polygon
 
-            val entitiesInPolygon = pointOfInterestSpatialService.getEntityInPolygon(polygon)
+            val entitiesInPolygon = pointOfInterestSpatialService.getEntityInPolygon(polygon, PointOfInterestEntity::class )
 
             Response.ok(entitiesInPolygon).build()
         } catch (e: Exception) {
@@ -100,7 +100,7 @@ class PointOfInterestResource (
         val point: Point = geometryFactory.createPoint(Coordinate(longitude, latitude))
 
         return try {
-            val poi = pointOfInterestSpatialService.getNearestEntityWithinArea(point)
+            val poi = pointOfInterestSpatialService.getNearestEntityWithinArea(point, PointOfInterestEntity::class)
             Response.ok(mapOf("poi" to poi)).build()
         } catch (e: Exception) {
             Response.status(Response.Status.BAD_REQUEST)
@@ -148,7 +148,7 @@ class PointOfInterestResource (
         val maxResults = limit ?: 1
 
         return try {
-            val entities = pointOfInterestSpatialService.getEntityFromAddress(adresse, maxResults)
+            val entities = pointOfInterestSpatialService.getEntityFromAddress(adresse, maxResults, PointOfInterestEntity::class)
             Response.ok(entities).build()
         } catch (e: Exception) {
             Response.status(Response.Status.BAD_REQUEST)
@@ -335,7 +335,7 @@ class PointOfInterestResource (
         val maxResults = limit ?: 10
 
         return try {
-            val resultList = pointOfInterestSpatialService.getNearestEntityWithDistance(point, maxResults)
+            val resultList = pointOfInterestSpatialService.getNearestEntityWithDistance(point, maxResults, PointOfInterestEntity::class)
             Response.ok(resultList).build()
         } catch (e: Exception) {
             Response.status(Response.Status.INTERNAL_SERVER_ERROR)

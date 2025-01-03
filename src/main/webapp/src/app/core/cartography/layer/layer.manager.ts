@@ -199,7 +199,6 @@ export class LayerManager {
     this.attachMarkerEvents(marker, entity);
 
     if (this.entityType === EntityType.POI) {
-      console.log("Je suis la et entityArea et égale à = " + marker.popUpConfig.isAreaDynamic)
       if(!marker.popUpConfig.isAreaDynamic){
         this.addPOIArea(marker, entity);
       }
@@ -420,7 +419,6 @@ export class LayerManager {
       marker.setLatLng(new L.LatLng(newCoordinates.coordinates[1], newCoordinates.coordinates[0]));
       // Définir la couleur en fonction du state
       let color: string = "gris";
-      console.log(state)
       switch (state) {
         case "NO_COM":
           color = 'gris';

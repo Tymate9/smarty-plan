@@ -24,7 +24,6 @@ import {PoiPopupComponent} from './features/poi/poi-popup/poi-popup.component';
 import {VehiclePopupComponent} from './features/vehicle/vehicle-popup/vehicle-popup.component';
 import {TeamTreeComponent} from "./commons/searchAutocomplete/team.tree.component";
 
-import {PoiManagerComponent} from './features/poi/poi-manager/poi-manager.component';
 import {ButtonModule} from 'primeng/button';
 import {TreeTableModule} from 'primeng/treetable';
 import {DropdownModule} from "primeng/dropdown";
@@ -46,14 +45,15 @@ import {TripsComponent} from "./features/trips/trips.component";
 import {CalendarModule} from "primeng/calendar";
 import {PanelModule} from "primeng/panel";
 import {InputTextModule} from 'primeng/inputtext';
-import {PoiMapComponent} from './features/poi/workInProgress/poi-map/poi-map.component';
-import {PoiSearchComponent} from './features/poi/workInProgress/poi-search/poi-search.component';
-import {PoiListComponent} from './features/poi/workInProgress/poi-list/poi-list.component';
+import {PoiMapComponent} from './features/poi/poi-manager/poi-map/poi-map.component';
+import {PoiSearchComponent} from './features/poi/poi-manager/poi-search/poi-search.component';
+import {PoiListComponent} from './features/poi/poi-manager/poi-list/poi-list.component';
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {InputNumberModule} from "primeng/inputnumber";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {LogoComponent} from "./commons/logo/logo.component";
 import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
+import {DialogModule} from "primeng/dialog";
 
 @NgModule({
   declarations: [
@@ -70,7 +70,6 @@ import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
     MapPopupComponent,
     PoiPopupComponent,
     VehiclePopupComponent,
-    PoiManagerComponent,
     TeamTreeComponent,
     TripsComponent,
     TripListComponent,
@@ -81,31 +80,32 @@ import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
     LogoComponent,
     TestBannerComponent
   ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    AppRoutingModule,
-    KeycloakAngularModule,
-    HttpClientModule,
-    ButtonModule,
-    TableModule,
-    TreeTableModule,
-    DropdownModule,
-    TabViewModule,
-    ProgressSpinnerModule,
-    ReactiveFormsModule,
-    ToastModule,
-    MenubarModule,
-    CardModule,
-    ToggleButtonModule,
-    TimelineModule,
-    CalendarModule,
-    PanelModule,
-    InputTextModule,
-    AutoCompleteModule,
-    InputNumberModule,
-    SelectButtonModule,
-  ],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        AppRoutingModule,
+        KeycloakAngularModule,
+        HttpClientModule,
+        ButtonModule,
+        TableModule,
+        TreeTableModule,
+        DropdownModule,
+        TabViewModule,
+        ProgressSpinnerModule,
+        ReactiveFormsModule,
+        ToastModule,
+        MenubarModule,
+        CardModule,
+        ToggleButtonModule,
+        TimelineModule,
+        CalendarModule,
+        PanelModule,
+        InputTextModule,
+        AutoCompleteModule,
+        InputNumberModule,
+        SelectButtonModule,
+        DialogModule,
+    ],
   providers: [
     MessageService,
     ConfigService,

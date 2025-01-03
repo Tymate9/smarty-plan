@@ -162,8 +162,6 @@ export class MapManager {
   // Marker Region
   addMarker(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
     const marker = MarkerFactory.createMarker(type, entity);
-    console.log("je suis dans le addMarker")
-    console.log(popUpConfig?.isAreaDynamic)
     if (marker) {
       this.addMarkerToMap(type, entity, popUpConfig);
     }
@@ -172,8 +170,6 @@ export class MapManager {
   private addMarkerToMap(type: EntityType, entity: any, popUpConfig?: PopUpConfig) {
     switch (type) {
       case EntityType.POI:
-        console.log("je suis dans le addMarkerToMap")
-        console.log(popUpConfig?.isAreaDynamic)
         this.layerManagers[0].addMarker(entity, popUpConfig);
         break;
       case EntityType.VEHICLE:
@@ -204,7 +200,7 @@ export class MapManager {
     if (latLngs.length > 1) {
       const bounds = L.latLngBounds(latLngs);
       // Ajuster la vue de la carte pour inclure tous les points avec un padding
-      this.map.fitBounds(bounds, { padding: [50, 50] });
+      this.map.flyToBounds(bounds.pad(0.5), { padding: [10, 10] });
     } else {
       console.log('Aucun marqueur mis en évidence.');
     }
@@ -224,12 +220,12 @@ export class MapManager {
       }
     )
 
-    this.map.fitBounds(featureGroup.getBounds())
+    this.map.flyToBounds(featureGroup.getBounds().pad(0.5), { padding: [10, 10] })
   }
 
-  private zoomToCoordinates(coordinates: [number, number], zoomLevel: number = 19): void {
+  private zoomToCoordinates(coordinates: [number, number], zoomLevel: number = 15): void {
     const [lng, lat] = coordinates;
-    this.map.setView([lat, lng], zoomLevel);
+    this.map.flyTo([lat, lng], zoomLevel);
   }
 
   // Context Menu Region.

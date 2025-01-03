@@ -231,8 +231,6 @@ export class TripsComponent implements OnInit {
   }
 
   protected hideCalendar(event: Event) {
-    console.log(event);
-    console.log(this.calendar)
     this.calendar.hideOverlay()
   }
 }

@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+
+-- changeset smarty_plan:21 context:dev,prod
+
 UPDATE point_of_interest SET client_code='3' WHERE id=350;
 UPDATE point_of_interest SET client_code='4' WHERE id=362;
 UPDATE point_of_interest SET client_code=NULL WHERE id=363;

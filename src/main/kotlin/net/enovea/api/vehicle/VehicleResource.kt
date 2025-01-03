@@ -1,9 +1,12 @@
 package net.enovea.api.vehicle
 
+import io.quarkus.logging.Log
 import io.quarkus.security.Authenticated
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
+import mu.KotlinLogging
+import net.dilivia.lang.StopWatch
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.device.DeviceDataStateEntity
 import net.enovea.domain.device.DeviceEntity
@@ -11,11 +14,13 @@ import net.enovea.domain.vehicle.*
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.service.TeamHierarchyNode
 import net.enovea.service.VehicleService
+import org.jboss.logging.Logger
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import org.locationtech.jts.io.WKTReader
+import kotlin.time.DurationUnit
 
 // TODO(A refactoriser et à améliorer avec le VehicleService et travailler sur le nombre de résultat retourner après le filtre)
 @Path("/api/vehicles")
@@ -26,6 +31,8 @@ class VehicleResource(
     private val vehicleService: VehicleService,
     private val deviceDataStateSpatialService: SpatialService,
 ) {
+    private val logger = Logger.getLogger(VehicleResource::class.java)
+
     private val vehicleMapper: VehicleMapper = VehicleMapper.INSTANCE
 
     @GET
@@ -72,12 +79,18 @@ class VehicleResource(
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
         @QueryParam("driverNames") driverNames: List<String>?
     ): List<TeamHierarchyNode> {
+        val stopWatch = StopWatch(id = "tableData", keepTaskList = true)
+
+        stopWatch.start("getFilteredVehicles")
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
-        val vehicleSummaries = vehicleService.getVehiclesTableData(filteredVehicles)
-        return vehicleSummaries
+        stopWatch.stop()
+
+        val table = vehicleService.getVehiclesTableData(filteredVehicles, stopWatch)
+
+        logger.info("Load vehicles table data:\n${stopWatch.prettyPrint(DurationUnit.MILLISECONDS)}")
+
+        return table
     }
-
-
 
     @GET
     @Path("/nearest")

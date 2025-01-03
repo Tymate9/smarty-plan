@@ -2,6 +2,7 @@ package net.enovea.service
 
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import net.dilivia.lang.StopWatch
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
@@ -12,11 +13,12 @@ import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
+import net.enovea.workInProgress.LogExecutionTime
 import java.time.*
 import java.time.temporal.Temporal
 import java.time.temporal.TemporalUnit
 
-class VehicleService(
+open class VehicleService(
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
     private val spatialService: SpatialService,
@@ -71,13 +73,19 @@ class VehicleService(
     }
 
     // TODO seperate the data treatment method
-    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
+    @LogExecutionTime
+    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
         // TODO
-        val allVehicles = removeLocalizationToUntrackedVehicle(vehicles ?: VehicleEntity.listAll())
+
+        stopWatch?.start("filter localized vehicles")
+        val allVehicles = vehicles ?: VehicleEntity.listAll()
+        println(allVehicles.flatMap { v -> v.vehicleDevices.map{ vd -> vd.device?.deviceDataState}})
+        stopWatch?.stopAndStart("compute daily stats")
         val tripStats = tripService.getTripDailyStats()
 
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
+        stopWatch?.stopAndStart("MapTo vehicle data DTO")
         val allVehicleDataDTO =
             allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
                 .map { vehicle ->
@@ -92,7 +100,8 @@ class VehicleService(
                     vehicleDTO
                 }
 
-        // Replace the last position for the untracked vehicles/drivers by null
+        // Find last position info (poi or address)
+        stopWatch?.stopAndStart("Get last position infos")
         allVehicleDataDTO.forEach { vehicleDataDTO ->
             try {
                 // Try to fetch POI using spatial service
@@ -127,12 +136,15 @@ class VehicleService(
             }
         }
         // Now we build the hierarchy of vehicles based on their teams
+        stopWatch?.stopAndStart("Build team hierarchy")
         val vehiclesWithHierarchy = allVehicleDataDTO.map { vehicleDataDTO ->
             val team = vehicleDataDTO.team
             val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy)
+
+        stopWatch?.stop()
         return teamHierarchy
     }
 
@@ -246,11 +258,9 @@ class VehicleService(
     fun getFilteredVehicles(
         teamLabels: List<String>? = null,
         vehicleIds: List<String>? = null,
-        driverNames: List<String>? = null
+        driverNames: List<String>? = null,
     ): List<VehicleEntity> {
-
         val params = mutableMapOf<String, Any>()
-
         var query =
             """
             SELECT v
@@ -259,7 +269,14 @@ class VehicleService(
             JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
             LEFT JOIN t.parentTeam parent_team
             JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
+                AND vd.id.startDate <= current_date()
+                AND (vd.endDate IS NULL OR vd.endDate >= current_date())   
             JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
+            JOIN FETCH DeviceVehicleInstallEntity dvi ON v.id = dvi.id.vehicleId
+                AND dvi.id.startDate <= current_date()
+                AND (dvi.endDate IS NULL OR dvi.endDate >= current_date())   
+            JOIN FETCH DeviceEntity de ON dvi.id.deviceId = de.id
+            LEFT JOIN FETCH DeviceDataStateEntity ds ON de.id = ds.device_id 
             LEFT JOIN VehicleUntrackedPeriodEntity vup 
                 ON vup.id.vehicleId = v.id 
                 AND vup.id.startDate <= current_date()
@@ -268,8 +285,7 @@ class VehicleService(
                 ON dup.id.driverId = d.id 
                 AND dup.id.startDate <= current_date() 
                 AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
-            WHERE 1=1
-            AND vt.endDate IS NULL
+            WHERE vt.endDate IS NULL
             AND vd.endDate IS NULL
             AND vup.id.startDate IS NULL
             AND dup.id.startDate IS NULL

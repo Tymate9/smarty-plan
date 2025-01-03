@@ -40,7 +40,11 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
                     dateFormat="yymmdd"
                     ></p-calendar>
       </p-tabView>
-      <div *ngIf="!tripData" class="no-data">
+      <div *ngIf="loading" class="full-screen-info">
+        Données en cours de chargement...
+        <p-progressSpinner strokeWidth="6"/>
+      </div>
+      <div *ngIf="!loading && !tripData" class="full-screen-info">
         Pas de données de trajet pour ce jour
       </div>
     </div>
@@ -50,7 +54,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
       position: relative;
       z-index: 10000;
 
-      .no-data {
+      .full-screen-info {
         position: absolute;
         display: flex;
         justify-content: center;
@@ -65,6 +69,15 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
       }
 
       ::ng-deep {
+        .p-progress-spinner {
+          width: 40px;
+          height: 40px;
+          .p-progress-spinner-circle {
+            animation: p-progress-spinner-dash 1.5s ease-in-out infinite;
+            stroke: #aa001f;
+          }
+        }
+
         .p-button.p-component.p-button-icon-only.custom-button {
           background-color: #aa001f !important;
           border-color: #aa001f !important;
@@ -158,10 +171,12 @@ export class TripsComponent implements OnInit {
 
   set calendarDate(date: Date) {
     date.setHours(3);
+    this.loading = true;
     this.router.navigate(['/trip', this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
   }
 
   protected tripData: TripEventsDTO | null = null;
+  protected loading: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -171,6 +186,7 @@ export class TripsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loading = true;
     this.route.paramMap.subscribe(params => {
       this.date = params.get('date') || '';
       this.vehicleId = params.get('vehicleId') || '';
@@ -181,6 +197,7 @@ export class TripsComponent implements OnInit {
   loadTrips(): void {
     this.tripsService.getTripByDateAndVehicle(this.vehicleId, this.date).subscribe({
       next: (data) => {
+        this.loading = false;
         this.tripData = data;
       },
       error: (error) => {

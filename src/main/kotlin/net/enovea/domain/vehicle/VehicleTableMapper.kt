@@ -1,6 +1,7 @@
 package net.enovea.domain.vehicle
 
 import net.enovea.domain.device.DeviceDataMapper
+import net.enovea.domain.device.DeviceDataStateMapper
 import net.enovea.domain.device.DeviceMapper
 import net.enovea.domain.device.DeviceSummaryMapper
 import net.enovea.domain.driver.DriverMapper
@@ -12,7 +13,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-@Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleMapper::class  ])
+@Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleMapper::class, DeviceDataStateMapper::class  ])
 interface VehicleTableMapper {
 
     @Mapping(target = "id", source = "id")

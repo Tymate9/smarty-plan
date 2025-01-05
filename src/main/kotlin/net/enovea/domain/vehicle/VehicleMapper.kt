@@ -1,7 +1,9 @@
 package net.enovea.domain.vehicle
 
+import net.enovea.domain.device.DeviceDataStateMapper
 import net.enovea.domain.device.DeviceMapper
 import net.enovea.domain.device.DeviceSummaryMapper
+import net.enovea.domain.device.until
 import net.enovea.domain.driver.DriverMapper
 import net.enovea.domain.team.TeamMapper
 import net.enovea.domain.team.TeamSummaryMapper
@@ -12,8 +14,9 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
+import java.time.Instant
 
-@Mapper(uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class])
+@Mapper(uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class, DeviceDataStateMapper::class])
 interface VehicleMapper {
 
     // Vehicle Summary Mapper
@@ -96,7 +99,13 @@ interface VehicleMapper {
     fun localizationStateMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): String? = vehicleDevices
         .filter { it.endDate == null }
         .maxByOrNull { it.id.startDate }
-        ?.let { it.device?.deviceDataState?.state }
+        ?.let {
+            if(it.device?.deviceDataState?.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12) {
+                "NO_COM"
+            }else {
+                it.device?.deviceDataState?.state
+            }
+        }
 
     companion object {
         val INSTANCE: VehicleMapper = Mappers.getMapper(VehicleMapper::class.java)

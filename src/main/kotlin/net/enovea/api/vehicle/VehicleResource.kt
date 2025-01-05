@@ -49,7 +49,7 @@ class VehicleResource(
         @QueryParam("driverNames") driverNames: List<String>?
     ): Response {
         val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
-        val vehicleSummaries = vehicleService.removeLocalizationToUntrackedVehicle(filteredVehicles)
+        val vehicleSummaries = filteredVehicles
         // TODO(Ceci est une rustine il faut la retravailler)
         val vehicleFinale = vehicleSummaries
             .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
@@ -60,7 +60,6 @@ class VehicleResource(
         return when(vehicleFormat)
         {
             VehicleFormat.FULL -> vehicles.map{ vehicle ->
-                println()
                 vehicleMapper.toVehicleDTO(vehicle)
             }
             VehicleFormat.RESUME -> vehicles.map{ vehicle ->

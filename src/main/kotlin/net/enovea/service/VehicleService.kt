@@ -16,7 +16,6 @@ import net.enovea.dto.VehicleTableDTO
 import net.enovea.workInProgress.LogExecutionTime
 import java.time.*
 import java.time.temporal.Temporal
-import java.time.temporal.TemporalUnit
 
 open class VehicleService(
     private val vehicleMapper: VehicleMapper,
@@ -73,13 +72,9 @@ open class VehicleService(
     }
 
     // TODO seperate the data treatment method
-    @LogExecutionTime
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
-        // TODO
-
         stopWatch?.start("filter localized vehicles")
         val allVehicles = vehicles ?: VehicleEntity.listAll()
-        println(allVehicles.flatMap { v -> v.vehicleDevices.map{ vd -> vd.device?.deviceDataState}})
         stopWatch?.stopAndStart("compute daily stats")
         val tripStats = tripService.getTripDailyStats()
 

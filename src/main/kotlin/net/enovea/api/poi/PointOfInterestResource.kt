@@ -6,21 +6,32 @@ import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
+import net.dilivia.lang.StopWatch
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.common.geo.SpatialService
+import org.jboss.logging.Logger
 import org.locationtech.jts.geom.*
 import org.locationtech.jts.io.WKTReader
+import kotlin.time.DurationUnit
 
-@Path("/api/poi")
 @Authenticated
+@Path("/api/poi")
 class PointOfInterestResource (
     val pointOfInterestSpatialService: SpatialService,
     val entityManager: EntityManager
 ){
+    private val logger = Logger.getLogger(PointOfInterestResource::class.java)
+
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun getPOI(): List<PointOfInterestEntity> {
-        return PointOfInterestEntity.listAll()
+        val stopWatch = StopWatch(id = "PointOfInterestResource", keepTaskList = true)
+        stopWatch.start("GetAllPOI")
+        val response = PointOfInterestEntity.getAll()
+        stopWatch.stop()
+        logger.info("Load vehicles table data:\n${stopWatch.prettyPrint(DurationUnit.MILLISECONDS)}")
+        return response
     }
 
     @GET

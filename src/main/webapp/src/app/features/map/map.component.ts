@@ -119,15 +119,49 @@ export class MapComponent implements OnInit, OnDestroy {
   private loadPOIs(): void {
     this.poiService.getAllPOIs().subscribe({
       next: (pois) => {
-        pois.forEach(poi => {
+        const centerLatLng = this.map.getCenter();
+        pois.sort((poiA, poiB) => {
+          const latLngA = L.latLng(poiA.coordinate.coordinates[1], poiA.coordinate.coordinates[0]);
+          const latLngB = L.latLng(poiB.coordinate.coordinates[1], poiB.coordinate.coordinates[0]);
+
+          const distA = latLngA.distanceTo(centerLatLng);
+          const distB = latLngB.distanceTo(centerLatLng);
+
+          return distA - distB;
+        });
+        this.addPoisInBatches(pois);
+/*        pois.forEach(poi => {
             this.mapManager.addMarker(EntityType.POI, poi)
           }
-        );
+        );*/
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des POI:', error);
       }
     });
+  }
+
+  private addPoisInBatches(pois: dto.PointOfInterestEntity[]) {
+    const batchSize = 150;
+    let index = 0;
+
+    const addBatch = (deadline?: IdleDeadline) => {
+      while ((deadline && deadline.timeRemaining() > 0) || !deadline) {
+        const batch = pois.slice(index, index + batchSize);
+
+        batch.forEach((poi) => {
+          this.mapManager.addMarker(EntityType.POI, poi);
+        });
+        index += batchSize;
+
+        if (index >= pois.length) {
+          this.notificationService.success("Point d'intérêt", "Chargement des points d'intérêt terminés")
+          return;
+        }
+      }
+      requestIdleCallback(addBatch);
+    };
+    requestIdleCallback(addBatch);
   }
 
   private subscribeToFilterChanges(): Subscription {
@@ -233,4 +267,3 @@ export class MapComponent implements OnInit, OnDestroy {
     this.isCollapsed = !this.isCollapsed;
   }
 }
-

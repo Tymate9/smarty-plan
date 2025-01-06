@@ -219,8 +219,7 @@ export class MapManager {
         }
       }
     )
-
-    this.map.flyToBounds(featureGroup.getBounds().pad(0.5), { padding: [10, 10] })
+    this.map.flyToBounds(featureGroup.getBounds(), { padding: [(1 + Math.sqrt(5)) / 2,(1 + Math.sqrt(5)) / 2] })
   }
 
   private zoomToCoordinates(coordinates: [number, number], zoomLevel: number = 15): void {

@@ -330,11 +330,15 @@ export class TripMapComponent {
       if (tripEvent.eventType != TripEventType.TRIP
         && tripEvent.eventType != TripEventType.TRIP_EXPECTATION
         && tripEvent.lat !== null && tripEvent.lng !== null) {
+        const popupLabel = tripEvent.poiLabel ??
+          (tripEvent.eventType === TripEventType.VEHICLE_RUNNING ? 'Véhicule roulant'
+            : tripEvent.eventType === TripEventType.VEHICLE_IDLE ? 'Véhicule à l\'arrêt avec moteur tournant'
+              : 'Arrêt');
         new CustomMarkerImpl([tripEvent.lat, tripEvent.lng])
           .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color))
           .addTo(this.featureGroup)
           .bindPopup(
-            `<b>${tripEvent.poiLabel || 'Arrêt'}</b><br>${tripEvent.address}<br>${tripEvent.start?.toLocaleTimeString() ?? ''} - ${tripEvent.end?.toLocaleTimeString() ?? ''}`
+            `<b>${popupLabel}</b><br>${tripEvent.address}<br>${tripEvent.start?.toLocaleTimeString() ?? ''} - ${tripEvent.end?.toLocaleTimeString() ?? ''}`
           );
       }
 

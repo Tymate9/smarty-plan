@@ -146,12 +146,13 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
 
   private initMap(): void {
     const normandyCenter: L.LatLngExpression = [49.1817, 0.3714];
-    this.map = L.map('map', { zoomDelta: 0.5 }).setView(normandyCenter, 9);
+    this.map = L.map('map', { zoomControl: true, zoomDelta: 1}).setView(normandyCenter, 9);
     this.map.setMaxZoom(18);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
+    this.map.attributionControl.setPosition('bottomleft')
     // this.tilesService.getTileUrls().subscribe(tileUrls => {
     //   const baseLayers = {
     //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),

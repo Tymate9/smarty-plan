@@ -92,13 +92,13 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {zoomControl: true, zoomDelta: 0.5}).setView(normandyCoordinates, 9);
+    this.map = L.map('map', {zoomControl: true, zoomDelta:1}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
-    this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
+    this.map.attributionControl.setPosition('bottomleft')
     // this.tilesService.getTileUrls().subscribe(tileUrls => {
     //   const baseLayers = {
     //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
@@ -113,6 +113,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
       this.mapManager.showPopup(e.latlng.lat, e.latlng.lng);
     });
+    this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
   }
 
   private loadPOIs(): void {

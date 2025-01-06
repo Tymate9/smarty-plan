@@ -139,9 +139,9 @@ class VehicleResource(
 
             val devicesIdInPolygon = deviceDataStateSpatialService.getEntityInPolygon(polygon, DeviceDataStateEntity::class).map {deviceDataState -> deviceDataState.device_id}
 
-            val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(devicesIdInPolygon)).map {
-                vehicleMapper.toVehicleDTOSummary(it)
-            }
+            val response = vehicleService.filterVehicle(getVehicleEntityFromDeviceIds(devicesIdInPolygon))
+                .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+                .map { vehicleMapper.toVehicleDTOSummary(it) }
 
             Response.ok(response).build()
         } catch (e: Exception) {

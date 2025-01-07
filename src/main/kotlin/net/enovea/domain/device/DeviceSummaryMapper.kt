@@ -8,6 +8,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 import java.sql.Timestamp
+import java.time.Instant
 
 @Mapper
 interface DeviceSummaryMapper {
@@ -39,10 +40,10 @@ interface DeviceSummaryMapper {
 
     @Named("stateMapper")
     fun stateMapper(deviceDataState: DeviceDataStateEntity?): String?{
-        return if(deviceDataState != null){
-            deviceDataState.state
-        } else {
-            null
+        return if(deviceDataState?.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12) {
+            "NO_COM"
+        }else {
+            deviceDataState?.state
         }
     }
 

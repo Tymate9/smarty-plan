@@ -344,7 +344,7 @@ export class PoiPopupComponent implements OnInit {
       type: this.selectedCategoryId,
       WKTPoint: wktPoint,
       WKTPolygon: wellknown.stringify(this.entity.area as GeoJSONGeometry),
-      adresse:"adresse Inconne"
+      adresse:this.entity.address
     };
 
     this.poiService.updatePOI(this.entity.id, updatedData).subscribe({

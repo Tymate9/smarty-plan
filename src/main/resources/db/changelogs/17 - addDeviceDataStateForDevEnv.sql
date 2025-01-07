@@ -13,7 +13,7 @@ SELECT d.id,
                           49 + random()*1
                   ), 4326) AS last_position,
        NOW() - (random()*'1 days'::interval) as last_position_time,
-       '' as address,
+       'abc' as address,
        NOW() - (random()*'2 days'::interval) as state_time
 FROM device d
 WHERE d.id NOT IN (SELECT device_id FROM device_data_state);

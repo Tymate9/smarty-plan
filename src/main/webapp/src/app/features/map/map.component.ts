@@ -92,13 +92,13 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {zoomControl: true, zoomDelta: 0.5}).setView(normandyCoordinates, 9);
+    this.map = L.map('map', {zoomControl: true, zoomDelta:1}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
-    this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
+    this.map.attributionControl.setPosition('bottomleft')
     // this.tilesService.getTileUrls().subscribe(tileUrls => {
     //   const baseLayers = {
     //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
@@ -113,20 +113,55 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
       this.mapManager.showPopup(e.latlng.lat, e.latlng.lng);
     });
+    this.mapManager = new MapManager(this.map, this.viewContainerRef, this.geoCodingService);
   }
 
   private loadPOIs(): void {
     this.poiService.getAllPOIs().subscribe({
       next: (pois) => {
-        pois.forEach(poi => {
+        const centerLatLng = this.map.getCenter();
+        pois.sort((poiA, poiB) => {
+          const latLngA = L.latLng(poiA.coordinate.coordinates[1], poiA.coordinate.coordinates[0]);
+          const latLngB = L.latLng(poiB.coordinate.coordinates[1], poiB.coordinate.coordinates[0]);
+
+          const distA = latLngA.distanceTo(centerLatLng);
+          const distB = latLngB.distanceTo(centerLatLng);
+
+          return distA - distB;
+        });
+        this.addPoisInBatches(pois);
+/*        pois.forEach(poi => {
             this.mapManager.addMarker(EntityType.POI, poi)
           }
-        );
+        );*/
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des POI:', error);
       }
     });
+  }
+
+  private addPoisInBatches(pois: dto.PointOfInterestEntity[]) {
+    const batchSize = 150;
+    let index = 0;
+
+    const addBatch = (deadline?: IdleDeadline) => {
+      while ((deadline && deadline.timeRemaining() > 0) || !deadline) {
+        const batch = pois.slice(index, index + batchSize);
+
+        batch.forEach((poi) => {
+          this.mapManager.addMarker(EntityType.POI, poi);
+        });
+        index += batchSize;
+
+        if (index >= pois.length) {
+          this.notificationService.success("Point d'intérêt", "Chargement des points d'intérêt terminés")
+          return;
+        }
+      }
+      requestIdleCallback(addBatch);
+    };
+    requestIdleCallback(addBatch);
   }
 
   private subscribeToFilterChanges(): Subscription {
@@ -232,4 +267,3 @@ export class MapComponent implements OnInit, OnDestroy {
     this.isCollapsed = !this.isCollapsed;
   }
 }
-

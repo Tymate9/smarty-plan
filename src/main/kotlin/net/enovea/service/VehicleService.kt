@@ -2,6 +2,7 @@ package net.enovea.service
 
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import net.dilivia.lang.StopWatch
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
@@ -12,11 +13,11 @@ import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
+import net.enovea.workInProgress.LogExecutionTime
 import java.time.*
 import java.time.temporal.Temporal
-import java.time.temporal.TemporalUnit
 
-class VehicleService(
+open class VehicleService(
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
     private val spatialService: SpatialService,
@@ -71,15 +72,17 @@ class VehicleService(
     }
 
     // TODO seperate the data treatment method
-    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null): List<TeamHierarchyNode> {
-        // TODO
-        val allVehicles = removeLocalizationToUntrackedVehicle(vehicles ?: VehicleEntity.listAll())
+    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
+        stopWatch?.start("filter localized vehicles")
+        val allVehicles = vehicles ?: VehicleEntity.listAll()
+        stopWatch?.stopAndStart("compute daily stats")
         val tripStats = tripService.getTripDailyStats()
 
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
+        stopWatch?.stopAndStart("MapTo vehicle data DTO")
         val allVehicleDataDTO =
-            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
                 .map { vehicle ->
                     // Convert to VehicleTableDTO
                     val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
@@ -92,7 +95,8 @@ class VehicleService(
                     vehicleDTO
                 }
 
-        // Replace the last position for the untracked vehicles/drivers by null
+        // Find last position info (poi or address)
+        stopWatch?.stopAndStart("Get last position infos")
         allVehicleDataDTO.forEach { vehicleDataDTO ->
             try {
                 // Try to fetch POI using spatial service
@@ -127,12 +131,15 @@ class VehicleService(
             }
         }
         // Now we build the hierarchy of vehicles based on their teams
+        stopWatch?.stopAndStart("Build team hierarchy")
         val vehiclesWithHierarchy = allVehicleDataDTO.map { vehicleDataDTO ->
             val team = vehicleDataDTO.team
             val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy)
+
+        stopWatch?.stop()
         return teamHierarchy
     }
 
@@ -239,68 +246,6 @@ class VehicleService(
         return panacheQuery.list()
             .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
             .map { vehicleMapper.toVehicleDTOSummary(it) }
-    }
-
-    //Function returns the list of vehicles based on the filters provided
-    @Transactional
-    fun getFilteredVehicles(
-        teamLabels: List<String>? = null,
-        vehicleIds: List<String>? = null,
-        driverNames: List<String>? = null
-    ): List<VehicleEntity> {
-
-        val params = mutableMapOf<String, Any>()
-
-        var query =
-            """
-            SELECT v
-            FROM VehicleEntity v
-            JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
-            JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
-            LEFT JOIN t.parentTeam parent_team
-            JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
-            JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
-            LEFT JOIN VehicleUntrackedPeriodEntity vup 
-                ON vup.id.vehicleId = v.id 
-                AND vup.id.startDate <= current_date()
-                AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
-            LEFT JOIN DriverUntrackedPeriodEntity dup 
-                ON dup.id.driverId = d.id 
-                AND dup.id.startDate <= current_date() 
-                AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
-            WHERE 1=1
-            AND vt.endDate IS NULL
-            AND vd.endDate IS NULL
-            AND vup.id.startDate IS NULL
-            AND dup.id.startDate IS NULL
-        """
-
-        if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
-
-            query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))" +
-                    " AND (v.licenseplate IN :vehicleIds OR CONCAT(d.lastName, ' ', d.firstName) IN :driverNames)"
-
-            params["teamLabels"] = teamLabels
-            params["vehicleIds"] = vehicleIds
-            params["driverNames"] = driverNames
-        } else {
-            if (!teamLabels.isNullOrEmpty()) {
-                query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))"
-                params["teamLabels"] = teamLabels
-            }
-            if (!vehicleIds.isNullOrEmpty()) {
-                query += " AND v.licenseplate IN :vehicleIds"
-                params["vehicleIds"] = vehicleIds
-            }
-            if (!driverNames.isNullOrEmpty()) {
-                query += " AND (d.lastName || ' ' || d.firstName) IN :driverNames"
-                params["driverNames"] = driverNames
-            }
-        }
-
-        val panacheQuery = VehicleEntity.find(query, params)
-
-        return panacheQuery.list()
     }
 }
 

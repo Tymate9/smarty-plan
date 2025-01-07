@@ -30,6 +30,7 @@
         <jdbi.version>3.34.0</jdbi.version>
         <mysql-connector-j.version>8.2.0</mysql-connector-j.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
+        <dilivia-lang.version>2.0.0</dilivia-lang.version>
     </properties>
 
     <distributionManagement>
@@ -42,6 +43,20 @@
             <url>https://gitlab.enovea.org/api/v4/projects/1104/packages/maven</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>dilivia</id>
+            <url>https://gitlab.enovea.org/api/v4/groups/1277/-/packages/maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -101,6 +116,13 @@
             <version>${kotlin-logging.version}</version>
         </dependency>
 
+        <!-- Dilivia -->
+        <dependency>
+            <groupId>net.dilivia.libs</groupId>
+            <artifactId>dilivia-lang</artifactId>
+            <version>${dilivia-lang.version}</version>
+        </dependency>
+
         <!-- Mysql Connector -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -152,6 +174,12 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-liquibase</artifactId>
+        </dependency>
+
+        <!-- Quarkus metrics -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <!-- Jackson Resteasy -->

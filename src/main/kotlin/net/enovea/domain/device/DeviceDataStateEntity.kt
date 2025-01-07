@@ -219,4 +219,8 @@ data class DeviceDataStateEntity(
             }
         }
     }
+
+    override fun toString(): String {
+        return "DeviceDataStateEntity(lastPositionTime=$lastPositionTime, coordinate=$coordinate, address=$address, stateTime=$stateTime, lastReceivedDataTime=$lastReceivedDataTime, lastCommTime=$lastCommTime, firstCommTime=$firstCommTime, state=$state, device_id=$device_id)"
+    }
 }

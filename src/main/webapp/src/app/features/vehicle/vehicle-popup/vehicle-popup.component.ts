@@ -16,7 +16,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         <p-tabPanel header="Information" *ngIf="popUpConfig.isTabEnabled(entityType, 'information')">
           <div class="p-field">
             <label><strong>Conducteur:</strong></label>
-            <span>{{ entity.driver?.firstName + ' ' + (entity.driver?.lastName || 'Aucun conducteur') }}</span>
+            <span *ngIf="entity.driver; else noDriver">
+                {{ entity.driver.firstName }} {{ entity.driver.lastName || 'Véhicule non attribué' }}
+            </span>
+            <ng-template #noDriver>
+              <span>Véhicule non attribué</span>
+            </ng-template>
           </div>
           <div class="p-field">
             <label><strong>Plaque d'immatriculation:</strong></label>
@@ -66,7 +71,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         </p-tabPanel>
 
         <!-- Onglet Envoyer un SMS -->
-        <p-tabPanel header="Envoyer un SMS">
+        <p-tabPanel *ngIf="entity.driver != null" header="Envoyer un SMS">
             <h4>Forfait SMS Enovea</h4>
 
             <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
@@ -220,13 +225,14 @@ export class VehiclePopupComponent implements OnInit {
     this.smsForm = {
       userName: '',
       callingCode: '+33',
-      phoneNumber: this.entity.driver!.phoneNumber!,
+      phoneNumber: this.entity.driver?.phoneNumber ?? null,
       content: ''
     };
+
     this.loadSmsStatistics();
     this.smsFormGroup.patchValue({
       phoneNumber: this.entity.driver?.phoneNumber || '',
-      callingCode: '+33' // Vous pouvez ajuster si nécessaire
+      callingCode: '+33'
     });
   }
 

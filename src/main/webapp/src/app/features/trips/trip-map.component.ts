@@ -24,7 +24,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
           id="side-panel-toggle"
         />
         <div class="container">
-          <h3 *ngIf="tripData">{{ tripData.driverName }} - {{ tripData.licensePlate }}</h3>
+          <h3 *ngIf="tripData">{{ tripData.driverName ?? 'Véhicule non attribué' }} - {{ tripData.licensePlate }}</h3>
           <div *ngIf="showTimeline" id="trip-cards" class="flex">
             <p-card header="Amplitude">
               <p>{{ tripsService.formatDuration(tripData!.range) }}</p>
@@ -53,10 +53,10 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                       <i class="pi pi-map-marker"></i>
               </span>
               <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
-                <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName }}"/>
+                <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
               </span>
               <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
-                <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName }}"/>
+                <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
               </span>
             </ng-template>
             <ng-template pTemplate="content" let-event>

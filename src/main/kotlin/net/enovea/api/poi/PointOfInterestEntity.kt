@@ -9,6 +9,8 @@ import net.enovea.common.geo.IHasArea
 import net.enovea.common.geo.IHasAreaRepository
 import net.enovea.common.geo.IHasCoordinate
 import net.enovea.common.geo.IHasCoordinateRepository
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import org.locationtech.jts.geom.*
 import org.locationtech.jts.geom.impl.CoordinateArraySequence
 import org.locationtech.jts.io.WKTWriter
@@ -25,7 +27,8 @@ data class PointOfInterestEntity(
     )
     var id: Int = -1,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+/*    @Fetch(FetchMode.JOIN)*/
     @JoinColumn(name = "type", nullable = false)
     var category: PointOfInterestCategoryEntity = PointOfInterestCategoryEntity(),
 
@@ -87,7 +90,9 @@ data class PointOfInterestEntity(
          * Méthode existante pour récupérer tous les POI
          */
         fun getAll(): List<PointOfInterestEntity> {
-            return listAll()
+            val entityManager = getEntityManager()
+            val query = entityManager.createQuery("SELECT poi from PointOfInterest as poi JOIN FETCH PointOfInterestCategory as c ON poi.category.id = c.id", PointOfInterestEntity::class.java)
+            return query.resultList
         }
 
         // ======================

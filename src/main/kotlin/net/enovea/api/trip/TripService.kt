@@ -7,6 +7,7 @@ import net.enovea.repository.TripRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -103,7 +104,7 @@ class TripService(
             lastPosition = lastDeviceState.coordinate
             addressAtEnd = lastDeviceState.address ?: lastPosition?.let { spatialService.getAddressFromEntity(it) }
             if (lastDeviceState.lastPositionTime != null) {
-                lastPositionTime = lastDeviceState.lastPositionTime!!.toLocalDateTime().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime()
+                lastPositionTime = Instant.ofEpochMilli(lastDeviceState.lastPositionTime!!.time).atZone(ZoneId.of("Europe/Paris")).toLocalDateTime()
             }
             lastTripStatus = when (lastDeviceState.state) {
                 "DRIVING" -> TripStatus.DRIVING

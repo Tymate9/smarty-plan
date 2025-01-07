@@ -15,9 +15,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 SELECT 
                     vehicle_id, 
                     trip_id,
-                    convert_tz(last_compute_date, 'UTC', 'Europe/Paris') as last_compute_date,
-                    convert_tz(start_time, 'UTC', 'Europe/Paris') as start_time,
-                    convert_tz(end_time, 'UTC', 'Europe/Paris') as end_time,
+                    coalesce(minutes_add(last_compute_date, tz_offset * 10), convert_tz(last_compute_date, 'UTC', 'Europe/Paris')) as last_compute_date,
+                    coalesce(minutes_add(start_time, tz_offset * 10), convert_tz(start_time, 'UTC', 'Europe/Paris')) as start_time,
+                    coalesce(minutes_add(end_time, tz_offset * 10), convert_tz(end_time, 'UTC', 'Europe/Paris')) as end_time,
                     distance,
                     duration,
                     datapoint_count,
@@ -47,9 +47,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 SELECT 
                     vehicle_id, 
                     trip_id,
-                    convert_tz(last_compute_date, 'UTC', 'Europe/Paris') as last_compute_date,
-                    convert_tz(start_time, 'UTC', 'Europe/Paris') as start_time,
-                    convert_tz(end_time, 'UTC', 'Europe/Paris') as end_time,
+                    coalesce(minutes_add(last_compute_date, tz_offset * 10), convert_tz(last_compute_date, 'UTC', 'Europe/Paris')) as last_compute_date,
+                    coalesce(minutes_add(start_time, tz_offset * 10), convert_tz(start_time, 'UTC', 'Europe/Paris')) as start_time,
+                    coalesce(minutes_add(end_time, tz_offset * 10), convert_tz(end_time, 'UTC', 'Europe/Paris')) as end_time,
                     distance,
                     duration,
                     datapoint_count,
@@ -78,9 +78,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 SELECT 
                     vehicle_id, 
                     trip_id,
-                    convert_tz(last_compute_date, 'UTC', 'Europe/Paris') as last_compute_date,
-                    convert_tz(start_time, 'UTC', 'Europe/Paris') as start_time,
-                    convert_tz(end_time, 'UTC', 'Europe/Paris') as end_time,
+                    coalesce(minutes_add(last_compute_date, tz_offset * 10), convert_tz(last_compute_date, 'UTC', 'Europe/Paris')) as last_compute_date,
+                    coalesce(minutes_add(start_time, tz_offset * 10), convert_tz(start_time, 'UTC', 'Europe/Paris')) as start_time,
+                    coalesce(minutes_add(end_time, tz_offset * 10), convert_tz(end_time, 'UTC', 'Europe/Paris')) as end_time,
                     distance,
                     duration,
                     datapoint_count,
@@ -112,7 +112,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     SELECT 
                         vehicle_id, 
                         sum(distance) as distance, 
-                        convert_tz(min(start_time), 'UTC', 'Europe/Paris') as first_trip_start
+                        coalesce(minutes_add(min(start_time), min_by(tz_offset, start_time) * 10), convert_tz(min(start_time), 'UTC', 'Europe/Paris')) as first_trip_start
                     FROM trips_vehicle_view
                     WHERE date(start_time) = date(now()) and vehicle_id is not null
                     GROUP BY vehicle_id, date(start_time)

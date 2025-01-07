@@ -220,7 +220,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   }
 
-
   updateVehicles(tags: string[]) {
     this.vehicleSelected = tags;
     this.emitSelectedTags();
@@ -269,7 +268,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
           .sort((a, b) => (a.licenseplate || '').localeCompare(b.licenseplate || ''))
           .map(vehicle => vehicle.licenseplate || '');
 
-
         // Traitement des conducteurs
         this.driverOptions = drivers;
         this.filteredDriverOptions = drivers
@@ -280,8 +278,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
             }
             return (a.firstName || '').localeCompare(b.firstName || '');
           })
-          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
-
+          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+          .concat('Véhicule non attribué');
 
         // Charger les filtres initiaux depuis le FilterService
         this.loadInitialFilters();
@@ -324,12 +322,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
             }
             return (a.firstName || '').localeCompare(b.firstName || '');
           })
-          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+          .concat('Véhicule non attribué');
       });
     } else {
       // Si aucune agence n'est sélectionnée, réinitialiser aux options originales
       this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
-      this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+      this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+        .concat('Véhicule non attribué');
     }
 
 
@@ -444,15 +444,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
             }
             return (a.firstName || '').localeCompare(b.firstName || '');
           })
-          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+          .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+          .concat('Véhicule non attribué');
 
         // Mettre à jour les sélections de conducteurs pour ne conserver que ceux qui sont toujours valides
-        this.driverSelected = this.driverSelected.filter(driverName => this.filteredDriverOptions.includes(driverName));
+        this.driverSelected = this.driverSelected.filter(driverName => this.filteredDriverOptions.includes(driverName))
+          .concat('Véhicule non attribué');
       });
     } else {
       // Si aucune agence n'est sélectionnée, réinitialiser les options
       this.filteredVehicleOptions = this.vehicleOptions.map(vehicle => vehicle.licenseplate);
-      this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim());
+      this.filteredDriverOptions = this.driverOptions.map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+        .concat('Véhicule non attribué');
     }
   }
 

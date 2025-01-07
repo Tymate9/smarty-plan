@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 export interface SmsForm {
   userName: string;
   callingCode: string;
-  phoneNumber: string;
+  phoneNumber: string | null;
   content: string;
 }
 

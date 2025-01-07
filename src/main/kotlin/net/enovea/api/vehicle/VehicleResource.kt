@@ -48,11 +48,10 @@ class VehicleResource(
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
         @QueryParam("driverNames") driverNames: List<String>?
     ): Response {
-        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
+        val filteredVehicles = VehicleEntity.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
         val vehicleSummaries = filteredVehicles
-        // TODO(Ceci est une rustine il faut la retravailler)
         val vehicleFinale = vehicleSummaries
-            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
         return Response.ok(formatResponse(format ?: VehicleFormat.RESUME, vehicleFinale)).build()
     }
 
@@ -81,7 +80,7 @@ class VehicleResource(
         val stopWatch = StopWatch(id = "tableData", keepTaskList = true)
 
         stopWatch.start("getFilteredVehicles")
-        val filteredVehicles = vehicleService.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
+        val filteredVehicles = VehicleEntity.getFilteredVehicles(teamLabels, vehicleIds, driverNames)
         stopWatch.stop()
 
         val table = vehicleService.getVehiclesTableData(filteredVehicles, stopWatch)

@@ -2,7 +2,7 @@ package net.enovea.api.trip
 
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.SpatialService
-import net.enovea.domain.vehicle.VehicleDriverEntity
+import net.enovea.domain.vehicle.VehicleEntity
 import net.enovea.repository.TripRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -23,7 +23,7 @@ class TripService(
 
         // check if the driver at that date on this vehicle can be localized
         // if yes, get his informations, if no, cancel
-        val vehicleDriver = VehicleDriverEntity.getForVehicleAtDateIfTracked(vehicleId, parsedDate)
+        val vehicle = VehicleEntity.getAtDateIfTracked(vehicleId, parsedDate)
             ?: return null
 
         val trips = tripRepository.findByVehicleIdAndDate(
@@ -89,7 +89,7 @@ class TripService(
         var poiAtEnd: PointOfInterestEntity? = null
         var addressAtEnd: String? = null
         val lastDeviceState = if (parsedDate == LocalDate.now()) // don't get device state if date isn't today
-            vehicleDriver.vehicle!!.vehicleDevices.firstOrNull {
+            vehicle.vehicle.vehicleDevices.firstOrNull {
                 !listOf("PARKED", "NO_COM", "UNPLUGGED", "UNKNOWN", null).contains(it.device!!.deviceDataState?.state)
             }?.device?.deviceDataState
         else null
@@ -144,8 +144,8 @@ class TripService(
 
         return TripEventsDTO(
             vehicleId = vehicleId,
-            licensePlate = vehicleDriver.vehicle!!.licenseplate,
-            driverName = "${vehicleDriver.driver!!.firstName} ${vehicleDriver.driver!!.lastName}",
+            licensePlate = vehicle.vehicle.licenseplate,
+            driverName = vehicle.driver?.let { "${it.firstName} ${it.lastName}" } ?: "Véhicule non attribué",
             range = lastTrip.endTime.toEpochSecond(ZoneOffset.of("Z")).toInt()
                     - trips.first().startTime.toEpochSecond(ZoneOffset.of("Z")).toInt(),
             tripAmount = trips.size,

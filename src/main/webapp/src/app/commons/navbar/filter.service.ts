@@ -14,8 +14,6 @@ export class FilterService {
   private resetSubject = new Subject<void>();
   reset$ = this.resetSubject.asObservable();
 
-
-
   // Observable pour suivre les changements
   filters$: Observable<{ [key: string]: string[] }>;
 

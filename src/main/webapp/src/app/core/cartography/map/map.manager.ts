@@ -431,10 +431,10 @@ export class MapManager {
     // Extraire les champs requis
     const id = vehicle.id ?? 'vehicle id is null';
     const licenceplate = vehicle.licenseplate ?? 'licenseplate is null';
-    const teamsLabel = vehicle.team?.label ?? 'vehicle team label is null'; // Propriétaire du véhicule
+    const teamsLabel = vehicle.team?.label ?? 'vehicle team label is null';
     const categoryLabel = vehicle.category?.label ?? 'category label is null';
-    const driverFullName = `${vehicle.driver?.firstName ?? ''} ${vehicle.driver?.lastName ?? 'name is null'}`.trim();
-    const driverPhoneNumber = vehicle.driver?.phoneNumber ?? 'vehicle phone number is null';
+    const driverFullName = `${vehicle.driver?.firstName ?? ''} ${vehicle.driver?.lastName ?? 'Véhicule non attribué'}`.trim();
+    const driverPhoneNumber = vehicle.driver?.phoneNumber ?? 'Véhicule non attribué';
     const deviceLastCommunicationDate = vehicle.device?.lastCommunicationDate ?? 'vehicule last communication date is null';
     const deviceCoordinates = vehicle.device?.coordinate ? `[${vehicle.device.coordinate.coordinates[1]}, ${vehicle.device.coordinate.coordinates[0]}]` : 'vehicle coordinate is null';
     const addressValue = address ?? 'adresse non disponible';

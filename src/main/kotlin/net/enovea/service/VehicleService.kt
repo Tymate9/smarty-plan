@@ -82,7 +82,7 @@ open class VehicleService(
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         stopWatch?.stopAndStart("MapTo vehicle data DTO")
         val allVehicleDataDTO =
-            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
                 .map { vehicle ->
                     // Convert to VehicleTableDTO
                     val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
@@ -246,72 +246,6 @@ open class VehicleService(
         return panacheQuery.list()
             .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
             .map { vehicleMapper.toVehicleDTOSummary(it) }
-    }
-
-    //Function returns the list of vehicles based on the filters provided
-    @Transactional
-    fun getFilteredVehicles(
-        teamLabels: List<String>? = null,
-        vehicleIds: List<String>? = null,
-        driverNames: List<String>? = null,
-    ): List<VehicleEntity> {
-        val params = mutableMapOf<String, Any>()
-        var query =
-            """
-            SELECT v
-            FROM VehicleEntity v
-            JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
-            JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
-            LEFT JOIN t.parentTeam parent_team
-            JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
-                AND vd.id.startDate <= current_date()
-                AND (vd.endDate IS NULL OR vd.endDate >= current_date())   
-            JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
-            JOIN FETCH DeviceVehicleInstallEntity dvi ON v.id = dvi.id.vehicleId
-                AND dvi.id.startDate <= current_date()
-                AND (dvi.endDate IS NULL OR dvi.endDate >= current_date())   
-            JOIN FETCH DeviceEntity de ON dvi.id.deviceId = de.id
-            LEFT JOIN FETCH DeviceDataStateEntity ds ON de.id = ds.device_id 
-            LEFT JOIN VehicleUntrackedPeriodEntity vup 
-                ON vup.id.vehicleId = v.id 
-                AND vup.id.startDate <= current_date()
-                AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
-            LEFT JOIN DriverUntrackedPeriodEntity dup 
-                ON dup.id.driverId = d.id 
-                AND dup.id.startDate <= current_date() 
-                AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
-            WHERE vt.endDate IS NULL
-            AND vd.endDate IS NULL
-            AND vup.id.startDate IS NULL
-            AND dup.id.startDate IS NULL
-        """
-
-        if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
-
-            query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))" +
-                    " AND (v.licenseplate IN :vehicleIds OR CONCAT(d.lastName, ' ', d.firstName) IN :driverNames)"
-
-            params["teamLabels"] = teamLabels
-            params["vehicleIds"] = vehicleIds
-            params["driverNames"] = driverNames
-        } else {
-            if (!teamLabels.isNullOrEmpty()) {
-                query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))"
-                params["teamLabels"] = teamLabels
-            }
-            if (!vehicleIds.isNullOrEmpty()) {
-                query += " AND v.licenseplate IN :vehicleIds"
-                params["vehicleIds"] = vehicleIds
-            }
-            if (!driverNames.isNullOrEmpty()) {
-                query += " AND (d.lastName || ' ' || d.firstName) IN :driverNames"
-                params["driverNames"] = driverNames
-            }
-        }
-
-        val panacheQuery = VehicleEntity.find(query, params)
-
-        return panacheQuery.list()
     }
 }
 

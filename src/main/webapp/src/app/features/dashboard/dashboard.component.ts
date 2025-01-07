@@ -84,9 +84,12 @@ import {Subscription} from "rxjs";
           'has-vehicle': rowData.vehicle
         }"
             *ngIf="rowData.vehicle">
-          <td>
-            {{ (rowData.vehicle.driver.lastName || 'Non spécifié') + ' ' + (rowData.vehicle.driver.firstName || 'Non spécifié') }}
-          </td>
+          <td *ngIf="rowData.vehicle.driver; else noDriver">
+                {{ rowData.vehicle.driver.firstName }} {{ rowData.vehicle.driver.lastName || 'Véhicule non attribué' }}
+            </td>
+          <ng-template #noDriver>
+            <td>Véhicule non attribué</td>
+          </ng-template>
           <td>{{ rowData.label }}</td>
           <td
             [ngClass]="{
@@ -614,7 +617,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             vehicle.category.label,
             vehicle.device?.deviceDataState?.state,
             vehicle.energy,
-            vehicle.driver?.lastName + ' ' + vehicle.driver?.firstName,
+            vehicle.driver?.lastName + ' ' + vehicle.driver?.firstName ?? 'Véhicule non attribué',
             this.formatDateTime(vehicle.device?.deviceDataState?.lastPositionTime),
             vehicle.firstTripStart,
             vehicle.lastPositionAddress,

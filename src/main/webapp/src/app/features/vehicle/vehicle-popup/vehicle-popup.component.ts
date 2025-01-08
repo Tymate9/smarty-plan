@@ -72,7 +72,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
         <!-- Onglet Envoyer un SMS -->
         <p-tabPanel *ngIf="entity.driver != null" header="Envoyer un SMS">
-            <h4>Forfait SMS Enovea</h4>
+            <h4>SMS disponible</h4>
 
             <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
               <ng-template pTemplate="header">

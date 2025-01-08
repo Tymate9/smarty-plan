@@ -46,7 +46,7 @@
 
     <repositories>
         <repository>
-            <id>dilivia</id>
+            <id>gitlab-maven</id>
             <url>https://gitlab.enovea.org/api/v4/groups/1277/-/packages/maven</url>
             <releases>
                 <enabled>true</enabled>

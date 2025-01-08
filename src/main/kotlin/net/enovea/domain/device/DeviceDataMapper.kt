@@ -16,7 +16,7 @@ interface DeviceDataMapper {
     fun toEntity(deviceDataDTO: DeviceDataDTO): DeviceEntity
 
     @Named("deviceDataStateMapper")
-    fun toDeviceDataDTO(deviceDataState: DeviceDataStateEntity): DeviceDataStateDTO = DeviceDataStateMapper.INSTANCE.toDto(deviceDataState)
+    fun toDeviceDataDTO(deviceDataState: DeviceDataStateEntity?): DeviceDataStateDTO? = deviceDataState?.let { DeviceDataStateMapper.INSTANCE.toDto(deviceDataState) }
 
     companion object {
         val INSTANCE: DeviceDataMapper = Mappers.getMapper(DeviceDataMapper::class.java)

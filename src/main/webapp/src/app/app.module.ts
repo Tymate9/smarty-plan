@@ -54,6 +54,7 @@ import {SelectButtonModule} from "primeng/selectbutton";
 import {LogoComponent} from "./commons/logo/logo.component";
 import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
 import {DialogModule} from "primeng/dialog";
+import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
 
 @NgModule({
   declarations: [
@@ -78,7 +79,8 @@ import {DialogModule} from "primeng/dialog";
     PoiSearchComponent,
     PoiListComponent,
     LogoComponent,
-    TestBannerComponent
+    TestBannerComponent,
+    SmsFormComponent
   ],
     imports: [
         BrowserModule,

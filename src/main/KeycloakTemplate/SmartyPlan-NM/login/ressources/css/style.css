@@ -1,0 +1,11 @@
+.card-pf {
+    border-color: var(--pf-global--palette--red-600);
+}
+
+#kc-login {
+    background-color: var(--pf-global--palette--red-600);
+}
+
+#kc-login:hover {
+    background-color: var(--pf-global--palette--red-700);
+}

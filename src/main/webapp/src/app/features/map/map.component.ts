@@ -155,7 +155,7 @@ export class MapComponent implements OnInit, OnDestroy {
         index += batchSize;
 
         if (index >= pois.length) {
-          this.notificationService.success("Point d'intérêt", "Chargement des points d'intérêt terminés")
+          this.notificationService.success("Point d'intérêt", "Chargement des points d'intérêt terminé")
           return;
         }
       }

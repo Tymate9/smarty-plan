@@ -120,7 +120,7 @@ export class MarkerFactory {
 
     // Retourner l'icône avec le chemin basé sur la couleur sélectionnée
     return L.divIcon({
-      html: `<img src="../../../assets/icon/${entity.category.label.toLowerCase()}-${color}.svg" alt="${entity.category.label}"/>`,
+      html: `<img src="../../../assets/icon/jd-${entity.category.label.toLowerCase()}-${color}.svg" alt="${entity.category.label}"/>`,
       iconSize: [30, 45],
       iconAnchor: [15, 45],
       className: 'custom-vehicle-icon',

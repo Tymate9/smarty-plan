@@ -6,7 +6,6 @@ import {ConfigService} from "../../core/config/config.service";
   template: `
     <app-navbar></app-navbar>
     <app-test-banner *ngIf="testEnv"></app-test-banner>
-    <app-logo></app-logo>
     <router-outlet></router-outlet>
   `,
   styles: [`

@@ -9,4 +9,5 @@ data class DeviceSummaryDTO (
     var enabled : Boolean,
     var coordinate: Point?,
     var state: String?,
+    var plugged: Boolean?,
 )

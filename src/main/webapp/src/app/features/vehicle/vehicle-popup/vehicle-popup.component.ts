@@ -10,6 +10,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-vehicle-popup',
   template: `
+    <img *ngIf="entity.device.plugged == false"
+      src="../../../../assets/icon/unplugged.svg"
+      alt="unplugged"
+      style="position: absolute; top: 10px; right: 10px; width: 40px; height: auto; padding: 0 5px;"
+    />
     <div class="vehicle-popup">
       <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
         <!-- Onglet Information -->
@@ -72,65 +77,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
         <!-- Onglet Envoyer un SMS -->
         <p-tabPanel *ngIf="entity.driver != null" header="Envoyer un SMS">
-            <h4>SMS disponible</h4>
-
-            <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th>Total SMS achetés</th>
-                  <th>Total SMS envoyés</th>
-                  <th>SMS disponibles</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-stat>
-                <tr>
-                  <td>{{ stat.totalPurchasedSms }}</td>
-                  <td>{{ stat.totalSentSms }}</td>
-                  <td>{{ stat.smsAvailable }}</td>
-                </tr>
-              </ng-template>
-            </p-table>
-          <h4>Envoyer un SMS à {{ entity.driver?.firstName + " " + entity.driver?.lastName }}</h4>
-          <form [formGroup]="smsFormGroup" (ngSubmit)="sendSms()">
-            <!-- Ligne pour l'indicatif et le numéro de téléphone -->
-            <div class="flex flex-row flex-wrap">
-              <!-- Champ Indicatif -->
-              <div class="col-4">
-                <div class="p-field">
-                  <label for="callingCode">Indicatif :</label>
-                  <input id="callingCode" type="text" formControlName="callingCode" [disabled]="true"
-                         class="p-inputtext"/>
-                </div>
-              </div>
-              <!-- Champ Numéro de téléphone -->
-              <div class="col-4">
-                <div class="p-field">
-                  <label for="phoneNumber">Numéro de téléphone :</label>
-                  <input id="phoneNumber" type="text" formControlName="phoneNumber" [disabled]="true"
-                         class="p-inputtext"/>
-                </div>
-              </div>
-            </div>
-            <!-- Champ Message -->
-            <div class="p-field">
-              <label for="content">Message :</label>
-              <textarea id="content" formControlName="content" rows="5" [style.width.px]=600></textarea>
-              <div
-                *ngIf="smsFormGroup.get('content')?.invalid && (smsFormGroup.get('content')?.dirty || smsFormGroup.get('content')?.touched)"
-                class="error">
-                <div *ngIf="smsFormGroup.get('content')?.errors?.['required']">
-                  Le message est requis.
-                </div>
-                <div *ngIf="smsFormGroup.get('content')?.errors?.['minlength']">
-                  Le message doit contenir au moins 1 caractère.
-                </div>
-                <div *ngIf="smsFormGroup.get('content')?.errors?.['maxlength']">
-                  Le message ne doit pas dépasser 160 caractères.
-                </div>
-              </div>
-            </div>
-            <button pButton type="submit" label="Envoyer" [disabled]="smsFormGroup.invalid" style="background-color: #aa001f; border: #aa001f;"></button>
-          </form>
+          <app-sms-form
+            [driverLabel]="entity.driver?.firstName + ' ' + entity.driver?.lastName"
+            [phoneNumber]="entity.driver?.phoneNumber || ''"
+            [callingCode]="'+33'"
+            [companyName]="'Normandie Manutention'"
+            (smsSent)="onSmsSent()"
+            (packPurchased)="onPackPurchased()"
+          >
+          </app-sms-form>
         </p-tabPanel>
 
       </p-tabView>
@@ -234,6 +189,7 @@ export class VehiclePopupComponent implements OnInit {
       phoneNumber: this.entity.driver?.phoneNumber || '',
       callingCode: '+33'
     });
+    console.log(this.entity)
   }
 
   loadSmsStatistics(): void {
@@ -315,51 +271,12 @@ export class VehiclePopupComponent implements OnInit {
     });
   }
 
-  buySmsPack(): void {
-    if (this.smsPackFormGroup.invalid) {
-      return;
-    }
-
-    const packForm: SmsPackForm = {
-      companyName: 'Normandie Manutention',
-      totalSms: this.smsPackFormGroup.value.totalSms
-    };
-
-    this.smsApiService.buySmsPack(packForm).subscribe({
-      next: (response) => {
-        console.log('Pack de SMS acheté avec succès:', response);
-        this.loadSmsStatistics();
-        this.smsPackFormGroup.reset();
-      },
-      error: (err) => {
-        console.error('Erreur lors de l\'achat du pack SMS:', err);
-      }
-    });
+  onSmsSent() {
+    console.log('SMS envoyé.');
   }
 
-  sendSms(): void {
-    if (this.smsFormGroup.invalid) {
-      return;
-    }
-
-    const smsForm: SmsForm = {
-      userName: '', //TODO(Ajouter le nom d'utilisateur provenant de Keycloak)
-      callingCode: this.smsFormGroup.get('callingCode')?.value,
-      phoneNumber: this.smsFormGroup.get('phoneNumber')?.value,
-      content: this.smsFormGroup.get('content')?.value
-    };
-
-    this.smsApiService.sendSms(smsForm).subscribe({
-      next: (response) => {
-        console.log('SMS envoyé avec succès:', response);
-        // Réinitialiser le champ de contenu après envoi
-        this.smsFormGroup.get('content')?.reset();
-      },
-      error: (err) => {
-        console.error('Erreur lors de l\'envoi du SMS:', err);
-      }
-    });
-    this.loadSmsStatistics();
+  onPackPurchased() {
+    console.log('Pack SMS acheté.');
   }
 }
 

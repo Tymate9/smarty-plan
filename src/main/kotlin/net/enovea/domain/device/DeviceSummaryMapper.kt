@@ -18,7 +18,17 @@ interface DeviceSummaryMapper {
     @Mapping(target = "enabled", source = "enabled")
     @Mapping(target = "coordinate", source = "deviceDataState", qualifiedByName = ["coordinateMapper"])
     @Mapping(target="state", source = "deviceDataState", qualifiedByName = ["stateMapper"])
+    @Mapping(target = "plugged", source = "deviceDataState", qualifiedByName = ["pluggedMapper"])
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
+
+    @Named("pluggedMapper")
+    fun pluggedMapper(deviceDataState: DeviceDataStateEntity?): Boolean?{
+        return if(deviceDataState != null){
+            deviceDataState.plugged
+        } else {
+            null
+        }
+    }
 
     @Named("lastCommunicationDateMapper")
     fun lastCommunicationDateMapper(deviceDataState: DeviceDataStateEntity?): Timestamp?{

@@ -74,7 +74,7 @@ import {Subscription} from "rxjs";
           <td>Heure de départ</td>
           <td>Adresse</td>
           <td>Distance totale</td>
-          <td>Fiche journalière</td>
+          <td>Bouton d'action</td>
         </tr>
 
         <tr [ttRow]="rowNode"
@@ -102,12 +102,71 @@ import {Subscription} from "rxjs";
           }">
             <!-- Icon and text -->
             <ng-container [ngSwitch]="rowData.vehicle.device?.deviceDataState?.state">
-              <span *ngSwitchCase="'DRIVING'" class="status-icon">Roulant<i class="pi pi-play"></i></span>
-              <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt<i class="pi pi-step-forward"></i></span>
-              <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté<i class="pi pi-stop"></i></span>
-              <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal<i class="pi pi-times"></i></span>
-              <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté<i class="pi pi-ban"></i></span>
-              <span *ngSwitchDefault class="status-icon">Inconnu<i class="pi pi-question-circle"></i></span>
+              <span *ngSwitchCase="'DRIVING'" class="status-icon">Roulant
+                <div>
+                  <i class="pi pi-play"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                    ngSrc="../../../assets/icon/unplugged.svg"
+                    alt="unplugged"
+                    height="16"
+                    width="16"
+                    style="float: right; margin-left: 8px;"
+                  />
+                </div>
+              </span>
+              <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt
+                <div>
+                <i class="pi pi-step-forward"></i>
+                <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                  ngSrc="../../../assets/icon/unplugged.svg"
+                  alt="unplugged"
+                  height="16"
+                  width="16"
+                  style="float: right; margin-left: 8px;"
+                /></div>
+              </span>
+              <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté
+                <div><i class="pi pi-stop"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                  ngSrc="../../../assets/icon/unplugged.svg"
+                  alt="unplugged"
+                  height="16"
+                  width="16"
+                  style="float: right; margin-left: 8px;"
+                /></div>
+                </span>
+              <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal
+                <div>
+                  <i class="pi pi-times"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16" width="16"
+                       style="float: right;
+                       margin-left: 8px;" />
+                </div></span>
+              <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté
+                <div>
+                  <i class="pi pi-ban"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                  ngSrc="../../../assets/icon/unplugged.svg"
+                  alt="unplugged"
+                  height="16"
+                  width="16"
+                  style="float: right; margin-left: 8px;"
+                /></div>
+                </span>
+              <span *ngSwitchDefault class="status-icon">Inconnu
+                <div>
+                  <i class="pi pi-question-circle"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                    ngSrc="../../../assets/icon/unplugged.svg"
+                    alt="unplugged"
+                    height="16"
+                    width="16"
+                    style="float: right; margin-left: 8px;"/>
+                </div>
+              </span>
             </ng-container>
           </td>
           <td
@@ -140,11 +199,39 @@ import {Subscription} from "rxjs";
           <td class="custom-cell">
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
+
+<!--            <p-button
+              *ngIf="rowData.vehicle.driver"
+              icon="pi pi-envelope"
+              styleClass="red-button"
+              (click)="openSmsOverlay(rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName, rowData.vehicle.driver.phoneNumber, '+33','Normandie Manutention' )"
+            >
+            </p-button>-->
           </td>
         </tr>
 
       </ng-template>
     </p-treeTable>
+
+<!--    <div class="overlay" *ngIf="smsOverlayVisible">
+      <div class="dialog-box">
+        <h3>Envoyer un SMS</h3>
+        <div class="dialog-content">
+          <app-sms-form
+            [driverLabel]="this.smsModalDriverLabel"
+            [phoneNumber]="this.smsModalPhoneNumber"
+            [callingCode]="this.smsModalCallingCode"
+            [companyName]="this.smsModalCompanyName"
+            (smsSent)="onSmsSent()"
+            (packPurchased)="onPackPurchased()">
+          </app-sms-form>
+        </div>
+
+        <div class="dialog-footer">
+          <button (click)="closeSmsOverlay()">Fermer</button>
+        </div>
+      </div>
+    </div>-->
 
   `,
   styles: [`
@@ -394,12 +481,102 @@ import {Subscription} from "rxjs";
       background-color: #aa001f !important;
       border-color: #aa001f !important;
       color: white !important;
+      margin: 1px !important;
     }
 
     /*fin de style de bouton personnalisé*/
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .dialog-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      min-width: 320px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .dialog-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .dialog-content {
+      margin-bottom: 16px;
+    }
+
+    .dialog-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .dialog-footer button {
+      background-color: #aa001f;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .dialog-footer button:hover {
+      background-color: #8e001b;
+    }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+
+  /**
+   * Modale SMS
+   */
+  smsOverlayVisible = false;
+
+  smsModalDriverLabel : string;
+  smsModalPhoneNumber : string;
+  smsModalCallingCode : string;
+  smsModalCompanyName : string;
+
+  // Ouvre la modale
+  openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode:string, companyName:string) {
+    this.smsModalDriverLabel = driverLabel
+    this.smsModalPhoneNumber = phoneNumber
+    this.smsModalCallingCode = callingCode
+    this.smsModalCompanyName = companyName
+    this.smsOverlayVisible = true;
+  }
+
+  // Ferme la modale
+  closeSmsOverlay() {
+    this.smsOverlayVisible = false;
+  }
+
+  // Callback quand <app-sms-form> émet (smsSent)
+  onSmsSent() {
+    console.log("SMS envoyé !");
+    // par exemple, recharger une liste, ou afficher un toast...
+  }
+
+  // Callback quand <app-sms-form> émet (packPurchased)
+  onPackPurchased() {
+    console.log("Pack de SMS acheté !");
+    // par exemple, recharger l’UI, etc.
+  }
+
   filters: { agencies: string[], vehicles: string[], drivers: string[] } = {
     agencies: [],
     vehicles: [],
@@ -419,7 +596,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private filterService: FilterService,
     private readonly vehicleService: VehicleService,
     protected router: Router,
-    private cdr: ChangeDetectorRef
   ) {
   }
 
@@ -670,8 +846,3 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return formattedDate;
   }
 }
-
-
-
-
-

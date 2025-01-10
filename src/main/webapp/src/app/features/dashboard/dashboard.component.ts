@@ -213,7 +213,7 @@ import {Subscription} from "rxjs";
       </ng-template>
     </p-treeTable>
 
-    <div class="overlay" *ngIf="smsOverlayVisible">
+<!--    <div class="overlay" *ngIf="smsOverlayVisible">
       <div class="dialog-box">
         <h3>Envoyer un SMS</h3>
         <div class="dialog-content">
@@ -231,7 +231,7 @@ import {Subscription} from "rxjs";
           <button (click)="closeSmsOverlay()">Fermer</button>
         </div>
       </div>
-    </div>
+    </div>-->
 
   `,
   styles: [`

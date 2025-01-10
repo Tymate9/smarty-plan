@@ -40,6 +40,9 @@ data class DeviceDataStateEntity(
     @Column(name = "address", nullable = true)
     var address: String? = null,
 
+    @Column(name = "plugged", nullable = true)
+    var plugged: Boolean? = null,
+
     @Column(name = "last_position")
     override var coordinate: Point? = Point(
         CoordinateArraySequence(arrayOf(Coordinate(0.0, 0.0))),

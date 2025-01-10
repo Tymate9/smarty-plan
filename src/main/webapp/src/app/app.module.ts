@@ -55,6 +55,7 @@ import {LogoComponent} from "./commons/logo/logo.component";
 import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
 import {DialogModule} from "primeng/dialog";
 import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
+import {NgOptimizedImage} from "@angular/common";
 
 @NgModule({
   declarations: [
@@ -82,32 +83,33 @@ import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
     TestBannerComponent,
     SmsFormComponent
   ],
-    imports: [
-        BrowserModule,
-        FormsModule,
-        AppRoutingModule,
-        KeycloakAngularModule,
-        HttpClientModule,
-        ButtonModule,
-        TableModule,
-        TreeTableModule,
-        DropdownModule,
-        TabViewModule,
-        ProgressSpinnerModule,
-        ReactiveFormsModule,
-        ToastModule,
-        MenubarModule,
-        CardModule,
-        ToggleButtonModule,
-        TimelineModule,
-        CalendarModule,
-        PanelModule,
-        InputTextModule,
-        AutoCompleteModule,
-        InputNumberModule,
-        SelectButtonModule,
-        DialogModule,
-    ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    AppRoutingModule,
+    KeycloakAngularModule,
+    HttpClientModule,
+    ButtonModule,
+    TableModule,
+    TreeTableModule,
+    DropdownModule,
+    TabViewModule,
+    ProgressSpinnerModule,
+    ReactiveFormsModule,
+    ToastModule,
+    MenubarModule,
+    CardModule,
+    ToggleButtonModule,
+    TimelineModule,
+    CalendarModule,
+    PanelModule,
+    InputTextModule,
+    AutoCompleteModule,
+    InputNumberModule,
+    SelectButtonModule,
+    DialogModule,
+    NgOptimizedImage,
+  ],
   providers: [
     MessageService,
     ConfigService,

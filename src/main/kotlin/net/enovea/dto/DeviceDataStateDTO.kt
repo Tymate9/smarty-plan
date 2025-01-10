@@ -13,4 +13,5 @@ data class DeviceDataStateDTO (
     var lastPositionTime: Timestamp ? = null,
     var stateTime: Timestamp? = null,
     var address: String? = null,
+    var plugged: Boolean? = null
 )

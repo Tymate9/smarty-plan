@@ -102,12 +102,71 @@ import {Subscription} from "rxjs";
           }">
             <!-- Icon and text -->
             <ng-container [ngSwitch]="rowData.vehicle.device?.deviceDataState?.state">
-              <span *ngSwitchCase="'DRIVING'" class="status-icon">Roulant<i class="pi pi-play"></i></span>
-              <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt<i class="pi pi-step-forward"></i></span>
-              <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté<i class="pi pi-stop"></i></span>
-              <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal<i class="pi pi-times"></i></span>
-              <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté<i class="pi pi-ban"></i></span>
-              <span *ngSwitchDefault class="status-icon">Inconnu<i class="pi pi-question-circle"></i></span>
+              <span *ngSwitchCase="'DRIVING'" class="status-icon">Roulant
+                <div>
+                  <i class="pi pi-play"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                    ngSrc="../../../assets/icon/unplugged.svg"
+                    alt="unplugged"
+                    height="16"
+                    width="16"
+                    style="float: right; margin-left: 8px;"
+                  />
+                </div>
+              </span>
+              <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt
+                <div>
+                <i class="pi pi-step-forward"></i>
+                <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                  ngSrc="../../../assets/icon/unplugged.svg"
+                  alt="unplugged"
+                  height="16"
+                  width="16"
+                  style="float: right; margin-left: 8px;"
+                /></div>
+              </span>
+              <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté
+                <div><i class="pi pi-stop"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                  ngSrc="../../../assets/icon/unplugged.svg"
+                  alt="unplugged"
+                  height="16"
+                  width="16"
+                  style="float: right; margin-left: 8px;"
+                /></div>
+                </span>
+              <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal
+                <div>
+                  <i class="pi pi-times"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16" width="16"
+                       style="float: right;
+                       margin-left: 8px;" />
+                </div></span>
+              <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté
+                <div>
+                  <i class="pi pi-ban"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                  ngSrc="../../../assets/icon/unplugged.svg"
+                  alt="unplugged"
+                  height="16"
+                  width="16"
+                  style="float: right; margin-left: 8px;"
+                /></div>
+                </span>
+              <span *ngSwitchDefault class="status-icon">Inconnu
+                <div>
+                  <i class="pi pi-question-circle"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                    ngSrc="../../../assets/icon/unplugged.svg"
+                    alt="unplugged"
+                    height="16"
+                    width="16"
+                    style="float: right; margin-left: 8px;"/>
+                </div>
+              </span>
             </ng-container>
           </td>
           <td

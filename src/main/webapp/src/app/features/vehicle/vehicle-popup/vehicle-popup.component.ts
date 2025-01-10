@@ -10,6 +10,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-vehicle-popup',
   template: `
+    <img *ngIf="entity.device.plugged == false"
+      src="../../../../assets/icon/unplugged.svg"
+      alt="unplugged"
+      style="position: absolute; top: 10px; right: 10px; width: 40px; height: auto; padding: 0 5px;"
+    />
     <div class="vehicle-popup">
       <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
         <!-- Onglet Information -->
@@ -184,6 +189,7 @@ export class VehiclePopupComponent implements OnInit {
       phoneNumber: this.entity.driver?.phoneNumber || '',
       callingCode: '+33'
     });
+    console.log(this.entity)
   }
 
   loadSmsStatistics(): void {

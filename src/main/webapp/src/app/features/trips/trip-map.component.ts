@@ -422,15 +422,9 @@ export class TripMapComponent {
           className: 'custom-poi-icon',
         });
       case TripEventType.VEHICLE_RUNNING:
-        return MarkerFactory.getVehicleIcon({
-          device: {state: 'DRIVING'},
-          category: {label: 'vl'}
-        });
+        return MarkerFactory.getVehicleIcon('DRIVING','vl');
       case TripEventType.VEHICLE_IDLE:
-        return MarkerFactory.getVehicleIcon({
-          device: {state: 'IDLE'},
-          category: {label: 'vl'}
-        })
+        return MarkerFactory.getVehicleIcon('IDLE','vl')
     }
   }
 

@@ -66,7 +66,7 @@ export class MarkerFactory {
         break;
       case EntityType.VEHICLE:
         marker = MarkerFactory.createVehicleMarker(entity);
-        marker.setIcon(MarkerFactory.getVehicleIcon(entity));
+        marker.setIcon(MarkerFactory.getVehicleIcon(entity.device.state, entity.category.label));
         marker.id = `vehicle-${entity.id}`;
         marker.entity = entity;
         break;
@@ -100,10 +100,10 @@ export class MarkerFactory {
     });
   }
 
-  static getVehicleIcon(entity: any): L.DivIcon {
+  static getVehicleIcon(state : string, label: string): L.DivIcon {
     // Définir la couleur en fonction de l'ID de l'entité avec modulo
     let color: string = "gris";
-    switch (entity.device.state) {
+    switch (state) {
       case "NO_COM":
         color = 'gris';
         break;
@@ -120,7 +120,7 @@ export class MarkerFactory {
 
     // Retourner l'icône avec le chemin basé sur la couleur sélectionnée
     return L.divIcon({
-      html: `<img src="../../../assets/icon/jd-${entity.category.label.toLowerCase()}-${color}.svg" alt="${entity.category.label}"/>`,
+      html: `<img src="../../../assets/icon/jd-${label.toLowerCase()}-${color}.svg" alt="${label}"/>`,
       iconSize: [30, 45],
       iconAnchor: [15, 45],
       className: 'custom-vehicle-icon',

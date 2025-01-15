@@ -28,11 +28,10 @@ import {AppConfig} from "../../app.config";
         <div class="nav-container">
           <div class="nav-buttons">
             <div class="nav-buttons-row">
-              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large"
-                        styleClass="custom-button-bg"></p-button>
-              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg"></p-button>
-              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker"
-                        styleClass="custom-button-bg"></p-button>
+              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" styleClass="custom-button-bg" title="Tableau de bord"></p-button>
+              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg" title="Cartographie"></p-button>
+              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg" title="POIs"></p-button>
+              <p-button (onClick)="navigateTo('report')" icon="pi pi-chart-bar" styleClass="custom-button-bg" title="Suivi d'activité"></p-button>
             </div>
           </div>
           <div class="filters center">

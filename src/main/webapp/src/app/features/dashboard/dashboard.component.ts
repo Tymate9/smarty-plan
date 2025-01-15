@@ -23,6 +23,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 @Component({
   selector: 'app-dashboard',
   template: `
+
     <div class="status-buttons">
       <button
         *ngFor="let status of vehicleStatusCounts"
@@ -47,6 +48,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     </div>
 
     <div style="margin-bottom: 10px;">
+
     </div>
 
 
@@ -346,6 +348,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       text-align: left;
       justify-content: space-between;
     }
+
     /*fin de style de colonne d'adresse*/
 
     /* Icônes de statut (span + i) */

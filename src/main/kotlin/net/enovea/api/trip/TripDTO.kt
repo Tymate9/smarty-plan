@@ -26,8 +26,8 @@ data class TripDTO(
 enum class TripStatus(
     val value: Int
 ) {
-    COMPLETED(0),
-    DRIVING(1),
+    DRIVING(0),
+    COMPLETED(1),
     IDLE(2)
 }
 
@@ -46,6 +46,7 @@ data class TripEventsDTO(
     val vehicleId: String,
     val licensePlate: String,
     val driverName: String,
+    val vehicleCategory: String,
     val range: Int,
     val stopDuration: Long,
     val drivingDuration: Long,

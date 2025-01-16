@@ -31,6 +31,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
                 WHERE trip_id = :tripId
+                AND duration > 60
                 """.trimIndent()
             )
                 .bind("tripId", tripId)
@@ -63,6 +64,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId
+                AND duration > 60
             """.trimIndent()
             )
                 .bind("vehicleId", vehicleId)
@@ -95,6 +97,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId 
                 AND date_trunc(start_time, 'day') = :date
+                AND duration > 60
                 ORDER BY start_time
                 """.trimIndent()
             )

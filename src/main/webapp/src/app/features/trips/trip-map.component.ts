@@ -335,7 +335,7 @@ export class TripMapComponent {
             : tripEvent.eventType === TripEventType.VEHICLE_IDLE ? 'Véhicule à l\'arrêt avec moteur tournant'
               : 'Arrêt');
         new CustomMarkerImpl([tripEvent.lat, tripEvent.lng])
-          .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color))
+          .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color, tripEventsDTO.vehicleCategory.toLowerCase()))
           .addTo(this.featureGroup)
           .bindPopup(
             `<b>${popupLabel}</b><br>${tripEvent.address}<br>${tripEvent.start?.toLocaleTimeString() ?? ''} - ${tripEvent.end?.toLocaleTimeString() ?? ''}`
@@ -410,7 +410,7 @@ export class TripMapComponent {
     }
   }
 
-  private getIcon(eventType: TripEventType.STOP | TripEventType.VEHICLE_RUNNING | TripEventType.VEHICLE_IDLE, color: string | null): L.DivIcon {
+  private getIcon(eventType: TripEventType.STOP | TripEventType.VEHICLE_RUNNING | TripEventType.VEHICLE_IDLE, color: string | null, category: string): L.DivIcon {
     switch (eventType) {
       case TripEventType.STOP:
         return L.divIcon({
@@ -422,9 +422,9 @@ export class TripMapComponent {
           className: 'custom-poi-icon',
         });
       case TripEventType.VEHICLE_RUNNING:
-        return MarkerFactory.getVehicleIcon('DRIVING','vl');
+        return MarkerFactory.getVehicleIcon('DRIVING', category);
       case TripEventType.VEHICLE_IDLE:
-        return MarkerFactory.getVehicleIcon('IDLE','vl')
+        return MarkerFactory.getVehicleIcon('IDLE', category)
     }
   }
 

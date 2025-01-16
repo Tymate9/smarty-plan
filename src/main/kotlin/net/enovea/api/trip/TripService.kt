@@ -146,6 +146,7 @@ class TripService(
             vehicleId = vehicleId,
             licensePlate = vehicle.vehicle.licenseplate,
             driverName = vehicle.driver?.let { "${it.firstName} ${it.lastName}" } ?: "Véhicule non attribué",
+            vehicleCategory = vehicle.vehicle.category?.label ?: "VL",
             range = lastTrip.endTime.toEpochSecond(ZoneOffset.of("Z")).toInt()
                     - trips.first().startTime.toEpochSecond(ZoneOffset.of("Z")).toInt(),
             tripAmount = trips.size,

@@ -207,8 +207,8 @@ open class VehicleService(
         var baseQuery = """
         SELECT v
         FROM VehicleEntity v
-        JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
-        JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
+        LEFT JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
+        LEFT JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
         LEFT JOIN VehicleUntrackedPeriodEntity vup 
             ON vup.id.vehicleId = v.id 
             AND vup.id.startDate <= current_date()
@@ -244,7 +244,7 @@ open class VehicleService(
         val panacheQuery = VehicleEntity.find(baseQuery, params)
 
         return panacheQuery.list()
-            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() && it.vehicleDrivers.isNotEmpty() }
+            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() }
             .map { vehicleMapper.toVehicleDTOSummary(it) }
     }
 }

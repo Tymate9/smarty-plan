@@ -3,6 +3,7 @@ package net.enovea.conf
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
+import net.enovea.domain.team.TeamCategoryMapper
 import net.enovea.domain.team.TeamMapper
 import net.enovea.service.TeamService
 
@@ -13,13 +14,18 @@ class TeamServiceConfiguration {
     @Produces
     @Named("teamService")
     fun teamService(
-        teamMapper: TeamMapper
+        teamMapper: TeamMapper,
+        teamCategoryMapper : TeamCategoryMapper
     ): TeamService {
-        return TeamService(teamMapper)
+        return TeamService(teamMapper, teamCategoryMapper)
     }
 
     @Produces
     @ApplicationScoped
     fun teamMapper(): TeamMapper = TeamMapper.INSTANCE
+
+    @Produces
+    @ApplicationScoped
+    fun teamCategoryMapper(): TeamCategoryMapper = TeamCategoryMapper.INSTANCE
 
 }

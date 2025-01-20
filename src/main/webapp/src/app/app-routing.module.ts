@@ -8,6 +8,7 @@ import {TripMapComponent} from "./features/trips/trip-map.component";
 import {TripsComponent} from "./features/trips/trips.component";
 import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.component";
 import {authGuard} from "./auth.guard";
+import {TeamFormComponent} from "./commons/workInProgress/CRUD/team-form/team-form.component";
 
 const routes: Routes = [
   {
@@ -20,12 +21,11 @@ const routes: Routes = [
       { path: 'poiedit', component: PoiMapComponent},
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-
+      { path: 'workinprogress', component: TeamFormComponent}
     ]
   },
   { path: '**', redirectTo: 'dashboard' }
 ];
-
 @NgModule({
   imports: [RouterModule.forRoot(routes, { bindToComponentInputs: true })],
   exports: [RouterModule]

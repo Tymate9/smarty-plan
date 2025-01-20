@@ -189,7 +189,6 @@ export class VehiclePopupComponent implements OnInit {
       phoneNumber: this.entity.driver?.phoneNumber || '',
       callingCode: '+33'
     });
-    console.log(this.entity)
   }
 
   loadSmsStatistics(): void {

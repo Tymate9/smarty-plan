@@ -56,7 +56,9 @@ import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
 import {DialogModule} from "primeng/dialog";
 import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
 import {NgOptimizedImage} from "@angular/common";
-import { ScrollingInfoBannerComponent } from './commons/app-scrolling-info-banner/app-scrolling-info-banner.component';
+import { TeamFormComponent } from './commons/workInProgress/CRUD/team-form/team-form.component';
+import { EntityFormComponent } from './commons/workInProgress/CRUD/entity-form/entity-form.component';
+import { AutocompleteInputComponent } from './commons/workInProgress/autocomplete-input/autocomplete-input.component';
 
 @NgModule({
   declarations: [
@@ -82,8 +84,13 @@ import { ScrollingInfoBannerComponent } from './commons/app-scrolling-info-banne
     PoiListComponent,
     LogoComponent,
     TestBannerComponent,
+    ScrollingInfoBannerComponent,
     SmsFormComponent,
-    ScrollingInfoBannerComponent
+    TeamFormComponent,
+    EntityFormComponent,
+    EntityFormComponent,
+    AutocompleteInputComponent,
+    AutocompleteInputComponent
   ],
   imports: [
     BrowserModule,

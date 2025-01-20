@@ -1,9 +1,11 @@
 package net.enovea.api.team
 
 import io.quarkus.security.Authenticated
+import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
+import net.enovea.dto.TeamCategoryDTO
 import net.enovea.domain.team.TeamEntity
 import net.enovea.dto.TeamDTO
 import net.enovea.service.TeamService
@@ -15,10 +17,45 @@ import java.time.format.DateTimeFormatter
 @Consumes(MediaType.APPLICATION_JSON)
 @Authenticated
 class TeamResource(private val teamService: TeamService) {
-
     @GET
     fun getAgencies(): List<TeamDTO> {
         return teamService.getAllAgencies()
+    }
+
+    @GET
+    @Path("/category")
+    fun getCategories(): List<TeamCategoryDTO> {
+        return teamService.getAllTeamCategory()
+    }
+
+    @GET
+    @Path("/{id}")
+    fun getTeamById(@PathParam("id") id: Int): TeamDTO {
+        return teamService.getTeamById(id)
+    }
+
+    @POST
+    @Transactional
+    fun createTeam(teamDTO: TeamDTO): Response {
+        val createdTeam = teamService.createTeam(teamDTO)
+        return Response.ok(createdTeam).build()
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    fun updateTeam(@PathParam("id") id: Int, teamDTO: TeamDTO): Response {
+        teamDTO.id = id
+        val updatedTeam = teamService.updateTeam(teamDTO)
+        return Response.ok(updatedTeam).build()
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    fun deleteTeam(@PathParam("id") id: Int): Response {
+        teamService.deleteTeam(id)
+        return Response.noContent().build()
     }
 
     @GET

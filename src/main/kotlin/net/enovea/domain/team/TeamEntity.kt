@@ -68,7 +68,7 @@ class TeamEntity(
         companion object : PanacheCompanionBase<TeamEntity, Int> {
         const val ENTITY_NAME = "TeamEntity"
         const val TABLE_NAME = "team"
-
+        const val ID_SEQUENCE = "team_id_seq"
 
         @Transactional
         fun findByLabels(labels: List<String>): List<TeamEntity> {
@@ -95,6 +95,5 @@ class TeamEntity(
                 query.setParameter("categoryLabel", "Service")
                 return query.resultList
             }
-
    }
 }

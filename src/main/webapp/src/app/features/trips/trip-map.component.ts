@@ -302,7 +302,7 @@ export class TripMapComponent {
       this.featureGroup.clearLayers();
     } else {
       this.map = L.map('map', {
-        zoomDelta: 0.5,
+        zoomDelta: 1,
       }).setView([tripEventsDTO.tripEvents[0].lat ?? 0, tripEventsDTO.tripEvents[0].lng ?? 0], 13);
 
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {

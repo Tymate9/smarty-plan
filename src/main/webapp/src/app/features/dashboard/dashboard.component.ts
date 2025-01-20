@@ -200,20 +200,20 @@ import {Subscription} from "rxjs";
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
 
-<!--            <p-button
+            <p-button
               *ngIf="rowData.vehicle.driver"
               icon="pi pi-envelope"
               styleClass="red-button"
               (click)="openSmsOverlay(rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName, rowData.vehicle.driver.phoneNumber, '+33','Normandie Manutention' )"
             >
-            </p-button>-->
+            </p-button>
           </td>
         </tr>
 
       </ng-template>
     </p-treeTable>
 
-<!--    <div class="overlay" *ngIf="smsOverlayVisible">
+    <div class="overlay" *ngIf="smsOverlayVisible">
       <div class="dialog-box">
         <h3>Envoyer un SMS</h3>
         <div class="dialog-content">
@@ -231,7 +231,7 @@ import {Subscription} from "rxjs";
           <button (click)="closeSmsOverlay()">Fermer</button>
         </div>
       </div>
-    </div>-->
+    </div>
 
   `,
   styles: [`

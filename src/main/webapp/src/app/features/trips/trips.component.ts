@@ -38,6 +38,8 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
                     [showButtonBar]="true"
                     [maxDate]="now"
                     dateFormat="yymmdd"
+                    [showOtherMonths]="true"
+                    [selectOtherMonths]="true"
                     ></p-calendar>
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">

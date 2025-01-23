@@ -94,7 +94,7 @@ export class TeamFormComponent implements OnInit {
           'Veuillez sélectionner une catégorie'
         ),
         new AutocompleteFormInput(
-          'parent',
+          'parentTeam',
           'Groupe parent',
           [],
           parentOptions,
@@ -103,6 +103,17 @@ export class TeamFormComponent implements OnInit {
           'Veuillez sélectionner un groupe parent'
         )
       ];
+
+      // Définir la fonction de transformation pour extraire les IDs
+      const transformFunction = (rawEntity: any) => {
+        return {
+          id: rawEntity.id,
+          label: rawEntity.label,
+          path: rawEntity.path,
+          parentTeam: rawEntity.parentTeam ? rawEntity.parentTeam.id : null,
+          category: rawEntity.category?.id ?? null
+        };
+      };
 
       this.formDescription = new FormDescription(
         'Édition des groupe',
@@ -114,9 +125,10 @@ export class TeamFormComponent implements OnInit {
               const category = group.get('category')?.value;
               return !category || (category && category.label === 'Agence');
             },
-            controlsToDisable: ['parent']
+            controlsToDisable: ['parentTeam']
           }
-        ]
+        ],
+        transformFunction
       );
     });
   }

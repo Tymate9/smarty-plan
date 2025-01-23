@@ -1,7 +1,10 @@
 package net.enovea.api.team
 
 import io.quarkus.security.Authenticated
+import jakarta.inject.Inject
 import jakarta.transaction.Transactional
+import jakarta.validation.ConstraintViolation
+import jakarta.validation.Validator
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -11,12 +14,14 @@ import net.enovea.dto.TeamDTO
 import net.enovea.service.TeamService
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import net.enovea.api.workInProgress.TeamForm
 
 @Path("/api/teams")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Authenticated
-class TeamResource(private val teamService: TeamService) {
+class TeamResource(private val teamService: TeamService, private val validator: Validator) {
+
     @GET
     fun getAgencies(): List<TeamDTO> {
         return teamService.getAllAgencies()
@@ -36,20 +41,33 @@ class TeamResource(private val teamService: TeamService) {
 
     @POST
     @Transactional
-    fun createTeam(teamDTO: TeamDTO): Response {
-        val createdTeam = teamService.createTeam(teamDTO)
+    fun createTeam(teamForm: TeamForm): Response {
+        // Valider manuellement l'objet teamForm
+        val violations: Set<ConstraintViolation<TeamForm>> = validator.validate(teamForm)
+        if (violations.isNotEmpty()) {
+            // Rassembler les messages d'erreur
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val createdTeam = teamService.createTeam(teamForm)
         return Response.ok(createdTeam).build()
     }
 
     @PUT
     @Path("/{id}")
     @Transactional
-    fun updateTeam(@PathParam("id") id: Int, teamDTO: TeamDTO): Response {
-        teamDTO.id = id
-        val updatedTeam = teamService.updateTeam(teamDTO)
+    fun updateTeam(@PathParam("id") id: Int, teamForm: TeamForm): Response {
+        teamForm.id = id
+        // Valider manuellement l'objet teamForm
+        val violations: Set<ConstraintViolation<TeamForm>> = validator.validate(teamForm)
+        if (violations.isNotEmpty()) {
+            // Rassembler les messages d'erreur
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val updatedTeam = teamService.updateTeam(teamForm)
         return Response.ok(updatedTeam).build()
     }
-
     @DELETE
     @Path("/{id}")
     @Transactional
@@ -124,4 +142,3 @@ class TeamResource(private val teamService: TeamService) {
         }
     }
 }
-

@@ -3,6 +3,8 @@ package net.enovea.conf
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
+import jakarta.validation.Validation
+import jakarta.validation.Validator
 import net.enovea.domain.team.TeamCategoryMapper
 import net.enovea.domain.team.TeamMapper
 import net.enovea.service.TeamService
@@ -27,5 +29,10 @@ class TeamServiceConfiguration {
     @Produces
     @ApplicationScoped
     fun teamCategoryMapper(): TeamCategoryMapper = TeamCategoryMapper.INSTANCE
+
+    @Produces
+    @Named("validator")
+    @ApplicationScoped
+    fun validator(): Validator = Validation.buildDefaultValidatorFactory().validator
 
 }

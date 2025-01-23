@@ -1,4 +1,4 @@
-package net.enovea.workInProgress
+package net.enovea.api.workInProgress
 
 import jakarta.annotation.Priority
 import jakarta.interceptor.AroundInvoke

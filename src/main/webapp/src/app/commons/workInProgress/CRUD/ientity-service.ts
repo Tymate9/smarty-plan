@@ -1,8 +1,8 @@
 import {Observable} from "rxjs";
 
-export interface IEntityService<T> {
-  getById(id: number): Observable<T>;
-  create(entity: T): Observable<T>;
-  update(entity: T): Observable<T>;
+export interface IEntityService<D, R> {
+  getById(id: number): Observable<D>;
+  create(entity: R): Observable<D>;
+  update(entity: R): Observable<D>;
   delete(id: number): Observable<void>;
 }

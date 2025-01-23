@@ -7,6 +7,7 @@ export class TeamValidator {
    * sinon parent_id doit être renseigné.
    */
   static checkCategoryParentConstraint(): ValidatorFn {
+    console.log("Je suis dans le check category constraint")
     return (group: AbstractControl): ValidationErrors | null => {
       if (!(group instanceof FormGroup)) {
         return null;

@@ -5,7 +5,6 @@ import { IEntityService } from "../ientity-service";
 import {IFormDescription} from "../iform-description";
 import {Subscription} from "rxjs";
 
-
 @Component({
   selector: 'app-entity-form',
   template: `
@@ -83,7 +82,7 @@ import {Subscription} from "rxjs";
 })
 export class EntityFormComponent implements OnInit, OnChanges {
   @Input() formDescription!: IFormDescription;
-  @Input() entityService?: IEntityService<any>;
+  @Input() entityService?: IEntityService<any, any>;
   @Input() entity?: any;
   @Input() mode: 'create' | 'update' = 'create';
   @Output() receiveResponse = new EventEmitter<any>();
@@ -93,7 +92,6 @@ export class EntityFormComponent implements OnInit, OnChanges {
   protected readonly FormInputUtils = FormInputUtils;
 
   ngOnInit(): void {
-    console.log(this.formDescription);
     this.initializeReactiveForm();
   }
 
@@ -147,27 +145,33 @@ export class EntityFormComponent implements OnInit, OnChanges {
 
   public onSubmit(): void {
     if (this.entityForm.valid) {
-      const updatedEntity = { ...(this.entity || {}) };
+      const updatedEntity: any = { ...(this.entity || {}) };
       for (const input of this.formDescription.formInputs) {
         updatedEntity[input.name] = this.entityForm.get(input.name)?.value;
       }
 
-      // Si en mode création, forcer l'id à null
-      if (this.mode === 'create') {
-        updatedEntity.id = null;
+      // Appliquer la fonction de transformation si elle est définie
+      let finalEntity = updatedEntity;
+      if (this.formDescription.transformToForm) {
+        finalEntity = this.formDescription.transformToForm(updatedEntity);
+        if (this.mode === 'create') {
+          // Si en mode création, forcer l'id à null
+          finalEntity.id = null;
+        }
       }
 
       if (this.entityService) {
+        console.log("finalEntity \n", finalEntity)
         const request = this.mode === 'update'
-          ? this.entityService.update(updatedEntity)
-          : this.entityService.create(updatedEntity);
+          ? this.entityService.update(finalEntity)
+          : this.entityService.create(finalEntity);
 
         request.subscribe({
           next: response => this.receiveResponse.emit(response),
           error: err => this.receiveResponse.emit({ error: err })
         });
       } else {
-        this.receiveResponse.emit(updatedEntity);
+        this.receiveResponse.emit(finalEntity);
       }
     } else {
       console.log('Formulaire invalide :', this.entityForm.errors);
@@ -175,7 +179,5 @@ export class EntityFormComponent implements OnInit, OnChanges {
   }
 
   public onOptionSelected(event: any) {
-    console.log('Option choisie :', event.option);
-    console.log(this.entityForm.errors);
   }
 }

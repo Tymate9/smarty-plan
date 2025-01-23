@@ -13,7 +13,7 @@ import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
-import net.enovea.workInProgress.LogExecutionTime
+import net.enovea.api.workInProgress.LogExecutionTime
 import java.time.*
 import java.time.temporal.Temporal
 

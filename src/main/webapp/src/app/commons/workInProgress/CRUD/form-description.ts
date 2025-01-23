@@ -8,17 +8,20 @@ export class FormDescription implements IFormDescription {
   formValidator?: ValidatorFn;
   formInputs: IFormInput[];
   dependencies?: IFormDependency[];
+  transformToForm?: (rawEntity: any) => any;
 
   constructor(
     title: string,
     formInputs: IFormInput[],
     formValidator?: ValidatorFn,
-    dependencies?: IFormDependency[]
-  ) {
+    dependencies?: IFormDependency[],
+    transformToForm?: (rawEntity: any) => any
+) {
     this.title = title;
     this.formInputs = formInputs;
     this.formValidator = formValidator;
     this.dependencies = dependencies;
+    this.transformToForm = transformToForm
   }
 
   applyDisableDependency(

@@ -8,6 +8,7 @@ import net.enovea.domain.team.TeamMapper
 import net.enovea.dto.TeamCategoryDTO
 
 import net.enovea.dto.TeamDTO
+import net.enovea.api.workInProgress.TeamForm
 
 
 class TeamService (
@@ -33,11 +34,14 @@ class TeamService (
     /**
      * Crée une nouvelle Team en base, et retourne le DTO créé.
      */
-    fun createTeam(teamDTO: TeamDTO): TeamDTO {
-        val newEntity = teamMapper.toEntity(teamDTO)
-        // On persiste avec Panache
-        TeamEntity.persist(newEntity)
-        // Retourne la version DTO (incluant l'ID généré, etc.)
+    fun createTeam(teamForm: TeamForm): TeamDTO {
+        // Convertir le TeamForm en entité TeamEntity à l'aide du mapper
+        val newEntity = TeamMapper.INSTANCE.toEntity(teamForm)
+
+        // Persister et forcer la synchronisation pour obtenir le nouvel ID
+        newEntity.persistAndFlush()
+
+        // Retourner le DTO correspondant à l'entité créée, maintenant avec le nouvel ID
         return teamMapper.toDto(newEntity)
     }
 
@@ -45,35 +49,27 @@ class TeamService (
      * Met à jour une Team existante, selon l'ID contenu dans le DTO.
      * Si l'entité n'existe pas, on peut lever une exception ou retourner un DTO vide.
      */
-    fun updateTeam(teamDTO: TeamDTO): TeamDTO {
-        // Vérifier que l'ID est fourni
-        val teamId = teamDTO.id ?: throw BadRequestException("Id not provided")
+    fun updateTeam(teamForm: TeamForm): TeamDTO {
+        // Vérifier que l'ID est fourni dans le formulaire
+        val teamId = teamForm.id ?: throw BadRequestException("Id not provided")
 
+        // Récupérer l'entité existante en base
         val existingEntity = TeamEntity.findById(teamId)
             ?: throw NotFoundException("Team with id=$teamId not found")
 
-        // Mettre à jour manuellement champ par champ
-        existingEntity.label = teamDTO.label
-        existingEntity.path = teamDTO.path
+        // Convertir le TeamForm en une nouvelle instance d'entité
+        val updatedEntity = TeamMapper.INSTANCE.toEntity(teamForm)
 
-        // Mise à jour de la relation parentTeam
-        val parentId = teamDTO.parentTeam?.id
-        if (parentId != null) {
-            val parentEntity = TeamEntity.findById(parentId)
-                ?: throw NotFoundException("Parent Team with id=$parentId not found")
-            existingEntity.parentTeam = parentEntity
-        } else {
-            existingEntity.parentTeam = null
-        }
-
-        // Mise à jour de la catégorie
-        val categoryId = teamDTO.category.id
-        val categoryEntity = TeamCategoryEntity.findById(categoryId)
-            ?: throw NotFoundException("Category with id=$categoryId not found")
-        existingEntity.category = categoryEntity
+        // Mettre à jour les champs de l'entité existante avec les valeurs du formulaire
+        existingEntity.label = updatedEntity.label
+        existingEntity.path = updatedEntity.path
+        existingEntity.parentTeam = updatedEntity.parentTeam
+        existingEntity.category = updatedEntity.category
 
         // Persister les modifications
-        existingEntity.persist()
+        existingEntity.persistAndFlush()
+
+        // Retourner le DTO mis à jour
         return teamMapper.toDto(existingEntity)
     }
 

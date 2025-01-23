@@ -12,6 +12,7 @@ export interface IFormDescription {
   formValidator?: ValidatorFn;
   formInputs: IFormInput[];
   dependencies?: IFormDependency[];
+  transformToForm?: (rawEntity: any) => any;  // Nouvelle propriété
 
   applyDisableDependency(
     group: FormGroup,

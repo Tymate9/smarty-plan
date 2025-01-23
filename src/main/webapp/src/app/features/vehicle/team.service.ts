@@ -5,12 +5,13 @@ import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import {IEntityService} from "../../commons/workInProgress/CRUD/ientity-service";
 import TeamCategoryDTO = dto.TeamCategoryDTO;
+import TeamForm = dto.TeamForm;
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class TeamService implements IEntityService<TeamDTO>{
+export class TeamService implements IEntityService<TeamDTO, TeamForm>{
 
   private apiUrl = '/api/teams';  // URL to the backend API
 
@@ -65,18 +66,20 @@ export class TeamService implements IEntityService<TeamDTO>{
   }
 
   /**
-   * Crée un nouveau Team (appelle @POST /api/teams)
+   * Crée un nouveau Team en envoyant un TeamForm (appelle @POST /api/teams)
    */
-  create(team: TeamDTO): Observable<TeamDTO> {
-    return this.http.post<TeamDTO>(this.apiUrl, team);
+  create(teamForm: TeamForm): Observable<TeamDTO> {
+    console.log("Juste avant la requête API")
+    console.log(teamForm)
+    return this.http.post<TeamDTO>(this.apiUrl, teamForm);
   }
 
   /**
-   * Met à jour un Team existant (appelle @PUT /api/teams/{id})
+   * Met à jour un Team existant en envoyant un TeamForm (appelle @PUT /api/teams/{id})
    */
-  update(team: TeamDTO): Observable<TeamDTO> {
-    // On s’attend à ce que team.id soit déjà valorisé
-    return this.http.put<TeamDTO>(`${this.apiUrl}/${team.id}`, team);
+  update(teamForm: TeamForm): Observable<TeamDTO> {
+    // On s’attend à ce que teamForm.id soit déjà valorisé
+    return this.http.put<TeamDTO>(`${this.apiUrl}/${teamForm.id}`, teamForm);
   }
 
   /**

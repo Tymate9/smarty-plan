@@ -179,7 +179,7 @@ class TripService(
                         val nextStop = tripEvents[j]
                         if (nextStop.eventType == TripEventType.STOP) {
                             // Un STOP avec durée >= 300 ou durée null est considéré comme un STOP long
-                            if ((nextStop.duration != null && nextStop.duration >= 300) || nextStop.duration == null) {
+                            if (nextStop.duration?.let { it >= 300L } != false) {
                                 break
                             }
                         }
@@ -209,6 +209,7 @@ class TripService(
         }
         return result
     }
+
     private fun mergeTrips(events: List<TripEventDTO>): TripEventDTO {
         // Identification du premier et du dernier événement TRIP dans la liste
         val firstTrip = events.first { it.eventType == TripEventType.TRIP }
@@ -250,23 +251,43 @@ class TripService(
         while (i < tripEvents.size) {
             val current = tripEvents[i]
 
+            // Vérifier si l'événement actuel est un STOP avec un poiId non nul
             if (current.eventType == TripEventType.STOP && current.poiId != null) {
-                // Vérifier si le prochain événement est un TRIP
-                if (i + 1 < tripEvents.size && tripEvents[i + 1].eventType == TripEventType.TRIP) {
-                    // Vérifier si le STOP suivant après le TRIP a le même poiId
-                    if (i + 2 < tripEvents.size && tripEvents[i + 2].eventType == TripEventType.STOP
-                        && tripEvents[i + 2].poiId == current.poiId
+                var mergeStartIndex = i
+                val poiIdToMerge = current.poiId
+                val eventsToMerge = mutableListOf<TripEventDTO>()
+                eventsToMerge.add(current)
+                var j = i + 1
+
+                // Parcourir les événements suivants pour détecter des séquences de STOP/TRIP/STOP avec le même poiId
+                while (j + 1 < tripEvents.size) {
+                    val nextEvent = tripEvents[j]
+                    val followingStop = tripEvents[j + 1]
+
+                    // Vérifier si le prochain événement est un TRIP suivi d'un STOP avec le même poiId
+                    if (nextEvent.eventType == TripEventType.TRIP &&
+                        followingStop.eventType == TripEventType.STOP &&
+                        followingStop.poiId == poiIdToMerge
                     ) {
-                        println("Fusion des arrêts redondants entre les indices $i et ${i + 2}")
-                        val eventsToMerge = tripEvents.subList(i, i + 3)
-                        val mergedStop = mergeStops(eventsToMerge)
-                        result.add(mergedStop)
-                        i += 3 // Sauter les trois événements fusionnés
-                        continue
+                        eventsToMerge.add(nextEvent)       // Ajouter le TRIP
+                        eventsToMerge.add(followingStop)  // Ajouter le STOP
+                        j += 2 // Avancer de deux positions
+                    } else {
+                        break
                     }
+                }
+
+                // Si au moins deux arrêts avec le même poiId sont trouvés, procéder à la fusion
+                if (eventsToMerge.size >= 3) { // STOP + TRIP + STOP
+                    println("Fusion des événements de l'index $mergeStartIndex à ${j - 1}")
+                    val mergedStop = mergeStops(eventsToMerge)
+                    result.add(mergedStop)
+                    i = j // Avancer l'index au prochain événement non fusionné
+                    continue
                 }
             }
 
+            // Ajouter l'événement actuel au résultat s'il n'est pas fusionné
             result.add(current)
             i++
         }
@@ -275,16 +296,9 @@ class TripService(
     }
 
     private fun mergeStops(events: List<TripEventDTO>): TripEventDTO {
-        // Validation des événements à fusionner
-        require(events.size >= 3) { "mergeStops nécessite au moins 3 événements : STOP, TRIP, STOP." }
-        require(events.all { it.eventType == TripEventType.STOP || it.eventType == TripEventType.TRIP }) {
-            "Tous les événements à fusionner doivent être de type STOP ou TRIP."
-        }
-        require(events[0].eventType == TripEventType.STOP && events[2].eventType == TripEventType.STOP) {
-            "La liste doit commencer et se terminer par un STOP."
-        }
-
+        // Le premier événement doit être un STOP
         val firstStop = events.first { it.eventType == TripEventType.STOP }
+        // Le dernier événement doit être un STOP
         val lastStop = events.last { it.eventType == TripEventType.STOP }
 
         // Calcul de la somme des distances (remplacer null par 0)
@@ -296,11 +310,11 @@ class TripService(
         // Collecte des indices des événements fusionnés
         val mergedSourceIndexes = events.map { it.index }
 
-        println("Fusion des arrêts redondants: POI-ID=${firstStop.poiId}, Durée totale=$mergedDuration, Distance totale=$mergedDistance, Indices fusionnés=$mergedSourceIndexes")
+        println("Fusion des arrêts redondants: Durée totale=$mergedDuration, Distance totale=$mergedDistance, Indices fusionnés=$mergedSourceIndexes")
 
         return TripEventDTO(
             index = firstStop.index, // Index du premier STOP
-            eventType = TripEventType.STOP, // Toujours STOP
+            eventType = TripEventType.STOP, // Toujours STOP après fusion
             distance = if (mergedDistance > 0) mergedDistance else null, // Somme des distances
             color = firstStop.color, // Couleur du premier STOP
             poiId = firstStop.poiId, // poiId du premier STOP

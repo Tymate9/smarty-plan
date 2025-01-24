@@ -55,6 +55,7 @@ data class TripEventsDTO(
     val drivingDistance: Double,
     val poiAmount: Int,
     val tripEvents: List<TripEventDTO>,
+    val compactedTripEvents: List<TripEventDTO>
 )
 
 enum class TripEventType {
@@ -79,4 +80,5 @@ data class TripEventDTO(
     val lat: Double? = null,
     val lng: Double? = null,
     val trace: String? = null,
+    val sourceIndexes: List<Int>? = null
 )

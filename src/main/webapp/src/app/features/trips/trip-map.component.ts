@@ -55,10 +55,10 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                       <i class="pi pi-map-marker"></i>
               </span>
                   <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
-                <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
+                <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
               </span>
                   <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
-                <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
+                <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
               </span>
                 </ng-template>
                 <ng-template pTemplate="content" let-event>
@@ -123,10 +123,10 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                       <i class="pi pi-map-marker"></i>
               </span>
                   <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
-                <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
+                <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
               </span>
                   <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
-                <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
+                <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
               </span>
                 </ng-template>
                 <ng-template pTemplate="content" let-event>

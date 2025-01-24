@@ -46,7 +46,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
             </p-card>
           </div>
           <p-tabView>
-            <p-tabPanel header="Compact">
+            <p-tabPanel header="Résumé">
               <p-timeline [value]="tripData!.compactedTripEvents" id="trips-timeline" *ngIf="showTimeline">
                 <ng-template pTemplate="marker" let-event>
               <span *ngIf="event.eventType === TripEventType.STOP"

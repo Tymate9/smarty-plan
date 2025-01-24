@@ -169,40 +169,46 @@ class TripService(
             val current = tripEvents[i]
 
             if (current.eventType == TripEventType.TRIP) {
-                // Vérifier s'il y a un STOP suivant avec durée < 5 minutes (300 secondes)
+                // Vérifier s'il y a un STOP suivant avec durée < 5 minutes (300 secondes) ET durée non nulle
                 if (i + 1 < tripEvents.size && tripEvents[i + 1].eventType == TripEventType.STOP
-                    && (tripEvents[i + 1].duration ?: 0) < 300
+                    && tripEvents[i + 1].duration?.let { it < 300 } == true
                 ) {
-                    // Rechercher le premier STOP suivant avec durée >= 5 minutes
+                    // Rechercher le premier STOP suivant avec durée >= 5 minutes ou durée null
                     var j = i + 2
                     while (j < tripEvents.size) {
                         val nextStop = tripEvents[j]
                         if (nextStop.eventType == TripEventType.STOP) {
-                            if ((nextStop.duration ?: 0) >= 300) {
+                            // Un STOP avec durée >= 300 ou durée null est considéré comme un STOP long
+                            if ((nextStop.duration != null && nextStop.duration >= 300) || nextStop.duration == null) {
                                 break
                             }
                         }
                         j++
                     }
 
-                    // Si un STOP avec durée >= 5 minutes est trouvé
+                    // Si un STOP avec durée >= 5 minutes ou durée null est trouvé
                     if (j < tripEvents.size) {
+                        println("Fusion des événements de l'index $i à ${j - 1}")
                         val eventsToMerge = tripEvents.subList(i, j)
                         val mergedTrip = mergeTrips(eventsToMerge)
                         result.add(mergedTrip)
                         i = j // Ne pas inclure le STOP long dans la fusion
                         continue
+                    } else {
+                        // Si aucun STOP long n'est trouvé jusqu'à la fin, fusionner jusqu'à la fin
+                        println("Fusion des événements de l'index $i à la fin de la liste")
+                        val eventsToMerge = tripEvents.subList(i, tripEvents.size)
+                        val mergedTrip = mergeTrips(eventsToMerge)
+                        result.add(mergedTrip)
+                        break // Fusion terminée, sortir de la boucle
                     }
                 }
             }
-
             result.add(current)
             i++
         }
-
         return result
     }
-
     private fun mergeTrips(events: List<TripEventDTO>): TripEventDTO {
         // Identification du premier et du dernier événement TRIP dans la liste
         val firstTrip = events.first { it.eventType == TripEventType.TRIP }

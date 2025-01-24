@@ -45,72 +45,144 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
               <p>{{ tripData!.poiAmount }}</p>
             </p-card>
           </div>
-          <p-timeline [value]="tripData!.tripEvents" id="trips-timeline" *ngIf="showTimeline">
-            <ng-template pTemplate="marker" let-event>
+          <p-tabView>
+            <p-tabPanel header="Compact">
+              <p-timeline [value]="tripData!.compactedTripEvents" id="trips-timeline" *ngIf="showTimeline">
+                <ng-template pTemplate="marker" let-event>
               <span *ngIf="event.eventType === TripEventType.STOP"
                     class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
                     [style]="{ 'background-color': event.color }">
                       <i class="pi pi-map-marker"></i>
               </span>
-              <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
+                  <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
                 <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
               </span>
-              <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
+                  <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
                 <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
               </span>
-            </ng-template>
-            <ng-template pTemplate="content" let-event>
-              <div
-                *ngIf="event.eventType === TripEventType.TRIP"
-                (mouseenter)="onTripEventMouseEnter(event)"
-                (mouseleave)="onTripEventMouseLeave(event)"
-                style="margin: 10px 0;"
-              >
-                <div>
-                  <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
+                </ng-template>
+                <ng-template pTemplate="content" let-event>
+                  <div
+                    *ngIf="event.eventType === TripEventType.TRIP"
+                    (mouseenter)="onTripEventMouseEnter(event)"
+                    (mouseleave)="onTripEventMouseLeave(event)"
+                    style="margin: 10px 0;"
+                  >
+                    <div>
+                      <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
-                  Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
+                      Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
 
-                <div class="time-oval">
-                  {{
-                    event.start?.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })
-                  }}
-                </div>
-                <i class="pi pi-caret-right"></i>
-                <div class="time-oval">
-                  {{
-                    event.end?.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })
-                  }}
-                </div>
+                    <div class="time-oval">
+                      {{
+                        event.start?.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      }}
+                    </div>
+                    <i class="pi pi-caret-right"></i>
+                    <div class="time-oval">
+                      {{
+                        event.end?.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      }}
+                    </div>
 
-                <!--                {{ event.distance.toFixed(0) }} Km-->
-                <div class="distance-rectangle small-right">
-                  {{ event.distance.toFixed(0) }} Km
-                </div>
-              </div>
-              <div
-                class="p-3 bg-black-alpha-20 border-round cursor-pointer"
-                *ngIf="event.eventType !== TripEventType.TRIP && event.eventType !== TripEventType.TRIP_EXPECTATION"
-                (mouseenter)="onTripEventMouseEnter(event)"
-                (mouseleave)="onTripEventMouseLeave(event)"
-                (click)="onTripEventClick(event)"
-              > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
-                <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
-                <i class="pi pi-caret-right"></i> {{
-                  event.end?.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })
-                }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
-              </div>
-            </ng-template>
-          </p-timeline>
+                    <!--                {{ event.distance.toFixed(0) }} Km-->
+                    <div class="distance-rectangle small-right">
+                      {{ event.distance.toFixed(0) }} Km
+                    </div>
+                  </div>
+                  <div
+                    class="p-3 bg-black-alpha-20 border-round cursor-pointer"
+                    *ngIf="event.eventType !== TripEventType.TRIP && event.eventType !== TripEventType.TRIP_EXPECTATION"
+                    (mouseenter)="onTripEventMouseEnter(event)"
+                    (mouseleave)="onTripEventMouseLeave(event)"
+                    (click)="onTripEventClick(event)"
+                  > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
+                    <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
+                    <i class="pi pi-caret-right"></i> {{
+                      event.end?.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
+                  </div>
+                </ng-template>
+              </p-timeline>
+            </p-tabPanel>
+            <p-tabPanel header="Détaillé">
+              <p-timeline [value]="tripData!.tripEvents" id="trips-timeline" *ngIf="showTimeline">
+                <ng-template pTemplate="marker" let-event>
+              <span *ngIf="event.eventType === TripEventType.STOP"
+                    class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+                    [style]="{ 'background-color': event.color }">
+                      <i class="pi pi-map-marker"></i>
+              </span>
+                  <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
+                <img src="../../../assets/icon/vl-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
+              </span>
+                  <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
+                <img src="../../../assets/icon/vl-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}"/>
+              </span>
+                </ng-template>
+                <ng-template pTemplate="content" let-event>
+                  <div
+                    *ngIf="event.eventType === TripEventType.TRIP"
+                    (mouseenter)="onTripEventMouseEnter(event)"
+                    (mouseleave)="onTripEventMouseLeave(event)"
+                    style="margin: 10px 0;"
+                  >
+                    <div>
+                      <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
+
+                      Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
+
+                    <div class="time-oval">
+                      {{
+                        event.start?.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      }}
+                    </div>
+                    <i class="pi pi-caret-right"></i>
+                    <div class="time-oval">
+                      {{
+                        event.end?.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      }}
+                    </div>
+
+                    <!--                {{ event.distance.toFixed(0) }} Km-->
+                    <div class="distance-rectangle small-right">
+                      {{ event.distance.toFixed(0) }} Km
+                    </div>
+                  </div>
+                  <div
+                    class="p-3 bg-black-alpha-20 border-round cursor-pointer"
+                    *ngIf="event.eventType !== TripEventType.TRIP && event.eventType !== TripEventType.TRIP_EXPECTATION"
+                    (mouseenter)="onTripEventMouseEnter(event)"
+                    (mouseleave)="onTripEventMouseLeave(event)"
+                    (click)="onTripEventClick(event)"
+                  > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
+                    <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
+                    <i class="pi pi-caret-right"></i> {{
+                      event.end?.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
+                  </div>
+                </ng-template>
+              </p-timeline>
+            </p-tabPanel>
+          </p-tabView>
           <div *ngIf="!showTimeline">
             <p>Chargement du détail des trajets...</p>
           </div>
@@ -296,7 +368,7 @@ export class TripMapComponent {
       return;
     }
     this._tripData = tripEventsDTO;
-
+    console.log(tripEventsDTO)
     // init map
     if (this.map) {
       this.featureGroup.clearLayers();
@@ -377,21 +449,50 @@ export class TripMapComponent {
     return this._tripData;
   }
 
+  //Todo finir demain
   onTripEventMouseEnter(event: TripEventDTO): void {
-    const layer = this.featureGroup.getLayers()[event.index]
-    if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-      layer.setStyle({fillColor: 'blue', weight: 5});
-    } else if (layer instanceof L.Marker) {
-      layer.getElement()?.classList.add('highlighted-marker');
+    if (event.sourceIndexes != null)
+    {
+      event.sourceIndexes.forEach(it => {
+        const layer = this.featureGroup.getLayers()[it]
+        if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
+          layer.setStyle({fillColor: 'blue', weight: 5});
+        } else if (layer instanceof L.Marker) {
+          layer.getElement()?.classList.add('highlighted-marker');
+        }
+      })
+    }
+    else
+    {
+      const layer = this.featureGroup.getLayers()[event.index]
+      if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
+        layer.setStyle({fillColor: 'blue', weight: 5});
+      } else if (layer instanceof L.Marker) {
+        layer.getElement()?.classList.add('highlighted-marker');
+      }
     }
   }
 
   onTripEventMouseLeave(event: TripEventDTO): void {
-    const layer = this.featureGroup.getLayers()[event.index]
-    if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-      layer.setStyle({fillColor: 'blue', weight: 3});
-    } else if (layer instanceof L.Marker) {
-      layer.getElement()?.classList.remove('highlighted-marker');
+    if (event.sourceIndexes != null)
+    {
+      event.sourceIndexes.forEach(it => {
+        const layer = this.featureGroup.getLayers()[it]
+        if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
+          layer.setStyle({fillColor: 'blue', weight: 3});
+        } else if (layer instanceof L.Marker) {
+          layer.getElement()?.classList.remove('highlighted-marker');
+        }
+      })
+    }
+    else
+    {
+      const layer = this.featureGroup.getLayers()[event.index]
+      if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
+        layer.setStyle({fillColor: 'blue', weight: 3});
+      } else if (layer instanceof L.Marker) {
+        layer.getElement()?.classList.remove('highlighted-marker');
+      }
     }
   }
 

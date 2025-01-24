@@ -26,7 +26,19 @@ export class TripsService {
     if (!tripEventsDto) {
       return null;
     }
+    //TODO(Beurk c'est dégueu j'ai copier coller du code)
     tripEventsDto.tripEvents = tripEventsDto.tripEvents.map((tripEvent, _, tripEvents) => {
+      tripEvent.start = tripEvent.start && new Date(tripEvent.start);
+      tripEvent.end = tripEvent.end && new Date(tripEvent.end);
+      // set color for trips (select colors on the hue circle while ignoring greeny colors)
+      if (tripEvent.eventType === dto.TripEventType.TRIP || tripEvent.eventType === dto.TripEventType.TRIP_EXPECTATION) {
+        const hue = 240 / tripEvents.length * tripEvent.index;
+        const adjustedHue = hue < 60 ? hue : hue + 120;
+        tripEvent.color = `hsl(${adjustedHue} 75% 40%)`;
+      }
+      return tripEvent;
+    });
+    tripEventsDto.compactedTripEvents = tripEventsDto.compactedTripEvents.map((tripEvent, _, tripEvents) => {
       tripEvent.start = tripEvent.start && new Date(tripEvent.start);
       tripEvent.end = tripEvent.end && new Date(tripEvent.end);
       // set color for trips (select colors on the hue circle while ignoring greeny colors)

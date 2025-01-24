@@ -2,6 +2,7 @@ package net.enovea.dto
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import java.time.LocalTime
 
+
 data class VehicleTableDTO (
     val id: String,
     val energy: String?,

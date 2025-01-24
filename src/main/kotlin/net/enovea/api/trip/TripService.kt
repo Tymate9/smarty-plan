@@ -1,11 +1,16 @@
 package net.enovea.api.trip
 
 import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.api.vehicleStats.VehicleStatsDTO
+import net.enovea.api.vehicleStats.VehicleStatsRepository
+import net.enovea.api.vehicleStats.VehiclesStatsDTO
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.team.TeamEntity
 import net.enovea.domain.vehicle.DeviceVehicleInstallEntity
 import net.enovea.domain.vehicle.VehicleEntity
+import net.enovea.domain.vehicle.VehicleEntity.Companion.getVehicleDriverAtDate
+import net.enovea.repository.TripRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
@@ -15,7 +20,8 @@ import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
 
 class TripService(
     private val tripRepository: TripRepository,
-    private val spatialService: SpatialService
+    private val spatialService: SpatialService,
+
 ) {
     private val geometryFactory = GeometryFactory()
 
@@ -80,7 +86,9 @@ class TripService(
             lastPosition = lastDeviceState.coordinate
             addressAtEnd = lastDeviceState.address ?: lastPosition?.let { spatialService.getAddressFromEntity(it) }
             if (lastDeviceState.lastPositionTime != null) {
-                lastPositionTime = Instant.ofEpochMilli(lastDeviceState.lastPositionTime!!.time).atZone(ZoneId.of("Europe/Paris")).toLocalDateTime()
+                lastPositionTime =
+                    Instant.ofEpochMilli(lastDeviceState.lastPositionTime!!.time).atZone(ZoneId.of("Europe/Paris"))
+                        .toLocalDateTime()
             }
             lastTripStatus = when (lastDeviceState.state) {
                 "DRIVING" -> TripStatus.DRIVING

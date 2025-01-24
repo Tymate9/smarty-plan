@@ -572,7 +572,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   //TODO make it more general (>3 levels)
   //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
-  transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {
+   transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {
     // Helper function to sort by label alphabetically
     const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
       a.data.label.localeCompare(b.data.label);

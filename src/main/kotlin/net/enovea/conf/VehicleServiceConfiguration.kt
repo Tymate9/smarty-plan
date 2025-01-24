@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
 import jakarta.persistence.EntityManager
 import net.enovea.api.trip.TripService
+import net.enovea.api.vehicleStats.VehicleStatsRepository
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.device.DeviceDataStateMapper
@@ -25,7 +26,8 @@ class VehicleServiceConfiguration {
         spatialService: SpatialService,
         geoCodingService: GeoCodingService,
         entityManager: EntityManager,
-        tripService: TripService
+        tripService: TripService,
+        vehicleStatsRepository: VehicleStatsRepository
     ): VehicleService {
         return VehicleService(
             vehicleMapper,
@@ -33,7 +35,8 @@ class VehicleServiceConfiguration {
             spatialService,
             geoCodingService,
             entityManager,
-            tripService
+            tripService,
+            vehicleStatsRepository
         )
     }
 

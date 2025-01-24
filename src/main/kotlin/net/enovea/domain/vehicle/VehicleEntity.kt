@@ -120,6 +120,21 @@ data class VehicleEntity(
                     AND dup.id.startDate IS NULL
                 """.trimIndent(), VehicleAndCurrentDriver::class.java).setParameter("vehicleId", vehicleId).setParameter("date", date.atStartOfDay()).singleResult
 
+        //Method to get the driver and the vehicle entity
+        @Transactional
+        fun getVehicleDriverAtDate(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver ?= getEntityManager().createQuery(
+            """
+                SELECT v, d
+                FROM VehicleEntity v 
+                    LEFT JOIN FETCH VehicleDriverEntity vd  
+                        ON vd.id.vehicleId = v.id
+                        AND vd.id.startDate <= :date 
+                        AND (vd.endDate IS NULL OR vd.endDate >= :date) 
+                    LEFT JOIN FETCH DriverEntity d ON d.id = vd.id.driverId    
+                WHERE v.id = :vehicleId 
+                """.trimIndent(), VehicleAndCurrentDriver::class.java).setParameter("vehicleId", vehicleId).setParameter("date", date.atStartOfDay()).resultList.firstOrNull()
+
+
         @Transactional
         fun getFilteredVehicles(
             teamLabels: List<String>? = null,

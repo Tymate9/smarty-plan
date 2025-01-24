@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.api.vehicleStats.VehicleStatsRepository
 import net.enovea.common.geo.SpatialService
 import java.time.LocalDateTime
 
@@ -12,6 +13,7 @@ class TripServiceTest : StringSpec({
 
     val tripRepository = mockk<TripRepository>()
     val spatialService = mockk<SpatialService>()
+    val vehicleStatsRepository = mockk<VehicleStatsRepository>()
     val tripService = TripService(tripRepository, spatialService)
 
     "computeTripMapDTO should return correct TripMapDTO" {

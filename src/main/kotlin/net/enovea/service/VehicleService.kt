@@ -6,9 +6,13 @@ import net.dilivia.lang.StopWatch
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
+import net.enovea.api.vehicleStats.VehicleStatsDTO
+import net.enovea.api.vehicleStats.VehicleStatsRepository
+import net.enovea.api.vehicleStats.VehiclesStatsDTO
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.vehicle.*
+import net.enovea.domain.vehicle.VehicleEntity.Companion.getVehicleDriverAtDate
 import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
@@ -16,6 +20,7 @@ import net.enovea.dto.VehicleTableDTO
 import net.enovea.api.workInProgress.LogExecutionTime
 import java.time.*
 import java.time.temporal.Temporal
+import kotlin.math.roundToInt
 
 open class VehicleService(
     private val vehicleMapper: VehicleMapper,
@@ -24,7 +29,102 @@ open class VehicleService(
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
+    private val vehicleStatsRepository: VehicleStatsRepository
 ) {
+
+
+    fun getVehiclesStats(startDate: String, endDate: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
+
+        val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate)
+        val totalVehiclesStatsMap=calculateTotalVehiclesStats(vehiclesStats)
+        println(vehiclesStats)
+        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
+
+        val vehiclesWithHierarchy =vehiclesStats?.map { stats ->
+            val vehicleDriverInfo = stats.vehicleId?.let { getVehicleDriverAtDate(it, LocalDate.parse(endDate)) }
+            val licensePlate = vehicleDriverInfo?.vehicle?.licenseplate ?:"unknown"
+
+            val driverName = (vehicleDriverInfo?.driver?.lastName ?:"unknown")+ ' ' + (vehicleDriverInfo?.driver?.firstName ?:"unknown")
+            println(stats.vehicleId+"   "+licensePlate+"   "+driverName)
+
+            // Fetch the team using the vehicleId
+            val team = stats.vehicleId?.let { latestTeams[it] }
+
+            // Build the team hierarchy
+            val teamHierarchy = buildTeamHierarchy(team)
+
+            // Create a new instance of VehicleStatsDTO with enriched information
+            VehiclesStatsDTO(
+                tripCount = stats.tripCount,
+                distanceSum = stats.distanceSum?.div(1000)?.roundToInt(),
+                drivingTime = stats.drivingTime?.let{
+                val hours = it / 3600
+                val minutes = (it % 3600) / 60
+                String.format("%02d:%02d", hours, minutes)},
+                distancePerTripAvg = stats.distancePerTripAvg?.div(1000)?.roundToInt(),
+                durationPerTripAvg = stats.durationPerTripAvg?.let{
+                    val hours = it / 3600
+                    val minutes = (it % 3600) / 60
+                    String.format("%02d:%02d", hours, minutes)},
+                hasLateStartSum = stats.hasLateStartSum,
+                hasLateStop = stats.hasLateStop,
+                hasLastTripLong = stats.hasLastTripLong,
+                rangeAvg = stats.rangeAvg.let{
+                    val hours = it / 3600
+                    val minutes = (it % 3600) / 60
+                    String.format("%02d:%02d", hours, minutes)},
+                waitingDuration = stats.waitingDuration?.let{
+                val hours = it / 3600
+                val minutes = (it % 3600) / 60
+                String.format("%02d:%02d", hours, minutes)},
+                licensePlate = licensePlate,
+                driverName = driverName,
+                team = team,
+                teamHierarchy = teamHierarchy
+            )
+        }
+        //val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy){ it.teamHierarchy }
+        println(vehiclesWithHierarchy)
+        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
+        println(teamHierarchy)
+        return Pair(teamHierarchy, totalVehiclesStatsMap)
+    }
+
+
+//function to calculate total statistics
+    fun calculateTotalVehiclesStats(vehiclesStats: List<VehicleStatsDTO>): Map<String, Any> {
+        // Calculate totals and averages
+        val totalVehicles = vehiclesStats.size
+        val totalDrivers = vehiclesStats.count { it.driverName != null }
+        val totalDistance = vehiclesStats.sumOf { it.distanceSum ?: 0.0 }
+        val totalTripCount = vehiclesStats.sumOf { it.tripCount }
+        val totalDrivingTime = vehiclesStats.sumOf { it.drivingTime ?: 0L }
+        val averageDistance = if (totalTripCount > 0) totalDistance / totalTripCount else 0.0
+        val averageDuration = if (totalTripCount > 0) totalDrivingTime.toDouble() / totalTripCount else 0.0
+        val totalWaitingTime = vehiclesStats.sumOf { it.waitingDuration ?: 0L }
+        val totalHasLateStart = vehiclesStats.sumOf { it.hasLateStartSum }
+        val totalHasLateStop = vehiclesStats.sumOf { it.hasLateStop }
+        val totalHasLastTripLong = vehiclesStats.sumOf { it.hasLastTripLong }
+        val averageRangeAvg = vehiclesStats.map { it.rangeAvg }.average().toInt()
+
+        // Return results as a map
+        return mapOf(
+            "totalVehicles" to totalVehicles,
+            "totalDrivers" to totalDrivers,
+            "totalDistanceSum" to totalDistance,
+            "totalTripCount" to totalTripCount,
+            "totalDrivingTime" to totalDrivingTime,
+            "averageDistance" to averageDistance,
+            "averageDuration" to averageDuration,
+            "totalWaitingTime" to totalWaitingTime,
+            "totalHasLateStartSum" to totalHasLateStart,
+            "totalHasLateStop" to totalHasLateStop,
+            "totalHasLastTripLong" to totalHasLastTripLong,
+            "averageRangeAvg" to averageRangeAvg
+        )
+    }
+
+
     fun filterVehicle(vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
         val untrackedVehicleIds = VehicleUntrackedPeriodEntity.findVehicleIdsWithUntrackedPeriod()
@@ -77,7 +177,6 @@ open class VehicleService(
         val allVehicles = vehicles ?: VehicleEntity.listAll()
         stopWatch?.stopAndStart("compute daily stats")
         val tripStats = tripService.getTripDailyStats()
-
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         stopWatch?.stopAndStart("MapTo vehicle data DTO")
@@ -137,7 +236,7 @@ open class VehicleService(
             val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
-        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy)
+        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy){ it.teamHierarchy }
 
         stopWatch?.stop()
         return teamHierarchy
@@ -145,6 +244,7 @@ open class VehicleService(
 
     // Helper function to build team hierarchy
     private fun buildTeamHierarchy(team: TeamDTO?): String {
+
         // Recursively build the team hierarchy
         val hierarchy = mutableListOf<String>()
         var currentTeam = team
@@ -253,16 +353,17 @@ open class VehicleService(
 data class TeamHierarchyNode(
     val label: String,
     val children: MutableList<TeamHierarchyNode> = mutableListOf(),
-    val vehicles: MutableList<VehicleTableDTO> = mutableListOf()
+    val vehicles: MutableList<Any> = mutableListOf()
 )
 
 // Function to build a hierarchy tree for multiple top-level teams
-fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarchyNode> {
+fun <T> buildTeamHierarchyForest(vehicles: List<T>,  extractTeamHierarchy: (T) -> String?): List<TeamHierarchyNode> {
     // Map to store team nodes by their labels
     val teamNodes = mutableMapOf<String, TeamHierarchyNode>()
 
     vehicles.forEach { vehicle ->
-        val teamHierarchy = vehicle.teamHierarchy?.split(" > ")
+        val teamHierarchy = extractTeamHierarchy(vehicle)?.split(" > ")
+       // val teamHierarchy = vehicle.teamHierarchy?.split(" > ")
 
         // Process the hierarchy and construct nodes
         var currentNode: TeamHierarchyNode? = null
@@ -278,9 +379,8 @@ fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarch
                 currentNode = node
             }
         }
-
         // Add the vehicle to the leaf node
-        currentNode?.vehicles?.add(vehicle)
+        currentNode?.vehicles?.add(vehicle as Any)
     }
 
     // Collect the top-level nodes (those that are not children of any other node)
@@ -290,9 +390,6 @@ fun buildTeamHierarchyForest(vehicles: List<VehicleTableDTO>): List<TeamHierarch
 
     return topLevelNodes.toList()
 }
-
 fun Instant?.until(duration: Temporal): Duration {
     return this?.let { Duration.between(this, duration) } ?: Duration.ZERO
 }
-
-

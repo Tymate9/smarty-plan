@@ -4,6 +4,8 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.domain.team.TeamEntity
+import net.enovea.domain.team.TeamMapper
+import net.enovea.dto.TeamDTO
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -33,6 +35,23 @@ data class VehicleTeamEntity (
     companion object : PanacheCompanionBase<VehicleTeamEntity, VehicleTeamId> {
         const val ENTITY_NAME = "VehicleTeamEntity"
         const val TABLE_NAME = "vehicle_team"
+
+        /**
+         * Returns a map of vehicle IDs with their latest team (where endDate is null).
+         */
+        fun getLatestTeams(): Map<String, TeamDTO> {
+            val teamMapper = TeamMapper.INSTANCE // Get the mapper instance
+
+            // Find all entities where endDate is null
+            return find("endDate IS NULL")
+                .list() // No type argument needed
+                .associate { entity ->
+                    // Map vehicleId to the corresponding TeamDTO
+                    entity.id.vehicleId to (entity.team?.let { teamMapper.toDto(it) }
+                        ?: throw IllegalStateException("Team cannot be null"))
+                }
+        }
+
 
     }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { dto} from "../../../habarta/dto";
+import {dto} from "../../../habarta/dto";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 
 export interface VehicleWithDistanceDTO {
@@ -11,8 +11,13 @@ export interface VehicleWithDistanceDTO {
 }
 export interface TeamHierarchyNode {
   label: string;
-  children?: TeamHierarchyNode[]; // Subteams
-  vehicles: dto.VehicleTableDTO[];     // List of vehicles at this team level
+  children?: TeamHierarchyNode[];
+  vehicles: (dto.VehicleTableDTO)[];
+}
+export interface TeamHierarchyNode1 {
+  label: string;
+  children?: TeamHierarchyNode1[];
+  vehicles: (dto.VehiclesStatsDTO)[];
 }
 
 @Injectable({
@@ -85,5 +90,26 @@ export class VehicleService {
     }
     return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableData`,  {params});
   }
+  //
+  // getVehiclesStats(
+  //   startDate: string,
+  //   endDate: string
+  // ): Observable<TeamHierarchyNode1[]> {
+  //   const params = {
+  //     startDate: startDate,
+  //     endDate: endDate
+  //   };
+  //   return this.http.get<TeamHierarchyNode1[]>(`${this.baseUrl}/vehicleStats`, { params });
+  // }
 
+  getVehiclesStats(
+    startDate: string,
+    endDate: string
+  ): Observable<{ teamHierarchyNodes: TeamHierarchyNode1[]; stats: Record<string, any> }> {
+    const params = {
+      startDate: startDate,
+      endDate: endDate
+    };
+    return this.http.get<{ teamHierarchyNodes: TeamHierarchyNode1[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats`, { params });
+  }
 }

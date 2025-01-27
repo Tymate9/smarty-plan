@@ -449,52 +449,71 @@ export class TripMapComponent {
     return this._tripData;
   }
 
-  //Todo finir demain
-  onTripEventMouseEnter(event: TripEventDTO): void {
-    if (event.sourceIndexes != null)
-    {
-      event.sourceIndexes.forEach(it => {
-        const layer = this.featureGroup.getLayers()[it]
-        if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-          layer.setStyle({fillColor: 'blue', weight: 5});
-        } else if (layer instanceof L.Marker) {
-          layer.getElement()?.classList.add('highlighted-marker');
+
+  private applyEventsHiglightedStyle(
+    indexes: number[],
+    fillColor: string,
+    weight: number,
+    highlightMarker: boolean
+  ): void {
+    indexes.forEach(index => {
+      const layer = this.featureGroup.getLayers()[index];
+      if (layer instanceof L.GeoJSON) {
+        layer.setStyle({ fillColor: fillColor, weight: weight });
+      } else if (layer instanceof L.Marker) {
+        const element = layer.getElement();
+        if (element) {
+          if (highlightMarker) {
+            element.classList.add('highlighted-marker');
+          } else {
+            element.classList.remove('highlighted-marker');
+          }
         }
-      })
-    }
-    else
-    {
-      const layer = this.featureGroup.getLayers()[event.index]
+      }
+    });
+  }
+
+// Méthode refactorisée pour l'événement MouseEnter
+  onTripEventMouseEnter(event: TripEventDTO): void {
+    const fillColor = 'blue';
+    const weight = 5;
+    const highlightMarker = true;
+
+    if (event.sourceIndexes && event.sourceIndexes.length > 0) {
+      this.applyEventsHiglightedStyle(event.sourceIndexes, fillColor, weight, highlightMarker);
+    } else {
+      const layer = this.featureGroup.getLayers()[event.index];
       if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-        layer.setStyle({fillColor: 'blue', weight: 5});
+        layer.setStyle({ fillColor: fillColor, weight: weight });
       } else if (layer instanceof L.Marker) {
         layer.getElement()?.classList.add('highlighted-marker');
       }
     }
   }
 
+// Méthode refactorisée pour l'événement MouseLeave
   onTripEventMouseLeave(event: TripEventDTO): void {
-    if (event.sourceIndexes != null)
-    {
-      event.sourceIndexes.forEach(it => {
-        const layer = this.featureGroup.getLayers()[it]
-        if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-          layer.setStyle({fillColor: 'blue', weight: 3});
-        } else if (layer instanceof L.Marker) {
-          layer.getElement()?.classList.remove('highlighted-marker');
-        }
-      })
-    }
-    else
-    {
-      const layer = this.featureGroup.getLayers()[event.index]
+    const fillColor = 'blue';
+    const weight = 3;
+    const highlightMarker = false;
+
+    if (event.sourceIndexes && event.sourceIndexes.length > 0) {
+      this.applyEventsHiglightedStyle(
+        event.sourceIndexes,
+        fillColor,
+        weight,
+        highlightMarker
+      );
+    } else {
+      const layer = this.featureGroup.getLayers()[event.index];
       if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-        layer.setStyle({fillColor: 'blue', weight: 3});
+        layer.setStyle({ fillColor: fillColor, weight: weight });
       } else if (layer instanceof L.Marker) {
         layer.getElement()?.classList.remove('highlighted-marker');
       }
     }
   }
+
 
   onTripEventClick(event: TripEventDTO): void {
     const layer = this.featureGroup.getLayers()[event.index]

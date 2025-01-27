@@ -4,6 +4,8 @@ import {map, Observable} from 'rxjs';
 import {dto} from "../../../habarta/dto";
 import TripDTO = dto.TripDTO;
 import TripEventsDTO = dto.TripEventsDTO;
+import TripEventDTO = dto.TripEventDTO;
+import TripEventType = dto.TripEventType;
 
 @Injectable({
   providedIn: 'root'
@@ -26,29 +28,36 @@ export class TripsService {
     if (!tripEventsDto) {
       return null;
     }
-    //TODO(Beurk c'est dégueu j'ai copier coller du code)
-    tripEventsDto.tripEvents = tripEventsDto.tripEvents.map((tripEvent, _, tripEvents) => {
-      tripEvent.start = tripEvent.start && new Date(tripEvent.start);
-      tripEvent.end = tripEvent.end && new Date(tripEvent.end);
-      // set color for trips (select colors on the hue circle while ignoring greeny colors)
-      if (tripEvent.eventType === dto.TripEventType.TRIP || tripEvent.eventType === dto.TripEventType.TRIP_EXPECTATION) {
-        const hue = 240 / tripEvents.length * tripEvent.index;
+
+    // Fonction auxiliaire pour traiter chaque TripEventDTO
+    const processTripEvent = (tripEvent: TripEventDTO, tripEvents: TripEventDTO[]): TripEventDTO => {
+      // Conversion des chaînes de caractères en objets Date, si elles existent
+      tripEvent.start = tripEvent.start ? new Date(tripEvent.start) : null;
+      tripEvent.end = tripEvent.end ? new Date(tripEvent.end) : null;
+
+      // Définition de la couleur pour les événements de type TRIP ou TRIP_EXPECTATION
+      if (
+        tripEvent.eventType === TripEventType.TRIP ||
+        tripEvent.eventType === TripEventType.TRIP_EXPECTATION
+      ) {
+        const hue = (240 / tripEvents.length) * tripEvent.index;
         const adjustedHue = hue < 60 ? hue : hue + 120;
         tripEvent.color = `hsl(${adjustedHue} 75% 40%)`;
       }
+
       return tripEvent;
-    });
-    tripEventsDto.compactedTripEvents = tripEventsDto.compactedTripEvents.map((tripEvent, _, tripEvents) => {
-      tripEvent.start = tripEvent.start && new Date(tripEvent.start);
-      tripEvent.end = tripEvent.end && new Date(tripEvent.end);
-      // set color for trips (select colors on the hue circle while ignoring greeny colors)
-      if (tripEvent.eventType === dto.TripEventType.TRIP || tripEvent.eventType === dto.TripEventType.TRIP_EXPECTATION) {
-        const hue = 240 / tripEvents.length * tripEvent.index;
-        const adjustedHue = hue < 60 ? hue : hue + 120;
-        tripEvent.color = `hsl(${adjustedHue} 75% 40%)`;
-      }
-      return tripEvent;
-    });
+    };
+
+    // Appliquer la transformation aux tripEvents
+    tripEventsDto.tripEvents = tripEventsDto.tripEvents.map(tripEvent =>
+      processTripEvent(tripEvent, tripEventsDto.tripEvents)
+    );
+
+    // Appliquer la transformation aux compactedTripEvents
+    tripEventsDto.compactedTripEvents = tripEventsDto.compactedTripEvents.map(tripEvent =>
+      processTripEvent(tripEvent, tripEventsDto.compactedTripEvents)
+    );
+
     return tripEventsDto;
   }
 

@@ -17,6 +17,7 @@ data class VehicleStatsDTO(
     var licensePlate : String? = null,
     var driverName : String? = null,
 
+
     )
 
 data class VehiclesStatsDTO(

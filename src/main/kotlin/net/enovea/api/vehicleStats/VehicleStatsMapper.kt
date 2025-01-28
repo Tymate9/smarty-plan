@@ -17,8 +17,9 @@ class VehicleStatsMapper: RowMapper<VehicleStatsDTO>{
             hasLateStop = rs.getInt("has_late_stop_sum"),
             hasLastTripLong = rs.getInt("has_last_trip_long_sum"),
             rangeAvg = rs.getInt("range_avg"),
-            waitingDuration = rs.getLong("waiting_duration").takeIf { !rs.wasNull()
-            }
+            waitingDuration = rs.getLong("waiting_duration").takeIf { !rs.wasNull() } ,
+            driverName = rs.getString("driver_name") ?: "Non attribué",
+            licensePlate = rs.getString("license_plate") ?: "-",
         )
     }
 }

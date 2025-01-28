@@ -90,7 +90,7 @@ export class VehicleService {
     }
     return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableData`,  {params});
   }
-  //
+
   // getVehiclesStats(
   //   startDate: string,
   //   endDate: string
@@ -104,12 +104,35 @@ export class VehicleService {
 
   getVehiclesStats(
     startDate: string,
-    endDate: string
+    endDate: string,
+    teamLabels: string[]=[],
+    vehicleIds: string[]=[],
+    driversIds: string[]=[]
   ): Observable<{ teamHierarchyNodes: TeamHierarchyNode1[]; stats: Record<string, any> }> {
     const params = {
       startDate: startDate,
-      endDate: endDate
+      endDate: endDate,
+      teamLabels: teamLabels.length ? teamLabels : [],
+      vehicleIds: vehicleIds.length ? vehicleIds : [],
+      driversIds: driversIds.length ? driversIds :[]
     };
     return this.http.get<{ teamHierarchyNodes: TeamHierarchyNode1[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats`, { params });
   }
+  //
+  // getVehiclesStats(
+  //   startDate: string,
+  //   endDate: string,
+  //   teamLabels: string[]=[],
+  //   vehicleIds: string[]=[],
+  //   driverNames: string[]=[]
+  // ): Observable<{ teamHierarchyNodes: TeamHierarchyNode1[]; stats: Record<string, any> }> {
+  //   const params = {
+  //     startDate: startDate,
+  //     endDate: endDate,
+  //     teamLabels: teamLabels.length ? teamLabels : [],
+  //     vehicleIds: vehicleIds.length ? vehicleIds : [],
+  //     driverNames: driverNames.length ? driverNames : []
+  //   };
+  //   return this.http.get<{ teamHierarchyNodes: TeamHierarchyNode1[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats`, { params });
+  // }
 }

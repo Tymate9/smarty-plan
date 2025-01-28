@@ -5,6 +5,7 @@ import {Calendar} from "primeng/calendar";
 import {TreeNode} from "primeng/api";
 import {dto} from "../../../habarta/dto";
 import VehiclesStatsDTO = dto.VehiclesStatsDTO;
+import {Subscription} from "rxjs";
 
 
 @Component({
@@ -32,84 +33,68 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 
     <div class="status-buttons">
       <button
-        *ngFor="let indicator of indicatorsValues"
+        *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:0:5"
         pButton
         [ngStyle]="{ '--button-color': 'var(--gray-300)' }"
-        class="custom-status-button">
-<!--        (click)="filterByStatus(status.state)">-->
+        class="custom-status-button"
+        (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
+
         <span>
-          <span class="status-count">{{ indicator.count }}</span>
-          <span class="status-text">{{ indicator.state }}</span>
+          <span class="status-count">{{ stat.value }}</span>
+          <span class="status-text">{{ keyLabels[stat.key] }}</span>
         </span>
       </button>
     </div>
     <div class="status-buttons">
       <button
-        *ngFor="let indicatorclick of indicatorsclick"
+        *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:5:10"
         pButton
         [ngStyle]="{ '--button-color': 'var(--gray-400)' }"
-        class="custom-status-button">
+        class="custom-status-button"
+        (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
         <!--        (click)="filterByStatus(status.state)">-->
         <span>
-          <span class="status-count">{{ indicatorclick.count }}</span>
-          <span class="status-text">{{ indicatorclick.state }}</span>
+          <span class="status-count">{{ stat.value }}</span>
+          <span class="status-text">{{ keyLabels[stat.key] }}</span>
         </span>
       </button>
     </div>
 
-<!--    <p-treeTable [value]="vehicleStats" [columns]="columns">-->
-<!--      <ng-template pTemplate="header" let-columns>-->
-<!--        <tr>-->
-<!--          <th *ngFor="let col of columns">{{ col.header }}</th>-->
-<!--        </tr>-->
-<!--      </ng-template>-->
-<!--      <ng-template pTemplate="body" let-rowData let-columns="columns">-->
-<!--        <tr>-->
-<!--          <td *ngFor="let col of columns">{{ rowData[col.field] }}</td>-->
-<!--        </tr>-->
-<!--      </ng-template>-->
-<!--    </p-treeTable>-->
+<!--    <div class="status-buttons">-->
+<!--      &lt;!&ndash; First Row &ndash;&gt;-->
+<!--      <div class="button-row">-->
+<!--        <button-->
+<!--          *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:0:5"-->
+<!--          pButton-->
+<!--          [ngStyle]="{ '&#45;&#45;button-color': 'var(&#45;&#45;gray-300)' }"-->
+<!--          class="custom-status-button">-->
+<!--      <span class="status-display">-->
+<!--        <span class="status-count">{{ stat.value }}</span>-->
+<!--        <span class="status-text">{{ stat.key }}</span>-->
 
-<!--    <p-table [value]="vehiclesTree" [columns]="columns" responsiveLayout="scroll">-->
-<!--      <ng-template pTemplate="header" let-columns>-->
-<!--        <tr>-->
-<!--          <th *ngFor="let col of columns">{{ col.header }}</th>-->
-<!--        </tr>-->
-<!--      </ng-template>-->
-<!--      <ng-template pTemplate="body" let-rowData let-columns="columns">-->
-<!--        <tr>-->
-<!--          <td *ngFor="let col of columns">{{ rowData[col.field] }}</td>-->
-<!--        </tr>-->
-<!--      </ng-template>-->
-<!--    </p-table>-->
-<!--    <p-treeTable [value]="vehiclesTree" [columns]="columns" responsiveLayout="scroll">-->
-<!--      <ng-template pTemplate="header" let-columns>-->
-<!--        <tr>-->
-<!--          <th *ngFor="let col of columns">{{ col.header }}</th>-->
-<!--        </tr>-->
-<!--      </ng-template>-->
+<!--      </span>-->
+<!--        </button>-->
+<!--      </div>-->
 
-<!--      <ng-template pTemplate="body" let-rowData let-columns="columns">-->
-<!--        <tr>-->
-<!--          <td *ngFor="let col of columns">-->
-<!--            &lt;!&ndash; Make sure to handle hierarchical data if needed &ndash;&gt;-->
-<!--            <ng-container *ngIf="col.field === 'label'">-->
-<!--              &lt;!&ndash; Display the hierarchical level of the label (e.g. tree node label) &ndash;&gt;-->
-<!--              <span>{{ rowData.vehicleStats.label }}</span>-->
-<!--            </ng-container>-->
-<!--            <ng-container *ngIf="col.field !== 'label'">-->
-<!--              &lt;!&ndash; Display other fields if necessary &ndash;&gt;-->
-<!--              <span>{{ rowData.data[col.field] }}</span>-->
-<!--            </ng-container>-->
-<!--          </td>-->
-<!--        </tr>-->
-<!--      </ng-template>-->
-<!--    </p-treeTable>-->
+<!--      &lt;!&ndash; Second Row &ndash;&gt;-->
+<!--      <div class="button-row">-->
+<!--        <button-->
+<!--          *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:5:10"-->
+<!--          pButton-->
+<!--          [ngStyle]="{ '&#45;&#45;button-color': 'var(&#45;&#45;gray-300)' }"-->
+<!--          class="custom-status-button">-->
+<!--      <span class="status-display">-->
+<!--        <span class="status-count">{{ stat.value }}</span>-->
+<!--        <span class="status-text">{{ stat.key }}</span>-->
+<!--      </span>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    </div>-->
 
 
-    <p-treeTable *ngIf="vehiclesTree.length"
+    <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
-                 [value]="vehiclesTree"
+                 [value]="vehiclesStatsTree"
                  [scrollable]="true"
                  [tableStyle]="{'width': '95%', 'margin': '0 auto' , 'table-layout' :'auto'}"
                  [resizableColumns]="true"
@@ -134,8 +119,8 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
             class="table-header">
-          <td>Véhicule</td>
           <td>Conducteur</td>
+          <td>Véhicule</td>
           <td>Nb de trajets effectués (nb)</td>
           <td>Distance parcourue</td>
           <td>Temps de conduite (en HH:MM)</td>
@@ -155,11 +140,10 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
           'has-vehicle': rowData.vehicle
         }"
             *ngIf="rowData.vehicle">
-
-          <td>{{ rowData.vehicle.licensePlate || 'Véhicule' }}</td>
           <td *ngIf="rowData.vehicle.driverName; else noDriver">
             {{ rowData.vehicle.driverName || 'Véhicule non attribué' }}
           </td>
+          <td>{{ rowData.vehicle.licensePlate || 'Véhicule' }}</td>
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
           </ng-template>
@@ -173,7 +157,6 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
           <td>{{ rowData.vehicle.hasLastTripLong }}</td>
           <td>{{ rowData.vehicle.rangeAvg }}</td>
           <td>{{ rowData.vehicle.waitingDuration }}</td>
-
         </tr>
 
       </ng-template>
@@ -282,7 +265,7 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
     }
 
     .custom-status-button .status-count {
-      color: white !Important;
+      color: black !Important;
       padding: 0 5px !Important;
       font-weight: bold !Important;
       margin-right: 10px !Important;
@@ -290,6 +273,7 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 
     .custom-status-button .status-text {
       color: var(--button-color, #007bff);
+
     }
 
     /*fin de Style de bouton Indicateur*/
@@ -461,24 +445,32 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 
   `]
 })
+
+
+
 export class ReportComponent implements OnInit {
+
   selectedTags: { [key: string]: string[] } = {};
   dateFrom: Date | null = new Date();
   dateTo: Date | null = new Date();
   protected now = new Date();
-  vehiclesTree: TreeNode[] = [];
-
-
+  vehiclesStatsTree: TreeNode[] = [];
   vehicleStats: any[] = []; // TreeTable data
+  filteredVehiclesStats: TeamHierarchyNode1[] = [];
+  vehiclesStatsTotal: Record<string, any>;
   constructor(private filterService: FilterService , private vehicleService: VehicleService) {}
- // indicatorsValues: { state: string; count: number }[] = [];
   @Input()
   vehicleId: string = '';
   @Input()
   date: string = '';
-
   @ViewChild('calendar')
   calendar!: Calendar;
+  filters: { agencies: string[], vehicles: string[], drivers: string[] } = {
+    agencies: [],
+    vehicles: [],
+    drivers: []
+  };
+  private filtersSubscription?: Subscription
 
   get calendarDate(): string {
     return this.date;
@@ -490,20 +482,20 @@ export class ReportComponent implements OnInit {
     //this.router.navigate(['/trip', this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
   }
 
-
   fetchVehicleStats(): void {
     if (this.dateFrom && this.dateTo) {
       const startDate = this.dateFrom.toISOString().split('T')[0];
       const endDate = this.dateTo.toISOString().split('T')[0];
 
-      this.vehicleService.getVehiclesStats(startDate, endDate).subscribe({
+      console.log("hello filters "+this.filters.agencies," ", this.filters.vehicles ," ", this.filters.drivers)
+      this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
         next: (data) => {
           const { teamHierarchyNodes, stats } = data;
           this.vehicleStats = teamHierarchyNodes;
-          console.log(stats)
-          console.log(this.vehicleStats)
-          this.vehiclesTree = this.transformToTreeNodes(this.vehicleStats)
-          console.log(this.vehiclesTree)
+          this.vehiclesStatsTotal=stats;
+          this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
+          console.log(this.vehiclesStatsTree)
+          console.log(this.filters.drivers)
         },
         error: (err) => {
           console.error('Error fetching vehicle stats:', err);
@@ -553,27 +545,81 @@ export class ReportComponent implements OnInit {
       };
     }).sort(sortByLabel);
   }
+  // Use keyof to reference only valid properties of VehiclesStatsDTO
+  keyToPropertyMap: Record<string, keyof VehiclesStatsDTO> = {
+    totalHasLastTripLong: 'hasLastTripLong',
+    totalHasLateStartSum: 'hasLateStartSum',
+    totalHasLateStop: 'hasLateStop',
+  };
 
 
-  indicatorsValues: { state: string; count: number }[] = [
-    { state: 'TEMPS DE CONDUITE TOTAL', count: 152 },
-    { state: 'TEMPS D\'ATTENTE TOTAL (en hh:mm)\n', count: 98 },
-    { state: 'DISTANCE PARCOURUE (en km)\n', count: 74 },
-    { state: 'TRAJETS EFFECTUES (en nb)\n', count: 123 },
-    { state: 'DISTANCE MOYENNE/TRAJET (en km)\n', count: 85 }
-  ];
-  indicatorsclick: { state: string; count: number }[] = [
-    { state: 'TEMPS DE CONDUITE DECLARE TOTAL\n', count: 67 },
-    { state: 'CONDUITE EN DEHORS PLAGE AUTORISEE  (en hh:mm)\n', count: 93 },
-    { state: 'DEPART TARDIF  (en nb)\n', count: 41 },
-    { state: 'PAUSE DEJEUNER>1h30  (en nb)\n', count: 57 },
-    { state: 'DERNIER TRAJET>45mn  (en nb)\n', count: 110 }
-  ];
-  ngOnInit() {
-    // S'abonner aux filtres partagés
-    this.filterService.filters$.subscribe(filters => {
-      this.selectedTags = filters;
-    });
+  filterByKey(key: string): void {
+    const property = this.keyToPropertyMap[key]; // Get the property name to filter by
+
+    if (property) {
+      // Map through the vehicleStats array
+      this.filteredVehiclesStats = this.vehicleStats.map((node: TeamHierarchyNode1) => ({
+        ...node,
+        vehicles: node.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
+          const value = vehicle[property as keyof VehiclesStatsDTO]; // Access the property dynamically
+          return typeof value === 'number' && value > 0; // Ensure it's a number and greater than 0
+        }), // Default to an empty array if vehicles is null/undefined
+      }));
+
+      // Process child nodes if they exist
+      this.filteredVehiclesStats = this.filteredVehiclesStats.map((node: TeamHierarchyNode1) => ({
+        ...node,
+        children: node.children?.map((childNode: TeamHierarchyNode1) => ({
+          ...childNode,
+          vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
+            const value = vehicle[property as keyof VehiclesStatsDTO]; // Access the property dynamically
+            return typeof value === 'number' && value > 0; // Ensure it's a number and greater than 0
+          }) ,
+        })),
+      }));
+    }
+
+    this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
   }
+
+
+  keyLabels: Record<string, string> = {
+    averageDistance: "DISTANCE MOYENNE/TRAJET (en km)",
+    averageDuration: "TEMPS DE CONDUITE DECLARE TOTAL",
+    averageRangeAvg: "Average Range",
+    totalDistanceSum: "DISTANCE PARCOURUE (en km)",
+    totalDrivers: "Total Drivers",
+    totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
+    totalHasLastTripLong: "DERNIER TRAJET>45mn  (en nb)",
+    totalHasLateStartSum: "DEPART TARDIF  (en nb)",
+    totalHasLateStop: "Late Stops",
+    totalTripCount: "TRAJETS EFFECTUES (en nb)",
+    totalVehicles: "Total Vehicles",
+    totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
+  };
+
+  ngOnInit() {
+    this.filtersSubscription = this.subscribeToFilterChanges();
+  }
+  ngOnDestroy(): void {
+    this.filtersSubscription?.unsubscribe()
+  }
+
+
+  private subscribeToFilterChanges(): Subscription {
+    return this.filterService.filters$.subscribe(filters => {
+      this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
+      console.log(this.filters.agencies,"  ",)
+
+      // Fetch the filtered vehicles based on the selected filters
+      // this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+      //   .subscribe(filteredVehicles => {
+      //
+      //     this.filteredVehiclesStats = filteredVehicles
+      //     this.vehiclesStatsTree = this.transformToTreeNodes(filteredVehicles)
+      //
+      //   });
+    })
+  };
 }
 

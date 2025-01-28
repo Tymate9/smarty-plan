@@ -4,12 +4,14 @@ import net.enovea.DorisJdbiContext
 
 class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
 
-    fun findVehicleStatsOverSpecificPeriod(startDate: String, endDate: String): List<VehicleStatsDTO> {
+    fun findVehicleStatsOverSpecificPeriod(startDate: String, endDate: String ,teamLabels: List<String>? = null , vehicleIds: List<String>? = null , driversIds:List<String>? =null ): List<VehicleStatsDTO> {
         return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
                         vehicle_id,
+                        driver_name,
+                        license_plate,
                         SUM(trip_count) AS trip_count,
                         SUM(distance_sum) AS distance_sum,
                         SUM(duration_sum) AS driving_time,
@@ -24,6 +26,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     FROM (
                         SELECT
                             vehicle_id,
+                            driver_name,
+                            license_plate,
                             COUNT(*) AS trip_count,
                             SUM(distance) AS distance_sum,
                             SUM(duration) AS duration_sum,
@@ -32,17 +36,31 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             hour(MAX(end_time)) > 18 AS has_late_stop,
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long
                     
-                        FROM trips_vehicle_view
+                        FROM trips_vehicle_team_view
                         WHERE DATE(start_time) = date(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
-                        GROUP BY vehicle_id, date(start_time)
+                          ${if (teamLabels.isNullOrEmpty()) "" else "AND team_label IN (<teamLabels>)"}
+                          ${if (vehicleIds.isNullOrEmpty()) "" else "AND license_plate IN (<vehicleIds>)"}
+                          ${if (driversIds.isNullOrEmpty()) "" else "AND driver_name IN (<driversIds>)"}
+                        GROUP BY vehicle_id, date(start_time), driver_name , license_plate
                          ) daily
-                    GROUP BY vehicle_id;
+                    GROUP BY vehicle_id , driver_name , license_plate ;
                 """.trimIndent()
             )
                 .bind("startDate", startDate)
                 .bind("endDate",endDate)
+                .apply {
+                    if (!teamLabels.isNullOrEmpty()) {
+                        bindList("teamLabels", teamLabels)
+                    }
+                    if (!vehicleIds.isNullOrEmpty()) {
+                        bindList("vehicleIds", vehicleIds)
+                    }
+                    if (!driversIds.isNullOrEmpty()) {
+                        bindList("driversIds", driversIds)
+                    }
+                }
                 .mapTo(VehicleStatsDTO::class.java)
                 .list()
         }

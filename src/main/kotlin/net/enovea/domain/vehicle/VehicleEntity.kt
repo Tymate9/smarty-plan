@@ -219,7 +219,6 @@ data class VehicleEntity(
             }
 
             val panacheQuery = VehicleEntity.find(query, params)
-
             return panacheQuery.list()
         }
     }

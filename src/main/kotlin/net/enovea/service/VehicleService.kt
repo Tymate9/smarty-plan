@@ -235,8 +235,7 @@ open class VehicleService(
         }
 
         baseQuery += """
-            ${if (baseQuery.contains("WHERE")) "AND" else "WHERE"} vd.endDate IS NULL
-            AND vup.id.startDate IS NULL
+            ${if (baseQuery.contains("WHERE")) "AND" else "WHERE"}  vup.id.startDate IS NULL
             AND dup.id.startDate IS NULL
         """.trimIndent()
 

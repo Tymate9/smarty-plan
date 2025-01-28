@@ -58,8 +58,14 @@ html, body {
 .highlighted-marker {
   width: 45px !important; // Augmenter la largeur de 15px
   height: 60px !important; // Augmenter la hauteur de 15px
-  &>svg,&>img {
+  &>svg {
     margin: -7.5px 0 0 -7.5px;
+    width: 100% !important;
+    height: 100% !important;
+    animation: grow 0.5s ease-in-out infinite alternate;
+  }
+  &>img {
+    margin: 7.5px 0 0 7.5px;
     width: 100% !important;
     height: 100% !important;
     animation: grow 0.5s ease-in-out infinite alternate;

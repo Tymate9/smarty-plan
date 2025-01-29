@@ -16,12 +16,6 @@ class VehicleStatsResource (
 ){
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-//    fun getVehicleStats(
-//        @QueryParam("startDate") startDate: String,
-//        @QueryParam("endDate") endDate: String
-//    ): List<TeamHierarchyNode>? {
-//        return vehicleService.getVehiclesStats(startDate, endDate)
-//    }
     fun getVehicleStats(
         @QueryParam("startDate") startDate: String,
         @QueryParam("endDate") endDate: String,
@@ -44,28 +38,5 @@ class VehicleStatsResource (
                 .build()
         }
     }
-
-//    fun getVehicleStats(
-//        @QueryParam("startDate") startDate: String,
-//        @QueryParam("endDate") endDate: String,
-//        @QueryParam("agencyIds") agencyIds: List<String>?,
-//        @QueryParam("vehiclesIds") vehiclesIds: List<String>?,
-//        @QueryParam("driversIds") driversIds: List<String>?,
-//    ): Response {
-//        val result = vehicleService.getVehiclesStats(startDate, endDate , agencyIds, vehiclesIds , driversIds)
-//        return if (result != null) {
-//            val (teamHierarchyNodes, statsMap) = result
-//            Response.ok(
-//                mapOf(
-//                    "teamHierarchyNodes" to teamHierarchyNodes,
-//                    "stats" to statsMap
-//                )
-//            ).build()
-//        } else {
-//            Response.status(Response.Status.NOT_FOUND)
-//                .entity("No vehicle stats found for the given date range")
-//                .build()
-//        }
-//    }
 
 }

@@ -12,8 +12,6 @@ import net.enovea.api.vehicleStats.VehiclesStatsDTO
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.vehicle.*
-import net.enovea.domain.vehicle.VehicleEntity.Companion.getFilteredVehicles
-import net.enovea.domain.vehicle.VehicleEntity.Companion.getVehicleDriverAtDate
 import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
@@ -33,21 +31,15 @@ open class VehicleService(
     private val vehicleStatsRepository: VehicleStatsRepository
 ) {
 
+
+    //function returns trips statistics displayed in the table on the page ('suivi d'activité')
     fun getVehiclesStats(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
 
-        println("heeeeeeeeeeeeeee"+ vehicleIds)
         val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds )
         val totalVehiclesStatsMap = calculateTotalVehiclesStats(vehiclesStats)
         val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
 
         val vehiclesWithHierarchy = vehiclesStats?.map { stats ->
-//            val vehicleDriverInfo = stats.vehicleId?.let { getVehicleDriverAtDate(it, LocalDate.parse(endDate)) }
-//            val licensePlate = vehicleDriverInfo?.vehicle?.licenseplate ?: "unknown"
-//
-//            val driverName =
-//                (vehicleDriverInfo?.driver?.lastName ?: "unknown") + ' ' + (vehicleDriverInfo?.driver?.firstName
-//                    ?: "unknown")
-//            println(stats.vehicleId + "   " + licensePlate + "   " + driverName)
 
             // Fetch the team using the vehicleId
             val team = stats.vehicleId?.let { latestTeams[it] }
@@ -89,40 +81,25 @@ open class VehicleService(
                 teamHierarchy = teamHierarchy
             )
         }
-        //val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy){ it.teamHierarchy }
-//        println(vehiclesWithHierarchy)
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
-//        println(teamHierarchy)
         return Pair(teamHierarchy, totalVehiclesStatsMap)
     }
 
 
-//    fun getFilteredVehicleIds(
-//        teamLabels: List<String>? = null,
-//        vehicleIds: List<String>? = null,
-//        driverNames: List<String>? = null,
-//    ): List<String> {
-//        val filteredVehicles = getFilteredVehicles(teamLabels, vehicleIds, driverNames)
-//        return filteredVehicles.mapNotNull { it.id } // Extract and return only the vehicle IDs
-//    }
-
-
-
-    //function to calculate total statistics
+    //function to calculate total statistics displayed in report page('suivi d'activité')
     fun calculateTotalVehiclesStats(vehiclesStats: List<VehicleStatsDTO>): Map<String, Any> {
-        // Calculate totals and averages
         val totalVehicles = vehiclesStats.size
         val totalDrivers = vehiclesStats.count { it.driverName != null } //TODO-bad results
-        val totalDistance = vehiclesStats.sumOf { it.distanceSum ?: 0.0 }
+        val totalDistance = (vehiclesStats.sumOf { it.distanceSum ?: 0.0 } / 1000).roundToInt()
         val totalTripCount = vehiclesStats.sumOf { it.tripCount }
-        val totalDrivingTime = vehiclesStats.sumOf { it.drivingTime ?: 0L }
-        val averageDistance = if (totalTripCount > 0) { (totalDistance / totalTripCount).roundToInt() } else 0
-        val averageDuration = if (totalTripCount > 0) { (totalDrivingTime.toDouble() / totalTripCount).roundToInt() } else 0
-        val totalWaitingTime = vehiclesStats.sumOf { it.waitingDuration ?: 0L }
+        val totalDrivingTime = String.format("%02d:%02d", (vehiclesStats.sumOf { it.drivingTime ?: 0L } / 3600), ((vehiclesStats.sumOf { it.drivingTime ?: 0L } % 3600) / 60))
+        val averageDistance = if (totalTripCount > 0) {  (totalDistance / totalTripCount)  } else 0
+        val averageDuration = if (totalTripCount > 0) String.format("%02d:%02d", (vehiclesStats.sumOf { it.drivingTime ?: 0L }.toDouble() / totalTripCount).roundToInt() / 3600, ((vehiclesStats.sumOf { it.drivingTime ?: 0L }.toDouble() / totalTripCount).roundToInt() % 3600) / 60) else "00:00"
+        val totalWaitingTime = String.format("%02d:%02d", (vehiclesStats.sumOf { it.waitingDuration ?: 0L } / 3600), (vehiclesStats.sumOf { it.waitingDuration ?: 0L } % 3600) / 60)
         val totalHasLateStart = vehiclesStats.sumOf { it.hasLateStartSum }
         val totalHasLateStop = vehiclesStats.sumOf { it.hasLateStop }
         val totalHasLastTripLong = vehiclesStats.sumOf { it.hasLastTripLong }
-        val averageRangeAvg = vehiclesStats.map { it.rangeAvg }.average().toInt()
+        val averageRangeAvg = String.format("%02d:%02d", (vehiclesStats.map { it.rangeAvg }.average().toInt() / 3600), (vehiclesStats.map { it.rangeAvg }.average().toInt() % 3600)/ 60)
 
         // Return results as a map
         return mapOf(
@@ -140,7 +117,6 @@ open class VehicleService(
             "averageRangeAvg" to averageRangeAvg
         )
     }
-
 
     fun filterVehicle(vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers

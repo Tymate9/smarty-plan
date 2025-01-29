@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {TeamHierarchyNode, TeamHierarchyNode1, VehicleService} from "../vehicle/vehicle.service";
+import {TeamHierarchyNode,TeamHierarchyNodeStats, VehicleService} from "../vehicle/vehicle.service";
 import {Calendar} from "primeng/calendar";
 import {TreeNode} from "primeng/api";
 import {dto} from "../../../habarta/dto";
@@ -18,6 +18,7 @@ import {Subscription} from "rxjs";
         [maxDate]="now"
         [showOtherMonths]="true"
         [showButtonBar]="true"
+        [showIcon]="true"
         appendTo="body">
       </p-calendar>
       <p-calendar
@@ -26,9 +27,12 @@ import {Subscription} from "rxjs";
         [maxDate]="now"
         [showOtherMonths]="true"
         [showButtonBar]="true"
-        appendTo="body">
+        appendTo="body"
+        [showIcon]="true"
+         >
       </p-calendar>
-      <button (click)="fetchVehicleStats()">OK</button>
+      <p-button [raised]="true" severity="info" icon="pi pi-search"
+                (click)="fetchVehicleStats()" styleClass="custom-button"></p-button>
     </div>
 
     <div class="status-buttons">
@@ -38,7 +42,6 @@ import {Subscription} from "rxjs";
         [ngStyle]="{ '--button-color': 'var(--gray-300)' }"
         class="custom-status-button"
         (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
-
         <span>
           <span class="status-count">{{ stat.value }}</span>
           <span class="status-text">{{ keyLabels[stat.key] }}</span>
@@ -59,38 +62,6 @@ import {Subscription} from "rxjs";
         </span>
       </button>
     </div>
-
-<!--    <div class="status-buttons">-->
-<!--      &lt;!&ndash; First Row &ndash;&gt;-->
-<!--      <div class="button-row">-->
-<!--        <button-->
-<!--          *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:0:5"-->
-<!--          pButton-->
-<!--          [ngStyle]="{ '&#45;&#45;button-color': 'var(&#45;&#45;gray-300)' }"-->
-<!--          class="custom-status-button">-->
-<!--      <span class="status-display">-->
-<!--        <span class="status-count">{{ stat.value }}</span>-->
-<!--        <span class="status-text">{{ stat.key }}</span>-->
-
-<!--      </span>-->
-<!--        </button>-->
-<!--      </div>-->
-
-<!--      &lt;!&ndash; Second Row &ndash;&gt;-->
-<!--      <div class="button-row">-->
-<!--        <button-->
-<!--          *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:5:10"-->
-<!--          pButton-->
-<!--          [ngStyle]="{ '&#45;&#45;button-color': 'var(&#45;&#45;gray-300)' }"-->
-<!--          class="custom-status-button">-->
-<!--      <span class="status-display">-->
-<!--        <span class="status-count">{{ stat.value }}</span>-->
-<!--        <span class="status-text">{{ stat.key }}</span>-->
-<!--      </span>-->
-<!--        </button>-->
-<!--      </div>-->
-<!--    </div>-->
-
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
@@ -115,7 +86,6 @@ import {Subscription} from "rxjs";
             {{ rowData.label }}
           </td>
         </tr>
-
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
             class="table-header">
@@ -170,7 +140,7 @@ import {Subscription} from "rxjs";
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      gap: 200px;
+      gap: 100px;
       margin-top: 20px;
     }
 
@@ -205,7 +175,6 @@ import {Subscription} from "rxjs";
       justify-content: center;
       align-items: center;
     }
-
     .custom-status-button {
       display: flex;
       align-items: center;
@@ -275,7 +244,6 @@ import {Subscription} from "rxjs";
       color: var(--button-color, #007bff);
 
     }
-
     /*fin de Style de bouton Indicateur*/
 
 
@@ -284,7 +252,7 @@ import {Subscription} from "rxjs";
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
       background-color: #007ad9 !important;
       color: white !important;
-      text-align: left !important;
+      text-align: center !important;
       padding: 2px 8px !important;
     }
 
@@ -363,7 +331,6 @@ import {Subscription} from "rxjs";
       border-width: 0px;
       font-weight: 700 !important;
     }
-
     /*fin de style de treeTable parent ligne*/
 
 
@@ -443,10 +410,28 @@ import {Subscription} from "rxjs";
     }
 
 
+    /*style de bouton personnalisé*/
+    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button {
+      background-color: #aa001f !important;
+      border-color: #aa001f !important;
+      color: white !important;
+      font-weight: 600;
+    }
+    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:focus,
+    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:active {
+      border-color: white !important;
+      box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
+    }
+
+    ::ng-deep .p-calendar .p-button {
+      background-color: #aa001f;
+      border-color: #aa001f !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
   `]
 })
-
-
 
 export class ReportComponent implements OnInit {
 
@@ -455,9 +440,11 @@ export class ReportComponent implements OnInit {
   dateTo: Date | null = new Date();
   protected now = new Date();
   vehiclesStatsTree: TreeNode[] = [];
-  vehicleStats: any[] = []; // TreeTable data
-  filteredVehiclesStats: TeamHierarchyNode1[] = [];
+  vehicleStats: any[] = [];
+  filteredVehiclesStats: TeamHierarchyNodeStats[] = [];
   vehiclesStatsTotal: Record<string, any>;
+  private filtersSubscription?: Subscription;
+
   constructor(private filterService: FilterService , private vehicleService: VehicleService) {}
   @Input()
   vehicleId: string = '';
@@ -470,117 +457,13 @@ export class ReportComponent implements OnInit {
     vehicles: [],
     drivers: []
   };
-  private filtersSubscription?: Subscription
 
-  get calendarDate(): string {
-    return this.date;
-  }
-
-  set calendarDate(date: Date) {
-    date.setHours(3);
-    //this.loading = true;
-    //this.router.navigate(['/trip', this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
-  }
-
-  fetchVehicleStats(): void {
-    if (this.dateFrom && this.dateTo) {
-      const startDate = this.dateFrom.toISOString().split('T')[0];
-      const endDate = this.dateTo.toISOString().split('T')[0];
-
-      console.log("hello filters "+this.filters.agencies," ", this.filters.vehicles ," ", this.filters.drivers)
-      this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
-        next: (data) => {
-          const { teamHierarchyNodes, stats } = data;
-          this.vehicleStats = teamHierarchyNodes;
-          this.vehiclesStatsTotal=stats;
-          this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
-          console.log(this.vehiclesStatsTree)
-          console.log(this.filters.drivers)
-        },
-        error: (err) => {
-          console.error('Error fetching vehicle stats:', err);
-        }
-      });
-    } else {
-      alert('Please select both From and To dates.');
-    }
-  }
-
-  transformToTreeNodes(teamNodes: TeamHierarchyNode1[]): TreeNode[] {
-    // Helper function to sort by label alphabetically
-    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-      a.data.label.localeCompare(b.data.label);
-
-    return teamNodes.map((team) => {
-      return {
-        data: {
-          label: team.label,
-          vehicle: null,
-        },
-        expanded: true,
-        children: [
-          ...(team.children || []).map((child: TeamHierarchyNode1) => ({
-            data: {
-              label: child.label,
-              vehicle: null
-            },
-            expanded: true,
-            children: [
-              ...(child.vehicles || [])
-                .filter((vehicle) => vehicle.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
-                .map((vehicle: VehiclesStatsDTO) => ({
-                data: {
-                  label: vehicle?.licensePlate || 'Unknown License Plate',
-                  //label: 'Unknown License Plate',
-                  vehicle: vehicle || null,
-                },
-                expanded: true,
-                children: []
-              }))
-
-            ]
-          }))
-            .sort(sortByLabel),
-        ]
-      };
-    }).sort(sortByLabel);
-  }
-  // Use keyof to reference only valid properties of VehiclesStatsDTO
+  //Pour référencer uniquement les propriétés valides de VehiclesStatsDTO
   keyToPropertyMap: Record<string, keyof VehiclesStatsDTO> = {
     totalHasLastTripLong: 'hasLastTripLong',
     totalHasLateStartSum: 'hasLateStartSum',
     totalHasLateStop: 'hasLateStop',
   };
-
-
-  filterByKey(key: string): void {
-    const property = this.keyToPropertyMap[key]; // Get the property name to filter by
-
-    if (property) {
-      // Map through the vehicleStats array
-      this.filteredVehiclesStats = this.vehicleStats.map((node: TeamHierarchyNode1) => ({
-        ...node,
-        vehicles: node.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
-          const value = vehicle[property as keyof VehiclesStatsDTO]; // Access the property dynamically
-          return typeof value === 'number' && value > 0; // Ensure it's a number and greater than 0
-        }), // Default to an empty array if vehicles is null/undefined
-      }));
-
-      // Process child nodes if they exist
-      this.filteredVehiclesStats = this.filteredVehiclesStats.map((node: TeamHierarchyNode1) => ({
-        ...node,
-        children: node.children?.map((childNode: TeamHierarchyNode1) => ({
-          ...childNode,
-          vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
-            const value = vehicle[property as keyof VehiclesStatsDTO]; // Access the property dynamically
-            return typeof value === 'number' && value > 0; // Ensure it's a number and greater than 0
-          }) ,
-        })),
-      }));
-    }
-
-    this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
-  }
 
 
   keyLabels: Record<string, string> = {
@@ -598,6 +481,124 @@ export class ReportComponent implements OnInit {
     totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
   };
 
+
+  get calendarDate(): string {
+    return this.date;
+  }
+
+  set calendarDate(date: Date) {
+    date.setHours(3);
+  }
+
+  //Récupérer des statistiques pour une période spécifique
+  fetchVehicleStats(): void {
+    if (this.dateFrom && this.dateTo) {
+      const startDate = this.dateFrom.toISOString().split('T')[0];
+      const endDate = this.dateTo.toISOString().split('T')[0];
+
+      this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
+        next: (data) => {
+          const { teamHierarchyNodes, stats } = data;
+
+          //cette variable contient les résultats originaux du tableau
+          this.vehicleStats = teamHierarchyNodes;
+
+          //Cette variable contient les résultats originaux des boutons statistiques
+          this.vehiclesStatsTotal=stats;
+
+          //transformer les résultats originaux de la table en TreeNode
+          this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
+
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération des statistiques du véhicule:', err);
+        }
+      });
+    } else {
+      alert('Veuillez sélectionner les dates De et À.');
+    }
+  }
+
+
+  //Fonction à transférer vers treeNode
+  transformToTreeNodes(teamNodes: TeamHierarchyNodeStats[]): TreeNode[] {
+    //Fonctions d'aide pour trier par ordre alphabétique
+    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
+      a.data.label.localeCompare(b.data.label);
+
+    const sortByDriverName = (
+      a: { data: { vehicle: dto.VehiclesStatsDTO } },
+      b: { data: { vehicle: dto.VehiclesStatsDTO } }
+    ) => {
+      const driverA = a.data.vehicle?.driverName || '';
+      const driverB = b.data.vehicle?.driverName || '';
+
+      return driverA.localeCompare(driverB);
+    };
+
+    return teamNodes.map((team) => {
+      return {
+        data: {
+          label: team.label,
+          vehicle: null,
+        },
+        expanded: true,
+        children: [
+          ...(team.children || []).map((child: TeamHierarchyNodeStats) => ({
+            data: {
+              label: child.label,
+              vehicle: null
+            },
+            expanded: true,
+            children: [
+              ...(child.vehicles || [])
+                .filter((vehicle) => vehicle.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
+                .map((vehicle: VehiclesStatsDTO) => ({
+                data: {
+                  label: vehicle?.licensePlate || 'Unknown License Plate',
+                  vehicle: vehicle || null,
+                },
+                expanded: true,
+                children: []
+              }))
+                .sort(sortByDriverName),
+            ]
+          }))
+            .sort(sortByLabel),
+        ]
+      };
+    }).sort(sortByLabel);
+  }
+
+
+  //fonction permettant de filtrer les résultats en fonction des boutons cliqués
+  filterByKey(key: string): void {
+    const property = this.keyToPropertyMap[key]; // Obtenir le nom de la propriété pour filtrer par
+
+    if (property) {
+      this.filteredVehiclesStats = this.vehicleStats.map((node: TeamHierarchyNodeStats) => ({
+        ...node,
+        vehicles: node.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
+          const value = vehicle[property as keyof VehiclesStatsDTO];
+          return typeof value === 'number' && value > 0;
+        }) || [],
+        children: node.children?.map((childNode: TeamHierarchyNodeStats) => ({
+          ...childNode,
+          vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
+            const value = vehicle[property as keyof VehiclesStatsDTO];
+            return typeof value === 'number' && value > 0;
+          }) || [],
+        }))
+          .filter((childNode) => childNode.vehicles.length > 0) || [], // Supprimer les nœuds enfants sans véhicules
+      }))
+        .filter((node) => node.children.length > 0 || node.vehicles.length > 0); // Supprimer les nœuds parents s'ils n'ont pas d'enfants ou de véhicules
+    }
+
+    this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
+  }
+
+
+
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
   }
@@ -609,16 +610,7 @@ export class ReportComponent implements OnInit {
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-      console.log(this.filters.agencies,"  ",)
 
-      // Fetch the filtered vehicles based on the selected filters
-      // this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
-      //   .subscribe(filteredVehicles => {
-      //
-      //     this.filteredVehiclesStats = filteredVehicles
-      //     this.vehiclesStatsTree = this.transformToTreeNodes(filteredVehicles)
-      //
-      //   });
     })
   };
 }

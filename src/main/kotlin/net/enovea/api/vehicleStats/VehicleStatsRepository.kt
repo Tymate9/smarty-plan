@@ -4,7 +4,14 @@ import net.enovea.DorisJdbiContext
 
 class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
 
-    fun findVehicleStatsOverSpecificPeriod(startDate: String, endDate: String ,teamLabels: List<String>? = null , vehicleIds: List<String>? = null , driversIds:List<String>? =null ): List<VehicleStatsDTO> {
+    //This function returns trips statistics data based on a specific period and applied filters.
+    fun findVehicleStatsOverSpecificPeriod(
+        startDate: String,
+        endDate: String,
+        teamLabels: List<String>? = null,
+        vehicleIds: List<String>? = null,
+        driversIds: List<String>? = null
+    ): List<VehicleStatsDTO> {
         return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
             handle.createQuery(
                 """
@@ -40,16 +47,46 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         WHERE DATE(start_time) = date(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
-                          ${if (teamLabels.isNullOrEmpty()) "" else "AND team_label IN (<teamLabels>)"}
-                          ${if (vehicleIds.isNullOrEmpty()) "" else "AND license_plate IN (<vehicleIds>)"}
-                          ${if (driversIds.isNullOrEmpty()) "" else "AND driver_name IN (<driversIds>)"}
+
+                           ${
+                    if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
+                        "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
+                                " AND (license_plate IN (<vehicleIds>) OR driver_name IN (<driversIds>))"
+                    } else {
+                        var conditions = mutableListOf<String>()
+                        if (!teamLabels.isNullOrEmpty()) {
+                            conditions.add("AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))")
+                        }
+                        if (!vehicleIds.isNullOrEmpty()) {
+                            conditions.add("AND license_plate IN (<vehicleIds>)")
+                        }
+                        if (!driversIds.isNullOrEmpty()) {
+                            val hasUnassignedSentinel = driversIds.contains("Véhicule non attribué")
+                            val realDriverNames = driversIds.filter { it != "Véhicule non attribué" }
+                            when {
+                                hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
+                                    conditions.add("AND (driver_name IN (<driversIds>) OR driver_name IS NULL)")
+                                }
+
+                                hasUnassignedSentinel -> {
+                                    conditions.add("AND driver_name IS NULL")
+                                }
+
+                                else -> {
+                                    conditions.add("AND driver_name IN (<driversIds>)")
+                                }
+                            }
+                        }
+                        conditions.joinToString(" ")
+                    }
+                }
                         GROUP BY vehicle_id, date(start_time), driver_name , license_plate
                          ) daily
                     GROUP BY vehicle_id , driver_name , license_plate ;
                 """.trimIndent()
             )
                 .bind("startDate", startDate)
-                .bind("endDate",endDate)
+                .bind("endDate", endDate)
                 .apply {
                     if (!teamLabels.isNullOrEmpty()) {
                         bindList("teamLabels", teamLabels)

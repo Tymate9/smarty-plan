@@ -4,6 +4,13 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import net.enovea.poi.PointOfInterestEntity
+import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
+import net.enovea.spatial.SpatialService
+import net.enovea.repository.TripRepository
+import net.enovea.trip.TripDTO
+import net.enovea.trip.TripService
+import net.enovea.trip.TripStatus
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.vehicleStats.VehicleStatsRepository
 import net.enovea.common.geo.SpatialService

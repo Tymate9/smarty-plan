@@ -4,6 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.context.Dependent
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
+import net.enovea.trip.TripService
+import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
+import net.enovea.spatial.SpatialService
+import net.enovea.repository.TripRepository
 import net.enovea.api.trip.TripService
 import net.enovea.api.vehicleStats.VehicleStatsRepository
 import net.enovea.common.geo.SpatialService

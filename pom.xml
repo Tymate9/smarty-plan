@@ -375,9 +375,13 @@
                 <configuration>
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
-                        <pattern>net.enovea.api.*.*Entity</pattern>
-                        <pattern>net.enovea.api.*.*DTO</pattern>
-                        <pattern>net.enovea.dto.*DTO</pattern>
+<!--                        <pattern>net.enovea.api.*.*Entity</pattern>-->
+<!--                        <pattern>net.enovea.api.*.*DTO</pattern>-->
+<!--                        <pattern>net.enovea.dto.*DTO</pattern>-->
+                        <pattern>net.enovea.*.*Entity</pattern>
+                        <pattern>net.enovea.*.*.*Entity</pattern>
+                        <pattern>net.enovea.*.*DTO</pattern>
+                        <pattern>net.enovea.*.*.*DTO</pattern>
                         <pattern>net.enovea.api.*.*Form</pattern>
                     </classPatterns>
                     <customTypeMappings>

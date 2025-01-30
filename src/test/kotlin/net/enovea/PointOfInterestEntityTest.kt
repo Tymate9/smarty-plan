@@ -3,7 +3,7 @@ package net.enovea
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkObject
-import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.poi.PointOfInterestEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

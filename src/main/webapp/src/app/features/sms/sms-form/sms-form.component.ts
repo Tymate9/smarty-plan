@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {SmsApiService, SmsForm, SmsPackForm, SmsStatistics} from "../../../services/sms-api.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {NotificationService} from "../../../commons/notification/notification.service";
 
 @Component({
   selector: 'app-sms-form',
@@ -244,7 +245,8 @@ export class SmsFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private smsApiService: SmsApiService
+    private smsApiService: SmsApiService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -332,7 +334,7 @@ export class SmsFormComponent implements OnInit {
 
     this.smsApiService.sendSms(smsForm).subscribe({
       next: (resp) => {
-        console.log('SMS envoyé avec succès:', resp);
+        this.notificationService.success("SMS", "SMS transmis.")
         // On recharge les stats
         this.loadSmsStatistics();
         // Reset du champ content
@@ -341,6 +343,7 @@ export class SmsFormComponent implements OnInit {
         this.smsSent.emit();
       },
       error: (err) => {
+        this.notificationService.error("SMS", "Une erreur est survenue lors de la transmission du SMS veuillez réessayé ulterieurement.")
         console.error('Erreur lors de l\'envoi du SMS:', err);
       }
     });

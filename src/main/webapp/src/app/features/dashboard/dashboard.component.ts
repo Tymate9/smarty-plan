@@ -567,14 +567,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Callback quand <app-sms-form> émet (smsSent)
   onSmsSent() {
-    console.log("SMS envoyé !");
-    // par exemple, recharger une liste, ou afficher un toast...
+    this.closeSmsOverlay()
   }
 
   // Callback quand <app-sms-form> émet (packPurchased)
   onPackPurchased() {
     console.log("Pack de SMS acheté !");
-    // par exemple, recharger l’UI, etc.
   }
 
   filters: { agencies: string[], vehicles: string[], drivers: string[] } = {

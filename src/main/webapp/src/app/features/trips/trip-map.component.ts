@@ -66,7 +66,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                     *ngIf="event.eventType === TripEventType.TRIP"
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
-                    style="margin: 10px 0;"
+                    style="margin: 10px 0; position: relative"
                   >
                     <div>
                       <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
@@ -92,8 +92,9 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                     </div>
 
                     <!--                {{ event.distance.toFixed(0) }} Km-->
-                    <div class="distance-rectangle small-right">
-                      {{ event.distance.toFixed(0) }} Km
+                    <div class="distance-rectangle small-right" style="position: relative">
+                      <p style="position: absolute; top:-0.6rem; left:0.2rem;">{{ event.distance.toFixed(0) }} Km</p>
+                      <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="bottom:0.4rem; right:0rem; position: absolute; color: black;"></i>
                     </div>
                   </div>
                   <div
@@ -102,6 +103,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
+                    style="position: relative"
                   > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
                     <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
                     <i class="pi pi-caret-right"></i> {{
@@ -110,6 +112,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                         minute: '2-digit'
                       })
                     }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
+                    <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="right: 1rem; bottom: 1rem; position: absolute;"></i>
                   </div>
                 </ng-template>
               </p-timeline>
@@ -272,7 +275,6 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
       }
 
       .distance-rectangle {
-        display: flex;
         padding: 5px 10px;
         border: 1px solid #BDBDBD;
         background-color: #BDBDBD;

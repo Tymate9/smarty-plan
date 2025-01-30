@@ -88,4 +88,16 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getCount(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/count`);
+  }
+
+  getStats(): Observable<dto.TeamEntityStatsDTO> {
+    return this.http.get<dto.TeamEntityStatsDTO>(`${this.apiUrl}/stats`);
+  }
+
+  getAuthorizedData(): Observable<TeamDTO[]> {
+    return this.http.get<TeamDTO[]>(`${this.apiUrl}/authorized-data`);
+  }
 }

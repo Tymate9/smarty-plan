@@ -3,12 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
-import {TripListComponent} from "./features/trips/trip-list.component";
-import {TripMapComponent} from "./features/trips/trip-map.component";
 import {TripsComponent} from "./features/trips/trips.component";
 import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.component";
 import {authGuard} from "./auth.guard";
-import {TeamFormComponent} from "./commons/workInProgress/CRUD/team-form/team-form.component";
+import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 
 const routes: Routes = [
   {
@@ -21,7 +19,7 @@ const routes: Routes = [
       { path: 'poiedit', component: PoiMapComponent},
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'workinprogress', component: TeamFormComponent}
+      { path: 'workinprogress', component: EntityAdminComponent}
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

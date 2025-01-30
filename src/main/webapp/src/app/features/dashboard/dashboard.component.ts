@@ -12,7 +12,6 @@ import {Subscription} from "rxjs";
 @Component({
   selector: 'app-dashboard',
   template: `
-
     <div class="status-buttons">
       <button
         *ngFor="let status of vehicleStatusCounts"
@@ -37,7 +36,6 @@ import {Subscription} from "rxjs";
     </div>
 
     <div style="margin-bottom: 10px;">
-
     </div>
 
 
@@ -178,7 +176,6 @@ import {Subscription} from "rxjs";
             <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
             <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
-
           <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
             <div style="display: flex; align-items: center; gap: 8px;">
               <!-- #1 Vérifie si l'adresse commence par 'pause midi' -->
@@ -631,9 +628,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
-      this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-      this.loadFilteredVehicles();
-    }
+        this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
+        this.loadFilteredVehicles();
+      }
     )
   };
   //Cette méthode permet de récupérer la liste des véhicules et de les transformer en TreeNode
@@ -649,6 +646,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
     });
   }
+
   //TODO make it more general (>3 levels)
   //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
   transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {

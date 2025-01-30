@@ -70,6 +70,8 @@ class TeamEntity(
         const val TABLE_NAME = "team"
         const val ID_SEQUENCE = "team_id_seq"
 
+
+
         @Transactional
         fun findByLabels(labels: List<String>): List<TeamEntity> {
             val query = TeamEntity.find(
@@ -94,6 +96,85 @@ class TeamEntity(
                 )
                 query.setParameter("categoryLabel", "Service")
                 return query.resultList
+            }
+
+            /**
+             * Nombre total d’agences (filtrées par categoryId).
+             * Ex: category.id = :catId
+             */
+            @Transactional
+            fun countAgencies(agencyCategoryId: Int): Long {
+                val em = getEntityManager()
+                val query = em.createQuery(
+                    """
+                SELECT COUNT(t)
+                FROM TeamEntity t
+                WHERE t.category.id = :catId
+                """.trimIndent(),
+                    Long::class.javaObjectType
+                )
+                query.setParameter("catId", agencyCategoryId)
+                return query.singleResult
+            }
+
+            /**
+             * Nombre d’agences sans équipe.
+             * On utilise un NOT EXISTS pour éviter de charger en mémoire.
+             */
+            @Transactional
+            fun countAgenciesWithoutTeam(agencyCategoryId: Int): Long {
+                val em = getEntityManager()
+                val query = em.createQuery(
+                    """
+                SELECT COUNT(a)
+                FROM TeamEntity a
+                WHERE a.category.id = :catId
+                  AND NOT EXISTS (
+                    SELECT 1
+                    FROM TeamEntity e
+                    WHERE e.parentTeam = a
+                  )
+                """.trimIndent(),
+                    Long::class.javaObjectType
+                )
+                query.setParameter("catId", agencyCategoryId)
+                return query.singleResult
+            }
+
+            /**
+             * Exemple d’une requête qui retourne directement la moyenne d’équipes par agence.
+             * On utilise ici un subselect pour faire le ratio count(TEAM) / count(AGENCE).
+             *
+             * Si countAgencies = 0 => on peut renvoyer 0.0 pour éviter la division par zéro.
+             */
+            @Transactional
+            fun averageTeamsPerAgency(agencyCategoryId: Int): Double {
+                val em = getEntityManager()
+
+                // 1) Récupérer le total des équipes
+                val totalTeamsQuery = em.createQuery(
+                    """SELECT COUNT(t) FROM TeamEntity t""",
+                    Long::class.javaObjectType
+                )
+                val totalTeams = totalTeamsQuery.singleResult
+
+                // 2) Récupérer le total des agences
+                val totalAgenciesQuery = em.createQuery(
+                    """
+                SELECT COUNT(t)
+                FROM TeamEntity t
+                WHERE t.category.id = :catId
+                """.trimIndent(),
+                    Long::class.javaObjectType
+                )
+                totalAgenciesQuery.setParameter("catId", agencyCategoryId)
+                val totalAgencies = totalAgenciesQuery.singleResult
+
+                // 3) ratio => totalTeams / totalAgencies
+                if (totalAgencies == 0L) {
+                    return 0.0
+                }
+                return totalTeams.toDouble() / totalAgencies.toDouble()
             }
    }
 }

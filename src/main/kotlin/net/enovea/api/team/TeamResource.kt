@@ -8,6 +8,7 @@ import jakarta.validation.Validator
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
+import net.enovea.api.workInProgress.TeamEntityStatsDTO
 import net.enovea.dto.TeamCategoryDTO
 import net.enovea.domain.team.TeamEntity
 import net.enovea.dto.TeamDTO
@@ -68,6 +69,7 @@ class TeamResource(private val teamService: TeamService, private val validator: 
         val updatedTeam = teamService.updateTeam(teamForm)
         return Response.ok(updatedTeam).build()
     }
+
     @DELETE
     @Path("/{id}")
     @Transactional
@@ -141,4 +143,42 @@ class TeamResource(private val teamService: TeamService, private val validator: 
             getEffectivePause(team.parentTeam, visited + team)
         }
     }
+
+    @GET
+    @Path("/count")
+    @Transactional
+    fun getTeamCount(): Response {
+        return try {
+            val count = teamService.getTeamCount()
+            Response.ok(count).build()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Erreur lors du comptage: ${e.message}")
+                .build()
+        }
+    }
+
+    @GET
+    @Path("/stats")
+    @Transactional
+    fun getTeamStats(): Response {
+        return try {
+            val stats = teamService.getTeamStats()
+            Response.ok(stats).build()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Erreur lors du calcul des stats: ${e.message}")
+                .build()
+        }
+    }
+
+    @GET
+    @Path("/authorized-data")
+    fun getAuthorizedData(): Response {
+        val list = teamService.getAuthorizedData()
+        return Response.ok(list).build()
+    }
+
 }

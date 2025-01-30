@@ -1,6 +1,9 @@
 package net.enovea.service
+import jakarta.transaction.Transactional
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
+import net.enovea.api.workInProgress.Stat
+import net.enovea.api.workInProgress.TeamEntityStatsDTO
 import net.enovea.domain.team.TeamCategoryEntity
 import net.enovea.domain.team.TeamCategoryMapper
 import net.enovea.domain.team.TeamEntity
@@ -9,6 +12,7 @@ import net.enovea.dto.TeamCategoryDTO
 
 import net.enovea.dto.TeamDTO
 import net.enovea.api.workInProgress.TeamForm
+import java.time.LocalDateTime
 
 
 class TeamService (
@@ -81,4 +85,63 @@ class TeamService (
             ?: throw NotFoundException("Team with id=$id not found")
         existingEntity.delete()
     }
+
+    @Transactional
+    fun getTeamCount(): Long {
+        return TeamEntity.count()  // Panache
+    }
+
+    /**
+     * Calcule les 4 stats demandées
+     */
+    @Transactional
+    fun getTeamStats(): TeamEntityStatsDTO {
+        val agencyCategoryId = TeamCategoryEntity.find("label", "Agence").firstResult()?.id ?: throw BadRequestException("Agency not found")
+
+        // A) Nombre total d’agences (via categoryId = 1)
+        val totalAgencies = TeamEntity.countAgencies(agencyCategoryId)
+
+        // B) Nombre total d’équipes
+        val totalTeams = TeamEntity.count()
+
+        // C) Nombre moyen d’équipes par agence => double
+        val avgTeams = TeamEntity.averageTeamsPerAgency(agencyCategoryId)
+
+        // D) Nombre d’agences sans équipe
+        val agenciesWithoutTeam = TeamEntity.countAgenciesWithoutTeam(agencyCategoryId)
+
+        val statList = listOf(
+            Stat(
+                label = "Nombre total d'agences",
+                value = totalAgencies.toDouble(),
+                description = "Compagnon: countAgencies"
+            ),
+            Stat(
+                label = "Nombre total d'équipes",
+                value = totalTeams.toDouble(),
+                description = "Compagnon: countAllTeams"
+            ),
+            Stat(
+                label = "Nombre moyen d'équipes par agence",
+                value = avgTeams,
+                description = "Compagnon: averageTeamsPerAgency"
+            ),
+            Stat(
+                label = "Nombre d'agences sans équipe",
+                value = agenciesWithoutTeam.toDouble(),
+                description = "Compagnon: countAgenciesWithoutTeam"
+            )
+        )
+
+        return TeamEntityStatsDTO(
+            date = LocalDateTime.now(),
+            stats = statList
+        )
+    }
+
+    @Transactional
+    fun getAuthorizedData(): List<TeamDTO> {
+        return TeamEntity.listAll().map { teamMapper.toDto(it) }
+    }
+
 }

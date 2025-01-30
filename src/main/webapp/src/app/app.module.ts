@@ -59,6 +59,12 @@ import {NgOptimizedImage} from "@angular/common";
 import { TeamFormComponent } from './commons/workInProgress/CRUD/team-form/team-form.component';
 import { EntityFormComponent } from './commons/workInProgress/CRUD/entity-form/entity-form.component';
 import { AutocompleteInputComponent } from './commons/workInProgress/autocomplete-input/autocomplete-input.component';
+import { EntityAdminComponent } from './commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component';
+import { EntityButtonTabContentComponent } from './commons/workInProgress/entityAdminModule/entity-button-tab-content/entity-button-tab-content.component';
+import { EntityAdminTabViewComponent } from './commons/workInProgress/entityAdminModule/entity-admin-tab-view/entity-admin-tab-view.component';
+import { EntityStatsComponent } from './commons/workInProgress/entityAdminModule/entity-stats/entity-stats.component';
+import { EntityTreeComponent } from './commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component';
+import {TreeModule} from "primeng/tree";
 
 @NgModule({
   declarations: [
@@ -90,7 +96,12 @@ import { AutocompleteInputComponent } from './commons/workInProgress/autocomplet
     EntityFormComponent,
     EntityFormComponent,
     AutocompleteInputComponent,
-    AutocompleteInputComponent
+    AutocompleteInputComponent,
+    EntityAdminComponent,
+    EntityButtonTabContentComponent,
+    EntityAdminTabViewComponent,
+    EntityStatsComponent,
+    EntityTreeComponent
   ],
   imports: [
     BrowserModule,
@@ -118,6 +129,7 @@ import { AutocompleteInputComponent } from './commons/workInProgress/autocomplet
     SelectButtonModule,
     DialogModule,
     NgOptimizedImage,
+    TreeModule,
   ],
   providers: [
     MessageService,

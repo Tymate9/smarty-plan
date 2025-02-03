@@ -27,7 +27,6 @@ import {DialogModule} from "primeng/dialog";
 import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
 import {NgOptimizedImage} from "@angular/common";
 import {DashboardNonGeolocComponent} from "./features/dashboard-non-geoloc/dashboard-non-geoloc.component";
-import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
 
 @NgModule({
   declarations: [

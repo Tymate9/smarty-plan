@@ -10,6 +10,7 @@ import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
+import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
 
 export const routes: Routes = [
   {

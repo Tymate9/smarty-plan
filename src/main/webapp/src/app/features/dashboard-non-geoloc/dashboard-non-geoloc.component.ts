@@ -200,13 +200,13 @@ import {Subscription} from "rxjs";
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
 
-            <p-button
-              *ngIf="rowData.vehicle.driver"
-              icon="pi pi-envelope"
-              styleClass="red-button"
-              (click)="openSmsOverlay(rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName, rowData.vehicle.driver.phoneNumber, '+33','Normandie Manutention' )"
-            >
-            </p-button>
+<!--            <p-button-->
+<!--              *ngIf="rowData.vehicle.driver"-->
+<!--              icon="pi pi-envelope"-->
+<!--              styleClass="red-button"-->
+<!--              (click)="openSmsOverlay(rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName, rowData.vehicle.driver.phoneNumber, '+33','Normandie Manutention' )"-->
+<!--            >-->
+<!--            </p-button>-->
           </td>
         </tr>
 

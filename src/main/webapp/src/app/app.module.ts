@@ -65,6 +65,8 @@ import { EntityAdminTabViewComponent } from './commons/workInProgress/entityAdmi
 import { EntityStatsComponent } from './commons/workInProgress/entityAdminModule/entity-stats/entity-stats.component';
 import { EntityTreeComponent } from './commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component';
 import {TreeModule} from "primeng/tree";
+import { LateralPanelComponent } from './commons/workInProgress/lateral-panel/lateral-panel.component';
+import { CellHostDirective } from './commons/workInProgress/cell-host.directive';
 
 @NgModule({
   declarations: [
@@ -101,7 +103,9 @@ import {TreeModule} from "primeng/tree";
     EntityButtonTabContentComponent,
     EntityAdminTabViewComponent,
     EntityStatsComponent,
-    EntityTreeComponent
+    EntityTreeComponent,
+    LateralPanelComponent,
+    CellHostDirective
   ],
   imports: [
     BrowserModule,

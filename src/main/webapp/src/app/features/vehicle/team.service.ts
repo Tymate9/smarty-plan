@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {map, Observable} from 'rxjs';
+import {map, Observable, of} from 'rxjs';
 import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import {IEntityService} from "../../commons/workInProgress/CRUD/ientity-service";
 import TeamCategoryDTO = dto.TeamCategoryDTO;
 import TeamForm = dto.TeamForm;
+import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
+import {TreeNode} from "primeng/api";
+import {LateralPanelComponent} from "../../commons/workInProgress/lateral-panel/lateral-panel.component";
 
 
 @Injectable({
@@ -99,5 +102,110 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
 
   getAuthorizedData(): Observable<TeamDTO[]> {
     return this.http.get<TeamDTO[]>(`${this.apiUrl}/authorized-data`);
+  }
+
+  getTreeColumns(): Observable<EntityColumn[]> {
+    // On renvoie un Observable simple, en dur.
+    // On peut utiliser of(...) pour créer un Observable immédiat.
+    return of([
+      {
+        field: 'label',
+        header: 'Nom Équipe',
+        ascending: true,
+        comparator: (valA: string, valB: string, asc: boolean) =>
+          asc ? valA.localeCompare(valB) : valB.localeCompare(valA),
+      },
+      {
+        field: 'parentLabel',
+        header: 'Équipe Parent',
+        ascending: true,
+        comparator: (valA: string, valB: string, asc: boolean) =>
+          asc ? valA.localeCompare(valB) : valB.localeCompare(valA),
+      },
+      {
+        field: 'categoryLabel',
+        header: 'Catégorie',
+        ascending: true,
+        comparator: (valA: string, valB: string, asc: boolean) =>
+          asc ? valA.localeCompare(valB) : valB.localeCompare(valA),
+      },
+      {
+        header: 'Actions',
+        isDynamic: true
+      }
+    ]);
+  }
+
+  getTreeNodes(): Observable<TreeNode[]> {
+    return this.getAuthorizedData().pipe(
+      map((teams: TeamDTO[]) => {
+        // 1) Grouper par catégorie (ex. "Agence", "Service", etc.)
+        const catMap = new Map<string, TeamDTO[]>(); // key = categoryLabel, value = liste de teams
+
+        teams.forEach(team => {
+          const catLabel = team.category.label;
+          if (!catMap.has(catLabel)) {
+            catMap.set(catLabel, []);
+          }
+          catMap.get(catLabel)!.push(team);
+        });
+
+        // 2) Pour chaque catégorie, on crée un "root" TreeNode
+        const treeNodes: TreeNode[] = [];
+
+        for (const [catLabel, catTeams] of catMap.entries()) {
+          // children = catTeams.map(...) => pour chaque team
+          const childrenLeafs: TreeNode[] = catTeams.map(team => this.buildTeamLeaf(team));
+
+          treeNodes.push({
+            label: catLabel,  // Le label du nœud parent
+            expanded: true,   // ou false si tu préfères
+            children: childrenLeafs
+          });
+        }
+
+        return treeNodes;
+      })
+    );
+  }
+
+  /**
+   * Construit un leaf TreeNode pour une équipe.
+   * Les champs "label", "parentLabel", "categoryLabel"
+   * + dynamicComponents["Actions"] qui contient 2 LateralPanel.
+   */
+  private buildTeamLeaf(team: TeamDTO): TreeNode {
+    // ex. parentLabel
+    const parentLabel = team.parentTeam ? team.parentTeam.label : '';
+
+    // 2 LateralPanelComponents, avec panelMessage = "team.label + ' Bouton X'"
+    const dynamicComps = [
+      {
+        compClass: LateralPanelComponent,
+        inputs: {
+          panelMessage: team.label + ' Bouton 1'
+        }
+      },
+      {
+        compClass: LateralPanelComponent,
+        inputs: {
+          panelMessage: team.label + ' Bouton 2'
+        }
+      }
+    ];
+
+    return {
+      // Pas de label au sens "Primeng" car c'est un leaf => on affiche col.field
+      data: {
+        label: team.label,
+        parentLabel: parentLabel,
+        categoryLabel: team.category.label,
+        dynamicComponents: {
+          Actions: dynamicComps
+        }
+      },
+      children: [],    // c’est un leaf
+      expanded: false  // ou true si tu veux
+    };
   }
 }

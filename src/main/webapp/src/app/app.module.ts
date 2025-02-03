@@ -26,5 +26,78 @@ import {TestBannerComponent} from "./commons/testBanner/testBanner.component";
 import {DialogModule} from "primeng/dialog";
 import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
 import {NgOptimizedImage} from "@angular/common";
+import {DashboardNonGeolocComponent} from "./features/dashboard-non-geoloc/dashboard-non-geoloc.component";
 import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
 
+@NgModule({
+  declarations: [
+    AppComponent,
+    HelloWorldComponent,
+    LandingPageComponent,
+    AdminComponent,
+    MapComponent,
+    NavbarComponent,
+    SearchAutocompleteComponent,
+    DashboardComponent,
+    DashboardNonGeolocComponent,
+    CartographyComponent,
+    MainLayoutComponent,
+    MapPopupComponent,
+    PoiPopupComponent,
+    VehiclePopupComponent,
+    TeamTreeComponent,
+    TripsComponent,
+    TripListComponent,
+    TripMapComponent,
+    PoiMapComponent,
+    PoiSearchComponent,
+    PoiListComponent,
+    LogoComponent,
+    TestBannerComponent,
+    SmsFormComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    AppRoutingModule,
+    KeycloakAngularModule,
+    HttpClientModule,
+    ButtonModule,
+    TableModule,
+    TreeTableModule,
+    DropdownModule,
+    TabViewModule,
+    ProgressSpinnerModule,
+    ReactiveFormsModule,
+    ToastModule,
+    MenubarModule,
+    CardModule,
+    ToggleButtonModule,
+    TimelineModule,
+    CalendarModule,
+    PanelModule,
+    InputTextModule,
+    AutoCompleteModule,
+    InputNumberModule,
+    SelectButtonModule,
+    DialogModule,
+    NgOptimizedImage,
+  ],
+  providers: [
+    MessageService,
+    ConfigService,
+    KeycloakService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      deps: [KeycloakService, ConfigService],
+      multi: true
+    }, {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CacheInterceptor,
+      multi: true
+    }],
+  bootstrap: [AppComponent]
+})
+export class AppModule {
+}

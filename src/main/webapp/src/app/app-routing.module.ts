@@ -1,10 +1,11 @@
-
 import { Routes } from '@angular/router';
 import {canActivateAuth} from "./auth.guard";
 import {MainLayoutComponent} from "./layout/main-layout/main-layout.component";
 import {DashboardComponent} from "./features/dashboard/dashboard.component";
 import {CartographyComponent} from "./features/cartography/cartography.component";
 import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.component";
+import {authGuard} from "./auth.guard";
+import {DashboardNonGeolocComponent} from "./features/dashboard-non-geoloc/dashboard-non-geoloc.component";
 import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
@@ -26,6 +27,7 @@ export const routes: Routes = [
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'workinprogress', component: EntityAdminComponent }
+      { path: 'dashboard-non-geoloc', component: DashboardNonGeolocComponent },
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

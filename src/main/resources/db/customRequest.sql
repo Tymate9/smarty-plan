@@ -30,6 +30,15 @@ WHERE vt.vehicle_id IS NULL;
 
 
 
+
+-- Véhicule assigné à plusieurs équipes simulanéement
+SELECT vt.*
+FROM vehicle_team vt
+JOIN vehicle_team vt1
+;
+
+-- Conducteur assigné à plusieurs équipes simulanéement
+
 -- TEST pour détecter les véhicules qui ont plus d'un conducteur simultanéement
 SELECT v.id, v.externalid, vd1.*, d1.first_name, d1.last_name, vd2.*, d2.first_name, d2.last_name
 FROM vehicle_driver vd1

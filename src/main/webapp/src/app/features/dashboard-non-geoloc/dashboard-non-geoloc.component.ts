@@ -10,7 +10,7 @@ import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {Subscription} from "rxjs";
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-dashboard-non-geoloc',
   template: `
 
     <div class="status-buttons">
@@ -539,7 +539,7 @@ import {Subscription} from "rxjs";
     }
   `]
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardNonGeolocComponent implements OnInit, OnDestroy {
 
   /**
    * Modale SMS
@@ -612,7 +612,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
 
       // Fetch the filtered vehicles based on the selected filters
-      this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+      this.vehicleService.getFilteredNonGeolocVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
 
           this.teamHierarchy = filteredVehicles

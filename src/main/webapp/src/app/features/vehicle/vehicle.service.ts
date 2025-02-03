@@ -250,4 +250,24 @@ export class VehicleService {
     return this.http.get<TeamHierarchyNodeBase[]>(`${this.baseUrl}/tableData-non-geoloc`,  {params});
   }
 
+  /**
+   * Visualization of non geolocalized vehicules,
+   * functionaliy reserved to administrator users.
+   * @param teamLabels : optional labels of teams to be filtered
+   * @param vehicleIds : optional labels of vehicles to be filtered
+   * @param driverNames : optional labels of drivers to be filtered
+   */
+  getFilteredNonGeolocVehiclesDashboard(
+    teamLabels: string[]=[],
+    vehicleIds: string[]=[],
+    driverNames: string[]=[]
+  ): Observable<TeamHierarchyNode[]> {
+    const params={
+      teamLabels: teamLabels.length ? teamLabels : [],
+      vehicleIds: vehicleIds.length ? vehicleIds : [],
+      driverNames: driverNames.length ? driverNames : []
+    }
+    return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableDataNonGeoloc`,  {params});
+  }
+
 }

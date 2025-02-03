@@ -292,8 +292,10 @@ data class VehicleEntity(
             WHERE 1 = 1
             AND vt.endDate IS NULL
             AND vd.endDate IS NULL
-            AND vup.id.startDate IS NULL
-            AND dup.id.startDate IS NOT NULL
+            AND (
+                vup.id.startDate IS NOT NULL
+                OR dup.id.startDate IS NOT NULL
+            )
             """
 
             var (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)

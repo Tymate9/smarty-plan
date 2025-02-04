@@ -4,6 +4,7 @@ import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import net.enovea.vehicle.VehicleService
+import net.enovea.vehicle.VehicleSummaryDTO
 
 @Path("/api/vehicles/vehicleStats")
 //@Authenticated
@@ -19,7 +20,7 @@ class VehicleStatsResource (
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
         @QueryParam("driversIds") driversIds: List<String>?
     ): Response {
-        val result = vehicleService.getVehiclesStats(startDate, endDate ,teamLabels,vehicleIds, driversIds)
+        val result = vehicleService.getVehiclesStatsOverPeriod(startDate, endDate ,teamLabels,vehicleIds, driversIds)
         return if (result != null) {
             val (teamHierarchyNodes, statsMap) = result
             Response.ok(
@@ -33,6 +34,18 @@ class VehicleStatsResource (
                 .entity("No vehicle stats found for the given date range")
                 .build()
         }
+    }
+
+    @GET
+    @Path("/daily")
+    @Produces(MediaType.APPLICATION_JSON)
+
+    fun getVehicleDailyStats(
+        @QueryParam("startDate") startDate: String,
+        @QueryParam("endDate") endDate: String,
+        @QueryParam("vehicleId") vehicleId: String,
+    ): List<VehicleStatsDTO> {
+        return vehicleService.getVehicleStatsDaily(startDate,endDate,vehicleId)
     }
 
 }

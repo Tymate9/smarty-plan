@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import VehicleStatsDTO = dto.VehicleStatsDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -106,6 +107,19 @@ export class VehicleService {
       driversIds: driversIds.length ? driversIds :[]
     };
     return this.http.get<{ teamHierarchyNodes: TeamHierarchyNodeStats[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats`, { params });
+  }
+
+  getVehicleDailyStats(
+    startDate: string,
+    endDate: string,
+   vehicleId: string,
+  ): Observable<VehicleStatsDTO[]> {
+    const params = {
+      startDate: startDate,
+      endDate: endDate,
+      vehicleId:vehicleId
+    };
+    return this.http.get<VehicleStatsDTO[]>(`${this.baseUrl}/vehicleStats/daily`, { params });
   }
 
 }

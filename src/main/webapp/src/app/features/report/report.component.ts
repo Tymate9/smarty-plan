@@ -6,6 +6,8 @@ import {TreeNode} from "primeng/api";
 import {dto} from "../../../habarta/dto";
 import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 import {Subscription} from "rxjs";
+import VehicleStatsDTO = dto.VehicleStatsDTO;
+import { DialogModule } from 'primeng/dialog';
 
 
 @Component({
@@ -29,7 +31,7 @@ import {Subscription} from "rxjs";
         [showButtonBar]="true"
         appendTo="body"
         [showIcon]="true"
-         >
+      >
       </p-calendar>
       <p-button [raised]="true" severity="info" icon="pi pi-search"
                 (click)="fetchVehicleStats()" styleClass="custom-button"></p-button>
@@ -39,7 +41,7 @@ import {Subscription} from "rxjs";
       <button
         *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:0:5"
         pButton
-        [ngStyle]="{ '--button-color': 'var(--gray-300)' }"
+        [ngStyle]="{ '--button-color': 'var(--red-100)' }"
         class="custom-status-button"
         (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
         <span>
@@ -52,7 +54,7 @@ import {Subscription} from "rxjs";
       <button
         *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:5:10"
         pButton
-        [ngStyle]="{ '--button-color': 'var(--gray-400)' }"
+        [ngStyle]="{ '--button-color': 'var(--gray-300)' }"
         class="custom-status-button"
         (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
         <!--        (click)="filterByStatus(status.state)">-->
@@ -81,7 +83,7 @@ import {Subscription} from "rxjs";
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
           'has-vehicle': rowData.vehicle
         }">
-          <td *ngIf="!rowData.vehicle" colspan="12">
+          <td *ngIf="!rowData.vehicle" colspan="13">
             <p-treeTableToggler [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
@@ -89,8 +91,8 @@ import {Subscription} from "rxjs";
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
             class="table-header">
-          <td>Conducteur</td>
           <td>Véhicule</td>
+          <td>Conducteur</td>
           <td>Nb de trajets effectués (nb)</td>
           <td>Distance parcourue</td>
           <td>Temps de conduite (en HH:MM)</td>
@@ -100,7 +102,8 @@ import {Subscription} from "rxjs";
           <td>Dernier arrêt tardif (>18H)</td>
           <td>Dernier trajet long (>45mn)</td>
           <td>Amplitude</td>
-          <td>Temps  d'attente</td>
+          <td>Temps d'attente</td>
+          <td>Détails</td>
         </tr>
 
         <tr [ttRow]="rowNode"
@@ -110,27 +113,83 @@ import {Subscription} from "rxjs";
           'has-vehicle': rowData.vehicle
         }"
             *ngIf="rowData.vehicle">
-          <td *ngIf="rowData.vehicle.driverName; else noDriver">
-            {{ rowData.vehicle.driverName || 'Véhicule non attribué' }}
+          <td>{{ rowData.vehicle.vehicleStats.licensePlate || 'Véhicule' }}</td>
+          <td *ngIf="rowData.vehicle.vehicleStats.driverName; else noDriver">
+            {{ rowData.vehicle.vehicleStats.driverName || 'Véhicule non attribué' }}
           </td>
-          <td>{{ rowData.vehicle.licensePlate || 'Véhicule' }}</td>
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
           </ng-template>
-          <td>{{ rowData.vehicle.tripCount }}</td>
-          <td>{{ rowData.vehicle.distanceSum }}</td>
-          <td>{{ rowData.vehicle.drivingTime }}</td>
-          <td>{{ rowData.vehicle.distancePerTripAvg }}</td>
-          <td>{{ rowData.vehicle.durationPerTripAvg }}</td>
-          <td>{{ rowData.vehicle.hasLateStartSum }}</td>
-          <td>{{ rowData.vehicle.hasLateStop }}</td>
-          <td>{{ rowData.vehicle.hasLastTripLong }}</td>
-          <td>{{ rowData.vehicle.rangeAvg }}</td>
-          <td>{{ rowData.vehicle.waitingDuration }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.tripCount }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.distanceSum }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.drivingTime }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.distancePerTripAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.durationPerTripAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.hasLateStartSum }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.hasLateStop }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.hasLastTripLong }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.rangeAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.waitingDuration }}</td>
+          <td>
+            <p-button [raised]="true" severity="info" icon="pi pi-info-circle"
+                      (click)="fetchVehicleDailyStats(rowData.vehicle?.vehicleStats.vehicleId , rowData.vehicle?.vehicleStats.licensePlate)"
+                      styleClass="custom-button"></p-button>
+          </td>
         </tr>
 
       </ng-template>
     </p-treeTable>
+
+    <p-dialog [(visible)]="displayDailyStats"
+              [modal]="false"
+              [header]="'Détails journaliers - ' + selectedDailyStat"
+              [style]="{width: '60vw'}"
+              [draggable]="false"
+              (onHide)="closeDialog()">
+      <div class="table-container">
+        <table>
+          <thead>
+          <tr>
+            <th>Date</th>
+            <th>Conducteur</th>
+            <th>Nb de trajets effectués (nb)</th>
+            <th>Distance parcourue</th>
+            <th>Temps de conduite (en HH:MM)</th>
+            <th>Distance moyenne / Trajet (en km)</th>
+            <th>Durée moyenne / Trajet (en HH:MM)</th>
+            <th>Départ tardif (>7H30)</th>
+            <th>Dernier arrêt tardif (>18H)</th>
+            <th>Dernier trajet long (>45mn)</th>
+            <th>Amplitude</th>
+            <th>Temps d'attente</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let dailyStat of vehicleDailyStats">
+            <td>{{ dailyStat.tripDate }}</td>
+            <td>{{ dailyStat.driverName }}</td>
+            <td>{{ dailyStat.tripCount }}</td>
+            <td>{{ dailyStat.distanceSum }}</td>
+            <td>{{ dailyStat.drivingTime }}</td>
+            <td>{{ dailyStat.distancePerTripAvg }}</td>
+            <td>{{ dailyStat.durationPerTripAvg }}</td>
+            <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#e5e7eb' : 'transparent'}">
+              {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}
+            </td>
+            <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#e5e7eb' : 'transparent'}">
+              {{ dailyStat.hasLateStop ? 'Oui' : 'Non'  }}
+            </td>
+            <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#e5e7eb' : 'transparent'}">
+              {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non'  }}
+            </td>
+            <td>{{ dailyStat.rangeAvg }}</td>
+            <td>{{ dailyStat.waitingDuration }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </p-dialog>
+
 
 
   `,
@@ -226,7 +285,7 @@ import {Subscription} from "rxjs";
 
     .custom-status-button span {
       position: relative;
-      z-index: 3;
+      //z-index: 3;
       display: flex;
       flex: 1;
       justify-content: space-between;
@@ -430,6 +489,71 @@ import {Subscription} from "rxjs";
       font-weight: 600;
     }
 
+
+
+    /* Make dialog content flexible */
+    ::ng-deep .p-dialog {
+      max-width: 95%;
+      width: auto !important;
+      height: auto !important;
+      max-height: 90vh;
+
+    }
+    ::ng-deep .p-dialog .p-dialog-header{
+      border-top-left-radius:20px !important;
+      border-top-right-radius:20px !important;
+    }
+
+    /* Ensure modal adjusts based on content */
+    ::ng-deep .p-dialog-content {
+      overflow: hidden; /* Prevents unwanted scrolling */
+      display: flex;
+      flex-direction: column;
+      border-bottom-left-radius:20px !important;
+      border-bottom-right-radius:20px !important;
+    }
+
+    /* Table container with scrolling */
+    .table-container {
+      max-height: 60vh; /* Ensures the table scrolls within the dialog */
+      overflow-y: auto;
+    }
+
+    /* Make table fully responsive */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto; /* Adjusts column width dynamically */
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    /* Sticky table header */
+    thead th {
+      background-color: #aa001f;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    /* Table row styling */
+    td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+
   `]
 })
 
@@ -441,9 +565,12 @@ export class ReportComponent implements OnInit {
   protected now = new Date();
   vehiclesStatsTree: TreeNode[] = [];
   vehicleStats: any[] = [];
+  vehicleDailyStats:  VehicleStatsDTO[] ;
   filteredVehiclesStats: TeamHierarchyNodeStats[] = [];
   vehiclesStatsTotal: Record<string, any>;
   private filtersSubscription?: Subscription;
+  displayDailyStats: boolean = false;
+  selectedDailyStat: string = '';
 
   constructor(private filterService: FilterService , private vehicleService: VehicleService) {}
   @Input()
@@ -459,10 +586,16 @@ export class ReportComponent implements OnInit {
   };
 
   //Pour référencer uniquement les propriétés valides de VehiclesStatsDTO
-  keyToPropertyMap: Record<string, keyof VehiclesStatsDTO> = {
-    totalHasLastTripLong: 'hasLastTripLong',
-    totalHasLateStartSum: 'hasLateStartSum',
-    totalHasLateStop: 'hasLateStop',
+  // keyToPropertyMap: Record<string, keyof VehiclesStatsDTO> = {
+  //   vehitotalHasLastTripLong: 'hasLastTripLong',
+  //   totalHasLateStartSum: 'hasLateStartSum',
+  //   totalHasLateStop: 'hasLateStop',
+  // };
+
+  keyToPropertyMap: Record<string, keyof VehicleStatsDTO> = {
+    vehitotalHasLastTripLong: "hasLastTripLong",
+    totalHasLateStartSum: "hasLateStartSum",
+    totalHasLateStop: "hasLateStop",
   };
 
 
@@ -493,9 +626,18 @@ export class ReportComponent implements OnInit {
   //Récupérer des statistiques pour une période spécifique
   fetchVehicleStats(): void {
     if (this.dateFrom && this.dateTo) {
-      const startDate = this.dateFrom.toISOString().split('T')[0];
-      const endDate = this.dateTo.toISOString().split('T')[0];
+      // const startDate = this.dateFrom.toISOString().split('T')[0];
+      // const endDate = this.dateTo.toISOString().split('T')[0];
 
+      const startDate = this.dateFrom.getFullYear() + '-' +
+        String(this.dateFrom.getMonth() + 1).padStart(2, '0') + '-' +
+        String(this.dateFrom.getDate()).padStart(2, '0');
+
+      const endDate = this.dateTo.getFullYear() + '-' +
+        String(this.dateTo.getMonth() + 1).padStart(2, '0') + '-' +
+        String(this.dateTo.getDate()).padStart(2, '0');
+
+      console.log(startDate+"c   "+ endDate);
       this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
         next: (data) => {
           const { teamHierarchyNodes, stats } = data;
@@ -508,6 +650,7 @@ export class ReportComponent implements OnInit {
 
           //transformer les résultats originaux de la table en TreeNode
           this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
+          console.log(this.vehiclesStatsTree)
 
         },
         error: (err) => {
@@ -520,6 +663,53 @@ export class ReportComponent implements OnInit {
   }
 
 
+
+
+
+  //Récupérer des statistiques pour une période spécifique
+  fetchVehicleDailyStats(vehicleId:string, licenseplat:string): void {
+    if (this.dateFrom && this.dateTo) {
+        console.log("Vehicle ID Received:", vehicleId);
+
+        if (!vehicleId) {
+          console.error("Error: vehicleId is undefined or empty!");
+          return;
+        }
+
+      const startDate = this.dateFrom.getFullYear() + '-' +
+        String(this.dateFrom.getMonth() + 1).padStart(2, '0') + '-' +
+        String(this.dateFrom.getDate()).padStart(2, '0');
+
+      const endDate = this.dateTo.getFullYear() + '-' +
+        String(this.dateTo.getMonth() + 1).padStart(2, '0') + '-' +
+        String(this.dateTo.getDate()).padStart(2, '0');
+
+      console.log(startDate+ endDate);
+      console.log(vehicleId);
+
+      this.vehicleService.getVehicleDailyStats(startDate, endDate ,vehicleId ).subscribe({
+        next: (data) => {
+          this.vehicleDailyStats = data;
+          this.displayDailyStats = true;
+          this.selectedDailyStat=licenseplat;
+
+
+          //cette variable contient les résultats originaux du tableau
+
+          console.log("here", this.vehicleDailyStats)
+
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération des statistiques du véhicule:', err);
+        }
+      });
+    } else {
+      alert('Veuillez sélectionner les dates De et À.');
+    }
+  }
+
+
+
   //Fonction à transférer vers treeNode
   transformToTreeNodes(teamNodes: TeamHierarchyNodeStats[]): TreeNode[] {
     //Fonctions d'aide pour trier par ordre alphabétique
@@ -530,8 +720,8 @@ export class ReportComponent implements OnInit {
       a: { data: { vehicle: dto.VehiclesStatsDTO } },
       b: { data: { vehicle: dto.VehiclesStatsDTO } }
     ) => {
-      const driverA = a.data.vehicle?.driverName || '';
-      const driverB = b.data.vehicle?.driverName || '';
+      const driverA = a.data.vehicle?.vehicleStats.driverName || '';
+      const driverB = b.data.vehicle?.vehicleStats.driverName || '';
 
       return driverA.localeCompare(driverB);
     };
@@ -552,10 +742,10 @@ export class ReportComponent implements OnInit {
             expanded: true,
             children: [
               ...(child.vehicles || [])
-                .filter((vehicle) => vehicle.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
+                .filter((vehicle) => vehicle.vehicleStats?.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
                 .map((vehicle: VehiclesStatsDTO) => ({
                 data: {
-                  label: vehicle?.licensePlate || 'Unknown License Plate',
+                  label: vehicle?.vehicleStats?.licensePlate || 'Unknown License Plate',
                   vehicle: vehicle || null,
                 },
                 expanded: true,
@@ -579,13 +769,13 @@ export class ReportComponent implements OnInit {
       this.filteredVehiclesStats = this.vehicleStats.map((node: TeamHierarchyNodeStats) => ({
         ...node,
         vehicles: node.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
-          const value = vehicle[property as keyof VehiclesStatsDTO];
+          const value = vehicle.vehicleStats?.[property as keyof VehicleStatsDTO];
           return typeof value === 'number' && value > 0;
         }) || [],
         children: node.children?.map((childNode: TeamHierarchyNodeStats) => ({
           ...childNode,
           vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsDTO) => {
-            const value = vehicle[property as keyof VehiclesStatsDTO];
+            const value = vehicle.vehicleStats?.[property as keyof VehicleStatsDTO];
             return typeof value === 'number' && value > 0;
           }) || [],
         }))
@@ -604,6 +794,9 @@ export class ReportComponent implements OnInit {
   }
   ngOnDestroy(): void {
     this.filtersSubscription?.unsubscribe()
+  }
+  closeDialog() {
+    this.displayDailyStats = false;
   }
 
 

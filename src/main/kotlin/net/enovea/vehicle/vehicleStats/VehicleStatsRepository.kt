@@ -17,18 +17,25 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 """
                     SELECT
                         vehicle_id,
-                        driver_name,
+                        ARRAY_JOIN(ARRAY_AGG(DISTINCT driver_name), ', ') AS driver_name,
                         license_plate,
+                        :startDate AS trip_date,
                         SUM(trip_count) AS trip_count,
-                        SUM(distance_sum) AS distance_sum,
-                        SUM(duration_sum) AS driving_time,
-                        SUM(distance_sum) / SUM(trip_count) AS distance_per_trip_avg,
-                        SUM(duration_sum) /SUM(trip_count) AS duration_per_trip_avg,
+                        ROUND(SUM(distance_sum)/1000) AS distance_sum,
+                        CONCAT(LPAD(CAST(FLOOR(SUM(duration_sum) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration_sum) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
+                        ROUND((SUM(distance_sum) / SUM(trip_count))/1000) AS distance_per_trip_avg,
+                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
                         SUM(has_late_start) AS has_late_start_sum,
                         SUM(has_late_stop) AS has_late_stop_sum,
                         SUM(has_last_trip_long) AS has_last_trip_long_sum,
-                        AVG(`range`) AS range_avg,
-                        SUM(`range`-duration_sum) AS waiting_duration
+                        CONCAT(
+                            LPAD(CAST(FLOOR(AVG(`range`) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((AVG(`range`) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS range_avg,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS waiting_duration
                     
                     FROM (
                         SELECT
@@ -44,7 +51,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long
                     
                         FROM trips_vehicle_team_view
-                        WHERE DATE(start_time) = date(end_time)
+                        WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
 
@@ -82,7 +89,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 }
                         GROUP BY vehicle_id, date(start_time), driver_name , license_plate
                          ) daily
-                    GROUP BY vehicle_id , driver_name , license_plate ;
+                    GROUP BY vehicle_id , license_plate ;
                 """.trimIndent()
             )
                 .bind("startDate", startDate)
@@ -102,4 +109,53 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 .list()
         }
     }
+
+    fun findVehicleDailyStats(
+        startDate: String, endDate: String, vehicleId: String
+    ): List<VehicleStatsDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
+            handle.createQuery(
+                """
+                    SELECT  
+                            DATE(start_time) AS trip_date,
+                            vehicle_id,
+                            driver_name,
+                            license_plate,
+                            COUNT(*) AS trip_count,
+                            ROUND(SUM(distance)/1000) AS distance_sum,
+                            CONCAT(LPAD(CAST(FLOOR(SUM(duration) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
+                            ROUND((SUM(distance) / COUNT(*))/1000) AS distance_per_trip_avg,
+                            CONCAT( LPAD(CAST(FLOOR(SUM(duration) / COUNT(*) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration) / COUNT(*)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
+                            CONCAT(
+                                LPAD(CAST(FLOOR(time_to_sec(timediff(MAX(end_time), MIN(start_time))) / 3600) AS STRING), 2, '0'), ':',
+                                LPAD(CAST(FLOOR((time_to_sec(timediff(MAX(end_time), MIN(start_time))) % 3600) / 60) AS STRING), 2, '0')
+                            ) AS range_avg,
+                            hour(minutes_add(MIN(start_time), 30)) >= 8 AS has_late_start_sum,
+                            hour(MAX(end_time)) > 18 AS has_late_stop_sum,
+                            TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long_sum,
+                            CONCAT(
+                                LPAD(CAST(FLOOR((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) / 3600) AS STRING), 2, '0'), ':',
+                                LPAD(CAST(FLOOR(((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) % 3600) / 60) AS STRING), 2, '0')
+                            ) AS waiting_duration
+                    
+                        FROM trips_vehicle_team_view
+                        WHERE DATE(start_time) = DATE(end_time)
+                          AND DATE(start_time) BETWEEN :startDate AND :endDate
+                          AND vehicle_id IS NOT NULL
+                          AND vehicle_id = :vehicleId
+                        GROUP BY vehicle_id, date(start_time), driver_name , license_plate
+                        ORDER BY trip_date
+                        ;
+                """.trimIndent()
+            )
+                .bind("startDate", startDate)
+                .bind("endDate", endDate)
+                .bind("vehicleId", vehicleId)
+                .mapTo(VehicleStatsDTO::class.java)
+                .list()
+        }
+    }
+
+
+
 }

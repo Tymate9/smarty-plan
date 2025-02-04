@@ -327,38 +327,7 @@ open class VehicleService(
         // Find last position info (poi or address)
         stopWatch?.stopAndStart("Get last position infos")
         allVehicleDataDTO.forEach { vehicleDataDTO ->
-            vehicleDataDTO.lastPositionAddress = "-"
-//            try {
-//                // Try to fetch POI using spatial service
-//                val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-//                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity :: class)
-//                }
-//                if (poi != null) {
-//                    vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
-//                    vehicleDataDTO.lastPositionAddressInfo = poi.category
-//                } else {
-//                    // Cannot find POI so Adress Type is "route"
-//                    vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
-//                        label = "route",
-//                        color = "#000"
-//                    )
-//                    // Get adress from device DataState or geocoding
-//                    if (vehicleDataDTO.device.deviceDataState?.address == null) {
-//                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-//                            geoCodingService.reverseGeocode(it)
-//                        }
-//                        vehicleDataDTO.lastPositionAddress = address
-//                    } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
-//                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnue"
-//                    } else {
-//                        vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
-//
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                // Handle any errors during POI lookup or reverse geocoding
-//                vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
-//            }
+            vehicleDataDTO.lastPositionAddress = null
         }
         // Now we build the hierarchy of vehicles based on their teams
         stopWatch?.stopAndStart("Build team hierarchy")

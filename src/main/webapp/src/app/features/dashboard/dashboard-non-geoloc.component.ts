@@ -628,7 +628,7 @@ export class DashboardNonGeolocComponent implements OnInit, OnDestroy {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
 
       // Fetch the filtered vehicles based on the selected filters
-      this.vehicleService.getFilteredNonGeolocVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+      this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
 
           this.teamHierarchy = filteredVehicles

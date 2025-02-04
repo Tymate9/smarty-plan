@@ -42,8 +42,9 @@ export class VehicleService {
     const params = {
       agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
     };
-    const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
-      return this.http.get<VehicleSummaryDTO[]>(`${this.baseUrl}/list`+(nonGeolocalized?'-non-geoloc':''), { params });
+      const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
+      return this.http.get<VehicleSummaryDTO[]>(`${this.baseUrl}/list`+(nonGeolocalized?'-non-geoloc':''),
+        { params });
   }
 
   // Méthode pour récupérer les véhicules les plus proches avec leur distance

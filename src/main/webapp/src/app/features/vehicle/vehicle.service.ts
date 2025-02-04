@@ -247,6 +247,9 @@ export class VehicleService {
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
     }
+    const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
+    return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableData`+(nonGeolocalized?'-non-geoloc':''),
+      {params});
     return this.http.get<TeamHierarchyNodeBase[]>(`${this.baseUrl}/tableData-non-geoloc`,  {params});
   }
 

@@ -116,7 +116,7 @@ class VehicleResource(
     }
 
     @GET
-    @Path("/tableDataNonGeoloc")
+    @Path("/tableData-non-geoloc")
     fun getFilteredNonGeolocVehiclesTableData(
         @QueryParam("teamLabels") teamLabels: List<String>?,
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
@@ -130,7 +130,7 @@ class VehicleResource(
 
         val table = vehicleService.getNonGeolocVehiclesTableData(filteredVehicles, stopWatch)
 
-        logger.info("Load vehicles table data:\n${stopWatch.prettyPrint(DurationUnit.MILLISECONDS)}")
+        logger.info("Load non geolocalized vehicles table data:\n${stopWatch.prettyPrint(DurationUnit.MILLISECONDS)}")
 
         return table
     }

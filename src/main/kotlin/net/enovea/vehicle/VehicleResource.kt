@@ -37,6 +37,16 @@ class VehicleResource(
     }
 
     @GET
+    @Path("/list-non-geoloc")
+    fun getNonGeolocVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<VehicleSummaryDTO> {
+        val vehiclesList = vehicleService.getVehiclesList(agencyIds)
+        val transformedList = vehiclesList.map { vehicle ->
+            vehicle.copy(device = vehicle.device.copy(coordinate = null))
+        }
+        return transformedList
+    }
+
+    @GET
     fun getFilteredVehicles(
         @QueryParam("format") format: VehicleFormat?,
         @QueryParam("teamLabels") teamLabels: List<String>?,

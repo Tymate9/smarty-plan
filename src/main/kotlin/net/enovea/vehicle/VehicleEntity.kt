@@ -134,11 +134,14 @@ data class VehicleEntity(
             ).list()
         }
 
-        data class VehicleAndCurrentDriver(val vehicle: VehicleEntity, val driver: DriverEntity?)
+        data class VehicleAndCurrentDriver(val vehicle: VehicleEntity, val geolocalized: Boolean?, val driver: DriverEntity?)
+
 
         @Transactional
-        fun getAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver?= getEntityManager().createQuery(
-            """
+        fun getAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver?{
+            try {
+                val vehicle = getEntityManager().createQuery(
+                    """
                 SELECT v, d
                 FROM VehicleEntity v 
                     LEFT JOIN FETCH VehicleDriverEntity vd  
@@ -155,9 +158,16 @@ data class VehicleEntity(
                         AND dup.id.startDate <= :date 
                         AND (dup.endDate IS NULL OR dup.endDate >= :date)      
                 WHERE v.id = :vehicleId 
-                    AND vup.id.startDate IS NULL
-                    AND dup.id.startDate IS NULL
-                """.trimIndent(), VehicleAndCurrentDriver::class.java).setParameter("vehicleId", vehicleId).setParameter("date", date.atStartOfDay()).singleResult
+                """.trimIndent(), VehicleAndCurrentDriver::class.java)
+                    .setParameter("vehicleId", vehicleId).
+                    setParameter("date", date.atStartOfDay()).
+                    singleResult
+                return vehicle
+            }catch (ex: NoResultException){
+                return null
+            }
+        }
+
 
         //Method to get the driver and the vehicle entity
         @Transactional

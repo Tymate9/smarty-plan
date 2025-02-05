@@ -20,7 +20,6 @@ class TripService(
 
 ) {
     private val geometryFactory = GeometryFactory()
-    ) {
 
     fun computeTripEventsDTO(vehicleId: String, date: String): TripEventsDTO? {
         val parsedDate = LocalDate.parse(date, BASIC_ISO_DATE)
@@ -29,11 +28,27 @@ class TripService(
 
         println("Heure de début extraite depuis la base de donnée : $lunchBreakStart")
         println("Heure de fin extraite depuis la base de donnée : $lunchBreakEnd")
+        var result = TripEventsDTO(
+            vehicleId = vehicleId,
+            licensePlate = "Véhicule non trouvé",
+            driverName = "Véhicule non attribué",
+            vehicleCategory = "VL",
+            range = 0,
+            tripAmount = 0,
+            stopDuration = 0,
+            drivingDuration = 0,
+            drivingDistance = 0.0,
+            idleDuration = 0,
+            poiAmount = 0,
+            tripEvents = emptyList(),
+            compactedTripEvents = emptyList()
+        )
+
 
         // check if the driver at that date on this vehicle can be localized
         // if yes, get his informations, if no, cancel
         val vehicle = VehicleEntity.getAtDateIfTracked(vehicleId, parsedDate)
-            ?: return null
+            ?: return result
 
         val trips = tripRepository.findByVehicleIdAndDate(
             vehicleId,
@@ -144,7 +159,7 @@ class TripService(
             )
         )
 
-        val result = TripEventsDTO(
+        result = TripEventsDTO(
             vehicleId = vehicleId,
             licensePlate = vehicle.vehicle.licenseplate,
             driverName = vehicle.driver?.let { "${it.firstName} ${it.lastName}" } ?: "Véhicule non attribué",

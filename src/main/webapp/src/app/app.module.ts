@@ -67,6 +67,8 @@ import { EntityTreeComponent } from './commons/workInProgress/entityAdminModule/
 import {TreeModule} from "primeng/tree";
 import { LateralPanelComponent } from './commons/workInProgress/lateral-panel/lateral-panel.component';
 import { CellHostDirective } from './commons/workInProgress/cell-host.directive';
+import { DrawerComponent } from './commons/workInProgress/drawer/drawer.component';
+import {SidebarModule} from "primeng/sidebar";
 
 @NgModule({
   declarations: [
@@ -105,7 +107,8 @@ import { CellHostDirective } from './commons/workInProgress/cell-host.directive'
     EntityStatsComponent,
     EntityTreeComponent,
     LateralPanelComponent,
-    CellHostDirective
+    CellHostDirective,
+    DrawerComponent
   ],
   imports: [
     BrowserModule,
@@ -134,6 +137,7 @@ import { CellHostDirective } from './commons/workInProgress/cell-host.directive'
     DialogModule,
     NgOptimizedImage,
     TreeModule,
+    SidebarModule,
   ],
   providers: [
     MessageService,

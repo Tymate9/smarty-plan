@@ -40,6 +40,9 @@ import {dto} from "../../../../../habarta/dto";
         </div>
       </div>
     </div>
+    <app-drawer buttonText="Mettre à jours l'entité" iconClass="pi pi-pencil" closeConfirmationMessage="Voulez-vous vraiment fermer ce panneau ?">
+      <p>Contenue définis par le parent a personnaliser à terme ce seras un formulaire avec des Tab etc...</p>
+    </app-drawer>
   `,
   styles: [`
     .stats-container {

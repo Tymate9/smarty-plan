@@ -12,12 +12,14 @@ import { Component, Input } from '@angular/core';
 
     <!-- Sidebar PrimeNG configurée en mode modal et dismissible -->
     <p-sidebar [(visible)]="visible" [autoZIndex]="true" [baseZIndex]="2000" position="right" [showCloseIcon]="false" [modal]="true" (onHide)="onSidebarHide()" >
+      <ng-template pTemplate="headless">
         <!-- Bouton de fermeture en haut à gauche -->
         <div class="drawer-header">
           <button pButton type="button" icon="pi pi-times" (click)="closeSidebar()" class="close-button"></button>
         </div>
         <!-- Contenu dynamique projeté depuis le parent -->
         <ng-content></ng-content>
+      </ng-template>
     </p-sidebar>
   `,
   styles: [`

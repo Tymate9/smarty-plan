@@ -40,6 +40,16 @@ class TripResource(
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/vehicle-non-geoloc/{vehicleId}/{date}")
+    fun getTripsByNonGeolocalizedVehicleIdAndDate(
+        @PathParam("vehicleId") vehicleId: String,
+        @PathParam("date") date: String // format %Y%m%d
+    ): TripEventsDTO? {
+        return tripService.computeTripEventsDTO(vehicleId, date)
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/vehicle/{vehicleId}")
     fun getTripsByVehicleId(@PathParam("vehicleId") vehicleId: String): List<TripDTO> {
         return tripRepository.findByVehicleId(vehicleId)

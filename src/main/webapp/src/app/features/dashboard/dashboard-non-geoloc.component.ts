@@ -200,7 +200,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 <!--          </td>-->
           <td class="custom-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
           <td class="custom-cell">
-            <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
+            <p-button (onClick)="this.router.navigate(['trip-non-geoloc', rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
 
 <!--            <p-button-->

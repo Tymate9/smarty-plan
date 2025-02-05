@@ -21,7 +21,9 @@ export class TripsService {
   }
 
   getTripByDateAndVehicle(vehicleId: string, date: string): Observable<TripEventsDTO | null> {
-    return this.http.get<TripEventsDTO | null>(`${this.apiUrl}/vehicle/${vehicleId}/${date}`).pipe(map(this.decodeTripEventsDTO));
+    const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
+    return this.http.get<TripEventsDTO | null>(`${this.apiUrl}/vehicle`+(nonGeolocalized?'-non-geoloc':'')+
+      `/${vehicleId}/${date}`).pipe(map(this.decodeTripEventsDTO));
   }
 
   private decodeTripEventsDTO(tripEventsDto: TripEventsDTO | null): TripEventsDTO | null {

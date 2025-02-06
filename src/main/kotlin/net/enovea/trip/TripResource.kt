@@ -45,7 +45,30 @@ class TripResource(
         @PathParam("vehicleId") vehicleId: String,
         @PathParam("date") date: String // format %Y%m%d
     ): TripEventsDTO? {
-        return tripService.computeTripEventsDTO(vehicleId, date)
+        val tripEventsList = tripService.computeTripEventsDTO(vehicleId, date, false)
+        val transformedList = tripEventsList?.copy(
+            tripEvents = tripEventsList.tripEvents.map { event ->
+                event.copy(
+                    poiId = null,
+                    poiLabel = null,
+                    address = "Adresse non géolocalisée",
+                    lat = null,
+                    lng = null,
+                    trace = null
+                )
+            },
+            compactedTripEvents = tripEventsList.compactedTripEvents.map { event ->
+                event.copy(
+                    poiId = null,
+                    poiLabel = null,
+                    address = "Adresse non géolocalisée",
+                    lat = null,
+                    lng = null,
+                    trace = null
+                )
+            }
+        )
+        return transformedList
     }
 
     @GET

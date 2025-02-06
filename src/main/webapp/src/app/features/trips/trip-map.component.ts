@@ -22,7 +22,7 @@ import {FormsModule} from "@angular/forms";
   selector: 'app-trip-map',
   template: `
     <div id="trip-container">
-      <div id="map"></div>
+      <div id="map" [style.visibility]="isMapVisible ? 'visible' : 'hidden'"></div>
       <div id="side-panel" class="h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
         <p-toggleButton
           [(ngModel)]="showSidePanel"
@@ -249,6 +249,7 @@ import {FormsModule} from "@angular/forms";
 
     #map {
       height: 80vh;
+      //visibility: hidden;
 
       ::ng-deep {
         .leaflet-control-zoom {
@@ -385,6 +386,8 @@ export class TripMapComponent {
   private map: L.Map | null = null;
   private featureGroup: L.FeatureGroup = L.featureGroup();
 
+  protected isMapVisible = true
+
   public itemHasLunchBreakStartEvent = (item:any): boolean => item.type === 'START_LUNCH_BREAK';
 
   public itemHasLunchBreakEndEvent = (item:any): boolean => item.type === 'END_LUNCH_BREAK';
@@ -397,11 +400,22 @@ export class TripMapComponent {
   }
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {
+    // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
+    //
+    // console.log("=== trip-map.component ::: geoloc : "+nonGeolocalized)
+    //
+    // if (nonGeolocalized || !tripEventsDTO) {
+    //   return;
+    // }
+
+    this.isMapVisible = !(location.pathname.indexOf('-non-geoloc')>0)
+
     if (!tripEventsDTO) {
       return;
     }
+
     this._tripData = tripEventsDTO;
-    console.log(tripEventsDTO)
+    console.log("=== trip-map.component ::: tripData : "+tripEventsDTO)
     // init map
     if (this.map) {
       this.featureGroup.clearLayers();

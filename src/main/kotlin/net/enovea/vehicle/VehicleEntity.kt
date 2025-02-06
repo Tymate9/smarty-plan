@@ -134,7 +134,7 @@ data class VehicleEntity(
             ).list()
         }
 
-        data class VehicleAndCurrentDriver(val vehicle: VehicleEntity, val geolocalized: Boolean?, val driver: DriverEntity?)
+        data class VehicleAndCurrentDriver(val vehicle: VehicleEntity, val geolocalized: Boolean? = false, val driver: DriverEntity?)
 
 
         @Transactional

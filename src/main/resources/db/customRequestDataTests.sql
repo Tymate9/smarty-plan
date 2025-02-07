@@ -97,3 +97,25 @@ where id = 'c38316b8-af43-4b6f-a3e5-d807f104932f'
 delete from public.team
 where id = 1000
 ;
+
+
+
+-- Affichage pour contrôler l'apect géolocalisé ou non d'un véhicule
+select v.id,
+       v.externalid,
+       v.licenseplate,
+       vup.start_date,
+       vup.end_date,
+       vd.start_date,
+       vd.end_date,
+       d.id,
+       d.first_name,
+       d.last_name,
+       dup.start_date,
+       dup.end_date
+from vehicle v
+left join vehicle_untracked_period vup on v.id = vup.vehicle_id
+join public.vehicle_driver vd on v.id = vd.vehicle_id
+join public.driver d on d.id = vd.driver_id
+left join driver_untracked_period dup on d.id = dup.driver_id
+order by v.externalid

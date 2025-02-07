@@ -17,6 +17,7 @@ import {
 } from '@angular/forms';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {filter, Subscription} from 'rxjs';
+import {JsonPipe} from "@angular/common";
 
 /**
  * Événement émis quand l’utilisateur sélectionne une option.
@@ -97,7 +98,7 @@ export interface AutocompleteSelectedEvent {
       z-index: 10;
       max-height: 200px;
       overflow-y: auto;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
       border-radius: 4px;
       padding: 4px 0;
     }
@@ -106,6 +107,7 @@ export interface AutocompleteSelectedEvent {
       padding: 6px 10px;
       cursor: pointer;
     }
+
     .autocomplete-option:hover,
     .autocomplete-option.active {
       background-color: #eee;
@@ -118,6 +120,10 @@ export interface AutocompleteSelectedEvent {
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    JsonPipe
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

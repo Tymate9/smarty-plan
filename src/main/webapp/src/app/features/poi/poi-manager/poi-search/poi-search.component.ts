@@ -3,6 +3,12 @@ import {dto} from "../../../../../habarta/dto";
 import PointOfInterestEntity = dto.PointOfInterestEntity;
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import {PoiService} from "../../poi.service";
+import {InputNumber} from "primeng/inputnumber";
+import {FormsModule} from "@angular/forms";
+import {ButtonDirective} from "primeng/button";
+import {NgIf} from "@angular/common";
+import {SelectButton} from "primeng/selectbutton";
+import {AutoComplete} from "primeng/autocomplete";
 
 @Component({
   selector: 'app-poi-search',
@@ -87,6 +93,15 @@ import {PoiService} from "../../poi.service";
       ></button>
     </div>
   `,
+  standalone: true,
+  imports: [
+    InputNumber,
+    FormsModule,
+    ButtonDirective,
+    NgIf,
+    SelectButton,
+    AutoComplete
+  ],
   styles: [`
     :host ::ng-deep .search-section {
       background-color: #f9f9f9;
@@ -94,7 +109,7 @@ import {PoiService} from "../../poi.service";
       border-radius: 4px;
       padding: 12px;
       position: relative;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -125,6 +140,7 @@ import {PoiService} from "../../poi.service";
       border-radius: 4px;
       transition: border-color 0.2s ease;
     }
+
     :host ::ng-deep .basic-input:focus {
       outline: none;
       border-color: #007ad9; /* Bleu discret au focus */
@@ -147,14 +163,16 @@ import {PoiService} from "../../poi.service";
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      background-color: #aa001f;  /* Rouge principal */
+      background-color: #aa001f; /* Rouge principal */
       color: #fff;
       font-weight: 600;
       transition: background-color 0.2s ease;
     }
+
     :host ::ng-deep .basic-button:hover {
-      background-color: #8e001b;  /* Rouge plus sombre au survol */
+      background-color: #8e001b; /* Rouge plus sombre au survol */
     }
+
     :host ::ng-deep .basic-button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
@@ -167,7 +185,7 @@ import {PoiService} from "../../poi.service";
       background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       max-height: 200px;
       overflow-y: auto;
     }

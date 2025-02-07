@@ -1,4 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from "@angular/core";
+import {Button} from "primeng/button";
+import {FormsModule} from "@angular/forms";
+import {NgStyle} from "@angular/common";
 
 export interface Option {
   label: string;
@@ -11,7 +14,8 @@ export interface Option {
       <div class="input-container">
         <div class="tags">
           <span *ngFor="let tag of selectedTags" class="tag">
-            {{ tag }} <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
+            {{ tag }}
+            <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
           </span>
           <input
             type="text"
@@ -26,7 +30,7 @@ export interface Option {
       </div>
 
       <!-- Display a flat list or hierarchical list based on data structure -->
-      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" >
+      <ul id='dropdown' *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
         <ng-container *ngFor="let option of filteredOptions">
           <li>
             <div (click)="selectOption(option.label)" [class.selected]="isSelected(option.label)">
@@ -57,6 +61,12 @@ export interface Option {
       </ul>
     </div>
   `,
+  standalone: true,
+  imports: [
+    Button,
+    FormsModule,
+    NgStyle
+  ],
   styles: [`
     .search-autocomplete {
       position: relative;
@@ -71,7 +81,7 @@ export interface Option {
       flex-wrap: wrap;
       align-items: center;
       background-color: white;
-      border-radius:5px;
+      border-radius: 5px;
 
     }
 
@@ -131,18 +141,21 @@ export interface Option {
       margin-left: 10px;
 
     }
+
     .autocomplete-list div.selected {
       background-color: #d0e8ff;
     }
+
     .autocomplete-list div:hover {
       background-color: #f0f0f0;
     }
-    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close{
-      background-color:#aa001f !important;
-      border-color:#aa001f !important;
+
+    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close {
+      background-color: #aa001f !important;
+      border-color: #aa001f !important;
       color: white !important;
-      font-weight:600;
-      margin-left:4px;
+      font-weight: 600;
+      margin-left: 4px;
       width: 20px;
       height: 20px;
       font-size: 10px;

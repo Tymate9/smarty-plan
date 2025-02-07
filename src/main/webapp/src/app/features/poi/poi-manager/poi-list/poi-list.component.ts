@@ -9,6 +9,12 @@ import {PointOfInterestForm, PoiService} from "../../poi.service";
 import {GeoJSONGeometry} from "wellknown";
 import * as wellknown from 'wellknown'
 import * as L from 'leaflet';
+import {FormsModule} from "@angular/forms";
+import {InputNumber} from "primeng/inputnumber";
+import {NgClass, NgForOf} from "@angular/common";
+import {ButtonDirective} from "primeng/button";
+import {InputText} from "primeng/inputtext";
+import {GeoJSON} from "leaflet";
 
 @Component({
   selector: 'app-poi-list',
@@ -107,30 +113,36 @@ import * as L from 'leaflet';
             <!-- Première zone de boutons (dessin) -->
             <div class="button-area">
               <!-- Définir un Polygone -->
-              <button pButton label="Définir un Polygone" type="button" icon="pi pi-pencil" (click)="startPolygonDrawing(poiPanel)">
+              <button pButton label="Définir un Polygone" type="button" icon="pi pi-pencil"
+                      (click)="startPolygonDrawing(poiPanel)">
               </button>
 
               <!-- Définir un Cercle (peut être masqué si class="hidden") -->
-              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle" (click)="startCircleDrawing(poiPanel)" class="hidden">
+              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle"
+                      (click)="startCircleDrawing(poiPanel)" class="hidden">
               </button>
 
               <!-- Définir un Cercle (via Dialog) -->
-              <button pButton  label="Définir un Cercle" type="button" icon="pi pi-circle" (click)="openEditAreaDialog(poiPanel)">
+              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle"
+                      (click)="openEditAreaDialog(poiPanel)">
               </button>
             </div>
 
             <!-- Seconde zone de boutons (CRUD) -->
             <div class="button-area">
               <!-- Ajouter POI -->
-              <button *ngIf="poiPanel.poi.id < 0" pButton label="Ajouter POI" type="button" icon="pi pi-plus" [disabled]="!isFormValid(poiPanel)" (click)="onCreate(poiPanel)">
+              <button *ngIf="poiPanel.poi.id < 0" pButton label="Ajouter POI" type="button" icon="pi pi-plus"
+                      [disabled]="!isFormValid(poiPanel)" (click)="onCreate(poiPanel)">
               </button>
 
               <!-- Mettre à jour -->
-              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Mettre à jour" type="button" icon="pi pi-check" [disabled]="!isFormValid(poiPanel)" (click)="onUpdate(poiPanel)">
+              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Mettre à jour" type="button" icon="pi pi-check"
+                      [disabled]="!isFormValid(poiPanel)" (click)="onUpdate(poiPanel)">
               </button>
 
               <!-- Supprimer -->
-              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Supprimer" type="button" icon="pi pi-trash" (click)="deletePoi(poiPanel)">
+              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Supprimer" type="button" icon="pi pi-trash"
+                      (click)="deletePoi(poiPanel)">
               </button>
             </div>
           </div>
@@ -165,6 +177,15 @@ import * as L from 'leaflet';
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    FormsModule,
+    InputNumber,
+    NgClass,
+    NgForOf,
+    ButtonDirective,
+    InputText
+  ],
   styles: [`
     /* Conteneur principal de la liste (scrollable) */
     .poi-list {

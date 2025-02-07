@@ -11,8 +11,8 @@ import {AdminComponent} from "../admin/admin.component";
       <button (click)="logout()">Se déconnecter</button>
     </div>
   `,
-  styles: [
-  ]
+  standalone: true,
+  styles: []
 })
 export class LandingPageComponent {
 

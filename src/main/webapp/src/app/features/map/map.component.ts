@@ -12,6 +12,8 @@ import {FilterService} from "../../commons/navbar/filter.service";
 import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
 import {NotificationService} from "../../commons/notification/notification.service";
 import {TilesService} from "../../services/tiles.service";
+import {Button} from "primeng/button";
+import {NgClass} from "@angular/common";
 import {TeamService} from "../vehicle/team.service";
 
 
@@ -40,6 +42,11 @@ import {TeamService} from "../vehicle/team.service";
     </div>
     <div id="map"></div>
   `,
+  standalone: true,
+  imports: [
+    Button,
+    NgClass
+  ],
   styles: [`
     #map {
       height: 87vh;

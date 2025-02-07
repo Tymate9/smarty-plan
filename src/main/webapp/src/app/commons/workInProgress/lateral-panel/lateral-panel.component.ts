@@ -7,6 +7,7 @@ import { Component, Input } from '@angular/core';
       <button (click)="logMessage()">Afficher le message</button>
     </div>
   `,
+  standalone: true,
   styles: [`
     .lateral-panel-container {
       padding: 8px;

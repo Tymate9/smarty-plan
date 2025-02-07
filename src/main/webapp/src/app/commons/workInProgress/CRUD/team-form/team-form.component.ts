@@ -8,9 +8,14 @@ import {IFormDescription} from "../iform-description";
 import {FormGroup} from "@angular/forms";
 import {FormDescription} from "../form-description";
 import {forkJoin} from "rxjs";
+import {EntityFormComponent} from "../entity-form/entity-form.component";
 
 @Component({
   selector: 'app-team-form',
+  standalone: true,
+  imports: [
+    EntityFormComponent
+  ],
   template: `
     <h2>Team Form</h2>
     <app-entity-form

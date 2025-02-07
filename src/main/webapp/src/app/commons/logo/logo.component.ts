@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-logo',
   template: `
     <div class="logo-container">
-      <img src="assets/logo-nm.png" alt="Logo" />
+      <img src="assets/logo-nm.png" alt="Logo"/>
     </div>
   `,
   styles: [
@@ -33,5 +33,6 @@ import { Component } from '@angular/core';
       }
     `,
   ],
+  standalone: true
 })
 export class LogoComponent {}

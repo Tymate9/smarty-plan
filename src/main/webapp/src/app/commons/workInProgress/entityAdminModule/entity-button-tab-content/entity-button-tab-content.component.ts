@@ -5,10 +5,11 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
   template: `
     <button class="tab-button" (click)="onButtonClick()">
       {{ label }}
-      <img *ngIf="icon && iconType === 'url'" [src]="icon" class="icon-img"  alt="TabIcon"/>
+      <img *ngIf="icon && iconType === 'url'" [src]="icon" class="icon-img" alt="TabIcon"/>
       <i *ngIf="icon && iconType === 'css'" [class]="icon"></i>
     </button>
   `,
+  standalone: true,
   styles: [`
     .tab-button {
       padding: 6px 12px;
@@ -20,6 +21,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
       align-items: center;
       gap: 8px;
     }
+
     .icon-img {
       width: 18px;
       height: 18px;

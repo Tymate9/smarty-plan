@@ -1,5 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ConfigService} from "../../core/config/config.service";
+import {NavbarComponent} from "../../commons/navbar/navbar.component";
+import {RouterOutlet} from "@angular/router";
+import {TestBannerComponent} from "../../commons/testBanner/testBanner.component";
 
 @Component({
   selector: 'app-main-layout',
@@ -8,6 +11,12 @@ import {ConfigService} from "../../core/config/config.service";
     <app-test-banner *ngIf="testEnv"></app-test-banner>
     <router-outlet></router-outlet>
   `,
+  standalone: true,
+  imports: [
+    NavbarComponent,
+    RouterOutlet,
+    TestBannerComponent
+  ],
   styles: [`
     :host {
       display: block;

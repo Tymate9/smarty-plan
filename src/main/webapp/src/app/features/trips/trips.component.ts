@@ -5,6 +5,13 @@ import {dto} from "../../../habarta/dto";
 import TripEventsDTO = dto.TripEventsDTO;
 import {Calendar} from "primeng/calendar";
 import {downloadAsCsv} from "../../core/csv/csv.downloader";
+import {ProgressSpinner} from "primeng/progressspinner";
+import {TripListComponent} from "./trip-list.component";
+import {Button} from "primeng/button";
+import {TabPanel, TabView} from "primeng/tabview";
+import {TripMapComponent} from "./trip-map.component";
+import {PrimeTemplate} from "primeng/api";
+import {FormsModule} from "@angular/forms";
 
 
 @Component({
@@ -28,7 +35,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
                   title="Télécharger un CSV des trajets de la journée de ce véhicule"
                   icon="pi pi-download"
                   styleClass="custom-button"
-                  >
+        >
         </p-button>
         <p-calendar #calendar
                     id="date-selector"
@@ -40,7 +47,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
                     dateFormat="yymmdd"
                     [showOtherMonths]="true"
                     [selectOtherMonths]="true"
-                    ></p-calendar>
+        ></p-calendar>
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">
         Données en cours de chargement...
@@ -51,6 +58,18 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    ProgressSpinner,
+    Calendar,
+    TripListComponent,
+    Button,
+    TabPanel,
+    TabView,
+    TripMapComponent,
+    PrimeTemplate,
+    FormsModule
+  ],
   styles: [`
     #trip-container {
       position: relative;
@@ -74,6 +93,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         .p-progress-spinner {
           width: 40px;
           height: 40px;
+
           .p-progress-spinner-circle {
             animation: p-progress-spinner-dash 1.5s ease-in-out infinite;
             stroke: #aa001f;

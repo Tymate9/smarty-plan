@@ -5,13 +5,13 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CartographyComponent } from './features/cartography/cartography.component';
 import {TripsComponent} from "./features/trips/trips.component";
 import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.component";
-import {authGuard} from "./auth.guard";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
+import {canActivateAuth} from "./auth.guard";
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [canActivateAuth],
     component: MainLayoutComponent,
     children: [
       { path: 'dashboard', component: DashboardComponent },

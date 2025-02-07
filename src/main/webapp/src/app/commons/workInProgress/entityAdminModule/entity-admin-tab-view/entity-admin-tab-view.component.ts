@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
+import {EntityTreeComponent} from "../entity-tree/entity-tree.component";
+import {EntityStatsComponent} from "../entity-stats/entity-stats.component";
 
 export interface EntityAdminTabConfig {
   showStats?: boolean;
@@ -17,7 +19,7 @@ export interface EntityAdminTabConfig {
         [entityService]="service"
       ></app-entity-stats>
 
-      <hr *ngIf="config.showStats && config.showTree" />
+      <hr *ngIf="config.showStats && config.showTree"/>
 
       <app-entity-tree
         *ngIf="config.showTree"
@@ -27,12 +29,18 @@ export interface EntityAdminTabConfig {
 
     </div>
   `,
+  standalone: true,
+  imports: [
+    EntityTreeComponent,
+    EntityStatsComponent
+  ],
   styles: [`
     .tab-view-container {
       background-color: #f0f7ff;
       padding: 16px;
       border: 1px solid #ccc;
     }
+
     hr {
       margin: 16px 0;
     }

@@ -7,7 +7,9 @@ import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
-import {TabViewChangeEvent} from "primeng/tabview";
+import {TabPanel, TabView, TabViewChangeEvent} from "primeng/tabview";
+import {Button} from "primeng/button";
+import {DecimalPipe} from "@angular/common";
 
 @Component({
   selector: 'app-map-popup',
@@ -16,7 +18,8 @@ import {TabViewChangeEvent} from "primeng/tabview";
       <h4>Adresse : {{ address }}</h4>
       <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
       <!-- Create POI Tab -->
-      <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
+      <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI
+      </p-button>
       <p-tabView (onChange)="selectTab($event)">
         <!-- Véhicule Tab -->
         <p-tabPanel header="Véhicule">
@@ -72,25 +75,33 @@ import {TabViewChangeEvent} from "primeng/tabview";
       </p-tabView>
     </div>
   `,
+  standalone: true,
+  imports: [
+    Button,
+    DecimalPipe,
+    TabPanel,
+    TabView
+  ],
   styles: [`
     .active {
       background-color: #007bff;
       color: white;
     }
 
-    ::ng-deep .p-button.p-component.p-button-raised.custom-button-red  {
-      background-color:#aa001f !important;
-      border-color:#aa001f !important;
+    ::ng-deep .p-button.p-component.p-button-raised.custom-button-red {
+      background-color: #aa001f !important;
+      border-color: #aa001f !important;
       color: white !important;
-      font-weight:600;
-      padding:0.2rem;
+      font-weight: 600;
+      padding: 0.2rem;
     }
-    ::ng-deep .p-button.p-component.p-button-raised.custom-button-gray  {
-      background-color:var(--gray-400)  !important;
-      border-color:var(--gray-400)  !important;
+
+    ::ng-deep .p-button.p-component.p-button-raised.custom-button-gray {
+      background-color: var(--gray-400) !important;
+      border-color: var(--gray-400) !important;
       color: white !important;
-      font-weight:600;
-      padding:0.2rem;
+      font-weight: 600;
+      padding: 0.2rem;
     }
 
     .mapContextMenu {

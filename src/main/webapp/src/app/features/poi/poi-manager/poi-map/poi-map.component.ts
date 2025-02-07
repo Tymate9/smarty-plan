@@ -14,6 +14,7 @@ import {ActivatedRoute} from "@angular/router";
 import {PoiService} from "../../poi.service";
 import {LatLng, LatLngExpression} from "leaflet";
 import {TilesService} from "../../../../services/tiles.service";
+import {PoiSearchComponent} from "../poi-search/poi-search.component";
 
 
 @Component({
@@ -41,6 +42,11 @@ import {TilesService} from "../../../../services/tiles.service";
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    PoiSearchComponent,
+    PoiListComponent
+  ],
   styles: [`
     :host ::ng-deep .poi-map-container {
       display: flex;
@@ -80,7 +86,7 @@ import {TilesService} from "../../../../services/tiles.service";
 
     /* Facultatif : si vous voulez un léger ombrage sur le side-panel */
     .side-panel {
-      box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
     }
 
     /* Annule le style inline height: 88vh qui est dans le composant,

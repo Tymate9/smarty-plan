@@ -4,10 +4,21 @@ import {TeamHierarchyNode, VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
 import {Router} from "@angular/router";
-import {DatePipe} from "@angular/common";
-import {TreeTable} from "primeng/treetable";
+import {
+  DatePipe,
+  NgClass, NgForOf,
+  NgIf,
+  NgOptimizedImage,
+  NgStyle,
+  NgSwitch,
+  NgSwitchCase,
+  NgSwitchDefault
+} from "@angular/common";
+import {TreeTable, TreeTableModule} from "primeng/treetable";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {Subscription} from "rxjs";
+import {Button, ButtonDirective} from "primeng/button";
+import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -255,6 +266,22 @@ import {Subscription} from "rxjs";
     </div>
 
   `,
+  standalone: true,
+  imports: [
+    Button,
+    NgStyle,
+    NgClass,
+    TreeTableModule,
+    NgIf,
+    NgOptimizedImage,
+    NgSwitchDefault,
+    NgSwitchCase,
+    NgSwitch,
+    NgForOf,
+    ButtonDirective,
+    DatePipe,
+    SmsFormComponent
+  ],
   styles: [`
     /*style de treeTable*/
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
@@ -814,7 +841,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             vehicle.category.label,
             vehicle.device?.deviceDataState?.state,
             vehicle.energy,
-            vehicle.driver?.lastName + ' ' + vehicle.driver?.firstName ?? 'Véhicule non attribué',
+            vehicle.driver?.lastName + ' ' + vehicle.driver?.firstName,
             this.formatDateTime(vehicle.device?.deviceDataState?.lastPositionTime),
             vehicle.firstTripStart,
             vehicle.lastPositionAddress,

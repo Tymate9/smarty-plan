@@ -9,6 +9,13 @@ import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
 import {GeoUtils} from "../../commons/geo/geo-utils";
+import {NgIf} from "@angular/common";
+import {PrimeTemplate} from "primeng/api";
+import {Timeline} from "primeng/timeline";
+import {TabPanel, TabView} from "primeng/tabview";
+import {Card} from "primeng/card";
+import {ToggleButton} from "primeng/togglebutton";
+import {FormsModule} from "@angular/forms";
 
 
 @Component({
@@ -219,6 +226,17 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    NgIf,
+    PrimeTemplate,
+    Timeline,
+    TabPanel,
+    Card,
+    ToggleButton,
+    FormsModule,
+    TabView
+  ],
   styles: [`
     #trip-container {
       overflow-x: hidden;
@@ -594,7 +612,6 @@ export class TripMapComponent {
     }
   }
 
-// Méthode refactorisée pour l'événement MouseLeave
   onTripEventMouseLeave(event: TripEventDTO): void {
     const fillColor = 'blue';
     const weight = 3;

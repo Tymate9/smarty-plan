@@ -1,9 +1,11 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {FormInputUtils, IFormInput} from "../iform-input";
 import { IEntityService } from "../ientity-service";
 import {IFormDescription} from "../iform-description";
 import {Subscription} from "rxjs";
+import {NgClass, NgSwitch} from "@angular/common";
+import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-input.component";
 
 @Component({
   selector: 'app-entity-form',
@@ -66,18 +68,46 @@ import {Subscription} from "rxjs";
 
       <div *ngIf="entityForm.errors">
         <span class="global-error" *ngIf="entityForm.errors['categoryParentConstraint']">
-          {{ entityForm.errors['categoryParentConstraint'] }}
+            {{ entityForm?.errors?.['categoryParentConstraint'] || " " }}
         </span>
       </div>
 
       <button type="submit" [disabled]="!entityForm.valid">Soumettre</button>
     </form>
   `,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgClass,
+    AutocompleteInputComponent,
+    NgSwitch
+  ],
   styles: [`
-    .error { color: red; font-size: 0.9em; }
-    .error-list { display: block; position: absolute; background-color: white; border: 1px solid red; padding: 5px; color: red; z-index: 10; }
-    label { position: relative; display: block; margin-bottom: 15px; }
-    input.invalid, select.invalid { border-color: red; outline: none; }
+    .error {
+      color: red;
+      font-size: 0.9em;
+    }
+
+    .error-list {
+      display: block;
+      position: absolute;
+      background-color: white;
+      border: 1px solid red;
+      padding: 5px;
+      color: red;
+      z-index: 10;
+    }
+
+    label {
+      position: relative;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    input.invalid, select.invalid {
+      border-color: red;
+      outline: none;
+    }
   `]
 })
 export class EntityFormComponent implements OnInit, OnChanges {

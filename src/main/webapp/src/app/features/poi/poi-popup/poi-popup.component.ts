@@ -9,6 +9,11 @@ import {GeoJSONGeometry} from "wellknown";
 import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 import {Router} from "@angular/router";
+import {ButtonDirective} from "primeng/button";
+import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {TabPanel, TabView} from "primeng/tabview";
+import {ProgressSpinner} from "primeng/progressspinner";
 
 @Component({
   selector: 'app-poi-popup',
@@ -20,7 +25,7 @@ import {Router} from "@angular/router";
           <div class="p-fluid">
             <div class="p-field">
               <label><h4>Dénomination :</h4></label>
-              <span>{{entity.client_code?? "0000"}}-{{ entity.client_label }}</span>
+              <span>{{ entity.client_code ?? "0000" }}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
               <label><h4>Adresse :</h4></label>
@@ -32,7 +37,8 @@ import {Router} from "@angular/router";
             </div>
             <div class="p-field">
               <label><h4>Coordonnées :</h4></label>
-              <span>Latitude :  {{ entity.coordinate.coordinates[1] }} <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
+              <span>Latitude :  {{ entity.coordinate.coordinates[1] }}
+                <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
             </div>
           </div>
         </p-tabPanel>
@@ -47,13 +53,15 @@ import {Router} from "@angular/router";
           <div *ngIf="!loadingProximity && proximityVehicles.length > 0">
             <div *ngFor="let vehicle of proximityVehicles" class="vehicle-item">
               <div>
-                <strong>{{ vehicle.second.driver?.firstName }} {{ vehicle.second.driver?.lastName }}-{{ vehicle.second.licenseplate }}</strong>
+                <strong>{{ vehicle.second.driver?.firstName }} {{ vehicle.second.driver?.lastName }}
+                  -{{ vehicle.second.licenseplate }}</strong>
                 - {{ vehicle.second.category.label }}
                 <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
               </div>
               <div class="vehicle-actions">
                 <button pButton label="Zoom" icon="pi pi-search-plus"
-                        (click)="centerMapOnVehicle(vehicle.second)" style="background-color: #aa001f; border:#aa001f;"></button>
+                        (click)="centerMapOnVehicle(vehicle.second)"
+                        style="background-color: #aa001f; border:#aa001f;"></button>
                 <button
                   pButton
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
@@ -171,48 +179,70 @@ import {Router} from "@angular/router";
       </p-tabView>
     </div>
   `,
+  standalone: true,
+  imports: [
+    ButtonDirective,
+    NgIf,
+    FormsModule,
+    NgForOf,
+    TabPanel,
+    ProgressSpinner,
+    DecimalPipe,
+    TabView,
+    DatePipe
+  ],
   styles: [`
     .form-actions .button-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 10px;
     }
+
     .form-actions .button-row button:last-child {
       margin-right: 0;
     }
+
     .poi-popup {
     }
+
     .vehicle-item {
       border: 1px solid #ccc;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
     }
+
     .vehicle-actions {
       margin-top: 10px;
       display: flex;
       gap: 5px;
     }
+
     .form-actions {
       margin-top: 20px;
       display: flex;
       flex-direction: column;
     }
+
     .button-row {
       display: flex;
       gap: 10px;
     }
+
     .custom-spinner {
       display: block;
       margin: 0 auto;
     }
+
     .error-message {
       color: red;
       font-size: 0.8rem;
     }
+
     .required {
       color: red;
     }
+
     .p-field select {
       width: 100%;
       padding: 0.5rem;

@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {dto} from "../../../../../habarta/dto";
+import {DrawerComponent} from "../../drawer/drawer.component";
+import {DatePipe} from "@angular/common";
 
 @Component({
   selector: 'app-entity-stats',
@@ -40,10 +42,16 @@ import {dto} from "../../../../../habarta/dto";
         </div>
       </div>
     </div>
-    <app-drawer buttonText="Mettre à jours l'entité" iconClass="pi pi-pencil" closeConfirmationMessage="Voulez-vous vraiment fermer ce panneau ?">
+    <app-drawer buttonText="Mettre à jours l'entité" iconClass="pi pi-pencil"
+                closeConfirmationMessage="Voulez-vous vraiment fermer ce panneau ?">
       <p>Contenue définis par le parent a personnaliser à terme ce seras un formulaire avec des Tab etc...</p>
     </app-drawer>
   `,
+  standalone: true,
+  imports: [
+    DrawerComponent,
+    DatePipe
+  ],
   styles: [`
     .stats-container {
       background-color: #f9f9f9;
@@ -86,12 +94,13 @@ import {dto} from "../../../../../habarta/dto";
       flex-direction: column;
       align-items: flex-start;
       justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s;
     }
+
     .stat-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
     .stat-icon {

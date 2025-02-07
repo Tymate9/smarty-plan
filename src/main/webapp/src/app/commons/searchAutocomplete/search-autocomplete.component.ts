@@ -1,4 +1,7 @@
  import {Component, Input, Output, EventEmitter, SimpleChanges, OnChanges} from '@angular/core';
+ import {Button} from "primeng/button";
+ import {FormsModule} from "@angular/forms";
+ import {NgForOf, NgIf, NgStyle} from "@angular/common";
 
 @Component({
   selector: 'app-search-autocomplete',
@@ -7,7 +10,8 @@
       <div class="input-container">
         <div class="tags">
           <span *ngFor="let tag of selectedTags" class="tag">
-            {{ tag }}  <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
+            {{ tag }}
+            <p-button (click)="removeTag(tag)" icon="pi pi-times" styleClass="custom-button-close"></p-button>
           </span>
           <input
             type="text"
@@ -20,13 +24,21 @@
           />
         </div>
       </div>
-      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list" >
+      <ul *ngIf="dropdownVisible && filteredOptions.length > 0" class="autocomplete-list">
         <li *ngFor="let option of filteredOptions" (click)="selectOption(option)">
           {{ option }}
         </li>
       </ul>
     </div>
   `,
+  standalone: true,
+  imports: [
+    Button,
+    FormsModule,
+    NgStyle,
+    NgForOf,
+    NgIf
+  ],
   styles: [`
     .search-autocomplete {
       position: relative;
@@ -40,7 +52,7 @@
       flex-wrap: wrap;
       align-items: center;
       background-color: white;
-      border-radius:5px;
+      border-radius: 5px;
     }
 
     .tags {
@@ -102,12 +114,13 @@
     .autocomplete-list li:hover {
       background-color: #f0f0f0;
     }
-    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close{
-      background-color:#aa001f !important;
-      border-color:#aa001f !important;
+
+    ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-close {
+      background-color: #aa001f !important;
+      border-color: #aa001f !important;
       color: white !important;
-      font-weight:600;
-      margin-left:4px;
+      font-weight: 600;
+      margin-left: 4px;
       width: 20px;
       height: 20px;
       font-size: 10px;

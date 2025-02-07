@@ -1,4 +1,7 @@
 import { Component, Input } from '@angular/core';
+import {Sidebar} from "primeng/sidebar";
+import {ButtonDirective} from "primeng/button";
+import {PrimeTemplate} from "primeng/api";
 
 @Component({
   selector: 'app-drawer',
@@ -11,7 +14,8 @@ import { Component, Input } from '@angular/core';
     </button>
 
     <!-- Sidebar PrimeNG configurée en mode modal et dismissible -->
-    <p-sidebar [(visible)]="visible" [autoZIndex]="true" [baseZIndex]="2000" position="right" [showCloseIcon]="false" [modal]="true" (onHide)="onSidebarHide()" >
+    <p-sidebar [(visible)]="visible" [autoZIndex]="true" [baseZIndex]="2000" position="right" [showCloseIcon]="false"
+               [modal]="true" (onHide)="onSidebarHide()">
       <ng-template pTemplate="headless">
         <!-- Bouton de fermeture en haut à gauche -->
         <div class="drawer-header">
@@ -22,12 +26,19 @@ import { Component, Input } from '@angular/core';
       </ng-template>
     </p-sidebar>
   `,
+  standalone: true,
+  imports: [
+    Sidebar,
+    ButtonDirective,
+    PrimeTemplate
+  ],
   styles: [`
     .drawer-header {
       display: flex;
       justify-content: flex-start;
       margin-bottom: 1rem;
     }
+
     .close-button {
       margin: 0.5rem;
     }

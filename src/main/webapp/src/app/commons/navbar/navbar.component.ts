@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
 import { FilterService } from './filter.service';
 import {KeycloakService} from "keycloak-angular";
@@ -14,25 +14,38 @@ import DriverDTO = dto.DriverDTO;
 import {ConfigService} from "../../core/config/config.service";
 import {forkJoin, Subscription} from "rxjs";
 import {NotificationService} from "../notification/notification.service";
+import {Button, ButtonDirective} from "primeng/button";
+import {Menubar} from "primeng/menubar";
+import {PrimeTemplate} from "primeng/api";
+import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomplete.component";
 
 @Component({
   selector: 'app-navbar',
   template: `
-    <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}" class="p-menubar transparent-blur-bg full-width ">
+    <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}"
+               class="p-menubar transparent-blur-bg full-width ">
       <ng-template pTemplate="start">
         <div class="nav-container">
           <div class="nav-buttons">
             <div class="nav-buttons-row">
-              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" styleClass="custom-button-bg"></p-button>
+              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large"
+                        styleClass="custom-button-bg"></p-button>
               <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg"></p-button>
-              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg"></p-button>
+              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker"
+                        styleClass="custom-button-bg"></p-button>
             </div>
           </div>
           <div class="filters center">
-            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>
-            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
-            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
-            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()" class="custom-button-bg"></button>
+            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"
+                           [selectedItems]="agencySelected"></app-team-tree>
+            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions"
+                                     (selectedTagsChange)="updateVehicles($event)"
+                                     [selectedItems]="vehicleSelected"></app-search-autocomplete>
+            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions"
+                                     (selectedTagsChange)="updateDrivers($event)"
+                                     [selectedItems]="driverSelected"></app-search-autocomplete>
+            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"
+                    class="custom-button-bg"></button>
             <p-button (onClick)="saveFilters()" icon="pi pi-save" styleClass="custom-button-bg"></p-button>
           </div>
         </div>
@@ -40,7 +53,8 @@ import {NotificationService} from "../notification/notification.service";
       <ng-template pTemplate="end">
         <div class="user-info compact">
           <p-button icon="pi pi-cog" class="user-settings" styleClass="custom-button-bg"></p-button>
-          <p-button (onClick)="logout()" icon="pi pi-power-off" styleClass="custom-button-bg" [disabled]="!logoutURL"></p-button>
+          <p-button (onClick)="logout()" icon="pi pi-power-off" styleClass="custom-button-bg"
+                    [disabled]="!logoutURL"></p-button>
         </div>
       </ng-template>
     </p-menubar>
@@ -52,33 +66,39 @@ import {NotificationService} from "../notification/notification.service";
         justify-content: space-between;
         padding: 10px;
       }
+
       .nav-container {
         display: flex;
         align-items: center;
         width: 100%;
         justify-content: space-between;
       }
+
       .nav-buttons {
         display: flex;
         flex-direction: column;
         align-items: center;
         margin-right: auto;
       }
+
       .nav-buttons-row {
         display: flex;
         align-items: center;
         margin-bottom: 5px;
       }
+
       .nav-button-center {
         display: flex;
         justify-content: center;
         width: 100%;
       }
+
       .nav-buttons p-button {
         margin-right: 10px;
         background: transparent;
         border: none;
       }
+
       .filters {
         display: flex;
         align-items: center;
@@ -88,36 +108,37 @@ import {NotificationService} from "../notification/notification.service";
         left: 50%;
         transform: translateX(-50%);
       }
+
       .user-info {
         display: flex;
         align-items: center;
         margin-left: auto;
       }
+
       .user-info.compact {
         gap: 5px;
       }
+
       .user-settings {
         margin-right: 10px;
         background: transparent;
         border: none;
       }
 
-      .p-menubar{
+      .p-menubar {
         padding: 0.5rem;
         color: transparent !important;
         border: 1px solid #dee2e6;
         border-radius: 3px;
         width: 100%;
-        background:transparent !important;
-        z-index:1000;
-        position:relative;
+        background: transparent !important;
+        z-index: 1000;
+        position: relative;
       }
 
-      ::ng-deep .p-menubar.p-component
-      {
-        background:transparent !important;
+      ::ng-deep .p-menubar.p-component {
+        background: transparent !important;
       }
-
 
 
       ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-bg {
@@ -125,6 +146,7 @@ import {NotificationService} from "../notification/notification.service";
         border-color: #aa001f !important;
         color: white !important;
       }
+
       .p-button {
         background-color: #aa001f !important;
         border-color: #aa001f !important;
@@ -134,6 +156,15 @@ import {NotificationService} from "../notification/notification.service";
 
     `,
   ],
+  imports: [
+    Button,
+    Menubar,
+    PrimeTemplate,
+    TeamTreeComponent,
+    SearchAutocompleteComponent,
+    ButtonDirective
+  ],
+  standalone: true
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   constructor(

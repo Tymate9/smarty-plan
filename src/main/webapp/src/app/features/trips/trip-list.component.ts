@@ -3,6 +3,8 @@ import {dto} from "../../../habarta/dto";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventType = dto.TripEventType;
 import {TripsService} from "./trips.service";
+import {DatePipe} from "@angular/common";
+import {TableModule} from "primeng/table";
 
 @Component({
   selector: 'app-trip-list',
@@ -38,15 +40,22 @@ import {TripsService} from "./trips.service";
       </p-table>
     </div>
   `,
+  standalone: true,
+  imports: [
+    DatePipe,
+    TableModule
+  ],
   styles: [`
     table {
       width: 100%;
       border-collapse: collapse;
     }
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
     }
+
     th {
       background-color: #f2f2f2;
     }

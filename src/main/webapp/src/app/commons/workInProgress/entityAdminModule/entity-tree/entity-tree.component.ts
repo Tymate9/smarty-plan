@@ -12,6 +12,7 @@ import { IEntityService } from '../../CRUD/ientity-service';
 import { TreeNode } from 'primeng/api';
 import { CellHostDirective } from '../../cell-host.directive';
 import { forkJoin } from 'rxjs';
+import {TreeTableModule} from "primeng/treetable";
 
 export interface EntityColumn {
   field?: string;
@@ -104,6 +105,11 @@ interface DynamicComponentConfig {
       </ng-template>
     </p-treeTable>
   `,
+  standalone: true,
+  imports: [
+    TreeTableModule,
+    CellHostDirective
+  ],
   styles: [`
     .entity-tree-container {
       background-color: #fafafa;
@@ -111,6 +117,7 @@ interface DynamicComponentConfig {
       padding: 12px;
       margin: 12px 0;
     }
+
     .error {
       color: red;
       font-weight: bold;

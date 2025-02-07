@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {TeamService} from "../../../../features/vehicle/team.service";
+import {EntityButtonTabContentComponent} from "../entity-button-tab-content/entity-button-tab-content.component";
+import {EntityAdminTabViewComponent} from "../entity-admin-tab-view/entity-admin-tab-view.component";
+import {NgClass} from "@angular/common";
 
 /**
  * On peut étendre cette interface selon les besoins
@@ -37,6 +40,12 @@ export interface EntityDefinition {
       </app-entity-admin-tab-view>
     </div>
   `,
+  standalone: true,
+  imports: [
+    EntityButtonTabContentComponent,
+    EntityAdminTabViewComponent,
+    NgClass
+  ],
   styles: [`
     .tabs-container {
       display: flex;
@@ -45,9 +54,11 @@ export interface EntityDefinition {
       background-color: #f5f5f5;
       border-bottom: 2px solid #ccc;
     }
+
     .content-container {
       padding: 16px;
     }
+
     .selected {
       border-bottom: 2px solid #666;
       background-color: #e0e0e0;
@@ -81,7 +92,7 @@ export class EntityAdminComponent implements OnInit {
     }
   ];
 
-  public selectedEntity?: EntityDefinition;
+  public selectedEntity: EntityDefinition;
 
   constructor(
     private teamService: TeamService

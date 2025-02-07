@@ -8,8 +8,8 @@ import { Component } from '@angular/core';
     </p>
     <button (click)="helloWorld()"></button>
   `,
-  styles: [
-  ]
+  standalone: true,
+  styles: []
 })
 export class HelloWorldComponent {
 

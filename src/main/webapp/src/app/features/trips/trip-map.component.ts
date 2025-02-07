@@ -249,7 +249,6 @@ import {FormsModule} from "@angular/forms";
 
     #map {
       height: 80vh;
-      //visibility: hidden;
 
       ::ng-deep {
         .leaflet-control-zoom {
@@ -400,19 +399,13 @@ export class TripMapComponent {
   }
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {
-    // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
-    //
-    // console.log("=== trip-map.component ::: geoloc : "+nonGeolocalized)
-    //
-    // if (nonGeolocalized || !tripEventsDTO) {
-    //   return;
-    // }
-
-    this.isMapVisible = !(location.pathname.indexOf('-non-geoloc')>0)
-
     if (!tripEventsDTO) {
       return;
     }
+
+    this.isMapVisible = !(location.pathname.indexOf('-non-geoloc')>0)
+
+
 
     this._tripData = tripEventsDTO;
     console.log("=== trip-map.component ::: tripData : "+tripEventsDTO)

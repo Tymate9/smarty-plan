@@ -18,25 +18,6 @@ data class VehicleStatsDTO(
     var licensePlate: String? = null,
     var driverName: String? = null,
     )
-//data class VehiclesStatsDTO(
-//    val tripDate: java.time.LocalDate?,
-//    val vehicleId: String?,
-//    var licensePlate: String? = null,
-//    var driverName: String? = null,
-//    val tripCount: Int,
-//    val distanceSum: Int?,
-//    val drivingTime: String?,
-//    val distancePerTripAvg: Int?,
-//    val durationPerTripAvg: String?,
-//    val hasLateStartSum: Int,
-//    val hasLateStop:Int,
-//    val hasLastTripLong: Int,
-//    val rangeAvg: String,
-//    val waitingDuration: String?,
-//    var team: TeamDTO?,
-//    var teamHierarchy:String?
-//
-//    )
 
 data class VehiclesStatsDTO(
     val vehicleStats: VehicleStatsDTO,
@@ -45,17 +26,17 @@ data class VehiclesStatsDTO(
 
 )
 
-//
-//data class VehicleStatsDaily(
-//    val tripCount: Int,
-//    val distanceSum: Double?,
-//    val drivingTime: Long?,
-//    val distancePerTripAvg: Double?,
-//    val durationPerTripAvg: Long?,
-//    val hasLateStartSum: Int,
-//    val hasLateStop:Int,
-//    val hasLastTripLong: Int,
-//    val rangeAvg: Int,
-//    val waitingDuration: Long?,
-//    var licensePlate : String? = null,
-//)
+data class VehicleStatsQseDTO(
+    val tripDate: java.time.LocalDate?,
+    val vehicleId: String?,
+    val distanceSum: Int?,
+    val durationPerTripAvg: String?,
+    var licensePlate: String? = null,
+    var driverName: String? = null,
+)
+data class VehiclesStatsQseDTO(
+    val vehicleStatsQse: VehicleStatsQseDTO,
+    var team: TeamDTO?,
+    var teamHierarchy:String?
+
+)

@@ -157,5 +157,94 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
     }
 
 
+//function returns data of QSE report
+    fun findVehicleStatsQSEOverSpecificPeriod(
+        startDate: String,
+        endDate: String,
+        teamLabels: List<String>? = null,
+        vehicleIds: List<String>? = null,
+        driversIds: List<String>? = null
+    ): List<VehicleStatsDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
+            handle.createQuery(
+                """
+                    SELECT
+                        vehicle_id,
+                        ARRAY_JOIN(ARRAY_AGG(DISTINCT driver_name), ', ') AS driver_name,
+                        license_plate,
+                        :startDate AS trip_date,      
+                        ROUND(SUM(distance_sum)/1000) AS distance_sum,
+                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg
+                    
+                    FROM (
+                        SELECT
+                            vehicle_id,
+                            driver_name,
+                            license_plate,
+                            SUM(distance) AS distance_sum,
+                            SUM(duration) AS duration_sum
+                            
+                        FROM trips_vehicle_team_view
+                        WHERE DATE(start_time) = DATE(end_time)
+                          AND DATE(start_time) BETWEEN :startDate AND :endDate
+                          AND vehicle_id IS NOT NULL
+
+                           ${
+                    if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
+                        "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
+                                " AND (license_plate IN (<vehicleIds>) OR driver_name IN (<driversIds>))"
+                    } else {
+                        var conditions = mutableListOf<String>()
+                        if (!teamLabels.isNullOrEmpty()) {
+                            conditions.add("AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))")
+                        }
+                        if (!vehicleIds.isNullOrEmpty()) {
+                            conditions.add("AND license_plate IN (<vehicleIds>)")
+                        }
+                        if (!driversIds.isNullOrEmpty()) {
+                            val hasUnassignedSentinel = driversIds.contains("Véhicule non attribué")
+                            val realDriverNames = driversIds.filter { it != "Véhicule non attribué" }
+                            when {
+                                hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
+                                    conditions.add("AND (driver_name IN (<driversIds>) OR driver_name IS NULL)")
+                                }
+
+                                hasUnassignedSentinel -> {
+                                    conditions.add("AND driver_name IS NULL")
+                                }
+
+                                else -> {
+                                    conditions.add("AND driver_name IN (<driversIds>)")
+                                }
+                            }
+                        }
+                        conditions.joinToString(" ")
+                    }
+                }
+                        GROUP BY vehicle_id, date(start_time), driver_name , license_plate
+                         ) daily
+                    GROUP BY vehicle_id , license_plate ;
+                """.trimIndent()
+            )
+                .bind("startDate", startDate)
+                .bind("endDate", endDate)
+                .apply {
+                    if (!teamLabels.isNullOrEmpty()) {
+                        bindList("teamLabels", teamLabels)
+                    }
+                    if (!vehicleIds.isNullOrEmpty()) {
+                        bindList("vehicleIds", vehicleIds)
+                    }
+                    if (!driversIds.isNullOrEmpty()) {
+                        bindList("driversIds", driversIds)
+                    }
+                }
+                .mapTo(VehicleStatsDTO::class.java)
+                .list()
+        }
+    }
+
+
+
 
 }

@@ -32,6 +32,7 @@ import {AppConfig} from "../../app.config";
               <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg" title="Cartographie"></p-button>
               <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg" title="POIs"></p-button>
               <p-button (onClick)="navigateTo('report')" icon="pi pi-chart-bar" styleClass="custom-button-bg" title="Suivi d'activité"></p-button>
+              <p-button (onClick)="navigateTo('qse-report')" icon="pi pi-chart-line" styleClass="custom-button-bg" title="Rapport QSE"></p-button>
             </div>
           </div>
           <div class="filters center">

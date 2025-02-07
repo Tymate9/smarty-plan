@@ -8,6 +8,7 @@ import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.compon
 import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
+import {QseReportComponent} from "./features/report/qse.report.component";
 
 export const routes: Routes = [
   {
@@ -19,6 +20,7 @@ export const routes: Routes = [
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit', component: PoiMapComponent},
       { path: 'report', component: ReportComponent },
+      { path: 'qse-report', component: QseReportComponent },
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'workinprogress', component: EntityAdminComponent }

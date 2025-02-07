@@ -13,57 +13,26 @@ import { DialogModule } from 'primeng/dialog';
 @Component({
   selector: 'app-report',
   template: `
-    <div class="calendar-container">
-      <p-calendar
-        [(ngModel)]="dateFrom"
-        placeholder="Select From Date"
-        [maxDate]="now"
-        [showOtherMonths]="true"
-        [showButtonBar]="true"
-        [showIcon]="true"
-        appendTo="body">
-      </p-calendar>
-      <p-calendar
-        [(ngModel)]="dateTo"
-        placeholder="Select To Date"
-        [maxDate]="now"
-        [showOtherMonths]="true"
-        [showButtonBar]="true"
-        appendTo="body"
-        [showIcon]="true"
-      >
-      </p-calendar>
-      <p-button [raised]="true" severity="info" icon="pi pi-search"
-                (click)="fetchVehicleStats()" styleClass="custom-button"></p-button>
-    </div>
 
-    <div class="status-buttons">
-      <button
-        *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:0:5"
-        pButton
-        [ngStyle]="{ '--button-color': 'var(--red-100)' }"
-        class="custom-status-button"
-        (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
-        <span>
-          <span class="status-count">{{ stat.value }}</span>
-          <span class="status-text">{{ keyLabels[stat.key] }}</span>
-        </span>
-      </button>
-    </div>
-    <div class="status-buttons">
-      <button
-        *ngFor="let stat of vehiclesStatsTotal | keyvalue | slice:5:10"
-        pButton
-        [ngStyle]="{ '--button-color': 'var(--gray-300)' }"
-        class="custom-status-button"
-        (click)="['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(stat.key) ? filterByKey(stat.key) : null">
-        <!--        (click)="filterByStatus(status.state)">-->
-        <span>
-          <span class="status-count">{{ stat.value }}</span>
-          <span class="status-text">{{ keyLabels[stat.key] }}</span>
-        </span>
-      </button>
-    </div>
+    <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
+
+    <app-indicator-buttons
+      [statsMap]="vehiclesStatsTotal"
+      [keyLabels]="keyLabels"
+      [buttonColor]="'var(--red-100)'"
+      [sliceRange]="[0, 5]"
+      [keyToPropertyMap]="keyToPropertyMap"
+      (filterClicked)="filterByKey($event)">
+    </app-indicator-buttons>
+
+    <app-indicator-buttons
+      [statsMap]="vehiclesStatsTotal"
+      [keyLabels]="keyLabels"
+      [buttonColor]="'var(--gray-300)'"
+      [sliceRange]="[5, 10]"
+      [keyToPropertyMap]="keyToPropertyMap"
+      (filterClicked)="filterByKey($event)">
+    </app-indicator-buttons>
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
@@ -194,118 +163,6 @@ import { DialogModule } from 'primeng/dialog';
 
   `,
   styles: [`
-    .calendar-container {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      gap: 100px;
-      margin-top: 20px;
-    }
-
-    ::ng-deep .p-calendar .p-inputtext:focus,
-    ::ng-deep .p-calendar .p-inputtext:hover,
-    ::ng-deep .p-calendar:not(.p-calendar-disabled).p-focus>.p-inputtext {
-      outline: 0 none;
-      outline-offset: 0;
-      border-color: white !important;
-      box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    }
-    ::ng-deep .p-calendar .p-datepicker {
-      z-index: 1000;
-      top:50px;
-      border-color: white !important;
-      box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    }
-    ::ng-deep .p-button.p-button-text{
-      color:var(--gray-700) !important;
-    }
-    ::ng-deep .p-button:active,::ng-deep .p-button:focus {
-      border-color: white !important;
-      box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    }
-
-    /*Style de bouton Indicateur*/
-    .status-buttons {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      margin-top: 20px;
-      justify-content: center;
-      align-items: center;
-    }
-    .custom-status-button {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 30px;
-      font-size: 10px;
-      font-weight: bold;
-      border: none;
-      width: 100%;
-      flex: 1 1 170px;
-      height: 90px;
-      box-sizing: border-box;
-      position: relative;
-      border-radius: 20px;
-      color: #333;
-      background: white;
-      overflow: hidden;
-      cursor: pointer;
-      transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
-      white-space: nowrap;
-      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
-
-    }
-
-    .custom-status-button i {
-      margin-right: auto;
-      font-size: 30px;
-      color: var(--button-color, #007bff);
-      margin-left: auto;
-
-    }
-
-    .custom-status-button:hover {
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-      transform: translateY(-2px);
-    }
-
-    .custom-status-button::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 30%;
-      background: var(--button-color, #007bff);
-      border-top-left-radius: 20px;
-      border-bottom-left-radius: 20px;
-    }
-
-    .custom-status-button span {
-      position: relative;
-      //z-index: 3;
-      display: flex;
-      flex: 1;
-      justify-content: space-between;
-      padding-left: 13px;
-    }
-
-    .custom-status-button .status-count {
-      color: black !Important;
-      padding: 0 5px !Important;
-      font-weight: bold !Important;
-      margin-right: 10px !Important;
-    }
-
-    .custom-status-button .status-text {
-      color: var(--button-color, #007bff);
-
-    }
-    /*fin de Style de bouton Indicateur*/
-
-
 
     /*style de treeTable*/
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
@@ -416,79 +273,6 @@ import { DialogModule } from 'primeng/dialog';
 
     /*fin de style de bouton personnalisé*/
 
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .dialog-box {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      min-width: 320px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .dialog-box h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .dialog-content {
-      margin-bottom: 16px;
-    }
-
-    .dialog-footer {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .dialog-footer button {
-      background-color: #aa001f;
-      border: none;
-      border-radius: 4px;
-      color: #fff;
-      font-weight: 600;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .dialog-footer button:hover {
-      background-color: #8e001b;
-    }
-
-
-    /*style de bouton personnalisé*/
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      font-weight: 600;
-    }
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:focus,
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:active {
-      border-color: white !important;
-      box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    }
-
-    ::ng-deep .p-calendar .p-button {
-      background-color: #aa001f;
-      border-color: #aa001f !important;
-      color: white !important;
-      font-weight: 600;
-    }
-
 
 
     /* Make dialog content flexible */
@@ -560,8 +344,8 @@ import { DialogModule } from 'primeng/dialog';
 export class ReportComponent implements OnInit {
 
   selectedTags: { [key: string]: string[] } = {};
-  dateFrom: Date | null = new Date();
-  dateTo: Date | null = new Date();
+  dateFrom: Date = new Date();
+  dateTo: Date = new Date();
   protected now = new Date();
   vehiclesStatsTree: TreeNode[] = [];
   vehicleStats: any[] = [];
@@ -585,15 +369,8 @@ export class ReportComponent implements OnInit {
     drivers: []
   };
 
-  //Pour référencer uniquement les propriétés valides de VehiclesStatsDTO
-  // keyToPropertyMap: Record<string, keyof VehiclesStatsDTO> = {
-  //   vehitotalHasLastTripLong: 'hasLastTripLong',
-  //   totalHasLateStartSum: 'hasLateStartSum',
-  //   totalHasLateStop: 'hasLateStop',
-  // };
-
   keyToPropertyMap: Record<string, keyof VehicleStatsDTO> = {
-    vehitotalHasLastTripLong: "hasLastTripLong",
+    totalHasLastTripLong: "hasLastTripLong",
     totalHasLateStartSum: "hasLateStartSum",
     totalHasLateStop: "hasLateStop",
   };
@@ -602,15 +379,15 @@ export class ReportComponent implements OnInit {
   keyLabels: Record<string, string> = {
     averageDistance: "DISTANCE MOYENNE/TRAJET (en km)",
     averageDuration: "TEMPS DE CONDUITE DECLARE TOTAL",
-    averageRangeAvg: "Average Range",
+    averageRangeAvg: "AMPLITUDE MOYENNE",
     totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-    totalDrivers: "Total Drivers",
+    totalDrivers: "NOMBRE TOTAL DE CONDUCTEURS",
     totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
     totalHasLastTripLong: "DERNIER TRAJET>45mn  (en nb)",
     totalHasLateStartSum: "DEPART TARDIF  (en nb)",
-    totalHasLateStop: "Late Stops",
+    totalHasLateStop: "ARRETS TARDIFS",
     totalTripCount: "TRAJETS EFFECTUES (en nb)",
-    totalVehicles: "Total Vehicles",
+    totalVehicles: "NOMBRE TOTAL DE VEHICULES",
     totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
   };
 
@@ -626,8 +403,6 @@ export class ReportComponent implements OnInit {
   //Récupérer des statistiques pour une période spécifique
   fetchVehicleStats(): void {
     if (this.dateFrom && this.dateTo) {
-      // const startDate = this.dateFrom.toISOString().split('T')[0];
-      // const endDate = this.dateTo.toISOString().split('T')[0];
 
       const startDate = this.dateFrom.getFullYear() + '-' +
         String(this.dateFrom.getMonth() + 1).padStart(2, '0') + '-' +
@@ -637,7 +412,7 @@ export class ReportComponent implements OnInit {
         String(this.dateTo.getMonth() + 1).padStart(2, '0') + '-' +
         String(this.dateTo.getDate()).padStart(2, '0');
 
-      console.log(startDate+"c   "+ endDate);
+
       this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
         next: (data) => {
           const { teamHierarchyNodes, stats } = data;
@@ -650,7 +425,7 @@ export class ReportComponent implements OnInit {
 
           //transformer les résultats originaux de la table en TreeNode
           this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
-          console.log(this.vehiclesStatsTree)
+
 
         },
         error: (err) => {
@@ -662,15 +437,9 @@ export class ReportComponent implements OnInit {
     }
   }
 
-
-
-
-
   //Récupérer des statistiques pour une période spécifique
   fetchVehicleDailyStats(vehicleId:string, licenseplat:string): void {
     if (this.dateFrom && this.dateTo) {
-        console.log("Vehicle ID Received:", vehicleId);
-
         if (!vehicleId) {
           console.error("Error: vehicleId is undefined or empty!");
           return;
@@ -684,19 +453,12 @@ export class ReportComponent implements OnInit {
         String(this.dateTo.getMonth() + 1).padStart(2, '0') + '-' +
         String(this.dateTo.getDate()).padStart(2, '0');
 
-      console.log(startDate+ endDate);
-      console.log(vehicleId);
 
       this.vehicleService.getVehicleDailyStats(startDate, endDate ,vehicleId ).subscribe({
         next: (data) => {
           this.vehicleDailyStats = data;
           this.displayDailyStats = true;
           this.selectedDailyStat=licenseplat;
-
-
-          //cette variable contient les résultats originaux du tableau
-
-          console.log("here", this.vehicleDailyStats)
 
         },
         error: (err) => {
@@ -707,7 +469,6 @@ export class ReportComponent implements OnInit {
       alert('Veuillez sélectionner les dates De et À.');
     }
   }
-
 
 
   //Fonction à transférer vers treeNode
@@ -787,8 +548,6 @@ export class ReportComponent implements OnInit {
     this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
   }
 
-
-
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
   }
@@ -799,6 +558,11 @@ export class ReportComponent implements OnInit {
     this.displayDailyStats = false;
   }
 
+  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date }) {
+    this.dateFrom=event.dateFrom;
+    this.dateTo=event.dateTo;
+    this.fetchVehicleStats();
+  }
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {

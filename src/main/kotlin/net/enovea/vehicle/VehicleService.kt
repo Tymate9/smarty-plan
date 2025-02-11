@@ -14,7 +14,6 @@ import net.enovea.vehicle.vehicleStats.*
 import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import net.enovea.vehicle.vehicleUntrackedPeriod.VehicleUntrackedPeriodEntity
-import org.apache.commons.lang3.time.DateUtils.round
 import java.time.*
 import java.time.temporal.Temporal
 import kotlin.math.roundToInt
@@ -31,8 +30,7 @@ open class VehicleService(
 ) {
 
 
-
-    //function returns trips statistics displayed in the table on the page ('suivi d'activité')
+    //function returns trips statistics displayed on the page ('suivi d'activité')
     fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
 
         val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds )
@@ -65,7 +63,6 @@ open class VehicleService(
                 licensePlate = stats.licensePlate,
                 driverName = stats.driverName,
             )
-
             VehiclesStatsDTO(
                 vehicleStats = vehicleStatsDTO,
                 team = team,
@@ -73,14 +70,11 @@ open class VehicleService(
             )
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
-        println(teamHierarchy)
-//        val test=getVehiclesStatsQSEReport(startDate, endDate ,teamLabels ,vehicleIds, driversIds)
-//        println("new "+test)
         return Pair(teamHierarchy, totalVehiclesStatsMap)
     }
 
 
-    //function to calculate total statistics displayed in report page('suivi d'activité')
+    //function to calculate total statistics(indicators) displayed on the page('suivi d'activité')
     private fun calculateTotalVehiclesStats(vehiclesStats: List<VehicleStatsDTO>): Map<String, Any> {
 
         val totalVehicles = vehiclesStats.size
@@ -89,7 +83,6 @@ open class VehicleService(
         val totalTripCount = vehiclesStats.sumOf { it.tripCount }
         val totalDrivingTime = String.format("%02d:%02d", (vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) } / 3600), ((vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) } % 3600) / 60))
         val averageDistance = if (totalTripCount > 0) round((totalDistance / totalTripCount).toDouble()) else 0
-        println(totalDistance.toString()+"   "+ totalTripCount.toString()+" "+averageDistance.toString())
         val averageDuration = if (totalTripCount > 0) String.format("%02d:%02d", (vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) }.toDouble() / totalTripCount).roundToInt() / 3600, ((vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) }.toDouble() / totalTripCount).roundToInt() % 3600) / 60) else "00:00"
         val totalWaitingTime = String.format("%02d:%02d", (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } / 3600), (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } % 3600) / 60)
         val totalHasLateStart = vehiclesStats.sumOf { it.hasLateStartSum }
@@ -114,35 +107,18 @@ open class VehicleService(
         )
     }
 
-    //To convert time from HH:MM format to second
-    fun convertHHMMToSeconds(drivingTime: String?): Long {
-        if (drivingTime.isNullOrBlank()) {
-            return 0L
-        }
-
-        // Split HH:MM string and convert to seconds
-        val timeParts = drivingTime.split(":")
-        if (timeParts.size == 2) {
-            val hours = timeParts[0].toIntOrNull() ?: 0
-            val minutes = timeParts[1].toIntOrNull() ?: 0
-            return (hours * 3600L) + (minutes * 60L)
-        }
-        return 0L
-    }
 
     //function to get the daily statistics of a vehicle over a period
     fun getVehicleStatsDaily(startDate: String, endDate: String , vehicleId: String): List<VehicleStatsDTO>{
         return  vehicleStatsRepository.findVehicleDailyStats(startDate,endDate,vehicleId)
-
     }
 
-
-
-    fun getVehiclesStatsQSEReport(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?): List<TeamHierarchyNode> {
+    //function returns vehicles statistics displayed on the page ('QSE  reports')
+    fun getVehiclesStatsQSEReport(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
 
         val vehiclesStatsQse = vehicleStatsRepository.findVehicleStatsQSEOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds )
 
-        //val totalVehiclesStatsMap = calculateTotalVehiclesStats(vehiclesStats)
+        val totalVehiclesStatsQSEMap = calculateTotalVehiclesStatsQSE(vehiclesStatsQse)
         val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
 
         val vehiclesWithHierarchy = vehiclesStatsQse?.map { stats ->
@@ -161,7 +137,10 @@ open class VehicleService(
                 durationPerTripAvg = stats.durationPerTripAvg,
                 licensePlate = stats.licensePlate,
                 driverName = stats.driverName,
-            )
+                tripCount = stats.tripCount,
+                waitingDuration = stats.waitingDuration,
+                drivingTime = stats.drivingTime,
+                )
             VehiclesStatsQseDTO(
                 vehicleStatsQse = vehicleStatsQseDTO,
                 team = team,
@@ -169,8 +148,32 @@ open class VehicleService(
             )
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
-        println(teamHierarchy)
-        return teamHierarchy
+        return Pair(teamHierarchy, totalVehiclesStatsQSEMap)
+    }
+
+    //function to calculate total statistics(indicators) displayed on the page('QSE Reports')
+    private fun calculateTotalVehiclesStatsQSE(vehiclesStats: List<VehicleStatsQseDTO>): Map<String, Any> {
+        val totalDistance = vehiclesStats.sumOf { it.distanceSum ?: 0 }
+        val totalDrivingTime = String.format(
+            "%02d:%02d",
+            (vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) } / 3600),
+            ((vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) } % 3600) / 60))
+        val totalWaitingTime = String.format(
+            "%02d:%02d",
+            (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } / 3600),
+            (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } % 3600) / 60)
+        val selectionScore = "A"
+        val severityOfUseTurn = "B"
+        val severityOfAcceleration ="C"
+
+        return mapOf(
+            "totalDistanceSum" to totalDistance,
+            "totalDrivingTime" to totalDrivingTime,
+            "totalWaitingTime" to totalWaitingTime,
+            "selectionScore" to selectionScore,
+            "severityOfUseTurn" to severityOfUseTurn,
+            "severityOfAcceleration" to severityOfAcceleration
+        )
     }
 
 
@@ -296,24 +299,7 @@ open class VehicleService(
         return teamHierarchy
     }
 
-    // Helper function to build team hierarchy
-    private fun buildTeamHierarchy(team: TeamDTO?): String {
 
-        // Recursively build the team hierarchy
-        val hierarchy = mutableListOf<String>()
-        var currentTeam = team
-        while (currentTeam != null) {
-            hierarchy.add(currentTeam.label)
-            currentTeam = currentTeam.parentTeam
-        }
-        // If the hierarchy is only one level, add "Interne" as the second level
-        if (hierarchy.size == 1) {
-            val teamLabel = hierarchy.first()
-            hierarchy.add("$teamLabel Interne")
-            return hierarchy.joinToString(" > ")
-        } else
-            return hierarchy.reversed().joinToString(" > ")
-    }
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers
     fun getVehiclesDetails(): List<VehicleDTO> {
@@ -402,6 +388,21 @@ open class VehicleService(
     }
 }
 
+//To convert time from HH:MM format to second
+fun convertHHMMToSeconds(drivingTime: String?): Long {
+    if (drivingTime.isNullOrBlank()) {
+        return 0L
+    }
+
+    // Split HH:MM string and convert to seconds
+    val timeParts = drivingTime.split(":")
+    if (timeParts.size == 2) {
+        val hours = timeParts[0].toIntOrNull() ?: 0
+        val minutes = timeParts[1].toIntOrNull() ?: 0
+        return (hours * 3600L) + (minutes * 60L)
+    }
+    return 0L
+}
 
 // Tree node data class
 data class TeamHierarchyNode(
@@ -410,6 +411,25 @@ data class TeamHierarchyNode(
     val vehicles: MutableList<Any> = mutableListOf()
 )
 
+// Helper function to build team hierarchy
+private fun buildTeamHierarchy(team: TeamDTO?): String {
+
+    // Recursively build the team hierarchy
+    val hierarchy = mutableListOf<String>()
+    var currentTeam = team
+    while (currentTeam != null) {
+        hierarchy.add(currentTeam.label)
+        currentTeam = currentTeam.parentTeam
+    }
+    // If the hierarchy is only one level, add "Interne" as the second level
+    if (hierarchy.size == 1) {
+        val teamLabel = hierarchy.first()
+        hierarchy.add("$teamLabel Interne")
+        return hierarchy.joinToString(" > ")
+    } else
+        return hierarchy.reversed().joinToString(" > ")
+}
+
 // Function to build a hierarchy tree for multiple top-level teams
 fun <T> buildTeamHierarchyForest(vehicles: List<T>, extractTeamHierarchy: (T) -> String?): List<TeamHierarchyNode> {
     // Map to store team nodes by their labels
@@ -417,7 +437,6 @@ fun <T> buildTeamHierarchyForest(vehicles: List<T>, extractTeamHierarchy: (T) ->
 
     vehicles.forEach { vehicle ->
         val teamHierarchy = extractTeamHierarchy(vehicle)?.split(" > ")
-        // val teamHierarchy = vehicle.teamHierarchy?.split(" > ")
 
         // Process the hierarchy and construct nodes
         var currentNode: TeamHierarchyNode? = null

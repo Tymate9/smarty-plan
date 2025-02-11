@@ -1,13 +1,12 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {TeamHierarchyNode,TeamHierarchyNodeStats, VehicleService} from "../vehicle/vehicle.service";
+import {TeamHierarchyNodeStats, VehicleService} from "../vehicle/vehicle.service";
 import {Calendar} from "primeng/calendar";
 import {TreeNode} from "primeng/api";
 import {dto} from "../../../habarta/dto";
 import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 import {Subscription} from "rxjs";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
-import { DialogModule } from 'primeng/dialog';
 
 
 @Component({
@@ -343,7 +342,6 @@ import { DialogModule } from 'primeng/dialog';
 
 export class ReportComponent implements OnInit {
 
-  selectedTags: { [key: string]: string[] } = {};
   dateFrom: Date = new Date();
   dateTo: Date = new Date();
   protected now = new Date();
@@ -424,7 +422,6 @@ export class ReportComponent implements OnInit {
           this.vehiclesStatsTotal=stats;
 
           //transformer les résultats originaux de la table en TreeNode
-          //this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
           this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
             this.vehicleStats,
             (vehicle: dto.VehiclesStatsDTO) => ({
@@ -433,8 +430,6 @@ export class ReportComponent implements OnInit {
             })
 
           )
-
-
         },
         error: (err) => {
           console.error('Erreur lors de la récupération des statistiques du véhicule:', err);
@@ -478,58 +473,6 @@ export class ReportComponent implements OnInit {
     }
   }
 
-
-  //Fonction à transférer vers treeNode
-  // transformToTreeNodesOld(teamNodes: TeamHierarchyNodeStats[]): TreeNode[] {
-  //   //Fonctions d'aide pour trier par ordre alphabétique
-  //   const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-  //     a.data.label.localeCompare(b.data.label);
-  //
-  //   const sortByDriverName = (
-  //     a: { data: { vehicle: dto.VehiclesStatsDTO } },
-  //     b: { data: { vehicle: dto.VehiclesStatsDTO } }
-  //   ) => {
-  //     const driverA = a.data.vehicle?.vehicleStats.driverName || '';
-  //     const driverB = b.data.vehicle?.vehicleStats.driverName || '';
-  //
-  //     return driverA.localeCompare(driverB);
-  //   };
-  //
-  //   return teamNodes.map((team) => {
-  //     return {
-  //       data: {
-  //         label: team.label,
-  //         vehicle: null,
-  //       },
-  //       expanded: true,
-  //       children: [
-  //         ...(team.children || []).map((child: TeamHierarchyNodeStats) => ({
-  //           data: {
-  //             label: child.label,
-  //             vehicle: null
-  //           },
-  //           expanded: true,
-  //           children: [
-  //             ...(child.vehicles || [])
-  //               .filter((vehicle) => vehicle.vehicleStats?.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
-  //               .map((vehicle: VehiclesStatsDTO) => ({
-  //               data: {
-  //                 label: vehicle?.vehicleStats?.licensePlate || 'Unknown License Plate',
-  //                 vehicle: vehicle || null,
-  //               },
-  //               expanded: true,
-  //               children: []
-  //             }))
-  //               .sort(sortByDriverName),
-  //           ]
-  //         }))
-  //           .sort(sortByLabel),
-  //       ]
-  //     };
-  //   }).sort(sortByLabel);
-  // }
-
-
   //fonction permettant de filtrer les résultats en fonction des boutons cliqués
   filterByKey(key: string): void {
     const property = this.keyToPropertyMap[key]; // Obtenir le nom de la propriété pour filtrer par
@@ -553,7 +496,6 @@ export class ReportComponent implements OnInit {
         .filter((node) => node.children.length > 0 || node.vehicles.length > 0); // Supprimer les nœuds parents s'ils n'ont pas d'enfants ou de véhicules
     }
 
-    //this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
     this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
       this.filteredVehiclesStats,
       (vehicle: dto.VehiclesStatsDTO) => ({

@@ -19,26 +19,10 @@ export interface TeamHierarchyNode<T> {
 }
 
 // Specific type aliases for each case
-//export type TeamHierarchyNodeBase = TeamHierarchyNode<dto.VehicleTableDTO>;
+export type TeamHierarchyNodeBase = TeamHierarchyNode<dto.VehicleTableDTO>;
 export type TeamHierarchyNodeStats = TeamHierarchyNode<dto.VehiclesStatsDTO>;
 export type TeamHierarchyNodeStatsQSE = TeamHierarchyNode<dto.VehiclesStatsQseDTO>;
 
-// export interface TeamHierarchyNode {
-//   label: string;
-//   children?: TeamHierarchyNode[];
-//   vehicles: (dto.VehicleTableDTO)[];
-// }
-// export interface TeamHierarchyNodeStats {
-//   label: string;
-//   children?: TeamHierarchyNodeStats[];
-//   vehicles: (dto.VehiclesStatsDTO)[];
-// }
-//
-// export interface TeamHierarchyNodeStatsQSE {
-//   label: string;
-//   children?: TeamHierarchyNodeStatsQSE[];
-//   vehicles: (dto.VehiclesStatsQseDTO)[];
-// }
 
 @Injectable({
   providedIn: 'root',
@@ -98,19 +82,22 @@ export class VehicleService {
     }
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`,  {params});
   }
+
+  // Méthode pour récupérer les véhicules dans la page Dashboard
   getFilteredVehiclesDashboard(
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
     driverNames: string[]=[]
-  ): Observable<TeamHierarchyNode<dto.VehicleTableDTO>[]> {
+  ): Observable<TeamHierarchyNodeBase[]> {
     const params={
       teamLabels: teamLabels.length ? teamLabels : [],
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
     }
-    return this.http.get<TeamHierarchyNode<dto.VehicleTableDTO>[]>(`${this.baseUrl}/tableData`,  {params});
+    return this.http.get<TeamHierarchyNodeBase[]>(`${this.baseUrl}/tableData`,  {params});
   }
 
+  // Méthode pour récupérer les véhicules et les indicateurs dans la page 'suivi d'activité'
   getVehiclesStats(
     startDate: string,
     endDate: string,
@@ -128,6 +115,7 @@ export class VehicleService {
     return this.http.get<{ teamHierarchyNodes: TeamHierarchyNodeStats[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats`, { params });
   }
 
+  // Méthode pour récupérer les statistics détailées d'un véhicle
   getVehicleDailyStats(
     startDate: string,
     endDate: string,
@@ -141,13 +129,14 @@ export class VehicleService {
     return this.http.get<VehicleStatsDTO[]>(`${this.baseUrl}/vehicleStats/daily`, { params });
   }
 
+  // Méthode pour récupérer les véhicules et les indicateurs dans la page 'Rapport QSE'
   getVehiclesStatsQse(
     startDate: string,
     endDate: string,
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
     driversIds: string[]=[]
-  ) :Observable<TeamHierarchyNode<dto.VehiclesStatsQseDTO>[]>  {
+  ) :Observable<{ teamHierarchyNodes: TeamHierarchyNodeStatsQSE[]; stats: Record<string, any> }>  {
     const params = {
       startDate: startDate,
       endDate: endDate,
@@ -155,11 +144,10 @@ export class VehicleService {
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driversIds: driversIds.length ? driversIds :[]
     };
-    return this.http.get<TeamHierarchyNode<dto.VehiclesStatsQseDTO>[]>(`${this.baseUrl}/vehicleStats/report-qse`, { params });
+    return this.http.get<{ teamHierarchyNodes: TeamHierarchyNodeStatsQSE[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats/report-qse`, { params });
   }
 
 //TODO make it more general (>3 levels)
-  ///////////////////////////for testing
   //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
   static transformToTreeNodes<T extends { label: string; children?: T[]; vehicles?: V[] }, V>(
     teamNodes: T[],

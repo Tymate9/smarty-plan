@@ -1,11 +1,10 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {TeamHierarchyNodeStats, TeamHierarchyNodeStatsQSE, VehicleService} from "../vehicle/vehicle.service";
+import {VehicleService} from "../vehicle/vehicle.service";
 import {Subscription} from "rxjs";
 import {dto} from "../../../habarta/dto";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import {TreeNode} from "primeng/api";
-import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
 
 @Component({
   selector:'app-qse-report',
@@ -15,7 +14,7 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
       [buttonColor]="'var(--red-100)'"
-      [sliceRange]="[0, 4]"
+      [sliceRange]="[0, 3]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
     </app-indicator-buttons>
@@ -24,7 +23,7 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
       [buttonColor]="'var(--gray-300)'"
-      [sliceRange]="[4, 8]"
+      [sliceRange]="[3, 6]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
     </app-indicator-buttons>
@@ -92,9 +91,16 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
           </ng-template>
           <td>{{ rowData.vehicle.vehicleStatsQse.distanceSum }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
-          <td>18/20</td><td>15/20</td><td>14/20</td>
-          <td>18/20</td><td>19/20</td><td>20/20</td>
-          <td>50%</td><td>70%</td><td>80%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.accelerationAR }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.accelerationR }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.accelerationV }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.turnAR }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.turnR }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.turnV }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.speedAR }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.speedR }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.speedV }}%</td>
+
         </tr>
 
       </ng-template>
@@ -216,36 +222,23 @@ export class QseReportComponent implements OnInit {
   dateTo: Date = new Date();
   vehicleStatsQse:any []=[];
   vehiclesStatsTree: TreeNode[] = [];
-  //vehiclesStatsTotal: Record<string, any>;
+  vehiclesStatsTotal: Record<string, any>;
+
 
   keyToPropertyMap: Record<string, keyof VehicleStatsDTO> = {
-    totalHasLastTripLong: "hasLastTripLong",
-    totalHasLateStartSum: "hasLateStartSum",
-    totalHasLateStop: "hasLateStop",
+    // example# totalHasLastTripLong: "hasLastTripLong",
   };
 
   keyLabels: Record<string, string> = {
     totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
     totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
     totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-    longTrips:"TRAJET LE PLUS LONG",
-    averageBreakLength:"TEMPS REPOS MOYEN (en hh:mm)",
     selectionScore:"SCORE DE LA SELECTION",
-    turn:"SEVERITE D'USAGE VIRAGE",
-    speed:"SEVERITE D'USAGE ACCELERATION-FREINAGE"
+    severityOfUseTurn:"SEVERITE D'USAGE VIRAGE",
+    severityOfAcceleration:"SEVERITE D'USAGE ACCELERATION-FREINAGE"
   };
 
 
-  vehiclesStatsTotal: Record<string, any> = {
-    totalDrivingTime: "1420:45",
-    totalWaitingTime: "360:15",
-    totalDistanceSum: 15840,
-    longTrips: 320,
-    averageBreakLength: "00:45",
-    selectionScore: "C",
-    turn: "A",
-    speed:"D"
-  };
 
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
@@ -256,7 +249,6 @@ export class QseReportComponent implements OnInit {
   onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date }) {
     this.dateFrom=event.dateFrom;
     this.dateTo=event.dateTo;
-    console.log(this.dateFrom, this.dateTo)
     this.fetchVehicleStatsQse();
   }
 
@@ -274,12 +266,12 @@ export class QseReportComponent implements OnInit {
 
       this.vehicleService.getVehiclesStatsQse(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
         next: (data) => {
+            const { teamHierarchyNodes, stats } = data;
 
+          this.vehicleStatsQse = teamHierarchyNodes;
+          this.vehiclesStatsTotal=stats;
 
-          //cette variable contient les résultats originaux du tableau
-          this.vehicleStatsQse = data;
           //transformer les résultats originaux de la table en TreeNode
-          //this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStatsQse)
           this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
             this.vehicleStatsQse,
             (vehicle: dto.VehiclesStatsQseDTO) => ({
@@ -288,7 +280,6 @@ export class QseReportComponent implements OnInit {
             })
 
           )
-          console.log(this.vehiclesStatsTree)
 
         },
         error: (err) => {
@@ -299,56 +290,6 @@ export class QseReportComponent implements OnInit {
       alert('Veuillez sélectionner les dates De et À.');
     }
   }
-
-  //Fonction à transférer vers treeNode
-  // transformToTreeNodesOld(teamNodes: TeamHierarchyNodeStatsQSE[]): TreeNode[] {
-  //   //Fonctions d'aide pour trier par ordre alphabétique
-  //   const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-  //     a.data.label.localeCompare(b.data.label);
-  //
-  //   const sortByDriverName = (
-  //     a: { data: { vehicle: dto.VehiclesStatsQseDTO } },
-  //     b: { data: { vehicle: dto.VehiclesStatsQseDTO } }
-  //   ) => {
-  //     const driverA = a.data.vehicle?.vehicleStatsQse.driverName || '';
-  //     const driverB = b.data.vehicle?.vehicleStatsQse.driverName || '';
-  //
-  //     return driverA.localeCompare(driverB);
-  //   };
-  //
-  //   return teamNodes.map((team) => {
-  //     return {
-  //       data: {
-  //         label: team.label,
-  //         vehicle: null,
-  //       },
-  //       expanded: true,
-  //       children: [
-  //         ...(team.children || []).map((child: TeamHierarchyNodeStatsQSE) => ({
-  //           data: {
-  //             label: child.label,
-  //             vehicle: null
-  //           },
-  //           expanded: true,
-  //           children: [
-  //             ...(child.vehicles || [])
-  //               .filter((vehicle) => vehicle.vehicleStatsQse?.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
-  //               .map((vehicle: VehiclesStatsQseDTO) => ({
-  //                 data: {
-  //                   label: vehicle?.vehicleStatsQse?.licensePlate || 'Unknown License Plate',
-  //                   vehicle: vehicle || null,
-  //                 },
-  //                 expanded: true,
-  //                 children: []
-  //               }))
-  //               .sort(sortByDriverName),
-  //           ]
-  //         }))
-  //           .sort(sortByLabel),
-  //       ]
-  //     };
-  //   }).sort(sortByLabel);
-  // }
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {

@@ -175,8 +175,12 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         SUM(trip_count) AS trip_count,
                         :startDate AS trip_date,      
                         ROUND(SUM(distance_sum)/1000) AS distance_sum,
-                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg
-                    
+                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
+                        CONCAT(LPAD(CAST(FLOOR(SUM(duration_sum) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration_sum) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS waiting_duration
                     FROM (
                         SELECT
                             vehicle_id,
@@ -184,7 +188,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             license_plate,
                             COUNT(*) AS trip_count,
                             SUM(distance) AS distance_sum,
-                            SUM(duration) AS duration_sum
+                            SUM(duration) AS duration_sum,
+                            time_to_sec(timediff(max(end_time), min(start_time))) AS `range`
                             
                         FROM trips_vehicle_team_view
                         WHERE DATE(start_time) = DATE(end_time)

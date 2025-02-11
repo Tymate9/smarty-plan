@@ -529,7 +529,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   vehiclesTree: TreeNode[] = [];
   @ViewChild(TreeTable) treeTable: TreeTable;
   vehicleStatusCounts: { state: string; count: number }[] = [];
-  teamHierarchy: TeamHierarchyNode[];
+  teamHierarchy: TeamHierarchyNode<dto.VehicleTableDTO>[];
   today = new Date().toISOString().split('T')[0].replaceAll('-', '');
   isExpanded = true;
   private filtersSubscription?: Subscription
@@ -628,10 +628,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
-  calculateStatusCounts(teams: TeamHierarchyNode[]): { state: string; count: number }[] {
+  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): Record<string, number> {
     const counts: Record<string, number> = {};
 
-    function traverseTeams(teamNodes: TeamHierarchyNode[]): void {
+    function traverseTeams(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): void {
       teamNodes.forEach((team) => {
         // Count states from the vehicles at this team level
         team.vehicles.forEach((vehicle) => {
@@ -663,7 +663,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       console.error('teamHierarchy is not an array or is undefined:', this.teamHierarchy);
       return;
     }
-    const filteredHierarchy: TeamHierarchyNode[] = this.teamHierarchy.map((team) => ({
+    const filteredHierarchy: TeamHierarchyNode<dto.VehicleTableDTO>[] = this.teamHierarchy.map((team) => ({
       ...team,
       children: team.children?.map((child) => ({
         ...child,
@@ -675,7 +675,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
     // Transformer en TreeNode
     this.teamHierarchy = filteredHierarchy;
-    this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
+    console.log(this.teamHierarchy);
+    //this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
+    this.vehiclesTree = VehicleService.transformToTreeNodes(
+      filteredHierarchy,
+      (vehicle: dto.VehicleTableDTO) => ({
+        driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+        licensePlate: vehicle.licenseplate,
+      }))
 
   }
 
@@ -696,7 +703,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   resetTreeNode() {
-    this.vehiclesTree = this.transformToTreeNodes(this.teamHierarchy);
+    //this.vehiclesTree = this.transformToTreeNodes(this.teamHierarchy);
+    this.vehiclesTree = VehicleService.transformToTreeNodes(
+      this.teamHierarchy,
+      (vehicle: dto.VehicleTableDTO) => ({
+        driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+        licensePlate: vehicle.licenseplate,
+      }))
+
   }
 
 
@@ -721,12 +735,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
 
-  convertToCSV(data: TeamHierarchyNode[]): string {
+
+  convertToCSV(data: TeamHierarchyNode<dto.VehicleTableDTO>[]): string {
     const rows: string[] = [];
     const headers = ['Véhicule', 'Immatriculation', 'Marque', 'Modèle', 'Etat', 'Energie', 'Conducteur', 'Dernière communication', 'Heure de départ', 'Adresse', 'Type d\'adresse de référence', 'Distance totale', 'Entité Conducteur', 'Entité Véhicule', 'Groupe de salarié'];
     rows.push(headers.join(','));
 
-    const processNode = (node: TeamHierarchyNode, parentLabel: string = ''): void => {
+    const processNode = (node: TeamHierarchyNode<dto.VehicleTableDTO>, parentLabel: string = ''): void => {
       const teamLabel = node.label;
       if (node.vehicles) {
         for (const vehicle of node.vehicles) {

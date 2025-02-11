@@ -164,14 +164,15 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         teamLabels: List<String>? = null,
         vehicleIds: List<String>? = null,
         driversIds: List<String>? = null
-    ): List<VehicleStatsDTO> {
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
+    ): List<VehicleStatsQseDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseDTO>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
                         vehicle_id,
                         ARRAY_JOIN(ARRAY_AGG(DISTINCT driver_name), ', ') AS driver_name,
                         license_plate,
+                        SUM(trip_count) AS trip_count,
                         :startDate AS trip_date,      
                         ROUND(SUM(distance_sum)/1000) AS distance_sum,
                         CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg
@@ -181,6 +182,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             vehicle_id,
                             driver_name,
                             license_plate,
+                            COUNT(*) AS trip_count,
                             SUM(distance) AS distance_sum,
                             SUM(duration) AS duration_sum
                             
@@ -239,7 +241,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         bindList("driversIds", driversIds)
                     }
                 }
-                .mapTo(VehicleStatsDTO::class.java)
+                .mapTo(VehicleStatsQseDTO::class.java)
                 .list()
         }
     }

@@ -74,6 +74,8 @@ open class VehicleService(
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
         println(teamHierarchy)
+//        val test=getVehiclesStatsQSEReport(startDate, endDate ,teamLabels ,vehicleIds, driversIds)
+//        println("new "+test)
         return Pair(teamHierarchy, totalVehiclesStatsMap)
     }
 

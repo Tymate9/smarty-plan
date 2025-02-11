@@ -23,4 +23,5 @@ class VehicleStatsMapper: RowMapper<VehicleStatsDTO>{
             licensePlate = rs.getString("license_plate") ?: "-",
         )
     }
+
 }

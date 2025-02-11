@@ -424,7 +424,15 @@ export class ReportComponent implements OnInit {
           this.vehiclesStatsTotal=stats;
 
           //transformer les résultats originaux de la table en TreeNode
-          this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
+          //this.vehiclesStatsTree = this.transformToTreeNodes(this.vehicleStats)
+          this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
+            this.vehicleStats,
+            (vehicle: dto.VehiclesStatsDTO) => ({
+              driverName: vehicle.vehicleStats.driverName ||'',
+              licensePlate: vehicle.vehicleStats.licensePlate || 'unknown',
+            })
+
+          )
 
 
         },
@@ -472,54 +480,54 @@ export class ReportComponent implements OnInit {
 
 
   //Fonction à transférer vers treeNode
-  transformToTreeNodes(teamNodes: TeamHierarchyNodeStats[]): TreeNode[] {
-    //Fonctions d'aide pour trier par ordre alphabétique
-    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-      a.data.label.localeCompare(b.data.label);
-
-    const sortByDriverName = (
-      a: { data: { vehicle: dto.VehiclesStatsDTO } },
-      b: { data: { vehicle: dto.VehiclesStatsDTO } }
-    ) => {
-      const driverA = a.data.vehicle?.vehicleStats.driverName || '';
-      const driverB = b.data.vehicle?.vehicleStats.driverName || '';
-
-      return driverA.localeCompare(driverB);
-    };
-
-    return teamNodes.map((team) => {
-      return {
-        data: {
-          label: team.label,
-          vehicle: null,
-        },
-        expanded: true,
-        children: [
-          ...(team.children || []).map((child: TeamHierarchyNodeStats) => ({
-            data: {
-              label: child.label,
-              vehicle: null
-            },
-            expanded: true,
-            children: [
-              ...(child.vehicles || [])
-                .filter((vehicle) => vehicle.vehicleStats?.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
-                .map((vehicle: VehiclesStatsDTO) => ({
-                data: {
-                  label: vehicle?.vehicleStats?.licensePlate || 'Unknown License Plate',
-                  vehicle: vehicle || null,
-                },
-                expanded: true,
-                children: []
-              }))
-                .sort(sortByDriverName),
-            ]
-          }))
-            .sort(sortByLabel),
-        ]
-      };
-    }).sort(sortByLabel);
-  }
+  // transformToTreeNodesOld(teamNodes: TeamHierarchyNodeStats[]): TreeNode[] {
+  //   //Fonctions d'aide pour trier par ordre alphabétique
+  //   const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
+  //     a.data.label.localeCompare(b.data.label);
+  //
+  //   const sortByDriverName = (
+  //     a: { data: { vehicle: dto.VehiclesStatsDTO } },
+  //     b: { data: { vehicle: dto.VehiclesStatsDTO } }
+  //   ) => {
+  //     const driverA = a.data.vehicle?.vehicleStats.driverName || '';
+  //     const driverB = b.data.vehicle?.vehicleStats.driverName || '';
+  //
+  //     return driverA.localeCompare(driverB);
+  //   };
+  //
+  //   return teamNodes.map((team) => {
+  //     return {
+  //       data: {
+  //         label: team.label,
+  //         vehicle: null,
+  //       },
+  //       expanded: true,
+  //       children: [
+  //         ...(team.children || []).map((child: TeamHierarchyNodeStats) => ({
+  //           data: {
+  //             label: child.label,
+  //             vehicle: null
+  //           },
+  //           expanded: true,
+  //           children: [
+  //             ...(child.vehicles || [])
+  //               .filter((vehicle) => vehicle.vehicleStats?.licensePlate !== null && vehicle !== undefined) // Exclude null or undefined vehicles
+  //               .map((vehicle: VehiclesStatsDTO) => ({
+  //               data: {
+  //                 label: vehicle?.vehicleStats?.licensePlate || 'Unknown License Plate',
+  //                 vehicle: vehicle || null,
+  //               },
+  //               expanded: true,
+  //               children: []
+  //             }))
+  //               .sort(sortByDriverName),
+  //           ]
+  //         }))
+  //           .sort(sortByLabel),
+  //       ]
+  //     };
+  //   }).sort(sortByLabel);
+  // }
 
 
   //fonction permettant de filtrer les résultats en fonction des boutons cliqués
@@ -545,7 +553,14 @@ export class ReportComponent implements OnInit {
         .filter((node) => node.children.length > 0 || node.vehicles.length > 0); // Supprimer les nœuds parents s'ils n'ont pas d'enfants ou de véhicules
     }
 
-    this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
+    //this.vehiclesStatsTree = this.transformToTreeNodes(this.filteredVehiclesStats);
+    this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
+      this.filteredVehiclesStats,
+      (vehicle: dto.VehiclesStatsDTO) => ({
+        driverName: vehicle.vehicleStats.driverName ||'',
+        licensePlate: vehicle.vehicleStats.licensePlate || 'unknown',
+      })
+    )
   }
 
   ngOnInit() {

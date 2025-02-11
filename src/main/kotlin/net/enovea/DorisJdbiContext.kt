@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import net.enovea.trip.TripDailyStatsRowMapper
 import net.enovea.trip.TripRowMapper
 import net.enovea.vehicle.vehicleStats.VehicleStatsMapper
+import net.enovea.vehicle.vehicleStats.VehicleStatsQseMapper
 import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.statement.SqlLogger
@@ -44,5 +45,6 @@ class DorisJdbiContext(dataSource: DataSource) {
             .registerRowMapper(TripRowMapper())
             .registerRowMapper(TripDailyStatsRowMapper())
             .registerRowMapper(VehicleStatsMapper())
+            .registerRowMapper(VehicleStatsQseMapper())
     }
 }

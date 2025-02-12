@@ -94,7 +94,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                     <!--                {{ event.distance.toFixed(0) }} Km-->
                     <div class="distance-rectangle small-right" style="position: relative">
                       <p style="position: absolute; top:-0.6rem; left:0.2rem;">{{ event.distance.toFixed(0) }} Km</p>
-                      <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="bottom:0.4rem; right:0rem; position: absolute; color: black;"></i>
+                      <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="bottom:0.4rem; right:0rem; position: absolute; color: darkred;"></i>
                     </div>
                   </div>
                   <div
@@ -112,7 +112,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                         minute: '2-digit'
                       })
                     }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
-                    <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="right: 1rem; bottom: 1rem; position: absolute;"></i>
+                    <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="right: 1rem; bottom: 1rem; position: absolute; color:darkred"></i>
                   </div>
                 </ng-template>
               </p-timeline>

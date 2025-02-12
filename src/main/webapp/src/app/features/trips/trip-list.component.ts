@@ -3,7 +3,7 @@ import {dto} from "../../../habarta/dto";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventType = dto.TripEventType;
 import {TripsService} from "./trips.service";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 
 @Component({
@@ -43,7 +43,8 @@ import {TableModule} from "primeng/table";
   standalone: true,
   imports: [
     DatePipe,
-    TableModule
+    TableModule,
+    NgIf
   ],
   styles: [`
     table {

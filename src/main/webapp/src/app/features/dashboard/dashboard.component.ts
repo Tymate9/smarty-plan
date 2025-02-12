@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
 import {TeamHierarchyNode, VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
@@ -40,10 +40,10 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
       <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()" styleClass="custom-button"></p-button>
-      <p-button [raised]="true" severity="info" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
-                (click)="toggleTree()" styleClass="custom-button"></p-button>
-      <p-button label="Exporter CSV" [raised]="true" severity="info" (click)="exportToCSV()"
-                styleClass="custom-button"></p-button>
+      <p-button [raised]="true" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
+                (click)="toggleTree()"></p-button>
+      <p-button label="Exporter CSV" [raised]="true" (click)="exportToCSV()"
+                ></p-button>
     </div>
 
     <div style="margin-bottom: 10px;">
@@ -64,19 +64,19 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
         <tr [ttRow]="rowNode"
             [ngClass]="{
-          'root-node': !rowNode.parent,
+          'dynamic-tt-parent-node': !rowNode.parent,
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
-          'has-vehicle': rowData.vehicle
+          'dynamic-tt-leaf': rowData.vehicle
         }">
           <td *ngIf="!rowData.vehicle" colspan="8">
-            <p-treeTableToggler [rowNode]="rowNode"/>
+            <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
         </tr>
 
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
-            class="table-header">
+            class="dynamic-tt-header">
           <td>Conducteur</td>
           <td>Immatriculation</td>
           <td>État</td>
@@ -84,14 +84,14 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
           <td>Heure de départ</td>
           <td>Adresse</td>
           <td>Distance totale</td>
-          <td>Bouton d'action</td>
+          <td>Action</td>
         </tr>
 
         <tr [ttRow]="rowNode"
             [ngClass]="{
-          'root-node': !rowNode.parent,
+          'dynamic-tt-parent-node': !rowNode.parent,
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
-          'has-vehicle': rowData.vehicle
+          'dynamic-tt-leaf': rowData.vehicle
         }"
             *ngIf="rowData.vehicle">
           <td *ngIf="rowData.vehicle.driver; else noDriver">
@@ -283,120 +283,34 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     SmsFormComponent
   ],
   styles: [`
-    /*style de treeTable*/
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
-      background-color: #007ad9 !important;
-      color: white !important;
-      text-align: left !important;
-      padding: 2px 8px !important;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
-      padding: 2px 8px !important;
-      border-bottom: 1px solid #ddd !important;
-      width: auto;
-      font-weight: 700;
-    }
-
-    .table-header {
-      background-color: var(--gray-500);
-      color: white;
-      padding: 10px !Important;
-      font-weight: 700 !Important;
-    }
-
-    .table-header td {
-      text-align: center !Important;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
-      background-color: var(--gray-200) !important;
-      //color: var(--blue-600) !important;
-      font-weight: 700;
-      color: red;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.has-vehicle {
-      background-color: var(--gray-200) !important;
-      font-weight: 600;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr:hover {
-      background-color: var(--bluegray-100) !important;
-    }
-
-    .p-treeTable .p-treetable-toggler {
-      color: white !important;
-    }
-
-    ::ng-deep .p-treetable .p-treetable-tbody > tr > td .p-treetable-toggler {
-      color: white;
-      background: #aa001f !important;
-      width: 1.3rem;
-      height: 1.3rem;
-    }
-
-    .custom-cell {
-      width: 1%;
-      white-space: nowrap;
-      text-align: center;
-      padding: 0;
-      align-items: center
-    }
-
-    /*fin de style de treeTable*/
-
-    /*style de treeTable parent ligne*/
-    :host ::ng-deep .p-treetable.custom-tree-table .root-node {
-      background-color: #aa001f;
-      color: white;
-      border-radius: 15px 15px 0px 0px !important;
-      border: none !important;
-      width: 100% !important;
-      margin: 0 auto !important;
-      box-shadow: 0 2px 4px #0000001a !important;
-      font-weight: 700 !important;
-      clip-path: polygon(0% 100%, 0% 15%, 25% 15%, 27% 75%, 100% 75%, 100% 100%) !important;
-      height: 50px;
-      line-height: 50px;
-    }
-
-    :host ::ng-deep .p-treetable.custom-tree-table .root-node td {
-      padding: 12px;
-      border-width: 0px;
-      font-weight: 700 !important;
-    }
-
-    /*fin de style de treeTable parent ligne*/
 
     /*style de colonne état*/
-    :host ::ng-deep .p-treetable.custom-tree-table .DRIVING {
+    .DRIVING {
       background-color: #21A179;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .IDLE {
+    .IDLE {
       background-color: #FE8F2B;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .PARKED {
+    .PARKED {
       background-color: #C71400;
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .NO_COM {
-      //background-color: #E5E5E5;
-      background-color: var(--gray-400);
+    .NO_COM {
+      background-color: var(--p-gray-400);
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .UNPLUGGED {
-      background-color: var(--gray-400);
+    .UNPLUGGED {
+      background-color: var(--p-gray-400);
       color: white;
     }
 
-    :host ::ng-deep .p-treetable.custom-tree-table .DEFAULT {
+    .DEFAULT {
       background-color: #E5E5E5;
       color: white;
     }
@@ -432,10 +346,23 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       text-align: left;
       justify-content: space-between;
     }
-
     /*fin de style de colonne d'adresse*/
 
-    /*Style de bouton Indicateur*/
+    /* Icônes de statut (span + i) */
+    .status-icon {
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+      justify-content: space-between;
+      color: white;
+    }
+    .status-icon i {
+      font-size: 1.2rem;
+      color: white;
+      margin-left: 0.5rem;
+    }
+
+    /* Conteneur et style des boutons d'indicateurs */
     .status-buttons {
       display: flex;
       gap: 15px;
@@ -444,7 +371,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       justify-content: center;
       align-items: center;
     }
-
     .custom-status-button {
       display: flex;
       align-items: center;
@@ -466,22 +392,17 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
       white-space: nowrap;
       box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
-
     }
-
     .custom-status-button i {
       margin-right: auto;
       font-size: 30px;
       color: var(--button-color, #007bff);
       margin-left: auto;
-
     }
-
     .custom-status-button:hover {
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
       transform: translateY(-2px);
     }
-
     .custom-status-button::before {
       content: '';
       position: absolute;
@@ -493,7 +414,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       border-top-left-radius: 20px;
       border-bottom-left-radius: 20px;
     }
-
     .custom-status-button span {
       position: relative;
       z-index: 3;
@@ -502,38 +422,17 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       justify-content: space-between;
       padding-left: 13px;
     }
-
     .custom-status-button .status-count {
-      color: white !Important;
-      padding: 0 5px !Important;
-      font-weight: bold !Important;
-      margin-right: 10px !Important;
+      color: white !important;
+      padding: 0 5px !important;
+      font-weight: bold !important;
+      margin-right: 10px !important;
     }
-
     .custom-status-button .status-text {
       color: var(--button-color, #007bff);
     }
 
-    /*fin de Style de bouton Indicateur*/
-
-
-    /*style de bouton personnalisé*/
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      font-weight: 600;
-    }
-
-    ::ng-deep .p-button.p-component.p-button-icon-only.red-button {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      margin: 1px !important;
-    }
-
-    /*fin de style de bouton personnalisé*/
-
+    /* Overlay + dialog SMS */
     .overlay {
       position: fixed;
       top: 0;
@@ -546,7 +445,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       align-items: center;
       z-index: 9999;
     }
-
     .dialog-box {
       background: #fff;
       padding: 20px;
@@ -554,23 +452,19 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       min-width: 320px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
-
     .dialog-box h3 {
       margin-top: 0;
       margin-bottom: 10px;
       color: #333;
     }
-
     .dialog-content {
       margin-bottom: 16px;
     }
-
     .dialog-footer {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
     }
-
     .dialog-footer button {
       background-color: #aa001f;
       border: none;
@@ -581,12 +475,11 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
-
     .dialog-footer button:hover {
       background-color: #8e001b;
     }
-  `]
-})
+  `]}
+)
 export class DashboardComponent implements OnInit, OnDestroy {
 
   /**

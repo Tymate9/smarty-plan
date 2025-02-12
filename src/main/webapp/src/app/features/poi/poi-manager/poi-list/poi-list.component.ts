@@ -11,7 +11,7 @@ import * as wellknown from 'wellknown'
 import * as L from 'leaflet';
 import {FormsModule} from "@angular/forms";
 import {InputNumber} from "primeng/inputnumber";
-import {NgClass, NgForOf} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {ButtonDirective} from "primeng/button";
 import {InputText} from "primeng/inputtext";
 import {GeoJSON} from "leaflet";
@@ -184,7 +184,8 @@ import {GeoJSON} from "leaflet";
     NgClass,
     NgForOf,
     ButtonDirective,
-    InputText
+    InputText,
+    NgIf
   ],
   styles: [`
     /* Conteneur principal de la liste (scrollable) */

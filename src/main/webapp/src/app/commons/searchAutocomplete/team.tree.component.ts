@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from "@angular/core";
 import {Button} from "primeng/button";
 import {FormsModule} from "@angular/forms";
-import {NgStyle} from "@angular/common";
+import {NgForOf, NgIf, NgStyle} from "@angular/common";
 
 export interface Option {
   label: string;
@@ -65,7 +65,9 @@ export interface Option {
   imports: [
     Button,
     FormsModule,
-    NgStyle
+    NgStyle,
+    NgForOf,
+    NgIf
   ],
   styles: [`
     .search-autocomplete {

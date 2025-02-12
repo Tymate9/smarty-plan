@@ -40,7 +40,7 @@ import {TeamService} from "../vehicle/team.service";
       <p>{{ noComVehicle }}</p>
       <p>{{ unpluggedVehicle }}</p>
     </div>
-    <div id="map"></div>
+    <div id="cartography-map"></div>
   `,
   standalone: true,
   imports: [
@@ -48,7 +48,7 @@ import {TeamService} from "../vehicle/team.service";
     NgClass
   ],
   styles: [`
-    #map {
+    #cartography-map {
       height: 87vh;
       width: 100%;
     }
@@ -103,8 +103,14 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Annule les souscriptions
     this.filterSubscription?.unsubscribe();
     this.updateSubscription?.unsubscribe();
+
+    // IMPORTANT : retire la carte pour éviter "Map container is already initialized."
+    if (this.map) {
+      this.map.remove();
+    }
   }
 
   private loadLunchPauseMessage() {
@@ -129,7 +135,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {zoomControl: true, zoomDelta:1}).setView(normandyCoordinates, 9);
+    this.map = L.map('cartography-map', {zoomControl: true, zoomDelta:1}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {

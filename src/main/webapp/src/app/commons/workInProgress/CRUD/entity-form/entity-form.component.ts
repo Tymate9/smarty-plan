@@ -4,7 +4,7 @@ import {FormInputUtils, IFormInput} from "../iform-input";
 import { IEntityService } from "../ientity-service";
 import {IFormDescription} from "../iform-description";
 import {Subscription} from "rxjs";
-import {NgClass, NgSwitch} from "@angular/common";
+import {NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
 import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-input.component";
 
 @Component({
@@ -80,7 +80,10 @@ import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-
     ReactiveFormsModule,
     NgClass,
     AutocompleteInputComponent,
-    NgSwitch
+    NgSwitch,
+    NgForOf,
+    NgIf,
+    NgSwitchCase
   ],
   styles: [`
     .error {

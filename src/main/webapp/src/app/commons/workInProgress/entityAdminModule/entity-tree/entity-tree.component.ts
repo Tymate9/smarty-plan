@@ -13,6 +13,7 @@ import { TreeNode } from 'primeng/api';
 import { CellHostDirective } from '../../cell-host.directive';
 import { forkJoin } from 'rxjs';
 import {TreeTableModule} from "primeng/treetable";
+import {NgForOf, NgIf} from "@angular/common";
 
 export interface EntityColumn {
   field?: string;
@@ -56,19 +57,19 @@ interface DynamicComponentConfig {
 
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
         <!-- Nœud parent -->
-        <tr>
+        <tr class="dynamic-tt-parent-node">
           <td
             *ngIf="rowNode.node.children?.length > 0"
             [attr.colspan]="columns.length"
           >
-            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+            <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"></p-treeTableToggler>
             {{ rowNode.node?.label }}
           </td>
         </tr>
 
         <!-- En-tête si racine expandée -->
         <ng-container *ngIf="!rowNode.parent && rowNode.node?.expanded">
-          <tr>
+          <tr class="dynamic-tt-header">
             <td [ttRow]="rowNode" *ngFor="let col of columns">
               <span>{{ col.header }}</span>
               <button
@@ -85,7 +86,7 @@ interface DynamicComponentConfig {
         </ng-container>
 
         <!-- Feuilles -->
-        <tr>
+        <tr class="dynamic-tt-leaf">
           <ng-container *ngFor="let col of columns">
             <td *ngIf="!(rowNode.node.children?.length > 0)">
               <ng-container *ngIf="!col.isDynamic">
@@ -108,9 +109,12 @@ interface DynamicComponentConfig {
   standalone: true,
   imports: [
     TreeTableModule,
-    CellHostDirective
+    CellHostDirective,
+    NgIf,
+    NgForOf
   ],
   styles: [`
+
     .entity-tree-container {
       background-color: #fafafa;
       border: 1px solid #ddd;
@@ -129,10 +133,13 @@ export class EntityTreeComponent implements OnInit/*, AfterViewInit*/ {
   @Input() entityService?: IEntityService<any, any>;
 
   items: any[] = [];
+
   columns: EntityColumn[] = [];
+
   treeData: TreeNode[] = [];
 
   loading: boolean = false;
+
   errorMsg: string | null = null;
 
   @ViewChildren(CellHostDirective) cellHosts!: QueryList<CellHostDirective>;
@@ -247,11 +254,7 @@ export class EntityTreeComponent implements OnInit/*, AfterViewInit*/ {
       });
   }
 
-  private sortLeavesInNodes(
-    nodes: TreeNode[],
-    comparator: (valA: any, valB: any) => number,
-    header: string
-  ): TreeNode[] {
+  private sortLeavesInNodes(nodes: TreeNode[],comparator: (valA: any, valB: any) => number,header: string ): TreeNode[] {
     if (!nodes || nodes.length === 0) {
       return nodes;
     }

@@ -1,8 +1,7 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnInit, OnDestroy, inject} from '@angular/core';
 import { Router } from '@angular/router';
 import { FilterService } from './filter.service';
-import {KeycloakService} from "keycloak-angular";
-import {KeycloakProfile} from "keycloak-js";
+import Keycloak from 'keycloak-js';
 import {VehicleService} from "../../features/vehicle/vehicle.service";
 import {TeamService} from "../../features/vehicle/team.service";
 import {DriverService} from "../../features/vehicle/driver.service";
@@ -18,6 +17,7 @@ import {Button, ButtonDirective} from "primeng/button";
 import {Menubar} from "primeng/menubar";
 import {PrimeTemplate} from "primeng/api";
 import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomplete.component";
+import {AppConfig} from "../../app.config";
 
 @Component({
   selector: 'app-navbar',
@@ -44,8 +44,7 @@ import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomp
             <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions"
                                      (selectedTagsChange)="updateDrivers($event)"
                                      [selectedItems]="driverSelected"></app-search-autocomplete>
-            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"
-                    class="custom-button-bg"></button>
+            <p-button type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></p-button>
             <p-button (onClick)="saveFilters()" icon="pi pi-save" styleClass="custom-button-bg"></p-button>
           </div>
         </div>
@@ -59,117 +58,75 @@ import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomp
       </ng-template>
     </p-menubar>
   `,
-  styles: [
-    `
-      .navbar {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-      }
+  styles: [`
+    /* Conteneur global du menu */
+    .nav-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
 
-      .nav-container {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        justify-content: space-between;
-      }
+    .nav-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: auto;
+    }
 
-      .nav-buttons {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-right: auto;
-      }
+    .nav-buttons-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
 
-      .nav-buttons-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
-      }
+    /* Applique un margin-right et retire fond/bordures sur les p-button internes */
+    .nav-buttons p-button {
+      margin-right: 10px;
+      background: transparent;
+      border: none;
+    }
 
-      .nav-button-center {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-      }
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
 
-      .nav-buttons p-button {
-        margin-right: 10px;
-        background: transparent;
-        border: none;
-      }
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
 
-      .filters {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin: 0 auto;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-      }
+    /* Utilisée dans <div class="user-info compact"> */
+    .user-info.compact {
+      gap: 5px;
+    }
 
-      .user-info {
-        display: flex;
-        align-items: center;
-        margin-left: auto;
-      }
+    .user-settings {
+      margin-right: 10px;
+      background: transparent;
+      border: none;
+    }
 
-      .user-info.compact {
-        gap: 5px;
-      }
-
-      .user-settings {
-        margin-right: 10px;
-        background: transparent;
-        border: none;
-      }
-
-      .p-menubar {
-        padding: 0.5rem;
-        color: transparent !important;
-        border: 1px solid #dee2e6;
-        border-radius: 3px;
-        width: 100%;
-        background: transparent !important;
-        z-index: 1000;
-        position: relative;
-      }
-
-      ::ng-deep .p-menubar.p-component {
-        background: transparent !important;
-      }
-
-
-      ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-bg {
-        background-color: #aa001f !important;
-        border-color: #aa001f !important;
-        color: white !important;
-      }
-
-      .p-button {
-        background-color: #aa001f !important;
-        border-color: #aa001f !important;
-        color: white !important;
-
-      }
-
-    `,
-  ],
+  `],
   imports: [
     Button,
     Menubar,
     PrimeTemplate,
     TeamTreeComponent,
     SearchAutocompleteComponent,
-    ButtonDirective
   ],
   standalone: true
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private filterService: FilterService,
-    private keycloakService: KeycloakService,
     private router: Router,
     private vehicleService: VehicleService,
     private teamService: TeamService,
@@ -178,9 +135,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private notificationService : NotificationService
   ) {}
 
+  // Injection directe de l'instance Keycloak via l'injection token
+  private keycloak: Keycloak = inject(Keycloak);
+  userProfile: any = null;
+
   userName: string = '';
   userRole: string = '';
-  userProfile: KeycloakProfile | null = null;
 
   agencyOptions: Option[] = [];
   agencyTree: Option[] = [];
@@ -279,16 +239,51 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     try {
-      // Charger le profil utilisateur depuis Keycloak
-      this.userProfile = await this.keycloakService.loadUserProfile();
-      this.userName = `${this.userProfile.firstName} ${this.userProfile.lastName}`;
+      // Vérification de l'instance Keycloak injectée
+      console.log('Keycloak instance:', this.keycloak);
 
-      // Charger les agences, les véhicules et les conducteurs en parallèle
+      if (this.keycloak && this.keycloak.authenticated) {
+        // Extraction du profil depuis le token décodé
+        this.userProfile = this.keycloak.tokenParsed;
+        console.log('Token Parsed:', this.keycloak.tokenParsed);
+        this.userName = `${this.userProfile.firstName || ''} ${this.userProfile.lastName || ''}`.trim();
+      } else {
+        console.warn('Keycloak non authentifié ou instance non disponible');
+      }
+
+      // Extraction des rôles depuis le token (en vérifiant resourceAccess et realm_access)
+      let roles: string[] = [];
+      if (this.keycloak && this.keycloak.tokenParsed) {
+        const tokenParsed = this.keycloak.tokenParsed;
+        console.log('Token Parsed for roles:', tokenParsed);
+        if (tokenParsed["resourceAccess"]) {
+          console.log('resourceAccess:', tokenParsed["resourceAccess"]);
+          const clientId = AppConfig.config.keycloakConfig.frontendClientId;
+          if (tokenParsed["resourceAccess"][clientId]) {
+            roles = tokenParsed["resourceAccess"][clientId].roles;
+          }
+        } else if (tokenParsed["realm_access"]) {
+          console.log('realm_access:', tokenParsed["realm_access"]);
+          roles = tokenParsed["realm_access"].roles;
+        } else {
+          console.warn('Aucune propriété resourceAccess ou realm_access dans le token');
+        }
+      } else {
+        console.warn('tokenParsed non disponible');
+      }
+      console.log('Rôles extraits:', roles);
+      this.userRole = roles && roles.length > 0 ? roles.join(' / ') : 'Aucun rôle trouvé';
+
+      // Chargement parallèle des données (agences, véhicules, conducteurs)
       forkJoin({
         agencies: this.teamService.getAgencies(),
         vehicles: this.vehicleService.getVehiclesList(),
         drivers: this.driverService.getDrivers()
       }).subscribe(({ agencies, vehicles, drivers }) => {
+        console.log('Agencies:', agencies);
+        console.log('Vehicles:', vehicles);
+        console.log('Drivers:', drivers);
+
         // Traitement des agences
         this.agencyOptions = this.transformToHierarchy(agencies);
         this.agencyTree = this.agencyOptions;
@@ -303,34 +298,36 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.driverOptions = drivers;
         this.filteredDriverOptions = drivers
           .sort((a, b) => {
-            const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
-            if (lastNameComparison !== 0) {
-              return lastNameComparison;
-            }
-            return (a.firstName || '').localeCompare(b.firstName || '');
+            const cmp = (a.lastName || '').localeCompare(b.lastName || '');
+            return cmp !== 0 ? cmp : (a.firstName || '').localeCompare(b.firstName || '');
           })
           .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
           .concat('Véhicule non attribué');
 
-        // Charger les filtres initiaux depuis le FilterService
+        // Chargement des filtres initiaux depuis le FilterService
         this.loadInitialFilters();
       });
 
-      // Récupérer les rôles de l'utilisateur depuis Keycloak
-      const roles = this.keycloakService.getUserRoles();
-      if (roles && roles.length > 0) {
-        this.userRole = roles.join(' / ');
-      }
-
-      // Abonner à la configuration Keycloak pour obtenir la logoutURL
+      // Abonnement à la configuration pour récupérer l'URL de déconnexion
       this.configSubscription = this.configService.getConfig().subscribe(config => {
+        console.log('Configuration Keycloak:', config);
         if (config) {
           this.logoutURL = config.keycloakConfig.redirectUrl;
         }
       });
 
     } catch (error) {
-      console.error('Failed to load user profile', error);
+      console.error('Erreur lors de l\'initialisation de Navbar', error);
+    }
+  }
+
+  // Méthode de déconnexion utilisant directement l'instance Keycloak injectée
+  logout() {
+    if (this.keycloak) {
+      this.keycloak.logout({ redirectUri: this.logoutURL });
+    } else {
+      console.error('Instance Keycloak non disponible pour la déconnexion.');
+      alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
     }
   }
 
@@ -417,15 +414,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navigateTo(page: string) {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
-  }
-
-  logout() {
-    if (this.logoutURL) {
-      this.keycloakService.logout(this.logoutURL);
-    } else {
-      console.error('Logout URL not available.');
-      alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
-    }
   }
 
   saveFilters(): void {

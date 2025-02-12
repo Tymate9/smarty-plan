@@ -208,7 +208,7 @@ export class SearchAutocompleteComponent implements OnChanges{
         this.closeDropdown();
       }
       this.filterOptions();
-      this.isDropdownClicked = false;  // Reset after checking
+      this.isDropdownClicked = false;
     }, 200);
   }
 

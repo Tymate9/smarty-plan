@@ -17,7 +17,7 @@ import {
 } from '@angular/forms';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {filter, Subscription} from 'rxjs';
-import {JsonPipe} from "@angular/common";
+import {JsonPipe, NgForOf, NgIf} from "@angular/common";
 
 /**
  * Événement émis quand l’utilisateur sélectionne une option.
@@ -122,7 +122,9 @@ export interface AutocompleteSelectedEvent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    JsonPipe
+    JsonPipe,
+    NgIf,
+    NgForOf
   ],
   providers: [
     {

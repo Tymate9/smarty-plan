@@ -2,20 +2,10 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import {importProvidersFrom, provideZoneChangeDetection} from '@angular/core';
 import { AppComponent } from './app/app.component';
-import {
-  AutoRefreshTokenService,
-  createInterceptorCondition,
-  INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition,
-  includeBearerTokenInterceptor,
-  KeycloakAngularModule,
-  KeycloakService,
-  provideKeycloak,
-  UserActivityService,
-  withAutoRefreshToken
-} from 'keycloak-angular';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import Nora from '@primeng/themes/nora'
+
 import { MessageService } from 'primeng/api';
 import {HTTP_INTERCEPTORS, withInterceptors} from '@angular/common/http';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -23,7 +13,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 // Modules Angular et PrimeNG utilisés dans votre application
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {AppRoutingModule, routes} from './app/app-routing.module';
+import {routes} from './app/app-routing.module';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TreeTableModule } from 'primeng/treetable';
@@ -45,44 +35,55 @@ import { DialogModule } from 'primeng/dialog';
 import { TreeModule } from 'primeng/tree';
 import { SidebarModule } from 'primeng/sidebar';
 
-// S
-// ervices et interceptors
+// Services et interceptors
 import { CacheInterceptor } from './app/core/cache/cache.interceptor';
 
 
 // Classe utilitaire pour stocker la configuration globale
-import {AppConfig} from "./app/app.config";
 import {provideRouter} from "@angular/router";
 
 
-const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /^(http:\/\/localhost:45180)(\/.*)?$/i,
+// Importation des fonctions et types de Keycloak Angular (v19)
+import {
+  provideKeycloak,
+  withAutoRefreshToken,
+  AutoRefreshTokenService,
+  UserActivityService,
+  createInterceptorCondition,
+  INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+  includeBearerTokenInterceptor
+} from 'keycloak-angular';
+
+// Importation de la configuration globale
+import {AppConfig} from "./app/app.config"
+import NmPreset from "./presets/nm-presets";
+
+const urlCondition = createInterceptorCondition({
+  urlPattern: /^\/api\//i,
   bearerPrefix: 'Bearer'
 });
 
-// ---------------------------------------------------------------------
-// Charge la configuration depuis le back-end AVANT de démarrer Angular
-// ---------------------------------------------------------------------
 fetch('/api/config')
   .then((response) => {
+    console.log("Preset de base :", Nora)
+    console.log("Preset NmPreset chargé :", NmPreset);
     if (!response.ok) {
       throw new Error(`Erreur lors du chargement de la config : ${response.statusText}`);
     }
     return response.json();
   })
   .then((config) => {
-    // Stocke la config dans la classe statique pour un accès global
+    // Stocke la configuration dans la classe statique pour un accès global
     AppConfig.config = config;
 
-    // Démarre l'application Angular en passant les providers nécessaires,
-    // dont celui de Keycloak qui utilise la config chargée.
+    // Démarrage de l'application Angular avec bootstrapApplication et configuration des providers
     bootstrapApplication(AppComponent, {
       providers: [
+        // Importation des modules Angular nécessaires
         importProvidersFrom(
           BrowserModule,
           FormsModule,
           ReactiveFormsModule,
-          AppRoutingModule,
           ButtonModule,
           TableModule,
           TreeTableModule,
@@ -102,12 +103,11 @@ fetch('/api/config')
           SelectButtonModule,
           DialogModule,
           TreeModule,
-          SidebarModule,
-          KeycloakAngularModule,
-          KeycloakService
+          SidebarModule
         ),
+        provideRouter(routes),
         provideAnimationsAsync(),
-        providePrimeNG({ theme: { preset: Aura } }),
+        providePrimeNG({ theme: { preset: NmPreset }, ripple:true }),
         MessageService,
         // Fourniture de Keycloak avec la configuration chargée
         provideKeycloak({
@@ -117,7 +117,7 @@ fetch('/api/config')
             clientId: AppConfig.config.keycloakConfig.frontendClientId,
           },
           initOptions: {
-            onLoad: 'login-required', // ou 'check-sso' selon vos besoins
+            onLoad: 'login-required',
             checkLoginIframe: false,
             enableLogging: true,
             pkceMethod: 'S256',
@@ -130,8 +130,8 @@ fetch('/api/config')
             })
           ],
           providers: [AutoRefreshTokenService, UserActivityService]
-          // Vous pouvez ajouter ici les propriétés 'providers' et 'features' si nécessaire
         }),
+        // Configuration de l'intercepteur pour ajouter le token Bearer aux requêtes ciblées
         {
           provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
           useValue: [urlCondition]

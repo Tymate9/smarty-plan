@@ -8,7 +8,8 @@ import TeamCategoryDTO = dto.TeamCategoryDTO;
 import TeamForm = dto.TeamForm;
 import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import {TreeNode} from "primeng/api";
-import {LateralPanelComponent} from "../../commons/workInProgress/lateral-panel/lateral-panel.component";
+import {DrawerComponent} from "../../commons/workInProgress/drawer/drawer.component";
+import {TeamFormComponent} from "../../commons/workInProgress/CRUD/team-form/team-form.component";
 
 
 @Injectable({
@@ -136,11 +137,12 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
     ]);
   }
 
+  /** Récupère les TreeNodes */
   getTreeNodes(): Observable<TreeNode[]> {
     return this.getAuthorizedData().pipe(
       map((teams: TeamDTO[]) => {
         // 1) Grouper par catégorie (ex. "Agence", "Service", etc.)
-        const catMap = new Map<string, TeamDTO[]>(); // key = categoryLabel, value = liste de teams
+        const catMap = new Map<string, TeamDTO[]>();
 
         teams.forEach(team => {
           const catLabel = team.category.label;
@@ -154,12 +156,12 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
         const treeNodes: TreeNode[] = [];
 
         for (const [catLabel, catTeams] of catMap.entries()) {
-          // children = catTeams.map(...) => pour chaque team
+          // chaque team = leaf
           const childrenLeafs: TreeNode[] = catTeams.map(team => this.buildTeamLeaf(team));
 
           treeNodes.push({
             label: catLabel,  // Le label du nœud parent
-            expanded: true,   // ou false si tu préfères
+            expanded: true,   // ou false
             children: childrenLeafs
           });
         }
@@ -171,31 +173,48 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
 
   /**
    * Construit un leaf TreeNode pour une équipe.
-   * Les champs "label", "parentLabel", "categoryLabel"
-   * + dynamicComponents["Actions"] qui contient 2 LateralPanel.
    */
   private buildTeamLeaf(team: TeamDTO): TreeNode {
-    // ex. parentLabel
     const parentLabel = team.parentTeam ? team.parentTeam.label : '';
 
-    // 2 LateralPanelComponents, avec panelMessage = "team.label + ' Bouton X'"
-    const dynamicComps = [
-      {
-        compClass: LateralPanelComponent,
-        inputs: {
-          panelMessage: team.label + ' Bouton 1'
-        }
-      },
-      {
-        compClass: LateralPanelComponent,
-        inputs: {
-          panelMessage: team.label + ' Bouton 2'
+    // Premier Drawer = "Modifier [team.label]"
+    const editDrawer = {
+      compClass: DrawerComponent,
+      inputs: {
+        buttonText: 'Modifier ' + team.label,
+        headerTitle: 'Édition de ' + team.label,
+        closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
+        // child => composant TeamForm + teamId = team.id
+        child: {
+          compClass: TeamFormComponent,
+          inputs: {
+            teamId: team.id
+          }
         }
       }
-    ];
+    };
+
+    // Second Drawer = "Créer un sous-groupe" (ou ce que tu veux)
+    const createChildDrawer = {
+      compClass: DrawerComponent,
+      inputs: {
+        buttonText: 'Créer un sous-groupe',
+        headerTitle: 'Nouveau sous-groupe pour ' + team.label,
+        closeConfirmationMessage: 'Voulez-vous fermer le formulaire de création ?',
+        // child => TeamFormComponent sans teamId => mode création
+        child: {
+          compClass: TeamFormComponent,
+          inputs: {
+            teamId: null
+          }
+        }
+      }
+    };
+
+    // On place ces deux Drawers dans dynamicComponents["Actions"]
+    const dynamicComps = [editDrawer, createChildDrawer];
 
     return {
-      // Pas de label au sens "Primeng" car c'est un leaf => on affiche col.field
       data: {
         label: team.label,
         parentLabel: parentLabel,
@@ -204,8 +223,8 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
           Actions: dynamicComps
         }
       },
-      children: [],    // c’est un leaf
-      expanded: false  // ou true si tu veux
+      children: [],
+      expanded: false
     };
   }
 }

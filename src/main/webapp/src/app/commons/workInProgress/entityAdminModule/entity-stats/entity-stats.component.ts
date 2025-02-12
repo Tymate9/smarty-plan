@@ -2,7 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {dto} from "../../../../../habarta/dto";
 import {DrawerComponent} from "../../drawer/drawer.component";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import {TeamFormComponent} from "../../CRUD/team-form/team-form.component";
 
 @Component({
   selector: 'app-entity-stats',
@@ -42,15 +43,12 @@ import {DatePipe} from "@angular/common";
         </div>
       </div>
     </div>
-    <app-drawer buttonText="Mettre à jours l'entité" iconClass="pi pi-pencil"
-                closeConfirmationMessage="Voulez-vous vraiment fermer ce panneau ?">
-      <p>Contenue définis par le parent a personnaliser à terme ce seras un formulaire avec des Tab etc...</p>
-    </app-drawer>
   `,
   standalone: true,
   imports: [
-    DrawerComponent,
-    DatePipe
+    DatePipe,
+    NgIf,
+    NgForOf
   ],
   styles: [`
     .stats-container {

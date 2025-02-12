@@ -3,6 +3,7 @@ import {ConfigService} from "../../core/config/config.service";
 import {NavbarComponent} from "../../commons/navbar/navbar.component";
 import {RouterOutlet} from "@angular/router";
 import {TestBannerComponent} from "../../commons/testBanner/testBanner.component";
+import {CommonModule, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-main-layout',
@@ -15,7 +16,9 @@ import {TestBannerComponent} from "../../commons/testBanner/testBanner.component
   imports: [
     NavbarComponent,
     RouterOutlet,
-    TestBannerComponent
+    TestBannerComponent,
+    NgIf,
+    CommonModule
   ],
   styles: [`
     :host {

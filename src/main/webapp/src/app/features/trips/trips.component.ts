@@ -12,6 +12,7 @@ import {TabPanel, TabView} from "primeng/tabview";
 import {TripMapComponent} from "./trip-map.component";
 import {PrimeTemplate} from "primeng/api";
 import {FormsModule} from "@angular/forms";
+import {NgIf} from "@angular/common";
 
 
 @Component({
@@ -68,7 +69,8 @@ import {FormsModule} from "@angular/forms";
     TabView,
     TripMapComponent,
     PrimeTemplate,
-    FormsModule
+    FormsModule,
+    NgIf
   ],
   styles: [`
     #trip-container {

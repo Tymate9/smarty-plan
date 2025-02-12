@@ -1,4 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import './styles/custom-treetable';
+
 // Variables de couleur
 $color-primary-dark: #3B6997;        // Bleu sombre, principal
 $color-primary-dark-secondary: #598392; // Bleu sombre, secondaire
@@ -24,15 +27,24 @@ $color-brown-tertiary: #EEE3D4;      // Marron clair, fond tertiaire
 
 html, body {
   font-family: 'Arial', sans-serif;
-  //background: $color-gray-secondary;
-  background: linear-gradient(to right, var(--red-100), var(--red-50), var(--bluegray-50), var(--surface-50) , var(--surface-0) , var(--red-50), var(--red-100)) !important;
-  color: $color-primary-dark;
+  background: linear-gradient(
+      to right,
+      var(--p-red-100),
+      var(--p-red-50),
+      var(--p-surface-50),
+      var(--p-surface-0),
+      var(--p-red-50),
+      var(--p-red-100)
+  ) !important;
+  color: var(--p-primary-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
   margin: 0;
   padding: 0;
 }
+
+
 :host {
   display: flex;
   flex-direction: column;
@@ -155,3 +167,4 @@ html, body {
   margin: 0;
   width: 100%;
 }
+

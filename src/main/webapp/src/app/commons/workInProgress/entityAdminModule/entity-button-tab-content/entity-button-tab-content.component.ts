@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-entity-button-tab-content',
@@ -10,6 +11,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
     </button>
   `,
   standalone: true,
+  imports: [
+    NgIf
+  ],
   styles: [`
     .tab-button {
       padding: 6px 12px;

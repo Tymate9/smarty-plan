@@ -9,12 +9,14 @@ import {FormGroup} from "@angular/forms";
 import {FormDescription} from "../form-description";
 import {forkJoin} from "rxjs";
 import {EntityFormComponent} from "../entity-form/entity-form.component";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-team-form',
   standalone: true,
   imports: [
-    EntityFormComponent
+    EntityFormComponent,
+    NgIf
   ],
   template: `
     <h2>Team Form</h2>
@@ -142,7 +144,6 @@ export class TeamFormComponent implements OnInit {
     if (response && !response.error) {
       if (this.mode === 'create') {
         this.entityCreated.emit(response);
-        // Passer en mode update après création
         this.mode = 'update';
         this.teamEntity = response;
         this.buildFormDescription(response);

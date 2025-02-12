@@ -3,7 +3,7 @@ import {IEntityService} from "../../CRUD/ientity-service";
 import {TeamService} from "../../../../features/vehicle/team.service";
 import {EntityButtonTabContentComponent} from "../entity-button-tab-content/entity-button-tab-content.component";
 import {EntityAdminTabViewComponent} from "../entity-admin-tab-view/entity-admin-tab-view.component";
-import {NgClass} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 
 /**
  * On peut étendre cette interface selon les besoins
@@ -44,7 +44,9 @@ export interface EntityDefinition {
   imports: [
     EntityButtonTabContentComponent,
     EntityAdminTabViewComponent,
-    NgClass
+    NgClass,
+    NgForOf,
+    NgIf
   ],
   styles: [`
     .tabs-container {

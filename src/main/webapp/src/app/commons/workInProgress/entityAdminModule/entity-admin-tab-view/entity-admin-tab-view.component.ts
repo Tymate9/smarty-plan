@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {EntityTreeComponent} from "../entity-tree/entity-tree.component";
 import {EntityStatsComponent} from "../entity-stats/entity-stats.component";
+import {NgIf} from "@angular/common";
 
 export interface EntityAdminTabConfig {
   showStats?: boolean;
@@ -32,7 +33,8 @@ export interface EntityAdminTabConfig {
   standalone: true,
   imports: [
     EntityTreeComponent,
-    EntityStatsComponent
+    EntityStatsComponent,
+    NgIf
   ],
   styles: [`
     .tab-view-container {

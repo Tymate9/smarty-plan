@@ -9,7 +9,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {TabPanel, TabView} from "primeng/tabview";
 import {SmsFormComponent} from "../../sms/sms-form/sms-form.component";
 import {ButtonDirective} from "primeng/button";
-import {DatePipe, DecimalPipe} from "@angular/common";
+import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
 import {ProgressSpinner} from "primeng/progressspinner";
 
 @Component({
@@ -105,7 +105,9 @@ import {ProgressSpinner} from "primeng/progressspinner";
     DecimalPipe,
     ProgressSpinner,
     DatePipe,
-    TabView
+    TabView,
+    NgIf,
+    NgForOf
   ],
   styles: [`
     .p-grid > .p-col-6 {

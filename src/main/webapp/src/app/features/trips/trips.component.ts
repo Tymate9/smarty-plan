@@ -13,6 +13,7 @@ import {TripMapComponent} from "./trip-map.component";
 import {PrimeTemplate} from "primeng/api";
 import {FormsModule} from "@angular/forms";
 import {NgIf} from "@angular/common";
+import {DatePicker} from "primeng/datepicker";
 
 
 @Component({
@@ -34,21 +35,32 @@ import {NgIf} from "@angular/common";
         </p-tabPanel>
         <p-button id="download-csv-button" (click)="downloadCsv()"
                   title="Télécharger un CSV des trajets de la journée de ce véhicule"
-                  icon="pi pi-download"
-                  styleClass="custom-button"
-        >
+                  icon="pi pi-download">
         </p-button>
-        <p-calendar #calendar
-                    id="date-selector"
-                    [(ngModel)]="calendarDate"
-                    [showIcon]="true"
-                    [readonlyInput]="true"
-                    [showButtonBar]="true"
-                    [maxDate]="now"
-                    dateFormat="yymmdd"
-                    [showOtherMonths]="true"
-                    [selectOtherMonths]="true"
-        ></p-calendar>
+<!--        <p-calendar #calendar-->
+<!--                    id="date-selector"-->
+<!--                    [(ngModel)]="calendarDate"-->
+<!--                    [showIcon]="true"-->
+<!--                    [readonlyInput]="true"-->
+<!--                    [showButtonBar]="true"-->
+<!--                    [maxDate]="now"-->
+<!--                    dateFormat="yymmdd"-->
+<!--                    [showOtherMonths]="true"-->
+<!--                    [selectOtherMonths]="true"-->
+<!--        ></p-calendar>-->
+        <p-datepicker
+          #calendar
+          id="date-selector"
+          [(ngModel)]="calendarDate"
+          [showIcon]="true"
+          [readonlyInput]="true"
+          inputId="buttondisplay"
+          [showButtonBar]="true"
+          [maxDate]="now"
+          [showOnFocus]="true"
+          [showOtherMonths]="true"
+          [selectOtherMonths]="true"/>
+
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">
         Données en cours de chargement...
@@ -70,7 +82,8 @@ import {NgIf} from "@angular/common";
     TripMapComponent,
     PrimeTemplate,
     FormsModule,
-    NgIf
+    NgIf,
+    DatePicker
   ],
   styles: [`
     #trip-container {
@@ -102,14 +115,6 @@ import {NgIf} from "@angular/common";
           }
         }
 
-        .p-button.p-component.p-button-icon-only.custom-button {
-          background-color: #aa001f !important;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
-
-        }
-
         .p-calendar .p-button {
           background-color: #aa001f;
           border-color: #aa001f !important;
@@ -132,23 +137,8 @@ import {NgIf} from "@angular/common";
         transform: translateX(-50%);
         z-index: 10001;
 
+
         ::ng-deep {
-          .p-datepicker-trigger[aria-expanded=true] {
-            &:before {
-              content: "\\e90b";
-              font-family: primeicons;
-              speak: none;
-              font-style: normal;
-              font-weight: 400;
-              font-variant: normal;
-              text-transform: none;
-            }
-
-            calendaricon {
-              display: none;
-            }
-          }
-
           .p-datepicker {
             top: 110%;
             left: 50%;

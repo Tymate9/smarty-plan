@@ -29,6 +29,7 @@ import {FormsModule} from "@angular/forms";
           onIcon="pi pi-angle-right"
           offIcon="pi pi-angle-left"
           id="side-panel-toggle"
+
         />
         <div class="container">
           <h3 *ngIf="tripData">{{ tripData.driverName ?? 'Véhicule non attribué' }} - {{ tripData.licensePlate }}</h3>
@@ -277,7 +278,7 @@ import {FormsModule} from "@angular/forms";
       }
 
       &.hide {
-        margin-left: -38px;
+        margin-left: -3rem;
       }
 
       &.show {
@@ -285,31 +286,12 @@ import {FormsModule} from "@angular/forms";
       }
 
       #side-panel-toggle {
-        position: relative;
-        margin-top: 10%;
-        width: 39px;
+        width: 2rem;
 
-
-        ::ng-deep .p-element.p-button.p-togglebutton.p-component.p-button-icon-only.p-highlight {
-          background-color: #aa001f !important;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
+        ::ng-deep .p-togglebutton-label {
+          display:none;
         }
-
-        ::ng-deep .p-element.p-button.p-togglebutton.p-component.p-button-icon-only {
-          background-color: #aa001f !important;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
-        }
-
-        ::ng-deep .pi.p-button-icon.p-button-icon-left.pi-angle-left {
-          color: white !Important;
-        }
-
       }
-
       .trip-dot {
         width: 10px;
         height: 10px;

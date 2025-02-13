@@ -1,12 +1,14 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {KeyValuePipe, NgForOf, NgStyle, SlicePipe} from "@angular/common";
+import {Button} from "primeng/button";
 
 @Component({
   selector: 'app-indicator-buttons',
-  template:`
+  template: `
     <div class="indicator-buttons">
-      <button
+      <p-button
         *ngFor="let stat of (statsMap | keyvalue | slice:sliceRange[0]:sliceRange[1])"
-        pButton
+
         [ngStyle]="{ '--button-color': buttonColor }"
         class="custom-indicator-button"
         (click)="onFilterByKey(stat.key)">
@@ -14,12 +16,12 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
       <span class="indicator-count">{{ stat.value }}</span>
       <span class="indicator-text">{{ keyLabels[stat.key] }}</span>
     </span>
-      </button>
+      </p-button>
     </div>
   `,
 
   styles: [`
-  /*Style de bouton Indicateur*/
+    /*Style de bouton Indicateur*/
     .indicator-buttons {
       display: flex;
       gap: 15px;
@@ -28,6 +30,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
       justify-content: center;
       align-items: center;
     }
+
     .custom-indicator-button {
       display: flex;
       align-items: center;
@@ -96,9 +99,18 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
     .custom-indicator-button .status-text {
       color: var(--button-color, #007bff);
     }
+
     /*fin de Style de bouton Indicateur*/
 
   `],
+  imports: [
+    NgStyle,
+    NgForOf,
+    Button,
+    KeyValuePipe,
+    SlicePipe
+  ],
+  standalone: true
 })
 export class IndicatorButtonsComponent {
   @Input() statsMap: { [key: string]: number } = {};

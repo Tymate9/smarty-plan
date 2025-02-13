@@ -7,6 +7,12 @@ import {dto} from "../../../habarta/dto";
 import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 import {Subscription} from "rxjs";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
+import {TreeTableModule} from "primeng/treetable";
+import {NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
+import {Button} from "primeng/button";
+import {Dialog} from "primeng/dialog";
+import {DateRangePickerComponent} from "../dateRange/dateRange.component";
+import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
 
 
 @Component({
@@ -145,10 +151,10 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
               {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}
             </td>
             <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#e5e7eb' : 'transparent'}">
-              {{ dailyStat.hasLateStop ? 'Oui' : 'Non'  }}
+              {{ dailyStat.hasLateStop ? 'Oui' : 'Non' }}
             </td>
             <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#e5e7eb' : 'transparent'}">
-              {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non'  }}
+              {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non' }}
             </td>
             <td>{{ dailyStat.rangeAvg }}</td>
             <td>{{ dailyStat.waitingDuration }}</td>
@@ -161,6 +167,18 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
 
 
   `,
+  standalone: true,
+  imports: [
+    TreeTableModule,
+    NgIf,
+    NgClass,
+    Button,
+    Dialog,
+    NgForOf,
+    NgStyle,
+    DateRangePickerComponent,
+    IndicatorButtonsComponent
+  ],
   styles: [`
 
     /*style de treeTable*/
@@ -246,8 +264,8 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
       border-width: 0px;
       font-weight: 700 !important;
     }
-    /*fin de style de treeTable parent ligne*/
 
+    /*fin de style de treeTable parent ligne*/
 
 
     /*style de bouton personnalisé*/
@@ -257,6 +275,7 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
       color: white !important;
       font-weight: 600;
     }
+
     ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:focus,
     ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:active {
       border-color: white !important;
@@ -273,7 +292,6 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
     /*fin de style de bouton personnalisé*/
 
 
-
     /* Make dialog content flexible */
     ::ng-deep .p-dialog {
       max-width: 95%;
@@ -282,9 +300,10 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
       max-height: 90vh;
 
     }
-    ::ng-deep .p-dialog .p-dialog-header{
-      border-top-left-radius:20px !important;
-      border-top-right-radius:20px !important;
+
+    ::ng-deep .p-dialog .p-dialog-header {
+      border-top-left-radius: 20px !important;
+      border-top-right-radius: 20px !important;
     }
 
     /* Ensure modal adjusts based on content */
@@ -292,8 +311,8 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
       overflow: hidden; /* Prevents unwanted scrolling */
       display: flex;
       flex-direction: column;
-      border-bottom-left-radius:20px !important;
-      border-bottom-right-radius:20px !important;
+      border-bottom-left-radius: 20px !important;
+      border-bottom-right-radius: 20px !important;
     }
 
     /* Table container with scrolling */

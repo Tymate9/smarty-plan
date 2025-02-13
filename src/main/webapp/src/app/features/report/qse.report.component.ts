@@ -5,10 +5,14 @@ import {Subscription} from "rxjs";
 import {dto} from "../../../habarta/dto";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import {TreeNode} from "primeng/api";
+import {DateRangePickerComponent} from "../dateRange/dateRange.component";
+import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
+import {TreeTableModule} from "primeng/treetable";
+import {NgClass, NgIf} from "@angular/common";
 
 @Component({
-  selector:'app-qse-report',
-  template:`
+  selector: 'app-qse-report',
+  template: `
     <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
     <app-indicator-buttons
       [statsMap]="vehiclesStatsTotal"
@@ -51,27 +55,39 @@ import {TreeNode} from "primeng/api";
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
             class="table-header">
-            <td rowspan="3">Véhicule</td>
-            <td rowspan="3">Conducteur</td>
-            <td rowspan="3">Distance parcourue</td>
-            <td rowspan="3">Durée de conduite moyenne (en HH:MM)</td>
+          <td rowspan="3">Véhicule</td>
+          <td rowspan="3">Conducteur</td>
+          <td rowspan="3">Distance parcourue</td>
+          <td rowspan="3">Durée de conduite moyenne (en HH:MM)</td>
 
-            <!-- Grouped Columns -->
-            <td colspan="3">Accélération et freinage (/20)</td>
-            <td colspan="3">Virage (/20)</td>
-            <td colspan="3">Allure (%)</td>
+          <!-- Grouped Columns -->
+          <td colspan="3">Accélération et freinage (/20)</td>
+          <td colspan="3">Virage (/20)</td>
+          <td colspan="3">Allure (%)</td>
         </tr>
         <!-- Sub-header row for AR, R, V -->
         <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="table-header">
-          <td>AR</td> <td>R</td> <td>V</td>
-          <td>AR</td> <td>R</td> <td>V</td>
-          <td>AR</td> <td>R</td> <td>V</td>
+          <td>AR</td>
+          <td>R</td>
+          <td>V</td>
+          <td>AR</td>
+          <td>R</td>
+          <td>V</td>
+          <td>AR</td>
+          <td>R</td>
+          <td>V</td>
         </tr>
 
         <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="table-header">
-          <td>note/20</td> <td>note/20</td> <td>note/20</td>
-          <td>note/20</td> <td>note/20</td> <td>note/20</td>
-          <td>%</td> <td>%</td> <td>%</td>
+          <td>note/20</td>
+          <td>note/20</td>
+          <td>note/20</td>
+          <td>note/20</td>
+          <td>note/20</td>
+          <td>note/20</td>
+          <td>%</td>
+          <td>%</td>
+          <td>%</td>
         </tr>
 
 
@@ -107,7 +123,15 @@ import {TreeNode} from "primeng/api";
     </p-treeTable>
 
   `,
-  styles:[`
+  standalone: true,
+  imports: [
+    DateRangePickerComponent,
+    IndicatorButtonsComponent,
+    TreeTableModule,
+    NgClass,
+    NgIf
+  ],
+  styles: [`
     /*style de treeTable*/
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
       background-color: #007ad9 !important;
@@ -191,6 +215,7 @@ import {TreeNode} from "primeng/api";
       border-width: 0px;
       font-weight: 700 !important;
     }
+
     /*fin de style de treeTable parent ligne*/
 
     /* Table row styling */

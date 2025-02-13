@@ -16,6 +16,7 @@ import net.enovea.service.TeamService
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import net.enovea.api.workInProgress.TeamForm
+import net.enovea.team.teamCategory.TeamCategoryDTO
 
 @Path("/api/teams")
 @Produces(MediaType.APPLICATION_JSON)

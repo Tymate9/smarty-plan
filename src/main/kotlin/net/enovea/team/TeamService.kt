@@ -4,16 +4,11 @@ import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
 import net.enovea.api.workInProgress.Stat
 import net.enovea.api.workInProgress.TeamEntityStatsDTO
-import net.enovea.domain.team.TeamCategoryEntity
-import net.enovea.domain.team.TeamCategoryMapper
-import net.enovea.domain.team.TeamEntity
-import net.enovea.domain.team.TeamMapper
-import net.enovea.dto.TeamCategoryDTO
-
-import net.enovea.dto.TeamDTO
 import net.enovea.api.workInProgress.TeamForm
+import net.enovea.team.teamCategory.TeamCategoryDTO
+import net.enovea.team.teamCategory.TeamCategoryEntity
 import java.time.LocalDateTime
-
+import net.enovea.team.teamCategory.TeamCategoryMapper
 
 class TeamService (
     private val teamMapper: TeamMapper,

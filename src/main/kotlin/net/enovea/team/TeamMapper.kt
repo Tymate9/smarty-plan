@@ -1,7 +1,8 @@
 package net.enovea.team
 
-import net.enovea.dto.TeamDTO
+
 import net.enovea.api.workInProgress.TeamForm
+import net.enovea.team.teamCategory.TeamCategoryEntity
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named

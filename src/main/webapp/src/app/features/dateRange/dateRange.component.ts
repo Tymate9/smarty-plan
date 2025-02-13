@@ -1,4 +1,7 @@
 import { Component, EventEmitter, Output , ChangeDetectorRef } from '@angular/core';
+import {Calendar} from "primeng/calendar";
+import {FormsModule} from "@angular/forms";
+import {Button} from "primeng/button";
 
 @Component({
   selector: 'app-date-range',
@@ -13,7 +16,7 @@ import { Component, EventEmitter, Output , ChangeDetectorRef } from '@angular/co
         [showButtonBar]="true"
         [showIcon]="true"
         appendTo="body"
-        >
+      >
       </p-calendar>
 
       <p-calendar
@@ -25,7 +28,7 @@ import { Component, EventEmitter, Output , ChangeDetectorRef } from '@angular/co
         [showButtonBar]="true"
         [showIcon]="true"
         appendTo="body"
-        >
+      >
       </p-calendar>
 
       <p-button
@@ -38,6 +41,12 @@ import { Component, EventEmitter, Output , ChangeDetectorRef } from '@angular/co
     </div>
 
   `,
+  standalone: true,
+  imports: [
+    Calendar,
+    FormsModule,
+    Button
+  ],
   styles: [`
     .calendar-container {
       display: flex;
@@ -50,16 +59,17 @@ import { Component, EventEmitter, Output , ChangeDetectorRef } from '@angular/co
 
     ::ng-deep .p-calendar .p-inputtext:focus,
     ::ng-deep .p-calendar .p-inputtext:hover,
-    ::ng-deep .p-calendar:not(.p-calendar-disabled).p-focus>.p-inputtext {
+    ::ng-deep .p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
       outline: 0 none;
       outline-offset: 0;
       color: black;
       border-color: white !important;
       box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
     }
+
     ::ng-deep .p-calendar .p-datepicker {
       z-index: 1000;
-      top:50px;
+      top: 50px;
       border-color: white !important;
       box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
     }
@@ -78,15 +88,18 @@ import { Component, EventEmitter, Output , ChangeDetectorRef } from '@angular/co
       color: white !important;
       font-weight: 600;
     }
+
     ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:focus,
     ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:active {
       border-color: white !important;
       box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
     }
-    ::ng-deep .p-button.p-button-text{
-      color:white !important;
+
+    ::ng-deep .p-button.p-button-text {
+      color: white !important;
     }
-    ::ng-deep .p-button:active,::ng-deep .p-button:focus {
+
+    ::ng-deep .p-button:active, ::ng-deep .p-button:focus {
       border-color: white !important;
       box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
     }

@@ -9,7 +9,7 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import {TabPanel, TabView, TabViewChangeEvent} from "primeng/tabview";
 import {Button} from "primeng/button";
-import {DecimalPipe} from "@angular/common";
+import {DecimalPipe, NgForOf, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-map-popup',
@@ -80,7 +80,9 @@ import {DecimalPipe} from "@angular/common";
     Button,
     DecimalPipe,
     TabPanel,
-    TabView
+    TabView,
+    NgIf,
+    NgForOf
   ],
   styles: [`
     .active {

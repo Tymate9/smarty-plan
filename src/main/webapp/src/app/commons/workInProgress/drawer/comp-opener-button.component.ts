@@ -1,0 +1,55 @@
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ButtonDirective } from 'primeng/button';
+import {DrawerOptions} from "./drawer.component";
+import {DrawerService} from "../service/component/drawer.service";
+
+@Component({
+  selector: 'app-comp-opener-button',
+  standalone: true,
+  imports: [CommonModule, ButtonDirective],
+  template: `
+    <button pButton type="button" (click)="openDrawer()" [label]="label">
+      <ng-container *ngIf="icon">
+        <ng-container *ngIf="isIconClass(icon); else imgIcon">
+          <i [ngClass]="icon" style="margin-right: 0.5em;"></i>
+        </ng-container>
+        <ng-template #imgIcon>
+          <img [src]="icon" alt="Icon" style="height: 1em; margin-right: 0.5em;">
+        </ng-template>
+      </ng-container>
+    </button>
+  `
+})
+export class CompOpenerButtonComponent {
+  /** Libellé affiché sur le bouton */
+  @Input() label: string = 'Open Drawer';
+
+  /** Icône à afficher (peut être une classe CSS ou une URL) */
+  @Input() icon: string = '';
+
+  /**
+   * Options de configuration à transmettre lors de l'ouverture du Drawer.
+   * Permet de personnaliser dynamiquement le Drawer (header, position, contenu, etc.)
+   */
+  @Input() drawerOptions?: DrawerOptions;
+
+  constructor(private drawerService: DrawerService) {}
+
+  /** Appelle le service pour ouvrir le Drawer avec les options fournies */
+  openDrawer(): void {
+    this.drawerService.open(this.drawerOptions);
+  }
+
+  /**
+   * Vérifie si la valeur passée est une classe CSS (par exemple "pi pi-info")
+   * ou une URL d'image.
+   */
+  isIconClass(iconValue: string): boolean {
+    if (!iconValue) return false;
+    return iconValue.startsWith('pi ')
+      || iconValue.startsWith('pi-')
+      || iconValue.startsWith('fa ')
+      || iconValue.startsWith('fa-');
+  }
+}

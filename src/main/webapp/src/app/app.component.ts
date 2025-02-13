@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import {ConfirmationService, SharedModule} from 'primeng/api';
+import {DrawerComponent} from "./commons/workInProgress/drawer/drawer.component";
 
 @Component({
   selector: 'app-root',
@@ -13,14 +14,16 @@ import {ConfirmationService, SharedModule} from 'primeng/api';
     RouterOutlet,
     Toast,
     ConfirmDialog,
-    SharedModule
+    SharedModule,
+    DrawerComponent
   ],
   providers: [
-    ConfirmationService  // <-- Fournit le service indispensable
+    ConfirmationService
   ],
   template: `
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
+    <app-drawer></app-drawer>
     <router-outlet></router-outlet>
   `,
   styles: [`

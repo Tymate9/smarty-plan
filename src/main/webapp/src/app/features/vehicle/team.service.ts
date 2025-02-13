@@ -10,6 +10,7 @@ import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entit
 import {TreeNode} from "primeng/api";
 import {DrawerComponent} from "../../commons/workInProgress/drawer/drawer.component";
 import {TeamFormComponent} from "../../commons/workInProgress/CRUD/team-form/team-form.component";
+import {CompOpenerButtonComponent} from "../../commons/workInProgress/drawer/comp-opener-button.component";
 
 
 @Injectable({
@@ -177,42 +178,44 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
   private buildTeamLeaf(team: TeamDTO): TreeNode {
     const parentLabel = team.parentTeam ? team.parentTeam.label : '';
 
-    // Premier Drawer = "Modifier [team.label]"
-    const editDrawer = {
-      compClass: DrawerComponent,
+    // Premier bouton : "Modifier [team.label]"
+    const editButton = {
+      compClass: CompOpenerButtonComponent,  // Nouveau composant déclencheur
       inputs: {
-        buttonText: 'Modifier ' + team.label,
-        headerTitle: 'Édition de ' + team.label,
-        closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
-        // child => composant TeamForm + teamId = team.id
-        child: {
-          compClass: TeamFormComponent,
-          inputs: {
-            teamId: team.id
+        label: 'Modifier ' + team.label, // Libellé du bouton
+        drawerOptions: {                // Options à transmettre au Drawer via DrawerService
+          headerTitle: 'Édition de ' + team.label,
+          closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
+          child: {
+            compClass: TeamFormComponent, // Composant de formulaire d'édition
+            inputs: {
+              teamId: team.id
+            }
           }
         }
       }
     };
 
-    // Second Drawer = "Créer un sous-groupe" (ou ce que tu veux)
-    const createChildDrawer = {
-      compClass: DrawerComponent,
+    // Second bouton : "Créer un sous-groupe"
+    const createChildButton = {
+      compClass: CompOpenerButtonComponent,
       inputs: {
-        buttonText: 'Créer un sous-groupe',
-        headerTitle: 'Nouveau sous-groupe pour ' + team.label,
-        closeConfirmationMessage: 'Voulez-vous fermer le formulaire de création ?',
-        // child => TeamFormComponent sans teamId => mode création
-        child: {
-          compClass: TeamFormComponent,
-          inputs: {
-            teamId: null
+        label: 'Créer un sous-groupe',
+        drawerOptions: {
+          headerTitle: 'Nouveau sous-groupe pour ' + team.label,
+          closeConfirmationMessage: 'Voulez-vous fermer le formulaire de création ?',
+          child: {
+            compClass: TeamFormComponent, // Composant de formulaire de création
+            inputs: {
+              teamId: null
+            }
           }
         }
       }
     };
 
-    // On place ces deux Drawers dans dynamicComponents["Actions"]
-    const dynamicComps = [editDrawer, createChildDrawer];
+    // On place ces deux boutons dans le conteneur dynamique sous la clé "Actions"
+    const dynamicComps = [editButton, createChildButton];
 
     return {
       data: {
@@ -227,4 +230,5 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
       expanded: false
     };
   }
+
 }

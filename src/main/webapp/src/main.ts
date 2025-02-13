@@ -127,7 +127,7 @@ fetch('/api/config')
           features: [
             withAutoRefreshToken({
               onInactivityTimeout: 'logout',
-              sessionTimeout: 60000
+              sessionTimeout: 600000
             })
           ],
           providers: [AutoRefreshTokenService, UserActivityService]

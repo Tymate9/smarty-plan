@@ -57,6 +57,7 @@ import {
 // Importation de la configuration globale
 import {AppConfig} from "./app/app.config"
 import NmPreset from "./presets/nm-presets";
+import {frenchTranslation} from "./presets/translation/french";
 
 const urlCondition = createInterceptorCondition({
   urlPattern: /^\/api\//i,
@@ -107,7 +108,7 @@ fetch('/api/config')
         ),
         provideRouter(routes),
         provideAnimationsAsync(),
-        providePrimeNG({ theme: { preset: NmPreset }, ripple:true }),
+        providePrimeNG({ theme: { preset: NmPreset }, ripple:true, translation:frenchTranslation}),
         MessageService,
         // Fourniture de Keycloak avec la configuration chargée
         provideKeycloak({

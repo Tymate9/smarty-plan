@@ -9,8 +9,6 @@ import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
-import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
-import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
 
 export const routes: Routes = [
   {
@@ -19,6 +17,8 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard-non-geoloc', component: DashboardComponent },
+      // { path: 'dashboard-non-geoloc', component: DashboardNonGeolocComponent },
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit', component: PoiMapComponent},
       { path: 'report', component: ReportComponent },
@@ -26,7 +26,6 @@ export const routes: Routes = [
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard-non-geoloc', component: DashboardNonGeolocComponent },
       { path: 'workinprogress', component: EntityAdminComponent }
     ]
   },

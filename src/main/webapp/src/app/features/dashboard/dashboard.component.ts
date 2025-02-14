@@ -231,7 +231,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
           </td>
           <td class="custom-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
           <td class="custom-cell">
-            <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"
+            <p-button (onClick)="this.router.navigate(['trip'+(non_geoloc?'-non-geoloc':''), rowData.vehicle.id, today])" icon="pi pi-calendar"
                       styleClass="red-button"></p-button>
 
             <p-button
@@ -495,6 +495,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   smsModalCallingCode : string;
   smsModalCompanyName : string;
 
+  non_geoloc : boolean = false;
+
   // Ouvre la modale
   openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode:string, companyName:string) {
     this.smsModalDriverLabel = driverLabel
@@ -542,6 +544,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
     this.filtersSubscription = this.subscribeToFilterChanges();
   }
 

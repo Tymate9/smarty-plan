@@ -212,13 +212,13 @@ export class VehicleService {
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
     driverNames: string[]=[]
-  ): Observable<TeamHierarchyNode[]> {
+  ): Observable<TeamHierarchyNodeBase[]> {
     const params={
       teamLabels: teamLabels.length ? teamLabels : [],
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
     }
-    return this.http.get<TeamHierarchyNode[]>(`${this.baseUrl}/tableDataNonGeoloc`,  {params});
+    return this.http.get<TeamHierarchyNodeBase[]>(`${this.baseUrl}/tableDataNonGeoloc`,  {params});
   }
 
 }

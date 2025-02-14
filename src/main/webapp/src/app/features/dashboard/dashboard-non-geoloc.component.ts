@@ -60,7 +60,8 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
           'has-vehicle': rowData.vehicle
         }">
-          <td *ngIf="!rowData.vehicle" colspan="8">
+<!--          <td *ngIf="!rowData.vehicle" colspan="8">-->
+          <td *ngIf="!rowData.vehicle" colspan="7">
             <p-treeTableToggler [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
@@ -74,7 +75,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
           <td>État</td>
           <td>Dernière communication</td>
           <td>Heure de départ</td>
-          <td>Adresse</td>
+<!--          <td>Adresse</td>-->
           <td>Distance totale</td>
           <td>Bouton d'action</td>
         </tr>
@@ -180,23 +181,23 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
             <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
 
-          <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
-                    class="poi-icon">
+<!--          <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">-->
+<!--            <div style="display: flex; align-items: center; gap: 8px;">-->
+<!--              <span [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"-->
+<!--                    class="poi-icon">-->
 
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30"
-                   [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}">
-                <path
-                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"></path>
-              </svg>
-            </span>
+<!--              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30"-->
+<!--                   [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}">-->
+<!--                <path-->
+<!--                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"></path>-->
+<!--              </svg>-->
+<!--            </span>-->
 
-              <span>
-            {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
-              </span>
-            </div>
-          </td>
+<!--              <span>-->
+<!--            {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}-->
+<!--              </span>-->
+<!--            </div>-->
+<!--          </td>-->
           <td class="custom-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
           <td class="custom-cell">
             <p-button (onClick)="this.router.navigate(['trip', rowData.vehicle.id, today])" icon="pi pi-calendar"

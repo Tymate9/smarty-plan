@@ -5,11 +5,12 @@ import {MainLayoutComponent} from "./layout/main-layout/main-layout.component";
 import {DashboardComponent} from "./features/dashboard/dashboard.component";
 import {CartographyComponent} from "./features/cartography/cartography.component";
 import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.component";
-import {DashboardNonGeolocComponent} from "./features/dashboard-non-geoloc/dashboard-non-geoloc.component";
 import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
+import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
+import {DashboardNonGeolocComponent} from "./features/dashboard/dashboard-non-geoloc.component";
 
 export const routes: Routes = [
   {

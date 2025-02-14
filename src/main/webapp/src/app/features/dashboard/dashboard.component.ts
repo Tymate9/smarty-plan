@@ -84,7 +84,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
           <td>État</td>
           <td>Dernière communication</td>
           <td>Heure de départ</td>
-          <td>Adresse</td>
+          <td *ngIf="!non_geoloc">Adresse</td>
           <td>Distance totale</td>
           <td>Action</td>
         </tr>
@@ -189,7 +189,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
             <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
             <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
-          <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
+          <td *ngIf="!non_geoloc" class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
             <div style="display: flex; align-items: center; gap: 8px;">
               <!-- #1 Vérifie si l'adresse commence par 'pause midi' -->
               <ng-container *ngIf="rowData.vehicle.lastPositionAddress?.startsWith('pause midi'); else defaultIcon">
@@ -541,6 +541,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly vehicleService: VehicleService,
     protected router: Router,
   ) {
+    this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
   }
 
   ngOnInit() {

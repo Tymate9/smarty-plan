@@ -136,13 +136,15 @@ data class VehicleEntity(
 
         data class VehicleAndCurrentDriver(val vehicle: VehicleEntity, val geolocalized: Boolean? = false, val driver: DriverEntity?)
 
-
         @Transactional
         fun getAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver?{
             try {
                 val vehicle = getEntityManager().createQuery(
                     """
-                SELECT v, d
+                SELECT v,
+                       (vup.id.startDate IS NULL
+                    AND dup.id.startDate IS NULL) as geolocalized,
+                        d
                 FROM VehicleEntity v 
                     LEFT JOIN FETCH VehicleDriverEntity vd  
                         ON vd.id.vehicleId = v.id

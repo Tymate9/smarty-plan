@@ -4,13 +4,15 @@ import {TeamHierarchyNode, VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
 import {Router} from "@angular/router";
-import {DatePipe} from "@angular/common";
-import {TreeTable} from "primeng/treetable";
+import {DatePipe, NgClass, NgStyle, NgSwitch, NgForOf, NgIf, NgSwitchCase, NgSwitchDefault} from "@angular/common";
+import {TreeTable, TreeTableModule} from "primeng/treetable";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {Subscription} from "rxjs";
+import {Button} from "primeng/button";
+import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-dashboard-non-geoloc',
   template: `
 
     <div class="status-buttons">
@@ -85,8 +87,8 @@ import {Subscription} from "rxjs";
         }"
             *ngIf="rowData.vehicle">
           <td *ngIf="rowData.vehicle.driver; else noDriver">
-                {{ rowData.vehicle.driver.firstName }} {{ rowData.vehicle.driver.lastName || 'Véhicule non attribué' }}
-            </td>
+            {{ rowData.vehicle.driver.firstName }} {{ rowData.vehicle.driver.lastName || 'Véhicule non attribué' }}
+          </td>
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
           </ng-template>
@@ -106,11 +108,11 @@ import {Subscription} from "rxjs";
                 <div>
                   <i class="pi pi-play"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                    ngSrc="../../../assets/icon/unplugged.svg"
-                    alt="unplugged"
-                    height="16"
-                    width="16"
-                    style="float: right; margin-left: 8px;"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
                   />
                 </div>
               </span>
@@ -118,22 +120,22 @@ import {Subscription} from "rxjs";
                 <div>
                 <i class="pi pi-step-forward"></i>
                 <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                  ngSrc="../../../assets/icon/unplugged.svg"
-                  alt="unplugged"
-                  height="16"
-                  width="16"
-                  style="float: right; margin-left: 8px;"
+                     ngSrc="../../../assets/icon/unplugged.svg"
+                     alt="unplugged"
+                     height="16"
+                     width="16"
+                     style="float: right; margin-left: 8px;"
                 /></div>
               </span>
               <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté
                 <div><i class="pi pi-stop"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                  ngSrc="../../../assets/icon/unplugged.svg"
-                  alt="unplugged"
-                  height="16"
-                  width="16"
-                  style="float: right; margin-left: 8px;"
-                /></div>
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
+                  /></div>
                 </span>
               <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal
                 <div>
@@ -143,28 +145,28 @@ import {Subscription} from "rxjs";
                        alt="unplugged"
                        height="16" width="16"
                        style="float: right;
-                       margin-left: 8px;" />
+                       margin-left: 8px;"/>
                 </div></span>
               <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté
                 <div>
                   <i class="pi pi-ban"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                  ngSrc="../../../assets/icon/unplugged.svg"
-                  alt="unplugged"
-                  height="16"
-                  width="16"
-                  style="float: right; margin-left: 8px;"
-                /></div>
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
+                  /></div>
                 </span>
               <span *ngSwitchDefault class="status-icon">Inconnu
                 <div>
                   <i class="pi pi-question-circle"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                    ngSrc="../../../assets/icon/unplugged.svg"
-                    alt="unplugged"
-                    height="16"
-                    width="16"
-                    style="float: right; margin-left: 8px;"/>
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"/>
                 </div>
               </span>
             </ng-container>
@@ -174,8 +176,8 @@ import {Subscription} from "rxjs";
           </td>
           <td
             class="custom-cell">
-                <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
-                <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
+            <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
+            <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
 
           <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
@@ -234,6 +236,19 @@ import {Subscription} from "rxjs";
     </div>
 
   `,
+  standalone: true,
+  imports: [
+    NgStyle,
+    NgClass,
+    Button,
+    TreeTableModule,
+    NgSwitch,
+    SmsFormComponent,
+    NgForOf,
+    NgIf,
+    NgSwitchCase,
+    NgSwitchDefault
+  ],
   styles: [`
     /*style de treeTable*/
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
@@ -539,7 +554,7 @@ import {Subscription} from "rxjs";
     }
   `]
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardNonGeolocComponent implements OnInit, OnDestroy {
 
   /**
    * Modale SMS
@@ -612,7 +627,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
 
       // Fetch the filtered vehicles based on the selected filters
-      this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+      this.vehicleService.getFilteredNonGeolocVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
 
           this.teamHierarchy = filteredVehicles

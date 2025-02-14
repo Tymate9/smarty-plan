@@ -86,6 +86,26 @@ class VehicleResource(
     }
 
     @GET
+    @Path("/tableDataNonGeoloc")
+    fun getFilteredNonGeolocVehiclesTableData(
+        @QueryParam("teamLabels") teamLabels: List<String>?,
+        @QueryParam("vehicleIds") vehicleIds: List<String>?,
+        @QueryParam("driverNames") driverNames: List<String>?
+    ): List<TeamHierarchyNode> {
+        val stopWatch = StopWatch(id = "tableNonGeolocData", keepTaskList = true)
+
+        stopWatch.start("getFilteredNonGeolocVehicles")
+        val filteredVehicles = VehicleEntity.getFilteredNonGeolocVehicles(teamLabels, vehicleIds, driverNames)
+        stopWatch.stop()
+
+        val table = vehicleService.getNonGeolocVehiclesTableData(filteredVehicles, stopWatch)
+
+        logger.info("Load vehicles table data:\n${stopWatch.prettyPrint(DurationUnit.MILLISECONDS)}")
+
+        return table
+    }
+
+    @GET
     @Path("/nearest")
     @Produces(MediaType.APPLICATION_JSON)
     fun getNearestVehiclesDetails(

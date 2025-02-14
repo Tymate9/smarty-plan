@@ -8,7 +8,7 @@ TRUNCATE TABLE public.vehicle_team;
 TRUNCATE TABLE public.vehicle_untracked_period;
 
 -- Vidage de toutes les tables centrales
-TRUNCATE TABLE public.device;
-TRUNCATE TABLE public.driver;
-TRUNCATE TABLE public.vehicle;
-TRUNCATE TABLE public.team;
+TRUNCATE TABLE public.device CASCADE;
+TRUNCATE TABLE public.driver CASCADE;
+TRUNCATE TABLE public.vehicle CASCADE;
+TRUNCATE TABLE public.team CASCADE;

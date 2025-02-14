@@ -300,6 +300,97 @@ open class VehicleService(
     }
 
 
+    // TODO seperate the data treatment method
+    fun getNonGeolocVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
+        stopWatch?.start("filter non localized vehicles")
+        val allVehicles = vehicles ?: VehicleEntity.listAll()
+        stopWatch?.stopAndStart("compute daily stats")
+        val tripStats = tripService.getTripDailyStats()
+
+
+        // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
+        stopWatch?.stopAndStart("MapTo vehicle data DTO")
+        val allVehicleDataDTO =
+            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
+                .map { vehicle ->
+                    // Convert to VehicleTableDTO
+                    val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+
+                    // Enrich the DTO with trip statistics if available
+                    tripStats[vehicle.id]?.let { stats ->
+                        vehicleDTO.distance = (stats.distance) / 1000
+                        vehicleDTO.firstTripStart = stats.firstTripStart
+                    }
+                    vehicleDTO
+                }
+
+        // Find last position info (poi or address)
+        stopWatch?.stopAndStart("Get last position infos")
+        allVehicleDataDTO.forEach { vehicleDataDTO ->
+            vehicleDataDTO.lastPositionAddress = "-"
+//            try {
+//                // Try to fetch POI using spatial service
+//                val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+//                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity :: class)
+//                }
+//                if (poi != null) {
+//                    vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
+//                    vehicleDataDTO.lastPositionAddressInfo = poi.category
+//                } else {
+//                    // Cannot find POI so Adress Type is "route"
+//                    vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
+//                        label = "route",
+//                        color = "#000"
+//                    )
+//                    // Get adress from device DataState or geocoding
+//                    if (vehicleDataDTO.device.deviceDataState?.address == null) {
+//                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
+//                            geoCodingService.reverseGeocode(it)
+//                        }
+//                        vehicleDataDTO.lastPositionAddress = address
+//                    } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
+//                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnue"
+//                    } else {
+//                        vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
+//
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                // Handle any errors during POI lookup or reverse geocoding
+//                vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
+//            }
+        }
+        // Now we build the hierarchy of vehicles based on their teams
+        stopWatch?.stopAndStart("Build team hierarchy")
+        val vehiclesWithHierarchy = allVehicleDataDTO.map { vehicleDataDTO ->
+            val team = vehicleDataDTO.team
+            val teamHierarchy = buildTeamHierarchy(team) // Get full team hierarchy
+            vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
+        }
+
+        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy) { it.teamHierarchy }
+
+        stopWatch?.stop()
+        return teamHierarchy
+    }
+
+    // Helper function to build team hierarchy
+    private fun buildTeamHierarchy(team: TeamDTO?): String {
+        // Recursively build the team hierarchy
+        val hierarchy = mutableListOf<String>()
+        var currentTeam = team
+        while (currentTeam != null) {
+            hierarchy.add(currentTeam.label)
+            currentTeam = currentTeam.parentTeam
+        }
+        // If the hierarchy is only one level, add "Interne" as the second level
+        if (hierarchy.size == 1) {
+            val teamLabel = hierarchy.first()
+            hierarchy.add("$teamLabel Interne")
+            return hierarchy.joinToString(" > ")
+        } else
+            return hierarchy.reversed().joinToString(" > ")
+    }
 
     //function returns tracked and untracked vehicles(details) with replacing the last position by null for untracked vehicles/drivers
     fun getVehiclesDetails(): List<VehicleDTO> {

@@ -17,7 +17,6 @@ import net.enovea.common.geo.SpatialService
 @Authenticated
 class TripResource(
     private val tripRepository: TripRepository,
-    private val spatialService: SpatialService,
     private val tripService: TripService
 ) {
 
@@ -45,30 +44,7 @@ class TripResource(
         @PathParam("vehicleId") vehicleId: String,
         @PathParam("date") date: String // format %Y%m%d
     ): TripEventsDTO? {
-        val tripEventsList = tripService.computeTripEventsDTO(vehicleId, date, false)
-        val transformedList = tripEventsList?.copy(
-            tripEvents = tripEventsList.tripEvents.map { event ->
-                event.copy(
-                    poiId = null,
-                    poiLabel = null,
-                    address = "Adresse non géolocalisée",
-                    lat = null,
-                    lng = null,
-                    trace = null
-                )
-            },
-            compactedTripEvents = tripEventsList.compactedTripEvents.map { event ->
-                event.copy(
-                    poiId = null,
-                    poiLabel = null,
-                    address = "Adresse non géolocalisée",
-                    lat = null,
-                    lng = null,
-                    trace = null
-                )
-            }
-        )
-        return transformedList
+        return tripService.computeTripEventsDTO(vehicleId, date, false)
     }
 
     @GET

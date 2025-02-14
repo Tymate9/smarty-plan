@@ -18,7 +18,6 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'dashboard-non-geoloc', component: DashboardComponent },
-      // { path: 'dashboard-non-geoloc', component: DashboardNonGeolocComponent },
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit', component: PoiMapComponent},
       { path: 'report', component: ReportComponent },

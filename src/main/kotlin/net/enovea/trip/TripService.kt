@@ -178,6 +178,35 @@ class TripService(
             tripEvents = tripEvents,
             compactedTripEvents = fuseRedundantStops(fuseShortStops(tripEvents))
         )
+
+        // Après avoir fait calculs sur les événements du trajet, on offusque toutes les adresses et les éléments
+        // d'identification géographiques.
+        if(!geolocalized){
+            val transformedList = result.copy(
+                tripEvents = result.tripEvents.map { event ->
+                    event.copy(
+                        poiId = null,
+                        poiLabel = null,
+                        address = "Adresse non géolocalisée",
+                        lat = null,
+                        lng = null,
+                        trace = null
+                    )
+                },
+                compactedTripEvents = result.compactedTripEvents.map { event ->
+                    event.copy(
+                        poiId = null,
+                        poiLabel = null,
+                        address = "Adresse non géolocalisée",
+                        lat = null,
+                        lng = null,
+                        trace = null
+                    )
+                }
+            )
+            result = transformedList
+        }
+
         return result
     }
 

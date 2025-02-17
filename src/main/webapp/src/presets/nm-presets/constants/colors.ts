@@ -17,5 +17,10 @@ export const nmColors = {
   darkGray: '#808080',
 
   // Exemple de focus ring (adaptable selon la charte)
-  focusRingColor: '#66afe9'
+  focusRingColor: '#66afe9',
+
+  //Colors of the toast/messages
+  taostGreen: '#C8E6C9',
+  toastGreenBorder:'#439446',
+  toastGreenText:'#15803d'
 };

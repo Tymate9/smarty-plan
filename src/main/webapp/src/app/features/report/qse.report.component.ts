@@ -17,7 +17,7 @@ import {NgClass, NgIf} from "@angular/common";
     <app-indicator-buttons
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
-      [buttonColor]="'var(--red-100)'"
+      [buttonColor]="'var(--p-red-100)'"
       [sliceRange]="[0, 3]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
@@ -26,7 +26,7 @@ import {NgClass, NgIf} from "@angular/common";
     <app-indicator-buttons
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
-      [buttonColor]="'var(--gray-300)'"
+      [buttonColor]="'var(--p-gray-300)'"
       [sliceRange]="[3, 6]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
@@ -43,18 +43,18 @@ import {NgClass, NgIf} from "@angular/common";
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
         <tr [ttRow]="rowNode"
             [ngClass]="{
-          'root-node': !rowNode.parent,
+          'dynamic-tt-parent-node': !rowNode.parent,
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
-          'has-vehicle': rowData.vehicle
+          'dynamic-tt-leaf': rowData.vehicle
         }">
           <td *ngIf="!rowData.vehicle" colspan="13">
-            <p-treeTableToggler [rowNode]="rowNode"/>
+            <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
         </tr>
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
-            class="table-header">
+            class="dynamic-tt-header">
           <td rowspan="3">Véhicule</td>
           <td rowspan="3">Conducteur</td>
           <td rowspan="3">Distance parcourue</td>
@@ -66,7 +66,7 @@ import {NgClass, NgIf} from "@angular/common";
           <td colspan="3">Allure (%)</td>
         </tr>
         <!-- Sub-header row for AR, R, V -->
-        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="table-header">
+        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
           <td>AR</td>
           <td>R</td>
           <td>V</td>
@@ -78,7 +78,7 @@ import {NgClass, NgIf} from "@angular/common";
           <td>V</td>
         </tr>
 
-        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="table-header">
+        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
           <td>note/20</td>
           <td>note/20</td>
           <td>note/20</td>
@@ -93,9 +93,9 @@ import {NgClass, NgIf} from "@angular/common";
 
         <tr [ttRow]="rowNode"
             [ngClass]="{
-          'root-node': !rowNode.parent,
+          'dynamic-tt-parent-node': !rowNode.parent,
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
-          'has-vehicle': rowData.vehicle
+          'dynamic-tt-leaf': rowData.vehicle
         }"
             *ngIf="rowData.vehicle">
           <td>{{ rowData.vehicle.vehicleStatsQse.licensePlate || 'Véhicule' }}</td>
@@ -132,105 +132,105 @@ import {NgClass, NgIf} from "@angular/common";
     NgIf
   ],
   styles: [`
-    /*style de treeTable*/
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
-      background-color: #007ad9 !important;
-      color: white !important;
-      text-align: center !important;
-      padding: 2px 8px !important;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
-      padding: 2px 8px !important;
-      border-bottom: 1px solid #ddd !important;
-      width: auto;
-      font-weight: 700;
-    }
-
-    .table-header {
-      background-color: var(--gray-500);
-      color: white;
-      padding: 10px !Important;
-      font-weight: 700 !Important;
-    }
-
-    .table-header td {
-      text-align: center !Important;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
-      background-color: var(--gray-200) !important;
-      //color: var(--blue-600) !important;
-      font-weight: 700;
-      color: red;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.has-vehicle {
-      background-color: var(--gray-200) !important;
-      font-weight: 600;
-    }
-
-    :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr:hover {
-      background-color: var(--bluegray-100) !important;
-    }
-
-    .p-treeTable .p-treetable-toggler {
-      color: white !important;
-    }
-
-    ::ng-deep .p-treetable .p-treetable-tbody > tr > td .p-treetable-toggler {
-      color: white;
-      background: #aa001f !important;
-      width: 1.3rem;
-      height: 1.3rem;
-    }
-
-    .custom-cell {
-      width: 1%;
-      white-space: nowrap;
-      text-align: center;
-      padding: 0;
-      align-items: center
-    }
-
-    /*fin de style de treeTable*/
-
-    /*style de treeTable parent ligne*/
-    :host ::ng-deep .p-treetable.custom-tree-table .root-node {
-      background-color: #aa001f;
-      color: white;
-      border-radius: 15px 15px 0px 0px !important;
-      border: none !important;
-      width: 100% !important;
-      margin: 0 auto !important;
-      box-shadow: 0 2px 4px #0000001a !important;
-      font-weight: 700 !important;
-      clip-path: polygon(0% 100%, 0% 15%, 25% 15%, 27% 75%, 100% 75%, 100% 100%) !important;
-      height: 50px;
-      line-height: 50px;
-    }
-
-    :host ::ng-deep .p-treetable.custom-tree-table .root-node td {
-      padding: 12px;
-      border-width: 0px;
-      font-weight: 700 !important;
-    }
-
-    /*fin de style de treeTable parent ligne*/
-
-    /* Table row styling */
-    td {
-      padding: 8px;
-      border: 1px solid #ddd;
-    }
-
-    tbody tr:nth-child(odd) {
-      background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-      background-color: #f1f1f1;
-    }
+    ///*style de treeTable*/
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
+    //  background-color: #007ad9 !important;
+    //  color: white !important;
+    //  text-align: center !important;
+    //  padding: 2px 8px !important;
+    //}
+    //
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
+    //  padding: 2px 8px !important;
+    //  border-bottom: 1px solid #ddd !important;
+    //  width: auto;
+    //  font-weight: 700;
+    //}
+    //
+    //.table-header {
+    //  background-color: var(--gray-500);
+    //  color: white;
+    //  padding: 10px !Important;
+    //  font-weight: 700 !Important;
+    //}
+    //
+    //.table-header td {
+    //  text-align: center !Important;
+    //}
+    //
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
+    //  background-color: var(--gray-200) !important;
+    //  //color: var(--blue-600) !important;
+    //  font-weight: 700;
+    //  color: red;
+    //}
+    //
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.has-vehicle {
+    //  background-color: var(--gray-200) !important;
+    //  font-weight: 600;
+    //}
+    //
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr:hover {
+    //  background-color: var(--bluegray-100) !important;
+    //}
+    //
+    //.p-treeTable .p-treetable-toggler {
+    //  color: white !important;
+    //}
+    //
+    //::ng-deep .p-treetable .p-treetable-tbody > tr > td .p-treetable-toggler {
+    //  color: white;
+    //  background: #aa001f !important;
+    //  width: 1.3rem;
+    //  height: 1.3rem;
+    //}
+    //
+    //.custom-cell {
+    //  width: 1%;
+    //  white-space: nowrap;
+    //  text-align: center;
+    //  padding: 0;
+    //  align-items: center
+    //}
+    //
+    ///*fin de style de treeTable*/
+    //
+    ///*style de treeTable parent ligne*/
+    //:host ::ng-deep .p-treetable.custom-tree-table .root-node {
+    //  background-color: #aa001f;
+    //  color: white;
+    //  border-radius: 15px 15px 0px 0px !important;
+    //  border: none !important;
+    //  width: 100% !important;
+    //  margin: 0 auto !important;
+    //  box-shadow: 0 2px 4px #0000001a !important;
+    //  font-weight: 700 !important;
+    //  clip-path: polygon(0% 100%, 0% 15%, 25% 15%, 27% 75%, 100% 75%, 100% 100%) !important;
+    //  height: 50px;
+    //  line-height: 50px;
+    //}
+    //
+    //:host ::ng-deep .p-treetable.custom-tree-table .root-node td {
+    //  padding: 12px;
+    //  border-width: 0px;
+    //  font-weight: 700 !important;
+    //}
+    //
+    ///*fin de style de treeTable parent ligne*/
+    //
+    ///* Table row styling */
+    //td {
+    //  padding: 8px;
+    //  border: 1px solid #ddd;
+    //}
+    //
+    //tbody tr:nth-child(odd) {
+    //  background-color: #f9f9f9;
+    //}
+    //
+    //tbody tr:hover {
+    //  background-color: #f1f1f1;
+    //}
 
   `]
 })

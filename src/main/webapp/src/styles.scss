@@ -2,6 +2,7 @@
 
 @import './styles/custom-treetable';
 
+
 // Variables de couleur
 $color-primary-dark: #3B6997;        // Bleu sombre, principal
 $color-primary-dark-secondary: #598392; // Bleu sombre, secondaire
@@ -14,6 +15,8 @@ $color-warning-semi: #FED42A;        // Jaune, Semi Warning
 $color-green-ok: #21A179;            // Vert, OK
 $color-gray-secondary: #E5E5E5;      // Gris, fond secondaire
 $color-brown-tertiary: #EEE3D4;      // Marron clair, fond tertiaire
+$primary-color: #aa001f;
+$secondary-color:#808080;
 
 // Classe pour créer un effet transparent ( verre dépoli )
 .transparent-blur-bg {
@@ -36,7 +39,7 @@ html, body {
       var(--p-red-50),
       var(--p-red-100)
   ) !important;
-  color: var(--p-primary-color);
+  color: $secondary-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;

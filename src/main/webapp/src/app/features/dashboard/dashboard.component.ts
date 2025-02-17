@@ -27,7 +27,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     <div class="status-buttons">
       <button
         *ngFor="let status of vehicleStatusCounts"
-        pButton
         [ngStyle]="{ '--button-color': getStatusDetails(status.state).color }"
         class="custom-status-button"
         (click)="filterByStatus(status.state)">

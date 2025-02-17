@@ -31,11 +31,11 @@ import {AppConfig} from "../../app.config";
         <div class="nav-container">
           <div class="nav-buttons">
             <div class="nav-buttons-row">
-              <p-button (onClick)="navigateTo('dashboard'+(this.router.url.includes('non-geoloc')?'-non-geoloc':''))" icon="pi pi-th-large" styleClass="custom-button-bg" title="Tableau de bord"></p-button>
-              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg" title="Cartographie"></p-button>
-              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg" title="POIs"></p-button>
-              <p-button (onClick)="navigateTo('report')" icon="pi pi-chart-bar" styleClass="custom-button-bg" title="Suivi d'activité"></p-button>
-              <p-button (onClick)="navigateTo('qse-report')" icon="pi pi-chart-line" styleClass="custom-button-bg" title="Rapport QSE"></p-button>
+              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" title="Tableau de bord"></p-button>
+              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" title="Cartographie"></p-button>
+              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" title="POIs"></p-button>
+              <p-button (onClick)="navigateTo('report')" icon="pi pi-chart-bar" title="Suivi d'activité"></p-button>
+              <p-button (onClick)="navigateTo('qse-report')" icon="pi pi-chart-line" title="Rapport QSE"></p-button>
             </div>
           </div>
           <div class="filters center">
@@ -48,14 +48,14 @@ import {AppConfig} from "../../app.config";
                                      (selectedTagsChange)="updateDrivers($event)"
                                      [selectedItems]="driverSelected"></app-search-autocomplete>
             <p-button type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></p-button>
-            <p-button (onClick)="saveFilters()" icon="pi pi-save" styleClass="custom-button-bg"></p-button>
+            <p-button (onClick)="saveFilters()" icon="pi pi-save" ></p-button>
           </div>
         </div>
       </ng-template>
       <ng-template pTemplate="end">
         <div class="user-info compact">
-          <p-button icon="pi pi-cog" class="user-settings" styleClass="custom-button-bg"></p-button>
-          <p-button (onClick)="logout()" icon="pi pi-power-off" styleClass="custom-button-bg"
+          <p-button icon="pi pi-cog" class="user-settings"></p-button>
+          <p-button (onClick)="logout()" icon="pi pi-power-off"
                     [disabled]="!logoutURL"></p-button>
         </div>
       </ng-template>

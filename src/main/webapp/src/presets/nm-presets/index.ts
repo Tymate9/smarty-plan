@@ -7,6 +7,8 @@ import {menubarConfig} from "./components/menubar";
 import {toggleButtonConfig} from "./components/togglebutton";
 import {datePickerConfig} from "./components/datepicker";
 import {inputTextConfig} from "./components/inputtext";
+import {toastConfig} from "./components/toast";
+import {cardConfig} from "./components/card";
 
 
 export const NmPreset = definePreset(Nora, {
@@ -16,7 +18,9 @@ export const NmPreset = definePreset(Nora, {
     menubar: menubarConfig ,
     togglebutton: toggleButtonConfig,
     datepicker:datePickerConfig,
-    inputtext:inputTextConfig
+    inputtext:inputTextConfig,
+    toast:toastConfig,
+    card:cardConfig
   }
 });
 

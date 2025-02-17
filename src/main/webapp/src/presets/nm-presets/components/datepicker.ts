@@ -15,7 +15,11 @@ export const datePickerConfig = {
     background: "{content.background}",
     borderColor: nmColors.brandRed,
     color: nmColors.brandBlack,
-    padding: "0 0 0.5rem 0"
+    padding: "0 0 0.5rem 0",
+    navIcon:{
+      color: nmColors.brandRed, // Change arrow icon color
+      hoverColor: nmColors.brandRedHover, // Optional for hover state
+    }
   },
   title: { gap: "0.5rem", fontWeight: "500" },
   dropdown: {
@@ -46,11 +50,11 @@ export const datePickerConfig = {
   weekDay: { padding: "0.25rem", fontWeight: "700", color: nmColors.darkGray },
   date: {
     hoverBackground: "{content.hover.background}",
-    selectedBackground: "{primary.color}",
+    selectedBackground: "{content.hover.background}",
     rangeSelectedBackground: "{highlight.background}",
     color: "{content.color}",
     hoverColor: "{content.hover.color}",
-    selectedColor: "{primary.contrast.color}",
+    selectedColor: nmColors.brandRedHover,
     rangeSelectedColor: "{highlight.color}",
     width: "3rem",
     height: "3rem",
@@ -68,7 +72,7 @@ export const datePickerConfig = {
   month: { padding: "0.375rem", borderRadius: "{content.border.radius}" },
   yearView: { margin: "0.5rem 0 0 0" },
   year: { padding: "0.375rem", borderRadius: "{content.border.radius}" },
-  buttonbar: { padding: "0.5rem 0 0 0", borderColor: "{content.border.color}" },
+  buttonbar: { padding: "0.5rem 0 0 0", borderColor: nmColors.brandRed },
   timePicker: { padding: "0.5rem 0 0 0", borderColor: nmColors.brandRed, gap: "0.5rem", buttonGap: "0.25rem" },
   colorScheme: {
     light: {

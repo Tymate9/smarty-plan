@@ -4,7 +4,7 @@ import {FormInputUtils, IFormInput} from "../iform-input";
 import { IEntityService } from "../ientity-service";
 import {IFormDescription} from "../iform-description";
 import {Subscription} from "rxjs";
-import {NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
+import {NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@angular/common";
 import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-input.component";
 
 @Component({
@@ -83,7 +83,8 @@ import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-
     NgSwitch,
     NgForOf,
     NgIf,
-    NgSwitchCase
+    NgSwitchCase,
+    NgSwitchDefault
   ],
   styles: [`
     .error {
@@ -125,6 +126,9 @@ export class EntityFormComponent implements OnInit, OnChanges {
   protected readonly FormInputUtils = FormInputUtils;
 
   ngOnInit(): void {
+    console.log("Je suis dans ce foutu init dans lequelle je ne suis pas sensé être")
+    console.log(this.formDescription)
+    console.log(this.entity)
     this.initializeReactiveForm();
   }
 

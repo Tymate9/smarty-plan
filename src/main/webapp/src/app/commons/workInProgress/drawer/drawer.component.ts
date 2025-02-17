@@ -53,7 +53,6 @@ export interface DrawerOptions {
       [position]="position"
       [closable]="showCloseIcon"
       (onShow)="onSidebarShow()"
-      (onHide)="onSideBarHide()"
       [styleClass]="styleClass"
     >
       <!-- Header -->
@@ -111,14 +110,46 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
   private childComponentRef: any;
 
   /** Contrôle interne de la visibilité */
-  public visible: boolean = false;
+  private _visible: boolean = false;
+
+  public get visible(){
+    return this._visible;
+  }
+
+  public set visible(value:boolean){
+    if (!value){
+      // Si aucune confirmation n'est requise, on ferme directement
+      if (!this.closeConfirmationMessage) {
+        this._visible = false;
+        this.childComponentRef.destroy()
+      } else {
+        // Sinon, on affiche le dialogue de confirmation
+        this.confirmationService.confirm({
+          message: this.closeConfirmationMessage,
+          header: 'Confirmation',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            this._visible = false;
+            this.childComponentRef.destroy()
+          },
+          reject: () => {
+            // En cas de refus, on garde le Drawer ouvert
+            this._visible = true;
+            this.childComponentRef.destroy()
+          }
+        });
+      }
+    }
+    else{
+      this._visible = value
+    }
+  }
 
   constructor(
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
     private drawerService: DrawerService
   ) {
-    // Enregistrement de cette instance dans le service pour y accéder globalement
+    // Enregistrement de cette instance dans le service pour y accéder globa_lement
     this.drawerService.registerDrawer(this);
   }
 
@@ -153,6 +184,7 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
    * @param options Options pour personnaliser l'affichage du Drawer
    */
   public openDrawer(options?: DrawerOptions): void {
+    this.childComponentRef.destroy()
     if (options) {
       if (options.headerTitle !== undefined) {
         this.headerTitle = options.headerTitle;
@@ -181,26 +213,5 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
    */
   public closeDrawer(): void {
     this.visible = false;
-  }
-
-  onSideBarHide() {
-      // Si aucune confirmation n'est requise, on ferme directement
-      if (!this.closeConfirmationMessage) {
-        this.visible = false;
-      } else {
-        // Sinon, on affiche le dialogue de confirmation
-        this.confirmationService.confirm({
-          message: this.closeConfirmationMessage,
-          header: 'Confirmation',
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            this.visible = false;
-          },
-          reject: () => {
-            // En cas de refus, on garde le Drawer ouvert
-            this.visible = true;
-          }
-        });
-      }
   }
 }

@@ -235,7 +235,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
                       styleClass="red-button"></p-button>
 
             <p-button
-              *ngIf="rowData.vehicle.driver"
+              *ngIf="!non_geoloc && rowData.vehicle.driver"
               icon="pi pi-envelope"
               styleClass="red-button"
               (click)="openSmsOverlay(rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName, rowData.vehicle.driver.phoneNumber, '+33','Normandie Manutention' )"

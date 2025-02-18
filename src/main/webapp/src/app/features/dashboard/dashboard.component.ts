@@ -85,8 +85,8 @@ import {Subscription} from "rxjs";
         }"
             *ngIf="rowData.vehicle">
           <td *ngIf="rowData.vehicle.driver; else noDriver">
-                {{ rowData.vehicle.driver.firstName }} {{ rowData.vehicle.driver.lastName || 'Véhicule non attribué' }}
-            </td>
+            {{ rowData.vehicle.driver.firstName }} {{ rowData.vehicle.driver.lastName || 'Véhicule non attribué' }}
+          </td>
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
           </ng-template>
@@ -106,11 +106,11 @@ import {Subscription} from "rxjs";
                 <div>
                   <i class="pi pi-play"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                    ngSrc="../../../assets/icon/unplugged.svg"
-                    alt="unplugged"
-                    height="16"
-                    width="16"
-                    style="float: right; margin-left: 8px;"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
                   />
                 </div>
               </span>
@@ -118,22 +118,22 @@ import {Subscription} from "rxjs";
                 <div>
                 <i class="pi pi-step-forward"></i>
                 <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                  ngSrc="../../../assets/icon/unplugged.svg"
-                  alt="unplugged"
-                  height="16"
-                  width="16"
-                  style="float: right; margin-left: 8px;"
+                     ngSrc="../../../assets/icon/unplugged.svg"
+                     alt="unplugged"
+                     height="16"
+                     width="16"
+                     style="float: right; margin-left: 8px;"
                 /></div>
               </span>
               <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté
                 <div><i class="pi pi-stop"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                  ngSrc="../../../assets/icon/unplugged.svg"
-                  alt="unplugged"
-                  height="16"
-                  width="16"
-                  style="float: right; margin-left: 8px;"
-                /></div>
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
+                  /></div>
                 </span>
               <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal
                 <div>
@@ -143,28 +143,28 @@ import {Subscription} from "rxjs";
                        alt="unplugged"
                        height="16" width="16"
                        style="float: right;
-                       margin-left: 8px;" />
+                       margin-left: 8px;"/>
                 </div></span>
               <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté
                 <div>
                   <i class="pi pi-ban"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                  ngSrc="../../../assets/icon/unplugged.svg"
-                  alt="unplugged"
-                  height="16"
-                  width="16"
-                  style="float: right; margin-left: 8px;"
-                /></div>
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
+                  /></div>
                 </span>
               <span *ngSwitchDefault class="status-icon">Inconnu
                 <div>
                   <i class="pi pi-question-circle"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
-                    ngSrc="../../../assets/icon/unplugged.svg"
-                    alt="unplugged"
-                    height="16"
-                    width="16"
-                    style="float: right; margin-left: 8px;"/>
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"/>
                 </div>
               </span>
             </ng-container>
@@ -174,25 +174,48 @@ import {Subscription} from "rxjs";
           </td>
           <td
             class="custom-cell">
-                <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
-                <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
+            <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
+            <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
 
           <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
-                    class="poi-icon">
+              <!-- #1 Vérifie si l'adresse commence par 'pause midi' -->
+              <ng-container *ngIf="rowData.vehicle.lastPositionAddress?.startsWith('pause midi'); else defaultIcon">
+                <!-- #2 Si oui, on affiche l'icône lunch-break.svg -->
+                <img
+                  ngSrc="../../../assets/icon/lunch-break.svg"
+                  width="30"
+                  height="30"
+                  alt="Pause midi icon"
+                />
+              </ng-container>
 
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30"
-                   [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}">
-                <path
-                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"></path>
-              </svg>
-            </span>
+              <!-- #3 Sinon, on affiche le SVG existant -->
+              <ng-template #defaultIcon>
+      <span
+        [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
+        class="poi-icon"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="30"
+          height="30"
+          [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}"
+        >
+          <path
+            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38
+               0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"
+          ></path>
+        </svg>
+      </span>
+              </ng-template>
 
+              <!-- #4 L'adresse s'affiche (que ce soit 'pause midi...' ou non) -->
               <span>
-            {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
-              </span>
+      {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
+    </span>
             </div>
           </td>
           <td class="custom-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>

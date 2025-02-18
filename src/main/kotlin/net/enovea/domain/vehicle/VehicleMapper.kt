@@ -90,22 +90,41 @@ interface VehicleMapper {
     fun toVehicleLocalizationDTO(vehicle: VehicleEntity): VehicleLocalizationDTO
 
     @Named("localizationLastPositionMapper")
-    fun localizationLastPositionMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): Point? = vehicleDevices
-        .filter { it.endDate == null }
-        .maxByOrNull { it.id.startDate }
-        ?.let { it.device?.deviceDataState?.coordinate }
+    fun localizationLastPositionMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): Point? {
+        val deviceDataState = vehicleDevices
+            .filter { it.endDate == null }
+            .maxByOrNull { it.id.startDate }
+            ?.device
+            ?.deviceDataState
+
+        if (deviceDataState == null) {
+            return null
+        }
+
+        // On applique le mapper DeviceDataStateMapper
+        val dto = DeviceDataStateMapper.INSTANCE.toDto(deviceDataState)
+
+        // dto.coordinate sera déjà anonymisé si la pause est en cours
+        return dto.coordinate
+    }
 
     @Named("localizationStateMapper")
-    fun localizationStateMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): String? = vehicleDevices
-        .filter { it.endDate == null }
-        .maxByOrNull { it.id.startDate }
-        ?.let {
-            if(it.device?.deviceDataState?.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12) {
-                "NO_COM"
-            }else {
-                it.device?.deviceDataState?.state
-            }
+    fun localizationStateMapper(vehicleDevices: List<DeviceVehicleInstallEntity>): String? {
+        val deviceDataState = vehicleDevices
+            .filter { it.endDate == null }
+            .maxByOrNull { it.id.startDate }
+            ?.device
+            ?.deviceDataState
+
+        if (deviceDataState == null) {
+            return null
         }
+
+        // On applique le mapper
+        val dto = DeviceDataStateMapper.INSTANCE.toDto(deviceDataState)
+        // dto.state sera déjà transformé par le custom mapper @Named("BR_StateMapper")
+        return dto.state
+    }
 
     companion object {
         val INSTANCE: VehicleMapper = Mappers.getMapper(VehicleMapper::class.java)

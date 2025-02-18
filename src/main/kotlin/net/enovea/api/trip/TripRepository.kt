@@ -1,9 +1,8 @@
-package net.enovea.repository
+package net.enovea.api.trip
 
 import net.enovea.DorisJdbiContext
-import net.enovea.api.trip.TripDTO
-import net.enovea.api.trip.TripDailyStatsDTO
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
     // todo : replace raw timezone computation with timezone field
@@ -126,4 +125,48 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
         }
 
     }
+
+    fun findDataPointIndexCloseToTime(
+        deviceId: String,
+        tripId: String,
+        referenceTime: LocalDateTime,
+        before: Boolean
+    ): Int? {
+        return dorisJdbiContext.jdbi.withHandle<Int?, Exception> { handle ->
+            // 1) Construction de la requête selon before = true/false
+            val query = if (before) {
+                // Dernier point dont timestamp <= referenceTime
+                """
+            SELECT point_index
+            FROM datapoint
+            WHERE device_id = :deviceId
+              AND trip_id = :tripId
+              AND timestamp <= :referenceTime
+            ORDER BY timestamp DESC
+            LIMIT 1
+            """.trimIndent()
+            } else {
+                // Premier point dont timestamp >= referenceTime
+                """
+            SELECT point_index
+            FROM datapoint
+            WHERE device_id = :deviceId
+              AND trip_id = :tripId
+              AND timestamp >= :referenceTime
+            ORDER BY timestamp ASC
+            LIMIT 1
+            """.trimIndent()
+            }
+
+            // 2) Exécution de la requête
+            handle.createQuery(query)
+                .bind("deviceId", deviceId)
+                .bind("tripId", tripId)
+                .bind("referenceTime", referenceTime)
+                .mapTo(Int::class.java)
+                .findOne()
+                .orElse(null)
+        }
+    }
+
 }

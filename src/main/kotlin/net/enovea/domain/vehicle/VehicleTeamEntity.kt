@@ -9,7 +9,6 @@ import java.sql.Timestamp
 
 @Entity(name = VehicleTeamEntity.ENTITY_NAME)
 @Table(name = VehicleTeamEntity.TABLE_NAME)
-
 data class VehicleTeamEntity (
 
     @EmbeddedId

@@ -3,7 +3,6 @@ package net.enovea.api.trip
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.SpatialService
 import net.enovea.domain.vehicle.VehicleEntity
-import net.enovea.repository.TripRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point

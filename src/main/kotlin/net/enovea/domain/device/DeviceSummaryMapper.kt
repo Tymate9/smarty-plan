@@ -1,6 +1,7 @@
 package net.enovea.domain.device
 
 
+import net.enovea.dto.DeviceDataStateDTO
 import net.enovea.dto.DeviceSummaryDTO
 import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper
@@ -21,40 +22,47 @@ interface DeviceSummaryMapper {
     @Mapping(target = "plugged", source = "deviceDataState", qualifiedByName = ["pluggedMapper"])
     fun toDeviceDTOsummary(deviceEntity: DeviceEntity): DeviceSummaryDTO
 
+    /**
+     * Récupère la propriété 'plugged' depuis le DTO, qui lui-même peut être anonymisé
+     * (si un jour la logique le nécessitait).
+     */
     @Named("pluggedMapper")
-    fun pluggedMapper(deviceDataState: DeviceDataStateEntity?): Boolean?{
-        return if(deviceDataState != null){
-            deviceDataState.plugged
-        } else {
-            null
-        }
+    fun pluggedMapper(deviceDataState: DeviceDataStateEntity?): Boolean? {
+        val dto = mapDeviceDataStateToDto(deviceDataState) ?: return null
+        return dto.plugged
     }
 
+    /**
+     * Récupère 'lastCommTime' directement ou depuis le DTO (ici, anonymisation non nécessaire).
+     */
     @Named("lastCommunicationDateMapper")
-    fun lastCommunicationDateMapper(deviceDataState: DeviceDataStateEntity?): Timestamp?{
-        return if(deviceDataState != null){
-            deviceDataState.lastCommTime
-        } else {
-            null
-        }
+    fun lastCommunicationDateMapper(deviceDataState: DeviceDataStateEntity?): Timestamp? {
+        val dto = mapDeviceDataStateToDto(deviceDataState) ?: return null
+        return dto.lastCommTime
     }
 
+    /**
+     * Récupère 'coordinate' via DeviceDataStateDTO, déjà anonymisé si la pause est en cours.
+     */
     @Named("coordinateMapper")
-    fun coordinateMapper(deviceDataState: DeviceDataStateEntity?): Point?{
-        return if(deviceDataState != null){
-            deviceDataState.coordinate
-        } else {
-            null
-        }
+    fun coordinateMapper(deviceDataState: DeviceDataStateEntity?): Point? {
+        val dto = mapDeviceDataStateToDto(deviceDataState) ?: return null
+        return dto.coordinate
     }
 
+    /**
+     * Récupère 'state' via DeviceDataStateDTO,
+     * où 'NO_COM' ou autre traitement (BR_StateMapper) est déjà appliqué.
+     */
     @Named("stateMapper")
-    fun stateMapper(deviceDataState: DeviceDataStateEntity?): String?{
-        return if(deviceDataState?.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12) {
-            "NO_COM"
-        }else {
-            deviceDataState?.state
-        }
+    fun stateMapper(deviceDataState: DeviceDataStateEntity?): String? {
+        val dto = mapDeviceDataStateToDto(deviceDataState) ?: return null
+        return dto.state
+    }
+
+    private fun mapDeviceDataStateToDto(entity: DeviceDataStateEntity?): DeviceDataStateDTO? {
+        if (entity == null) return null
+        return DeviceDataStateMapper.INSTANCE.toDto(entity)
     }
 
     companion object {

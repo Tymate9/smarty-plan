@@ -13,6 +13,7 @@ import {Button} from "primeng/button";
 import {Dialog} from "primeng/dialog";
 import {DateRangePickerComponent} from "../dateRange/dateRange.component";
 import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
+import {TableModule} from "primeng/table";
 
 
 @Component({
@@ -107,7 +108,7 @@ import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.componen
           <td>
             <p-button icon="pi pi-info-circle"
                       (click)="fetchVehicleDailyStats(rowData.vehicle?.vehicleStats.vehicleId , rowData.vehicle?.vehicleStats.licensePlate)"
-                      ></p-button>
+            ></p-button>
           </td>
         </tr>
 
@@ -121,46 +122,47 @@ import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.componen
               [draggable]="false"
               (onHide)="closeDialog()">
       <div class="table-container">
-        <table>
-          <thead>
-          <tr>
-            <th>Date</th>
-            <th>Conducteur</th>
-            <th>Nb de trajets effectués (nb)</th>
-            <th>Distance parcourue</th>
-            <th>Temps de conduite (en HH:MM)</th>
-            <th>Distance moyenne / Trajet (en km)</th>
-            <th>Durée moyenne / Trajet (en HH:MM)</th>
-            <th>Départ tardif (>7H30)</th>
-            <th>Dernier arrêt tardif (>18H)</th>
-            <th>Dernier trajet long (>45mn)</th>
-            <th>Amplitude</th>
-            <th>Temps d'attente</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr *ngFor="let dailyStat of vehicleDailyStats">
-            <td>{{ dailyStat.tripDate }}</td>
-            <td>{{ dailyStat.driverName }}</td>
-            <td>{{ dailyStat.tripCount }}</td>
-            <td>{{ dailyStat.distanceSum }}</td>
-            <td>{{ dailyStat.drivingTime }}</td>
-            <td>{{ dailyStat.distancePerTripAvg }}</td>
-            <td>{{ dailyStat.durationPerTripAvg }}</td>
-            <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#e5e7eb' : 'transparent'}">
-              {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}
-            </td>
-            <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#e5e7eb' : 'transparent'}">
-              {{ dailyStat.hasLateStop ? 'Oui' : 'Non' }}
-            </td>
-            <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#e5e7eb' : 'transparent'}">
-              {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non' }}
-            </td>
-            <td>{{ dailyStat.rangeAvg }}</td>
-            <td>{{ dailyStat.waitingDuration }}</td>
-          </tr>
-          </tbody>
-        </table>
+        <p-table [value]="vehicleDailyStats">
+          <ng-template #header>
+            <tr>
+              <th>Date</th>
+              <th>Conducteur</th>
+              <th>Nb de trajets effectués (nb)</th>
+              <th>Distance parcourue</th>
+              <th>Temps de conduite (en HH:MM)</th>
+              <th>Distance moyenne / Trajet (en km)</th>
+              <th>Durée moyenne / Trajet (en HH:MM)</th>
+              <th>Départ tardif (>7H30)</th>
+              <th>Dernier arrêt tardif (>18H)</th>
+              <th>Dernier trajet long (>45mn)</th>
+              <th>Amplitude</th>
+              <th>Temps d'attente</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-dailyStat>
+<!--            <tr *ngFor="let dailyStat of vehicleDailyStats">-->
+            <tr>
+              <td>{{ dailyStat.tripDate }}</td>
+              <td>{{ dailyStat.driverName }}</td>
+              <td>{{ dailyStat.tripCount }}</td>
+              <td>{{ dailyStat.distanceSum }}</td>
+              <td>{{ dailyStat.drivingTime }}</td>
+              <td>{{ dailyStat.distancePerTripAvg }}</td>
+              <td>{{ dailyStat.durationPerTripAvg }}</td>
+              <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#e5e7eb' : 'transparent'}">
+                {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}
+              </td>
+              <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#e5e7eb' : 'transparent'}">
+                {{ dailyStat.hasLateStop ? 'Oui' : 'Non' }}
+              </td>
+              <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#e5e7eb' : 'transparent'}">
+                {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non' }}
+              </td>
+              <td>{{ dailyStat.rangeAvg }}</td>
+              <td>{{ dailyStat.waitingDuration }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     </p-dialog>
 
@@ -177,49 +179,50 @@ import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.componen
     NgForOf,
     NgStyle,
     DateRangePickerComponent,
-    IndicatorButtonsComponent
+    IndicatorButtonsComponent,
+    TableModule
   ],
   styles: [`
 
     ///*style de treeTable*/
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts th {
     //  background-color: #007ad9 !important;
     //  color: white !important;
     //  text-align: center !important;
     //  padding: 2px 8px !important;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts td {
       //padding: 2px 8px !important;
       //border: 1px solid #dddddd !important;
       //width: auto;
      // font-weight: 700;
     //}
     //
-    //.table-header {
+    //.table.ts-header {
     //  background-color: var(--gray-500);
     //  color: white;
     //  padding: 10px !Important;
     //  font-weight: 700 !Important;
     //}
     //
-    //.table-header td {
+    //.table.ts-header td {
     //  text-align: center !Important;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr.no-vehicle {
     //  background-color: var(--gray-200) !important;
     //  //color: var(--blue-600) !important;
     //  font-weight: 700;
     //  color: red;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.has-vehicle {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr.has-vehicle {
     //  background-color: var(--gray-200) !important;
     //  font-weight: 600;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr:hover {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr:hover {
     //  background-color: var(--bluegray-100) !important;
     //}
     //
@@ -245,7 +248,7 @@ import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.componen
     ///*fin de style de treeTable*/
     //
     ///*style de treeTable parent ligne*/
-    //:host ::ng-deep .p-treetable.custom-tree-table .root-node {
+    //:host ::ng-deep .p-treetable.custom-tree-table.ts .root-node {
     //  background-color: #aa001f;
     //  color: white;
     //  border-radius: 15px 15px 0px 0px !important;
@@ -259,7 +262,7 @@ import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.componen
     //  line-height: 50px;
     //}
     //
-    //:host ::ng-deep .p-treetable.custom-tree-table .root-node td {
+    //:host ::ng-deep .p-treetable.custom-tree-table.ts .root-node td {
     //  padding: 12px;
     //  border-width: 0px;
     //  font-weight: 700 !important;
@@ -317,44 +320,44 @@ import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.componen
 
     /* Table container with scrolling */
     .table-container {
-      max-height: 60vh; /* Ensures the table scrolls within the dialog */
+      max-height: 60vh; /* Ensures the table.ts scrolls within the dialog */
       overflow-y: auto;
     }
 
-    /* Make table fully responsive */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: auto; /* Adjusts column width dynamically */
-      border-radius: 12px;
-      white-space: nowrap;
-    }
-
-    /* Sticky table header */
-    thead th {
-      background-color: #aa001f;
-      color: white;
-      padding: 10px;
-      text-align: left;
-      font-weight: bold;
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-
-    /* Table row styling */
-    td {
-      padding: 8px;
-      border: 1px solid #ddd;
-    }
-
-    tbody tr:nth-child(odd) {
-      background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-      background-color: #f1f1f1;
-    }
+    ///* Make table.ts fully responsive */
+    //table {
+    //  width: 100%;
+    //  border-collapse: collapse;
+    //  table-layout: auto; /* Adjusts column width dynamically */
+    //  border-radius: 12px;
+    //  white-space: nowrap;
+    //}
+    //
+    ///* Sticky table.ts header */
+    //thead th {
+    //  background-color: #aa001f;
+    //  color: white;
+    //  padding: 10px;
+    //  text-align: left;
+    //  font-weight: bold;
+    //  position: sticky;
+    //  top: 0;
+    //  z-index: 2;
+    //}
+    //
+    ///* Table row styling */
+    //td {
+    //  padding: 8px;
+    //  border: 1px solid #ddd;
+    //}
+    //
+    //tbody tr:nth-child(odd) {
+    //  background-color: #f9f9f9;
+    //}
+    //
+    //tbody tr:hover {
+    //  background-color: #f1f1f1;
+    //}
 
   `]
 })
@@ -440,7 +443,7 @@ export class ReportComponent implements OnInit {
           //Cette variable contient les résultats originaux des boutons statistiques
           this.vehiclesStatsTotal=stats;
 
-          //transformer les résultats originaux de la table en TreeNode
+          //transformer les résultats originaux de la table.ts en TreeNode
           this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
             this.vehicleStats,
             (vehicle: dto.VehiclesStatsDTO) => ({

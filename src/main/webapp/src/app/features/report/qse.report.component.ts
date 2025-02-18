@@ -133,44 +133,44 @@ import {NgClass, NgIf} from "@angular/common";
   ],
   styles: [`
     ///*style de treeTable*/
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts th {
     //  background-color: #007ad9 !important;
     //  color: white !important;
     //  text-align: center !important;
     //  padding: 2px 8px !important;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table td {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts td {
     //  padding: 2px 8px !important;
     //  border-bottom: 1px solid #ddd !important;
     //  width: auto;
     //  font-weight: 700;
     //}
     //
-    //.table-header {
+    //.table.ts-header {
     //  background-color: var(--gray-500);
     //  color: white;
     //  padding: 10px !Important;
     //  font-weight: 700 !Important;
     //}
     //
-    //.table-header td {
+    //.table.ts-header td {
     //  text-align: center !Important;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.no-vehicle {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr.no-vehicle {
     //  background-color: var(--gray-200) !important;
     //  //color: var(--blue-600) !important;
     //  font-weight: 700;
     //  color: red;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr.has-vehicle {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr.has-vehicle {
     //  background-color: var(--gray-200) !important;
     //  font-weight: 600;
     //}
     //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table tr:hover {
+    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr:hover {
     //  background-color: var(--bluegray-100) !important;
     //}
     //
@@ -196,7 +196,7 @@ import {NgClass, NgIf} from "@angular/common";
     ///*fin de style de treeTable*/
     //
     ///*style de treeTable parent ligne*/
-    //:host ::ng-deep .p-treetable.custom-tree-table .root-node {
+    //:host ::ng-deep .p-treetable.custom-tree-table.ts .root-node {
     //  background-color: #aa001f;
     //  color: white;
     //  border-radius: 15px 15px 0px 0px !important;
@@ -210,7 +210,7 @@ import {NgClass, NgIf} from "@angular/common";
     //  line-height: 50px;
     //}
     //
-    //:host ::ng-deep .p-treetable.custom-tree-table .root-node td {
+    //:host ::ng-deep .p-treetable.custom-tree-table.ts .root-node td {
     //  padding: 12px;
     //  border-width: 0px;
     //  font-weight: 700 !important;
@@ -296,7 +296,7 @@ export class QseReportComponent implements OnInit {
           this.vehicleStatsQse = teamHierarchyNodes;
           this.vehiclesStatsTotal=stats;
 
-          //transformer les résultats originaux de la table en TreeNode
+          //transformer les résultats originaux de la table.ts en TreeNode
           this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
             this.vehicleStatsQse,
             (vehicle: dto.VehiclesStatsQseDTO) => ({

@@ -9,6 +9,7 @@ import {datePickerConfig} from "./components/datepicker";
 import {inputTextConfig} from "./components/inputtext";
 import {toastConfig} from "./components/toast";
 import {cardConfig} from "./components/card";
+import {dataTableConfig} from "./components/table";
 
 
 export const NmPreset = definePreset(Nora, {
@@ -20,7 +21,9 @@ export const NmPreset = definePreset(Nora, {
     datepicker:datePickerConfig,
     inputtext:inputTextConfig,
     toast:toastConfig,
-    card:cardConfig
+    card:cardConfig,
+    datatable:dataTableConfig
+
   }
 });
 

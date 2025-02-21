@@ -5,12 +5,12 @@ export const toggleButtonConfig = {
     padding: '0.1rem 0.5rem',
     gap: '0.5rem',
     fontWeight: '500',
-    background: nmColors.brandRed ,
+    background: nmColors.brandWhite ,
     borderColor: nmColors.brandRed ,
-    color: nmColors.brandWhite,
-    hoverColor: nmColors.brandRedHover,
+    color: nmColors.darkGray,
+    hoverColor: nmColors.brandWhite,
     checkedBackground: nmColors.brandRed,
-    checkedColor: nmColors.brandRed,
+    checkedColor: nmColors.brandWhite,
     checkedBorderColor: nmColors.brandRed,
     disabledColor: nmColors.brandRed,
     sm: {
@@ -25,10 +25,10 @@ export const toggleButtonConfig = {
     },
   },
   icon: {
-    color: nmColors.brandWhite,
+    color: nmColors.brandRed,
     hoverColor: nmColors.brandWhite,
     checkedColor: nmColors.brandWhite,
-    disabledColor: nmColors.brandWhite,
+    disabledColor: nmColors.brandRed,
   },
   content: {
     left: '0.25rem',
@@ -44,7 +44,7 @@ export const toggleButtonConfig = {
     },
     dark: {
       root: {
-        hoverBackground: nmColors.brandRed,
+        hoverBackground: nmColors.darkGray,
       },
     },
   },

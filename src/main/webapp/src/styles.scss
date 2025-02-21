@@ -48,6 +48,7 @@ html, body {
 }
 
 
+
 :host {
   display: flex;
   flex-direction: column;
@@ -170,4 +171,10 @@ html, body {
   margin: 0;
   width: 100%;
 }
+.custom-gray-button {
+  background-color: var(--p-gray-400) !important;
+  border-color: var(--p-gray-400) !important;
+  color: white !important;
+}
+
 

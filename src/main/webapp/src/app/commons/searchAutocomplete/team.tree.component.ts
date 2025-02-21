@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewCh
 import {Button} from "primeng/button";
 import {FormsModule} from "@angular/forms";
 import {NgForOf, NgIf, NgStyle} from "@angular/common";
+import {InputText} from "primeng/inputtext";
 
 export interface Option {
   label: string;
@@ -67,7 +68,8 @@ export interface Option {
     FormsModule,
     NgStyle,
     NgForOf,
-    NgIf
+    NgIf,
+    InputText
   ],
   styles: [`
     .search-autocomplete {
@@ -85,6 +87,19 @@ export interface Option {
       background-color: white;
       border-radius: 5px;
 
+    }
+    .input-container input {
+      border: none;
+      outline: none;
+      flex-grow: 1;
+      min-width: 120px;
+      background-color: white;
+      border-radius: 5px;
+      color: black;
+    }
+    .input-container:hover,
+    .input-container:focus-within {
+      border-color: #aa001f;
     }
 
     .tags {
@@ -135,13 +150,15 @@ export interface Option {
       width: 100%;
       max-height: 150px;
       overflow-y: auto;
+      color: black;
+      //z-index: 100000;
     }
 
     .autocomplete-list li {
       padding: 5px;
       cursor: pointer;
       margin-left: 10px;
-
+      //z-index: 100000;
     }
 
     .autocomplete-list div.selected {

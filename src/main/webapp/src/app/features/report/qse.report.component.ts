@@ -236,7 +236,9 @@ import {NgClass, NgIf} from "@angular/common";
 })
 export class QseReportComponent implements OnInit {
 
-  constructor(private filterService: FilterService , private vehicleService: VehicleService){}
+  constructor(private filterService: FilterService, private vehicleService: VehicleService) {
+  }
+
   private filtersSubscription?: Subscription;
   filters: { agencies: string[], vehicles: string[], drivers: string[] } = {
     agencies: [],
@@ -245,7 +247,7 @@ export class QseReportComponent implements OnInit {
   };
   dateFrom: Date = new Date();
   dateTo: Date = new Date();
-  vehicleStatsQse:any []=[];
+  vehicleStatsQse: any [] = [];
   vehiclesStatsTree: TreeNode[] = [];
   vehiclesStatsTotal: Record<string, any>;
 
@@ -258,22 +260,23 @@ export class QseReportComponent implements OnInit {
     totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
     totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
     totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-    selectionScore:"SCORE DE LA SELECTION",
-    severityOfUseTurn:"SEVERITE D'USAGE VIRAGE",
-    severityOfAcceleration:"SEVERITE D'USAGE ACCELERATION-FREINAGE"
+    selectionScore: "SCORE DE LA SELECTION",
+    severityOfUseTurn: "SEVERITE D'USAGE VIRAGE",
+    severityOfAcceleration: "SEVERITE D'USAGE ACCELERATION-FREINAGE"
   };
-
 
 
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
   }
+
   ngOnDestroy(): void {
     this.filtersSubscription?.unsubscribe()
   }
+
   onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date }) {
-    this.dateFrom=event.dateFrom;
-    this.dateTo=event.dateTo;
+    this.dateFrom = event.dateFrom;
+    this.dateTo = event.dateTo;
     this.fetchVehicleStatsQse();
   }
 
@@ -289,21 +292,20 @@ export class QseReportComponent implements OnInit {
         String(this.dateTo.getDate()).padStart(2, '0');
 
 
-      this.vehicleService.getVehiclesStatsQse(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
+      this.vehicleService.getVehiclesStatsQse(startDate, endDate, this.filters.agencies, this.filters.vehicles, this.filters.drivers).subscribe({
         next: (data) => {
-            const { teamHierarchyNodes, stats } = data;
+          const {teamHierarchyNodes, stats} = data;
 
           this.vehicleStatsQse = teamHierarchyNodes;
-          this.vehiclesStatsTotal=stats;
+          this.vehiclesStatsTotal = stats;
 
           //transformer les résultats originaux de la table.ts en TreeNode
-          this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
+          this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
             this.vehicleStatsQse,
             (vehicle: dto.VehiclesStatsQseDTO) => ({
-              driverName: vehicle.vehicleStatsQse.driverName ||'',
+              driverName: vehicle.vehicleStatsQse.driverName || '',
               licensePlate: vehicle.vehicleStatsQse.licensePlate || 'unknown',
             })
-
           )
 
         },
@@ -319,7 +321,7 @@ export class QseReportComponent implements OnInit {
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-
+      this.fetchVehicleStatsQse();
     })
   };
 

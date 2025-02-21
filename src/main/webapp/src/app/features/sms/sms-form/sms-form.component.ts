@@ -5,6 +5,8 @@ import {ButtonDirective} from "primeng/button";
 import {NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {NotificationService} from "../../../commons/notification/notification.service";
+import {InputText} from "primeng/inputtext";
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-sms-form',
@@ -80,11 +82,13 @@ import {NotificationService} from "../../../commons/notification/notification.se
               <div class="p-field">
                 <label>Indicatif :</label>
                 <input
-                  id="callingCode"
+                  pInputText
                   type="text"
+                  id="callingCode"
                   formControlName="callingCode"
                   class="p-inputtext"
                 />
+
               </div>
             </div>
             <!-- Numéro de téléphone -->
@@ -92,6 +96,7 @@ import {NotificationService} from "../../../commons/notification/notification.se
               <div class="p-field">
                 <label>Numéro de téléphone :</label>
                 <input
+                  pInputText
                   id="phoneNumber"
                   type="text"
                   formControlName="phoneNumber"
@@ -106,6 +111,7 @@ import {NotificationService} from "../../../commons/notification/notification.se
             <label for="content">Message :</label>
             <br/>
             <textarea
+              pTextarea
               id="content"
               formControlName="content"
               rows="5"
@@ -149,7 +155,9 @@ import {NotificationService} from "../../../commons/notification/notification.se
     FormsModule,
     ReactiveFormsModule,
     NgIf,
-    TableModule
+    TableModule,
+    InputText,
+    TextareaModule
   ],
   styles: [`
     .sms-form-container {

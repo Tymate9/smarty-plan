@@ -8,10 +8,9 @@ import {SmsApiService, SmsForm, SmsPackForm, SmsStatistics} from "../../../servi
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {TabPanel, TabView} from "primeng/tabview";
 import {SmsFormComponent} from "../../sms/sms-form/sms-form.component";
-import {ButtonDirective} from "primeng/button";
+import {ButtonDirective, ButtonModule} from "primeng/button";
 import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
 import {ProgressSpinner} from "primeng/progressspinner";
-
 @Component({
   selector: 'app-vehicle-popup',
   template: `
@@ -66,16 +65,30 @@ import {ProgressSpinner} from "primeng/progressspinner";
                 : {{ poi.distance | number:'1.0-2' }} km
               </div>
               <div class="poi-actions">
-                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus"
-                        (click)="centerMapOnPOI(poi.poi)"
-                        style="background-color: #aa001f; border: #aa001f;"></button>
-                <button
-                  pButton
+<!--                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus"-->
+<!--                        (click)="centerMapOnPOI(poi.poi)"-->
+<!--                        style="background-color: #aa001f; border: #aa001f;"></button>-->
+<!--                <button-->
+<!--                  pButton-->
+<!--                  [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"-->
+<!--                  [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"-->
+<!--                  (click)="toggleHighlightMarker('poi-' + poi.poi.id)"-->
+<!--                  style="background-color: #515151; border: #515151;"-->
+<!--                ></button>-->
+                <p-button
+                  label="Centrer sur ce POI"
+                  icon="pi pi-search-plus"
+                  (click)="centerMapOnPOI(poi.poi)"
+                  >
+                </p-button>
+
+                <p-button
                   [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
-                  style="background-color: #515151; border: #515151;"
-                ></button>
+                  styleClass="custom-gray-button">
+                </p-button>
+
               </div>
             </div>
           </div>
@@ -107,7 +120,8 @@ import {ProgressSpinner} from "primeng/progressspinner";
     DatePipe,
     TabView,
     NgIf,
-    NgForOf
+    NgForOf,
+    ButtonModule
   ],
   styles: [`
     .p-grid > .p-col-6 {
@@ -156,6 +170,7 @@ import {ProgressSpinner} from "primeng/progressspinner";
       display: block;
       margin: 0 auto;
     }
+
   `]
 })
 export class VehiclePopupComponent implements OnInit {

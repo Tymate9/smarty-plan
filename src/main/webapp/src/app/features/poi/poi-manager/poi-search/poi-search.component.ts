@@ -9,6 +9,7 @@ import {ButtonDirective} from "primeng/button";
 import {NgIf} from "@angular/common";
 import {SelectButton} from "primeng/selectbutton";
 import {AutoComplete} from "primeng/autocomplete";
+import {InputText} from "primeng/inputtext";
 
 @Component({
   selector: 'app-poi-search',
@@ -43,10 +44,10 @@ import {AutoComplete} from "primeng/autocomplete";
 
       <div class="form-group" *ngIf="inputType === 'adresse'">
         <input
+          pInputText
           type="text"
           [(ngModel)]="newPoiAddress"
           placeholder="Entrez une adresse"
-          class="basic-input"
         />
       </div>
 
@@ -63,7 +64,6 @@ import {AutoComplete} from "primeng/autocomplete";
             [maxFractionDigits]="5"
             placeholder="Latitude"
             [showButtons]="false"
-            class="basic-input"
           ></p-inputNumber>
         </div>
         <div class="form-group">
@@ -78,7 +78,7 @@ import {AutoComplete} from "primeng/autocomplete";
             [maxFractionDigits]="5"
             [showButtons]="false"
             placeholder="Longitude"
-            class="basic-input"
+
           ></p-inputNumber>
         </div>
       </div>
@@ -100,7 +100,8 @@ import {AutoComplete} from "primeng/autocomplete";
     ButtonDirective,
     NgIf,
     SelectButton,
-    AutoComplete
+    AutoComplete,
+    InputText
   ],
   styles: [`
     :host ::ng-deep .search-section {
@@ -130,21 +131,21 @@ import {AutoComplete} from "primeng/autocomplete";
       margin-bottom: 10px;
     }
 
-    /* Champs input de base */
-    :host ::ng-deep .basic-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 6px 8px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      transition: border-color 0.2s ease;
-    }
-
-    :host ::ng-deep .basic-input:focus {
-      outline: none;
-      border-color: #007ad9; /* Bleu discret au focus */
-    }
+    ///* Champs input de base */
+    //:host ::ng-deep .basic-input {
+    //  width: 100%;
+    //  box-sizing: border-box;
+    //  padding: 6px 8px;
+    //  font-size: 14px;
+    //  border: 1px solid #ccc;
+    //  border-radius: 4px;
+    //  transition: border-color 0.2s ease;
+    //}
+    //
+    //:host ::ng-deep .basic-input:focus {
+    //  outline: none;
+    //  border-color: #007ad9; /* Bleu discret au focus */
+    //}
 
     /* Organisation verticale pour les champs coords */
     :host ::ng-deep .coords-fields-vertical {

@@ -23,7 +23,7 @@ export const treeTableConfig = {
     }
   },
   bodyCell: {
-    borderColor: nmColors.brandRedHover,
+    borderColor: nmColors.brandWhite,
     padding: '2px 8px',
     gap: '0.5rem'
   },

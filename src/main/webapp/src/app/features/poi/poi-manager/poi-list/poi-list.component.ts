@@ -16,6 +16,8 @@ import {ButtonDirective} from "primeng/button";
 import {InputText} from "primeng/inputtext";
 import {GeoJSON} from "leaflet";
 import {ConfirmationService} from "primeng/api";
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-poi-list',
@@ -31,8 +33,13 @@ import {ConfirmationService} from "primeng/api";
           <span class="poi-title">{{ poiPanel.poi.denomination }}</span>
           <span class="poi-address">{{ poiPanel.poi.address }}</span>
           <span class="expand-icon">{{ poiPanel.expanded ? '▼' : '►' }}</span>
-          <button pButton label="✖" class="delete-button"
-                  (click)="onRemovePanel(poiPanel); $event.stopPropagation();"></button>
+<!--          <button pButton label="✖" class="delete-button"-->
+<!--                  (click)="onRemovePanel(poiPanel); $event.stopPropagation();"></button>-->
+          <p-button
+            icon="pi pi-times"
+            class="delete-button"
+            (click)="onRemovePanel(poiPanel); $event.stopPropagation();">
+          </p-button>
         </div>
         <div class="poi-body" [hidden]="!poiPanel.expanded">
           <div>
@@ -59,24 +66,29 @@ import {ConfirmationService} from "primeng/api";
 
             <label>
               Catégorie:
-              <select [(ngModel)]="poiPanel.selectedCategoryId"
-                      (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"
-                      name="category{{poiPanel.poi.id}}"
-                      required>
-                <option *ngFor="let category of poiCategories" [ngValue]="category.id">
-                  {{ category.label }}
-                </option>
-              </select>
+              <p-select
+                [(ngModel)]="poiPanel.selectedCategoryId"
+                (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"
+                [options]="poiCategories"
+                optionLabel="label"
+                optionValue="id"
+                name="category{{poiPanel.poi.id}}"
+                required>
+              </p-select>
+
             </label>
 
             <label>
               Modifier :
-              <select [(ngModel)]="poiPanel.inputType"
-                      name="inputType{{poiPanel.poi.id}}"
-                      (ngModelChange)="poiPanel.isModified = true">
-                <option value="adresse">Adresse</option>
-                <option value="coordonnees">Coordonnées</option>
-              </select>
+              <p-select
+                [(ngModel)]="poiPanel.inputType"
+                (ngModelChange)="poiPanel.isModified = true"
+                [options]="inputTypeOptions"
+                optionLabel="label"
+                optionValue="value"
+                name="inputType{{poiPanel.poi.id}}">
+              </p-select>
+
             </label>
 
             <div *ngIf="poiPanel.inputType === 'adresse'">
@@ -186,7 +198,9 @@ import {ConfirmationService} from "primeng/api";
     NgForOf,
     ButtonDirective,
     InputText,
-    NgIf
+    NgIf,
+    SelectModule,
+    ButtonModule
   ],
   styles: [`
     /* Conteneur principal de la liste (scrollable) */
@@ -243,13 +257,13 @@ import {ConfirmationService} from "primeng/api";
       font-size: 16px;
     }
 
-    .delete-button {
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      color: #ff0000;
-    }
+    //.delete-button {
+    //  background: none;
+    //  border: none;
+    //  font-size: 16px;
+    //  cursor: pointer;
+    //  color: #ff0000;
+    //}
 
     /* Corps du panel (zone "formulaire") */
     .poi-body {
@@ -387,6 +401,11 @@ export class PoiListComponent implements OnInit {
     private confirmationService: ConfirmationService
   ) {
   }
+
+  inputTypeOptions = [
+    { label: 'Adresse', value: 'adresse' },
+    { label: 'Coordonnées', value: 'coordonnees' }
+  ];
 
   ngOnInit(): void {
     this.loadCategories();

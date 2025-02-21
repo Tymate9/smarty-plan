@@ -547,6 +547,8 @@ export class ReportComponent implements OnInit {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
 
+      this.fetchVehicleStats();
+
     })
   };
 }

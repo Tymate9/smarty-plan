@@ -9,11 +9,13 @@ import {GeoJSONGeometry} from "wellknown";
 import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 import {Router} from "@angular/router";
-import {ButtonDirective} from "primeng/button";
+import {ButtonDirective, ButtonModule} from "primeng/button";
 import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {TabPanel, TabView} from "primeng/tabview";
 import {ProgressSpinner} from "primeng/progressspinner";
+import {InputText} from "primeng/inputtext";
+import {Select} from "primeng/select";
 
 @Component({
   selector: 'app-poi-popup',
@@ -59,16 +61,30 @@ import {ProgressSpinner} from "primeng/progressspinner";
                 <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
               </div>
               <div class="vehicle-actions">
-                <button pButton label="Zoom" icon="pi pi-search-plus"
-                        (click)="centerMapOnVehicle(vehicle.second)"
-                        style="background-color: #aa001f; border:#aa001f;"></button>
-                <button
-                  pButton
+                <!--                <button pButton label="Zoom" icon="pi pi-search-plus"-->
+                <!--                        (click)="centerMapOnVehicle(vehicle.second)"-->
+                <!--                        style="background-color: #aa001f; border:#aa001f;"></button>-->
+                <!--                <button-->
+                <!--                  pButton-->
+                <!--                  [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"-->
+                <!--                  [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"-->
+                <!--                  (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"-->
+                <!--                  style="background-color: #515151; border:#515151"-->
+                <!--                ></button>-->
+                <p-button
+                  label="Zoom"
+                  icon="pi pi-search-plus"
+                  (click)="centerMapOnVehicle(vehicle.second)"
+                >
+                </p-button>
+
+                <p-button
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-                  style="background-color: #515151; border:#515151"
-                ></button>
+                  styleClass="custom-gray-button">
+                </p-button>
+
               </div>
             </div>
           </div>
@@ -107,14 +123,18 @@ import {ProgressSpinner} from "primeng/progressspinner";
               <div class="p-field">
                 <label for="label">Code client : </label>
                 <input
+                  pInputText
                   type="text"
                   id="label-code"
                   [(ngModel)]="updatedPoi.clientCode"
                   name="label-code"
                   required
                 />
+              </div>
+              <div class="p-field">
                 <label for="label">Nom :</label>
                 <input
+                  pInputText
                   type="text"
                   id="label"
                   [(ngModel)]="updatedPoi.clientLabel"
@@ -124,17 +144,30 @@ import {ProgressSpinner} from "primeng/progressspinner";
               </div>
               <div class="p-field">
                 <label for="category">Type : </label>
-                <select
-                  id="category"
-                  [(ngModel)]="selectedCategoryId"
-                  name="category"
-                  required
-                >
-                  <option [ngValue]="null" disabled>Sélectionner une catégorie</option>
-                  <option *ngFor="let category of categoryOptions" [ngValue]="category.value">
-                    {{ category.label }}
-                  </option>
-                </select>
+                <!--                <select-->
+                <!--                  id="category"-->
+                <!--                  [(ngModel)]="selectedCategoryId"-->
+                <!--                  name="category"-->
+                <!--                  required-->
+                <!--                >-->
+                <!--                  <option [ngValue]="null" disabled>Sélectionner une catégorie</option>-->
+                <!--                  <option *ngFor="let category of categoryOptions" [ngValue]="category.value">-->
+                <!--                    {{ category.label }}-->
+                <!--                  </option>-->
+                <!--                </select>-->
+
+                <div class="p-field">
+                  <p-select
+                    id="category"
+                    [(ngModel)]="selectedCategoryId"
+                    optionLabel="label"
+                    optionValue="value"
+                    name="category"
+                    required
+                    [options]="categoryOptions"
+                  >
+                  </p-select>
+                </div>
                 <small
                   *ngIf="!poiForm.form.controls['category']?.valid && poiForm.form.controls['category']?.touched"
                   class="error-message"
@@ -145,33 +178,54 @@ import {ProgressSpinner} from "primeng/progressspinner";
             </div>
             <div class="form-actions">
               <div class="button-row">
-                <button
-                  pButton
+                <!--                <button-->
+                <!--                  pButton-->
+                <!--                  type="submit"-->
+                <!--                  label="Mettre à jour"-->
+                <!--                  icon="pi pi-check"-->
+                <!--                  [disabled]="!poiForm.form.valid"-->
+                <!--                  style="background-color: #aa001f; border: #aa001f;"-->
+
+                <!--                ></button>-->
+                <p-button
                   type="submit"
                   label="Mettre à jour"
                   icon="pi pi-check"
                   [disabled]="!poiForm.form.valid"
-                  style="background-color: #aa001f; border: #aa001f;"
+                ></p-button>
 
-                ></button>
-                <button
-                  pButton
+                <p-button
                   type="button"
                   label="Supprimer le POI"
                   icon="pi pi-trash"
-                  (click)="deletePOI()"
-                  style="background-color: #aa001f; border: #aa001f;"
-                ></button>
+                  (onClick)="deletePOI()"
+                ></p-button>
+                <!--                <button-->
+                <!--                  pButton-->
+                <!--                  type="button"-->
+                <!--                  label="Supprimer le POI"-->
+                <!--                  icon="pi pi-trash"-->
+                <!--                  (click)="deletePOI()"-->
+                <!--                  style="background-color: #aa001f; border: #aa001f;"-->
+                <!--                ></button>-->
               </div>
               <div class="button-row">
-                <button
-                  pButton
+                <!--                <button-->
+                <!--                  pButton-->
+                <!--                  type="button"-->
+                <!--                  label="Aller à l'Édition POI"-->
+                <!--                  icon="pi pi-external-link"-->
+                <!--                  (click)="navigateToPoiEdit()"-->
+                <!--                  style="background-color: #515151; border: #515151;"-->
+                <!--                ></button>-->
+                <p-button
                   type="button"
                   label="Aller à l'Édition POI"
                   icon="pi pi-external-link"
-                  (click)="navigateToPoiEdit()"
-                  style="background-color: #515151; border: #515151;"
-                ></button>
+                  (onClick)="navigateToPoiEdit()"
+                  styleClass="custom-gray-button"
+                ></p-button>
+
               </div>
             </div>
           </form>
@@ -189,7 +243,10 @@ import {ProgressSpinner} from "primeng/progressspinner";
     ProgressSpinner,
     DecimalPipe,
     TabView,
-    DatePipe
+    DatePipe,
+    ButtonModule,
+    InputText,
+    Select
   ],
   styles: [`
     .form-actions .button-row {

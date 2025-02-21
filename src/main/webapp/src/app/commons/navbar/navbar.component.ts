@@ -18,6 +18,8 @@ import {Menubar} from "primeng/menubar";
 import {PrimeTemplate} from "primeng/api";
 import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomplete.component";
 import {AppConfig} from "../../app.config";
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { NgModel } from '@angular/forms';
 
 @Component({
   // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
@@ -47,6 +49,8 @@ import {AppConfig} from "../../app.config";
             <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions"
                                      (selectedTagsChange)="updateDrivers($event)"
                                      [selectedItems]="driverSelected"></app-search-autocomplete>
+
+
             <p-button type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></p-button>
             <p-button (onClick)="saveFilters()" icon="pi pi-save" ></p-button>
           </div>
@@ -124,6 +128,7 @@ import {AppConfig} from "../../app.config";
     PrimeTemplate,
     TeamTreeComponent,
     SearchAutocompleteComponent,
+    AutoCompleteModule,
   ],
   standalone: true
 })

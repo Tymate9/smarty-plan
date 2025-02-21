@@ -180,11 +180,9 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
               </span>
             </ng-container>
           </td>
-          <td
-            class="custom-cell">{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
+          <td>{{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
-          <td
-            class="custom-cell">
+          <td>
             <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
             <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
@@ -228,15 +226,14 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     </span>
             </div>
           </td>
-          <td class="custom-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
-          <td class="custom-cell">
+          <td>{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
+          <td>
             <p-button (onClick)="this.router.navigate(['trip'+(non_geoloc?'-non-geoloc':''), rowData.vehicle.id, today])" icon="pi pi-calendar"
-                      styleClass="red-button"></p-button>
+                      [style]="{ 'margin-right': '5px' }" ></p-button>
 
             <p-button
               *ngIf="!non_geoloc && rowData.vehicle.driver"
               icon="pi pi-envelope"
-              styleClass="red-button"
               (click)="openSmsOverlay(rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName, rowData.vehicle.driver.phoneNumber, '+33','Normandie Manutention' )"
             >
             </p-button>
@@ -261,7 +258,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
         </div>
 
         <div class="dialog-footer">
-          <button (click)="closeSmsOverlay()">Fermer</button>
+          <p-button (click)="closeSmsOverlay()" label="Fermer"></p-button>
         </div>
       </div>
     </div>
@@ -479,6 +476,11 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     }
     .dialog-footer button:hover {
       background-color: #8e001b;
+    }
+
+    .custom-cell {
+      display: flex;
+      gap: 5px;
     }
   `]}
 )

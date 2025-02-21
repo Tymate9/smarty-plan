@@ -63,7 +63,8 @@ import {NgIf} from "@angular/common";
           [maxDate]="now"
           [showOnFocus]="true"
           [showOtherMonths]="true"
-          [selectOtherMonths]="true"/>
+          [selectOtherMonths]="true"
+          />
 
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">
@@ -119,12 +120,12 @@ import {NgIf} from "@angular/common";
           }
         }
 
-        .p-calendar .p-button {
-          background-color: #aa001f;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
-        }
+        //.p-calendar .p-button {
+        //  background-color: #aa001f;
+        //  border-color: #aa001f !important;
+        //  color: white !important;
+        //  font-weight: 600;
+        //}
       }
 
       #download-csv-button {

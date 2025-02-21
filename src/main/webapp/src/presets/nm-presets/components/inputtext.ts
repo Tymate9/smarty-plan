@@ -2,6 +2,7 @@ import { nmColors } from '../constants/colors';
 
 export const inputTextConfig = {
   root: {
+    color: nmColors.brandBlack,
     borderColor: nmColors.brandRedHover,
     hoverBorderColor: nmColors.brandRedHover,
     focusBorderColor: nmColors.brandRedHover,

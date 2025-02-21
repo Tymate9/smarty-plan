@@ -32,10 +32,10 @@ export const buttonConfig = {
           color: nmColors.brandWhite,
           hoverBorderColor:nmColors.brandRed,
           activeBorderColor: nmColors.brandRed,
-          // focusRing:{
-          //   color: nmColors.brandRed,
-          //   shadow: "0 0 0 0.2rem rgba(255, 87, 51, 0.25)",
-          // }
+           focusRing:{
+             color: nmColors.brandRed,
+             shadow: "0 0 0 0.2rem rgba(255, 87, 51, 0.25)",
+           }
 
         },
         secondary: {

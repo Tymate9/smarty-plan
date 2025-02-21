@@ -2,6 +2,7 @@
  import {Button} from "primeng/button";
  import {FormsModule} from "@angular/forms";
  import {NgForOf, NgIf, NgStyle} from "@angular/common";
+ import {InputText} from "primeng/inputtext";
 
 @Component({
   selector: 'app-search-autocomplete',
@@ -37,7 +38,8 @@
     FormsModule,
     NgStyle,
     NgForOf,
-    NgIf
+    NgIf,
+    InputText
   ],
   styles: [`
     .search-autocomplete {
@@ -83,18 +85,24 @@
       border: none;
       outline: none;
       flex-grow: 1;
-      min-width: 150px;
+      min-width: 120px;
       background-color: white;
       border-radius: 5px;
+      color: black;
+    }
+    .input-container:hover,
+    .input-container:focus-within{
+      border-color: #aa001f;
     }
 
-    .dropdown-button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 0 5px;
-    }
+
+    //.dropdown-button {
+    //  border: none;
+    //  background: transparent;
+    //  cursor: pointer;
+    //  font-size: 16px;
+    //  padding: 0 5px;
+    //}
 
     .autocomplete-list {
       position: absolute;
@@ -103,6 +111,8 @@
       width: 100%;
       max-height: 150px;
       overflow-y: auto;
+      z-index: 100000;
+      color: black;
 
     }
 

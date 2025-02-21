@@ -29,6 +29,7 @@ import {Subscription} from "rxjs";
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()" styleClass="custom-button"></p-button>
       <p-button [raised]="true" severity="info" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()" styleClass="custom-button"></p-button>
       <p-button label="Exporter CSV" [raised]="true" severity="info" (click)="exportToCSV()"
@@ -608,26 +609,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-
-      // Fetch the filtered vehicles based on the selected filters
-      this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
-        .subscribe(filteredVehicles => {
-
-          this.teamHierarchy = filteredVehicles
-          this.vehiclesTree = this.transformToTreeNodes(filteredVehicles)
-
-          const stateCounts = this.calculateStatusCounts(filteredVehicles);
-          this.vehicleStatusCounts = [
-            {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
-            {state: 'PARKED', count: stateCounts['PARKED'] || 0},
-            {state: 'IDLE', count: stateCounts['IDLE'] || 0},
-            {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
-            {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
-          ];
-        });
-    })
+      this.loadFilteredVehicles();
+    }
+    )
   };
+  //Cette méthode permet de récupérer la liste des véhicules et de les transformer en TreeNode
+  loadFilteredVehicles(): void {
+    this.vehicleService.getFilteredVehiclesDashboard(
+      this.filters.agencies,
+      this.filters.vehicles,
+      this.filters.drivers
+    ).subscribe(filteredVehicles => {
+      this.teamHierarchy = filteredVehicles;
 
+      this.vehiclesTree = this.transformToTreeNodes(filteredVehicles);
+      this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
+    });
+  }
   //TODO make it more general (>3 levels)
   //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
   transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {
@@ -686,7 +684,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
-  calculateStatusCounts(teams: TeamHierarchyNode[]): Record<string, number> {
+  calculateStatusCounts(teams: TeamHierarchyNode[]): { state: string; count: number }[] {
     const counts: Record<string, number> = {};
 
     function traverseTeams(teamNodes: TeamHierarchyNode[]): void {
@@ -698,7 +696,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             counts[state] = (counts[state] || 0) + 1;
           }
         });
-
         // Recursively process child teams
         if (team.children && team.children.length > 0) {
           traverseTeams(team.children);
@@ -707,7 +704,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     traverseTeams(teams);
-    return counts;
+    return [
+      { state: 'DRIVING', count: counts['DRIVING'] || 0 },
+      { state: 'PARKED', count: counts['PARKED'] || 0 },
+      { state: 'IDLE', count: counts['IDLE'] || 0 },
+      { state: 'NO_COM', count: counts['NO_COM'] || 0 },
+      { state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0 },
+    ];
   }
 
   //Cette méthode permet de filtrer les véhicule en fonction du statut sélectionné

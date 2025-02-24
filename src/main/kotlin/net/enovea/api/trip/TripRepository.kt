@@ -163,7 +163,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
             handle.createQuery(
                 """
                 SELECT 
-                    DATE_ADD(timestamp, INTERVAL (Cast(time_zone AS SIGNED*10) MINUTE), 
+                    DATE_ADD(timestamp, INTERVAL (Cast(time_zone AS SIGNED)*10) MINUTE), 
                     device_id, 
                     trip_id, 
                     s2_latitude(location) AS location_lat, 

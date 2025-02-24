@@ -4,11 +4,9 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.context.Dependent
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
-import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.SpatialService
-import net.enovea.repository.TripRepository
-import net.enovea.service.VehicleService
+import net.enovea.api.trip.TripRepository
 import javax.sql.DataSource
 import io.quarkus.agroal.DataSource as AgroalDataSource
 

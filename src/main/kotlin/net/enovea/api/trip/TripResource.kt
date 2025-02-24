@@ -6,11 +6,7 @@ import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
-import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.SpatialService
-import net.enovea.repository.TripRepository
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
 
 @Path("/api/trips")
 @Authenticated

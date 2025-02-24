@@ -37,3 +37,15 @@ class TripDailyStatsRowMapper: RowMapper<TripDailyStatsDTO> {
         )
     }
 }
+
+class DatapointSimpleRowMapper : RowMapper<DatapointDTO> {
+    override fun map(rs: ResultSet, ctx: StatementContext): DatapointDTO {
+        return DatapointDTO(
+            timestamp = rs.getObject("timestamp", LocalDateTime::class.java),
+            deviceId = rs.getInt("device_id"),
+            tripId = rs.getInt("trip_id"),
+            locationLat = rs.getDouble("location_lat"),
+            locationLng = rs.getDouble("location_lng")
+        )
+    }
+}

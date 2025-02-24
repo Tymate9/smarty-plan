@@ -12,11 +12,17 @@ import {FilterService} from "../../commons/navbar/filter.service";
 import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
 import {NotificationService} from "../../commons/notification/notification.service";
 import {TilesService} from "../../services/tiles.service";
+import {TeamService} from "../vehicle/team.service";
 
 
 @Component({
   selector: 'app-map',
   template: `
+    <app-scrolling-info-banner
+      *ngIf="lunchPauseMessage"
+      [text]="lunchPauseMessage"
+      [scrollDuration]="20">
+    </app-scrolling-info-banner>
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <p-button
         label="Alerting véhicules"
@@ -68,6 +74,8 @@ export class MapComponent implements OnInit, OnDestroy {
   isCollapsed: boolean = true;
   private updateSubscription?: Subscription;
   private filterSubscription?: Subscription;
+  lunchPauseMessage: string = '';
+
 
   constructor(private readonly viewContainerRef: ViewContainerRef,
               private readonly poiService: PoiService,
@@ -75,7 +83,8 @@ export class MapComponent implements OnInit, OnDestroy {
               private readonly geoCodingService: GeocodingService,
               private readonly filterService: FilterService,
               private readonly tilesService: TilesService,
-              private readonly notificationService: NotificationService) {
+              private readonly notificationService: NotificationService,
+              private readonly teamService: TeamService) {
   }
 
   ngOnInit(): void {
@@ -83,11 +92,32 @@ export class MapComponent implements OnInit, OnDestroy {
     this.loadPOIs();
     this.filterSubscription = this.subscribeToFilterChanges();
     this.updateSubscription = this.startVehiclePositionUpdater();
+    this.loadLunchPauseMessage();
   }
 
   ngOnDestroy(): void {
     this.filterSubscription?.unsubscribe();
     this.updateSubscription?.unsubscribe();
+  }
+
+  private loadLunchPauseMessage() {
+    const now = new Date();
+    // Convertit l'heure courante en "HH:mm"
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const timeParam = `${hh}:${mm}`;
+
+    this.teamService.getTeamsInPause(timeParam).subscribe({
+      next: (message: string) => {
+        // S'il est vide => on n'affiche pas le composant
+        this.lunchPauseMessage = message.trim();
+        // On pourrait logger ou gérer autrement
+        console.log("Pause message: ", this.lunchPauseMessage);
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération du message de pause: ", err);
+      }
+    });
   }
 
   private initMap(): void {

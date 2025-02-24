@@ -41,4 +41,11 @@ export class TeamService {
     });
     return teamTree;
   }
+
+  getTeamsInPause(time: string): Observable<string> {
+    return this.http.get(`${this.apiUrl}/pause`, {
+      params: { time },
+      responseType: 'text'
+    });
+  }
 }

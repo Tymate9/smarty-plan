@@ -6,8 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.SpatialService
-import net.enovea.repository.TripRepository
-import net.enovea.service.VehicleService
 import java.time.LocalDateTime
 
 class TripServiceTest : StringSpec({

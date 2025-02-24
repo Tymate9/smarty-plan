@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.domain.vehicle.VehicleTeamEntity
 import java.io.Serializable
+import java.time.LocalTime
 
 @Entity(name = TeamEntity.ENTITY_NAME )
 @Table(name = TeamEntity.TABLE_NAME)
@@ -40,7 +41,15 @@ class TeamEntity(
         mappedBy = "team",
         cascade = [CascadeType.ALL, CascadeType.REMOVE]
     )
-    val vehicleTeams: List<VehicleTeamEntity> = mutableListOf()
+    val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
+
+    // Nouvelles colonnes pour la pause déjeuner
+    @Column(name = "lunch_break_start", nullable = true)
+    val lunchBreakStart: LocalTime? = null,
+
+    @Column(name = "lunch_break_end", nullable = true)
+    val lunchBreakEnd: LocalTime? = null
+
 
 
 ) : Serializable , PanacheEntityBase {

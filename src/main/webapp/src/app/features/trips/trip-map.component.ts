@@ -72,6 +72,12 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                       <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
                       Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
+                    <!-- Affichage des subTripEvent descriptions -->
+                    <div *ngIf="event.subTripEvents?.length">
+                      <div *ngFor="let subEvent of event.subTripEvents">
+                        {{ subEvent.description }}
+                      </div>
+                    </div>
 
                     <div class="time-oval">
                       {{
@@ -112,6 +118,12 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                         minute: '2-digit'
                       })
                     }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
+                    <!-- Affichage des subTripEvent descriptions -->
+                    <div *ngIf="event.subTripEvents?.length">
+                      <div *ngFor="let subEvent of event.subTripEvents">
+                        {{ subEvent.description }}
+                      </div>
+                    </div>
                     <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="right: 1rem; bottom: 1rem; position: absolute; color:darkred"></i>
                   </div>
                 </ng-template>
@@ -142,7 +154,15 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                     <div>
                       <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
-                      Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong></div>
+                      Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong><br/>
+                      <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakStartEvent)">
+                        La pause déjeuner à débuter pendant cette évènement
+                      </div>
+                      <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakEndEvent)">
+                        La pause déjeuner s'est terminer pendant cette évènement
+                      </div>
+                    </div>
+
 
                     <div class="time-oval">
                       {{
@@ -181,6 +201,12 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                         minute: '2-digit'
                       })
                     }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
+                    <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakStartEvent)">
+                      La pause déjeuner à débuter pendant cette évènement
+                    </div>
+                    <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakEndEvent)">
+                      La pause déjeuner s'est terminer pendant cette évènement
+                    </div>
                   </div>
                 </ng-template>
               </p-timeline>
@@ -359,6 +385,11 @@ export class TripMapComponent {
   private map: L.Map | null = null;
   private featureGroup: L.FeatureGroup = L.featureGroup();
 
+  public itemHasLunchBreakStartEvent = (item:any): boolean => item.type === 'START_LUNCH_BREAK';
+
+  public itemHasLunchBreakEndEvent = (item:any): boolean => item.type === 'END_LUNCH_BREAK';
+
+
   constructor(
     protected tripsService: TripsService,
     protected tilesService: TilesService
@@ -408,33 +439,86 @@ export class TripMapComponent {
           (tripEvent.eventType === TripEventType.VEHICLE_RUNNING ? 'Véhicule roulant'
             : tripEvent.eventType === TripEventType.VEHICLE_IDLE ? 'Véhicule à l\'arrêt avec moteur tournant'
               : 'Arrêt');
-        new CustomMarkerImpl([tripEvent.lat, tripEvent.lng])
-          .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color, tripEventsDTO.vehicleCategory.toLowerCase()))
+        const poiMarker = new CustomMarkerImpl([tripEvent.lat, tripEvent.lng])
+          .setIcon(this.getIcon(tripEvent.eventType, tripEvent.color, tripEventsDTO.vehicleCategory.toLowerCase()));
+
+        // Ajout de la propriété personnalisée pour associer l'index du TripEventDTO
+        (<any>poiMarker.options).tripEventIndex = tripEvent.index;
+
+        poiMarker
           .addTo(this.featureGroup)
           .bindPopup(
             `<b>${popupLabel}</b><br>${tripEvent.address}<br>${tripEvent.start?.toLocaleTimeString() ?? ''} - ${tripEvent.end?.toLocaleTimeString() ?? ''}`
           );
       }
-
       // add trace to map
-      if ([TripEventType.TRIP, TripEventType.TRIP_EXPECTATION].includes(tripEvent.eventType)
-        && tripEvent.trace) {
-        const geoJSON = WKTParse(tripEvent.trace);
-        if (geoJSON === null || geoJSON.type !== 'LineString') {
-          alert('Erreur lors de la récupération de la trace')
-          return
-        }
-
-        L.geoJson(geoJSON,
-          {
-            style: {
-              color: tripEvent.color || 'blue',
-              dashArray: tripEvent.eventType === TripEventType.TRIP_EXPECTATION ? '4' : undefined
+      if ([TripEventType.TRIP, TripEventType.TRIP_EXPECTATION].includes(tripEvent.eventType) && tripEvent.trace) {
+        // Si trace est un tableau, on itère sur chaque segment
+        tripEvent.trace.forEach(segment => {
+          if (segment) {
+            const geoJSON = WKTParse(segment);
+            if (geoJSON === null || geoJSON.type !== 'LineString') {
+              alert('Erreur lors de la récupération de la trace');
+              return;
             }
+            const geoLayer = L.geoJson(geoJSON, {
+              style: {
+                color: tripEvent.color || 'blue',
+                dashArray: tripEvent.eventType === TripEventType.TRIP_EXPECTATION ? '4' : undefined
+              }
+            });
+            // Ajout de la propriété personnalisée pour associer l'index du TripEventDTO
+            (<any>geoLayer.options).tripEventIndex = tripEvent.index;
+            geoLayer.addTo(this.featureGroup);
           }
-        ).addTo(this.featureGroup);
+        });
       }
     });
+    const allSubTripEvents: { timestamp: Date, lat: number, lng: number, type: string }[] = [];
+
+    this._tripData?.tripEvents.forEach(event => {
+      if (event.subTripEvents && event.subTripEvents.length > 0) {
+        event.subTripEvents.forEach(sub => {
+          // Assurez-vous que le timestamp est de type Date dans le front.
+          // Par exemple, si sub.timestamp est au format string, convertissez-le via new Date(sub.timestamp)
+          if (sub.timestamp && sub.lat != null && sub.lng != null) {
+            allSubTripEvents.push({
+              timestamp: new Date(sub.timestamp),
+              lat: sub.lat,
+              lng: sub.lng,
+              type: sub.type
+            });
+          }
+        });
+      }
+    });
+
+    // Trier les subTripEvents par timestamp
+    allSubTripEvents.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+    // Parcourir la liste pour former des paires START puis END
+    for (let i = 0; i < allSubTripEvents.length; i++) {
+      const subEvent = allSubTripEvents[i];
+      if (subEvent.type === 'START_LUNCH_BREAK') {
+        // Chercher le prochain END_LUNCH_BREAK
+        const endEvent = allSubTripEvents.find((s, j) => j > i && s.type === 'END_LUNCH_BREAK');
+        if (endEvent) {
+          // Créer une polyline reliant ces deux points
+          const polyline = L.polyline(
+            [
+              [subEvent.lat, subEvent.lng],
+              [endEvent.lat, endEvent.lng]
+            ],
+            {
+              color: 'green',
+              dashArray: '5, 10',
+              weight: 3
+            }
+          );
+          polyline.addTo(this.featureGroup);
+        }
+      }
+    }
 
     // set page up and zoom
     this.featureGroup.addTo(this.map);
@@ -451,28 +535,33 @@ export class TripMapComponent {
     return this._tripData;
   }
 
-
-  private applyEventsHiglightedStyle(
-    indexes: number[],
-    fillColor: string,
-    weight: number,
-    highlightMarker: boolean
-  ): void {
+  private applyEventsHiglightedStyle( indexes: number[], fillColor: string, weight: number, highlightMarker: boolean ): void {
     indexes.forEach(index => {
-      const layer = this.featureGroup.getLayers()[index];
-      if (layer instanceof L.GeoJSON) {
-        layer.setStyle({ fillColor: fillColor, weight: weight });
-      } else if (layer instanceof L.Marker) {
-        const element = layer.getElement();
-        if (element) {
-          if (highlightMarker) {
-            element.classList.add('highlighted-marker');
-          } else {
-            element.classList.remove('highlighted-marker');
+      const layers = this.getLayersByTripEventIndex(index);
+      if (layers.length === 0) {
+        console.warn(`applyEventsHiglightedStyle: Aucun layer trouvé pour tripEventIndex ${index}`);
+      }
+      layers.forEach(layer => {
+        if (layer instanceof L.GeoJSON) {
+          layer.setStyle({ fillColor: fillColor, weight: weight });
+        } else if (layer instanceof L.Marker) {
+          const element = layer.getElement();
+          if (element) {
+            if (highlightMarker) {
+              element.classList.add('highlighted-marker');
+            } else {
+              element.classList.remove('highlighted-marker');
+            }
           }
         }
-      }
+      });
     });
+  }
+
+// Fonction utilitaire pour retrouver tous les layers par tripEventIndex
+  private getLayersByTripEventIndex(eventIndex: number): L.Layer[] {
+    const layers = this.featureGroup.getLayers();
+    return layers.filter(layer => (<any>layer.options).tripEventIndex === eventIndex);
   }
 
 // Méthode refactorisée pour l'événement MouseEnter
@@ -484,12 +573,24 @@ export class TripMapComponent {
     if (event.sourceIndexes && event.sourceIndexes.length > 0) {
       this.applyEventsHiglightedStyle(event.sourceIndexes, fillColor, weight, highlightMarker);
     } else {
-      const layer = this.featureGroup.getLayers()[event.index];
-      if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-        layer.setStyle({ fillColor: fillColor, weight: weight });
-      } else if (layer instanceof L.Marker) {
-        layer.getElement()?.classList.add('highlighted-marker');
+      // Récupérer tous les layers correspondant à event.index
+      const layers = this.getLayersByTripEventIndex(event.index);
+      if (layers.length === 0) {
+        console.warn(`onTripEventMouseEnter: No layer found with tripEventIndex ${event.index}`);
+        return;
       }
+      layers.forEach(layer => {
+        if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
+          layer.setStyle({ fillColor: fillColor, weight: weight });
+        } else if (layer instanceof L.Marker) {
+          const element = layer.getElement();
+          if (element) {
+            element.classList.add('highlighted-marker');
+          } else {
+            console.warn("onTripEventMouseEnter: No DOM element found for Marker with tripEventIndex", event.index);
+          }
+        }
+      });
     }
   }
 
@@ -500,35 +601,50 @@ export class TripMapComponent {
     const highlightMarker = false;
 
     if (event.sourceIndexes && event.sourceIndexes.length > 0) {
-      this.applyEventsHiglightedStyle(
-        event.sourceIndexes,
-        fillColor,
-        weight,
-        highlightMarker
-      );
+      this.applyEventsHiglightedStyle(event.sourceIndexes, fillColor, weight, highlightMarker);
     } else {
-      const layer = this.featureGroup.getLayers()[event.index];
-      if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
-        layer.setStyle({ fillColor: fillColor, weight: weight });
-      } else if (layer instanceof L.Marker) {
-        layer.getElement()?.classList.remove('highlighted-marker');
+      // Récupérer tous les layers correspondant à event.index
+      const layers = this.getLayersByTripEventIndex(event.index);
+      if (layers.length === 0) {
+        console.warn(`onTripEventMouseLeave: No layer found with tripEventIndex ${event.index}`);
+        return;
       }
+      layers.forEach(layer => {
+        if (event.eventType === TripEventType.TRIP && layer instanceof L.GeoJSON) {
+          layer.setStyle({ fillColor: fillColor, weight: weight });
+        } else if (layer instanceof L.Marker) {
+          const element = layer.getElement();
+          if (element) {
+            element.classList.remove('highlighted-marker');
+          } else {
+            console.warn("onTripEventMouseLeave: No DOM element found for Marker with tripEventIndex", event.index);
+          }
+        }
+      });
     }
   }
 
-
   onTripEventClick(event: TripEventDTO): void {
-    const layer = this.featureGroup.getLayers()[event.index]
-    if (layer instanceof L.Marker) {
-      const latLng = layer.getLatLng();
-      const zoom = this.map!.getZoom()
+    // Récupérer tous les layers associés à l'index de l'événement
+    const layers = this.getLayersByTripEventIndex(event.index);
+
+    // Sélectionner le premier layer qui est un Marker
+    const targetLayer = layers.find(layer => layer instanceof L.Marker) as L.Marker | undefined;
+
+    if (targetLayer) {
+      const latLng = targetLayer.getLatLng();
+      const zoom = this.map!.getZoom();
       const bounds = this.map!.getBounds();
       this.map!.flyTo(
         [
           latLng.lat,
           latLng.lng + (this.showSidePanel ? (bounds.getEast() - bounds.getWest()) * 0.175 : 0)
-        ], zoom);
-      layer.openPopup();
+        ],
+        zoom
+      );
+      targetLayer.openPopup();
+    } else {
+      console.warn(`onTripEventClick: Aucun Marker trouvé pour tripEventIndex ${event.index}`);
     }
   }
 

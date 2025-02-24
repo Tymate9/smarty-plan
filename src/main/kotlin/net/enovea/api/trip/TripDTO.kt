@@ -22,7 +22,6 @@ data class TripDTO(
     val trace: String?,
 )
 
-
 enum class TripStatus(
     val value: Int
 ) {
@@ -79,6 +78,28 @@ data class TripEventDTO(
     val duration: Long? = null,
     val lat: Double? = null,
     val lng: Double? = null,
-    val trace: String? = null,
-    val sourceIndexes: List<Int>? = null
+    val trace: List<String?>? = null,
+    val sourceIndexes: List<Int>? = null,
+    val subTripEvents: List<SubTripEvent>? = null,
 )
+
+data class DatapointDTO(
+    val timestamp: LocalDateTime,
+    val deviceId: Int,
+    val tripId: Int,
+    val locationLat: Double,
+    val locationLng: Double
+)
+
+data class SubTripEvent(
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val timestamp: LocalTime? = null,
+    val type: SubTripEventType,
+    val description : String? = null
+)
+
+enum class SubTripEventType {
+    START_LUNCH_BREAK,
+    END_LUNCH_BREAK,
+}

@@ -83,7 +83,7 @@ interface DeviceDataStateMapper {
     private fun isInPause( lastPositionTime: Timestamp?, earliestStart: LocalTime?, latestEnd: LocalTime? ): Boolean {
         if (lastPositionTime == null || earliestStart == null || latestEnd == null) return false
         val localTime = lastPositionTime.toInstant()
-            .atZone(ZoneId.systemDefault())
+            .atZone(ZoneId.of("Europe/Paris"))
             .toLocalTime()
 
         // On considère [start <= localTime <= end] comme "dans la pause"

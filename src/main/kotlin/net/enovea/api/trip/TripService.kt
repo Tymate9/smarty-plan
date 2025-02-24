@@ -26,6 +26,9 @@ class TripService(
         val effectiveLunchBreak = getEffectiveLunchBreak(vehicleId, parsedDate)
         val (lunchBreakStart, lunchBreakEnd) = effectiveLunchBreak ?: (null to null)
 
+        println("Heure de début extraite depuis la base de donnée : $lunchBreakStart")
+        println("Heure de fin extraite depuis la base de donnée : $lunchBreakEnd")
+
         // check if the driver at that date on this vehicle can be localized
         // if yes, get his informations, if no, cancel
         val vehicle = VehicleEntity.getAtDateIfTracked(vehicleId, parsedDate)
@@ -223,7 +226,7 @@ class TripService(
 
         // Ajuster les timestamps (ajout d'une heure pour compenser un éventuel décalage)
         val adjustedDatapoints = datapoints.map { dp ->
-            dp.copy(timestamp = dp.timestamp.plusHours(1))
+            dp.copy(/*timestamp = dp.timestamp.plusHours(1)*/)
         }
 
         val pStart = originalTrip.startTime.toLocalTime()
@@ -273,7 +276,7 @@ class TripService(
                             lng = lastCoordBefore.x,
                             timestamp = lunchBreakStart,
                             type = SubTripEventType.START_LUNCH_BREAK,
-                            description = "Pause déjeuner commencé durant ce trajet à $lunchBreakStart"
+                            description = "Pause déjeuner commencée durant ce trajet à $lunchBreakStart"
                         )
                     )
                 }
@@ -285,7 +288,7 @@ class TripService(
                             lng = firstCoordAfter.x,
                             timestamp = lunchBreakEnd,
                             type = SubTripEventType.END_LUNCH_BREAK,
-                            description = "Pause déjeuner terminé durant ce trajet à $lunchBreakEnd"
+                            description = "Pause déjeuner terminée durant ce trajet à $lunchBreakEnd"
                         )
                     )
                 }
@@ -360,7 +363,7 @@ class TripService(
                             lng = firstCoord.x,
                             timestamp = lunchBreakEnd,
                             type = SubTripEventType.END_LUNCH_BREAK,  // Assurez-vous que cet enum est défini dans votre projet
-                            description = "Pause déjeuner terminé durant ce trajet à $lunchBreakEnd"
+                            description = "Pause déjeuner terminée durant ce trajet à $lunchBreakEnd"
                         )
                     )
                 }
@@ -416,7 +419,7 @@ class TripService(
                         lng = eventLng,
                         timestamp = endLunchBreak,
                         type = SubTripEventType.END_LUNCH_BREAK,
-                        description = "Pause déjeuner terminer durant cet arrêt à $endLunchBreak"
+                        description = "Pause déjeuner terminée durant cet arrêt à $endLunchBreak"
                     )
                 )
             }

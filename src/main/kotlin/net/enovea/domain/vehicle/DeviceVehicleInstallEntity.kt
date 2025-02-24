@@ -60,8 +60,6 @@ data class DeviceVehicleInstallEntity (
                 "vehicle.id = ?1 and id.startDate <= ?2 and (endDate is null or endDate >= ?2)",
                 vehicleId, startTimestamp
             ).firstResult()
-
-            println("getActiveDevice: For vehicleId=$vehicleId at date=$date, active device found: ${activeInstall?.device?.id}")
             return activeInstall?.device
         }
 

@@ -243,7 +243,7 @@ open class VehicleService(
         val panacheQuery = VehicleEntity.find(baseQuery, params)
 
         return panacheQuery.list()
-            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() }
+            .filter { DeviceVehicleInstallEntity.getActiveDevice(it.id!!, LocalDate.now()) != null && it.vehicleTeams.isNotEmpty() }
             .map { vehicleMapper.toVehicleDTOSummary(it) }
     }
 }

@@ -212,7 +212,7 @@ export class TripsComponent implements OnInit {
     this.tripsService.getTripByDateAndVehicle(this.vehicleId, this.date).subscribe({
       next: (data) => {
         this.loading = false;
-        this.tripData = data;
+        this.tripData = data.tripEvents;
       },
       error: (error) => {
         console.error('Erreur lors de la récupération du trajet:', error);

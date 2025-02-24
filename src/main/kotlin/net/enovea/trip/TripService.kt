@@ -21,7 +21,8 @@ class TripService(
     ) {
     private val geometryFactory = GeometryFactory()
 
-    fun computeTripEventsDTO(vehicleId: String, date: String, geolocalized: Boolean = true): TripEventsDTO? {
+    fun computeTripEventsDTO(vehicleId: String, date: String):
+            Pair<Boolean, TripEventsDTO?> {
         val parsedDate = LocalDate.parse(date, BASIC_ISO_DATE)
         val effectiveLunchBreak = getEffectiveLunchBreak(vehicleId, parsedDate)
         val (lunchBreakStart, lunchBreakEnd) = effectiveLunchBreak ?: (null to null)
@@ -48,10 +49,10 @@ class TripService(
         // check if the driver at that date on this vehicle can be localized
         // if yes, get his informations, if no, cancel
         val vehicle = VehicleEntity.getAtDateIfTracked(vehicleId, parsedDate)
-            ?: return result
+            ?: return Pair(false,result)
 
-        if(geolocalized and !vehicle.geolocalized!!)
-            return result
+        val geolocalized = vehicle.geolocalized!!
+
 
         val trips = tripRepository.findByVehicleIdAndDate(
             vehicleId,
@@ -59,7 +60,7 @@ class TripService(
         )
 
         if (trips.isEmpty()) {
-            return null
+            return Pair(geolocalized,null)
         }
 
         // compute events for each trip and stop between each trip
@@ -207,7 +208,7 @@ class TripService(
             result = transformedList
         }
 
-        return result
+        return Pair(geolocalized,result)
     }
 
     private fun computeTrip( originalTrip: TripDTO, index: Int, lunchBreakStart: LocalTime?, lunchBreakEnd: LocalTime? ): TripEventDTO {

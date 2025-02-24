@@ -48,7 +48,7 @@ class TripServiceTest : StringSpec({
         every { spatialService.getNearestEntityWithinArea(any(), PointOfInterestEntity :: class) } returns null
         every { spatialService.getAddressFromEntity(any()) } returns "Some Address"
 
-        val result = tripService.computeTripEventsDTO(vehicleId, date)
+        val result = tripService.computeTripEventsDTO(vehicleId, date).second
 
         result?.vehicleId shouldBe vehicleId
         result?.tripAmount shouldBe 1

@@ -6,6 +6,7 @@ import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
 import net.enovea.api.trip.TripRepository
 
 @Path("/api/trips")
@@ -28,8 +29,15 @@ class TripResource(
     fun getTripsByVehicleIdAndDate(
         @PathParam("vehicleId") vehicleId: String,
         @PathParam("date") date: String // format %Y%m%d
-    ): TripEventsDTO? {
-        return tripService.computeTripEventsDTO(vehicleId, date)
+    ): Response {
+        val result = tripService.computeTripEventsDTO(vehicleId, date)
+        val (geolocDay, tripEvents) = result
+        return Response.ok(
+            mapOf(
+                "geolocDay" to geolocDay,
+                "tripEvents" to tripEvents
+            )
+        ).build()
     }
 
     @GET
@@ -38,8 +46,15 @@ class TripResource(
     fun getTripsByNonGeolocalizedVehicleIdAndDate(
         @PathParam("vehicleId") vehicleId: String,
         @PathParam("date") date: String // format %Y%m%d
-    ): TripEventsDTO? {
-        return tripService.computeTripEventsDTO(vehicleId, date, false)
+    ): Response {
+        val result = tripService.computeTripEventsDTO(vehicleId, date)
+        val (geolocDay, tripEvents) = result
+        return Response.ok(
+            mapOf(
+                "geolocDay" to geolocDay,
+                "tripEvents" to tripEvents
+            )
+        ).build()
     }
 
     @GET

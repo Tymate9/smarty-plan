@@ -126,47 +126,58 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
 
     }
 
-    fun findDataPointIndexCloseToTime(
-        deviceId: String,
-        tripId: String,
-        referenceTime: LocalDateTime,
-        before: Boolean
-    ): Int? {
+    fun findDataPointIndexCloseToTime( deviceId: String, tripId: String, referenceTime: LocalDateTime, before: Boolean ): Int? {
         return dorisJdbiContext.jdbi.withHandle<Int?, Exception> { handle ->
-            // 1) Construction de la requête selon before = true/false
-            val query = if (before) {
-                // Dernier point dont timestamp <= referenceTime
-                """
-            SELECT point_index
-            FROM datapoint
-            WHERE device_id = :deviceId
-              AND trip_id = :tripId
-              AND timestamp <= :referenceTime
-            ORDER BY timestamp DESC
-            LIMIT 1
-            """.trimIndent()
-            } else {
-                // Premier point dont timestamp >= referenceTime
-                """
-            SELECT point_index
-            FROM datapoint
-            WHERE device_id = :deviceId
-              AND trip_id = :tripId
-              AND timestamp >= :referenceTime
-            ORDER BY timestamp ASC
-            LIMIT 1
-            """.trimIndent()
-            }
+            // 1) Choix de la fonction selon 'before'
+            val rowFunc = if (before) "MAX_BY" else "MIN_BY"
+            // 2) Choix du comparateur de temps
+            val timeComparator = if (before) "<=" else ">="
 
-            // 2) Exécution de la requête
-            handle.createQuery(query)
+            // 3) Construction de la requête SQL
+            val query = """
+            SELECT 
+                $rowFunc(
+                    row_number() OVER (PARTITION BY device_id, trip_id ORDER BY timestamp),
+                    timestamp
+                ) AS rownumber
+            FROM datapoints
+            WHERE device_id = :deviceId
+              AND trip_id = :tripId
+              AND DATE_ADD(timestamp, INTERVAL (CAST(time_zone AS SIGNED)*10) MINUTE) $timeComparator :referenceTime
+        """.trimIndent()
+
+            // 5) Exécution de la requête
+            val resultOptional = handle.createQuery(query)
                 .bind("deviceId", deviceId)
                 .bind("tripId", tripId)
                 .bind("referenceTime", referenceTime)
                 .mapTo(Int::class.java)
                 .findOne()
-                .orElse(null)
+
+            resultOptional.orElse(null)
         }
     }
 
+    fun findDatapointsForTrip( deviceId: String, tripId: String ): List<DatapointDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<DatapointDTO>, Exception> { handle ->
+            handle.createQuery(
+                """
+                SELECT 
+                    timestamp, 
+                    device_id, 
+                    trip_id, 
+                    s2_latitude(location) AS location_lat, 
+                    s2_longitude(location) AS location_lng
+                FROM datapoints
+                WHERE device_id = :deviceId
+                  AND trip_id = :tripId
+                ORDER BY timestamp
+                """.trimIndent()
+            )
+                .bind("deviceId", deviceId)
+                .bind("tripId", tripId)
+                .map(DatapointSimpleRowMapper())
+                .list()
+        }
+    }
 }

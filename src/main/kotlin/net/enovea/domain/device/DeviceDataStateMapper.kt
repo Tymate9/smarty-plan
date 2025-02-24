@@ -72,6 +72,9 @@ interface DeviceDataStateMapper {
             entity.address
         }
     }
+
+    //TODO(Ces fonctionnalités doivent être déplacés)
+
     /**
      * Vérifie si [lastPositionTime] tombe dans l’intervalle [earliestStart, latestEnd].
      * On compare uniquement l'heure du jour, pas la date complète.
@@ -96,7 +99,6 @@ interface DeviceDataStateMapper {
      * - on prend la plus tôt pour start, la plus tard pour end
      */
     private fun computeFinalLunchBreakWindow( vehicles: List<VehicleEntity>, drivers: List<DriverEntity>, refDate: Timestamp ): Pair<LocalTime?, LocalTime?> {
-
         // 1. Récupérer TOUTES les teams actives (driverTeam, vehicleTeam)
         val allTeams = mutableSetOf<TeamEntity>()
         drivers.forEach { driver ->
@@ -110,7 +112,7 @@ interface DeviceDataStateMapper {
 
         // 2. Pour chacune de ces teams, on remonte le parentTeam si lunchBreakStart ou lunchBreakEnd est null
         //    ou selon les règles d’héritage. Par simplicité, on va chercher la "vraie" start / end
-        //    en grimpant les parents tant que c’est null. (On pourrait itérer plus proprement, ici c'est inline.)
+        //    en grimpant les parents tant que c’est null. (On devras itérer plus proprement)
         val timeRanges = allTeams.mapNotNull { team ->
             val finalStart = findInheritedStart(team)
             val finalEnd = findInheritedEnd(team)

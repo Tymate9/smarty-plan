@@ -348,7 +348,7 @@ class TripService(
             pStart > lunchBreakStart && pEnd >= lunchBreakEnd -> {
                 // Filtrer les datapoints pour ne conserver que ceux dont l'heure locale est < lunchBreakEnd
                 val segmentDatapoints = datapoints.filter { dp ->
-                    dp.timestamp.toLocalTime() < lunchBreakEnd
+                    dp.timestamp.toLocalTime() >= lunchBreakEnd
                 }.sortedBy { it.timestamp }
 
                 val geometryFactory = GeometryFactory()
@@ -419,7 +419,7 @@ class TripService(
                         lng = eventLng,
                         timestamp = startLunchBreak,
                         type = SubTripEventType.START_LUNCH_BREAK,
-                        description = "Pause déjeuner commencer durant cet arrêt à $startLunchBreak"
+                        description = "Pause déjeuner commencée durant cet arrêt à $startLunchBreak"
                     )
                 )
             }

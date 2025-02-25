@@ -87,13 +87,6 @@ class TripService(
                 "IDLE" -> TripStatus.IDLE
                 else -> throw NotImplementedError("Unknown device state ${lastDeviceState.state}")
             }
-            if (lunchBreakStart != null && lunchBreakEnd != null) {
-                val eventTime = lastPositionTime.toLocalTime()
-                if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
-                    addressAtEnd = "pause midi de $lunchBreakStart à $lunchBreakEnd"
-                    lastPosition = null
-                }
-            }
             tripEvents.add(
                 TripEventDTO(
                     index = tripEvents.size,
@@ -109,6 +102,25 @@ class TripService(
                 )
             )
         }
+        val eventTime = lastPositionTime.toLocalTime()
+        if (lunchBreakStart != null && lunchBreakEnd != null) {
+            if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
+                addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
+                lastPosition = null
+            }
+        }
+        val finalLat: Double? = if (lunchBreakStart != null && lunchBreakEnd != null && eventTime >= lunchBreakStart && eventTime <= lunchBreakEnd) {
+            // Pendant la pause, on annule la position
+            null
+        } else {
+            // En dehors de la pause, on utilise la dernière position si présente, sinon la valeur de repli
+            lastPosition?.y ?: lastTrip.endLat
+        }
+        val finalLng: Double? = if (lunchBreakStart != null && lunchBreakEnd != null && eventTime >= lunchBreakStart && eventTime <= lunchBreakEnd) {
+            null
+        } else {
+            lastPosition?.x ?: lastTrip.endLng
+        }
         tripEvents.add(
             TripEventDTO(
                 index = tripEvents.size,
@@ -121,8 +133,8 @@ class TripService(
                 poiId = poiAtEnd?.id,
                 poiLabel = poiAtEnd?.getDenomination(),
                 address = addressAtEnd ?: poiAtEnd?.address,
-                lat = lastPosition?.y ?: lastTrip.endLat,
-                lng = lastPosition?.x ?: lastTrip.endLng,
+                lat = finalLat,
+                lng = finalLng,
                 start = lastPositionTime,
             )
         )

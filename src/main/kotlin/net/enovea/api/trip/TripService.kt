@@ -87,6 +87,13 @@ class TripService(
                 "IDLE" -> TripStatus.IDLE
                 else -> throw NotImplementedError("Unknown device state ${lastDeviceState.state}")
             }
+            if (lunchBreakStart != null && lunchBreakEnd != null) {
+                val eventTime = lastPositionTime.toLocalTime()
+                if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
+                    addressAtEnd = "pause midi de $lunchBreakStart à $lunchBreakEnd"
+                    lastPosition = null
+                }
+            }
             tripEvents.add(
                 TripEventDTO(
                     index = tripEvents.size,

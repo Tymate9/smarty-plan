@@ -15,7 +15,10 @@ class VehicleStatsQseMapper: RowMapper<VehicleStatsQseDTO> {
             licensePlate = rs.getString("license_plate") ?: "-",
             waitingDuration = rs.getString("waiting_duration").takeIf { !rs.wasNull() } ,
             tripCount = rs.getInt("trip_count"),
-            drivingTime = rs.getString("driving_time").takeIf { !rs.wasNull() }
+            drivingTime = rs.getString("driving_time").takeIf { !rs.wasNull() },
+            rangeAvg = rs.getString("range_avg"),
+            idleDuration = rs.getString("idle_duration").takeIf { !rs.wasNull() },
+            distanceMax = rs.getInt("longest_trip_distance").takeIf { !rs.wasNull() },
 
         )
     }

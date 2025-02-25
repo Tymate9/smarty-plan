@@ -39,10 +39,9 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-      <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()" styleClass="custom-button"></p-button>
-      <p-button [raised]="true" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
+      <p-button icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()"></p-button>
-      <p-button label="Exporter CSV" [raised]="true" (click)="exportToCSV()"
+      <p-button label="Exporter CSV" (click)="exportToCSV()"
                 ></p-button>
     </div>
 
@@ -442,7 +441,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
+      z-index: 9998;
     }
     .dialog-box {
       background: #fff;
@@ -556,83 +555,57 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
-        this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-        this.loadFilteredVehicles();
-      }
-    )
-  };
-  //Cette méthode permet de récupérer la liste des véhicules et de les transformer en TreeNode
-  loadFilteredVehicles(): void {
-    this.vehicleService.getFilteredVehiclesDashboard(
-      this.filters.agencies,
-      this.filters.vehicles,
-      this.filters.drivers
-    ).subscribe(filteredVehicles => {
-      this.teamHierarchy = filteredVehicles;
+      this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
 
-      this.vehiclesTree = this.transformToTreeNodes(filteredVehicles);
-      this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
-    });
-  }
-  //TODO make it more general (>3 levels)
-  //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
-  transformToTreeNodes(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): TreeNode[] {
-    // Helper function to sort by label alphabetically
-    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-      a.data.label.localeCompare(b.data.label);
+      // Fetch the filtered vehicles based on the selected filters
+      if(this.non_geoloc){
+        this.vehicleService.getFilteredNonGeolocVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+          .subscribe(filteredVehicles => {
 
-    // Helper function to sort vehicles by driver's lastName and firstName
-    const sortByDriverName = (
-      a: { data: { vehicle: dto.VehicleTableDTO } },
-      b: { data: { vehicle: dto.VehicleTableDTO } }
-    ) => {
-      const driverA = a.data.vehicle?.driver || { lastName: '', firstName: '' };
-      const driverB = b.data.vehicle?.driver || { lastName: '', firstName: '' };
-
-      // First compare by lastName
-      const lastNameComparison = driverA.lastName.localeCompare(driverB.lastName);
-      if (lastNameComparison !== 0) {
-        return lastNameComparison;
-      }
-
-      // If lastName is the same, compare by firstName
-      return driverA.firstName.localeCompare(driverB.firstName);
-    };
-
-    return teamNodes.map((team) => {
-      return {
-        data: {
-          label: team.label,
-          vehicle: null,
-        },
-        expanded: true,
-        children: [
-          ...(team.children || []).map((child: TeamHierarchyNode<dto.VehicleTableDTO>) => ({
-            data: {
-              label: child.label,
-              vehicle: null
-            },
-            expanded: true,
-            children: [
-              ...(child.vehicles || []).map((vehicle: dto.VehicleTableDTO) => ({
-                data: {
-                  label: vehicle.licenseplate,
-                  vehicle: vehicle,
-                },
-                expanded: true,
-                children: []
+            this.teamHierarchy = filteredVehicles
+            this.vehiclesTree = VehicleService.transformToTreeNodes(
+              filteredVehicles,
+              (vehicle: dto.VehicleTableDTO) => ({
+                driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+                licensePlate: vehicle.licenseplate,
               }))
-                .sort(sortByDriverName),
-            ]
-          }))
-            .sort(sortByLabel),
-        ]
-      };
-    }).sort(sortByLabel);
-  }
+
+            const stateCounts = this.calculateStatusCounts(filteredVehicles);
+            this.vehicleStatusCounts = [
+              {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
+              {state: 'PARKED', count: stateCounts['PARKED'] || 0},
+              {state: 'IDLE', count: stateCounts['IDLE'] || 0},
+              {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
+              {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
+            ];
+          });
+      }else{
+        this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+          .subscribe(filteredVehicles => {
+
+            this.teamHierarchy = filteredVehicles
+            this.vehiclesTree = VehicleService.transformToTreeNodes(
+              filteredVehicles,
+              (vehicle: dto.VehicleTableDTO) => ({
+                driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+                licensePlate: vehicle.licenseplate,
+              }))
+
+            const stateCounts = this.calculateStatusCounts(filteredVehicles);
+            this.vehicleStatusCounts = [
+              {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
+              {state: 'PARKED', count: stateCounts['PARKED'] || 0},
+              {state: 'IDLE', count: stateCounts['IDLE'] || 0},
+              {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
+              {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
+            ];
+          });
+      }
+    })
+  };
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
-  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): { state: string; count: number }[] {
+  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): Record<string, number> {
     const counts: Record<string, number> = {};
 
     function traverseTeams(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): void {
@@ -652,13 +625,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     traverseTeams(teams);
-    return [
-      { state: 'DRIVING', count: counts['DRIVING'] || 0 },
-      { state: 'PARKED', count: counts['PARKED'] || 0 },
-      { state: 'IDLE', count: counts['IDLE'] || 0 },
-      { state: 'NO_COM', count: counts['NO_COM'] || 0 },
-      { state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0 },
-    ];
+    return counts;
   }
 
 

@@ -358,6 +358,13 @@ import {TableModule} from "primeng/table";
     //tbody tr:hover {
     //  background-color: #f1f1f1;
     //}
+    //::ng-deep .p-table-tbody tr:nth-child(odd) {
+    //  background-color: var(--surface-50) !important;
+    //}
+    //
+    //::ng-deep .p-table-tbody tr:nth-child(even) {
+    //  background-color: var(--surface-100) !important;
+    //}
 
   `]
 })

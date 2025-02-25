@@ -141,6 +141,9 @@ open class VehicleService(
                 tripCount = stats.tripCount,
                 waitingDuration = stats.waitingDuration,
                 drivingTime = stats.drivingTime,
+                rangeAvg = stats.rangeAvg,
+                idleDuration = stats.idleDuration,
+                distanceMax = stats.distanceMax
                 )
             VehiclesStatsQseDTO(
                 vehicleStatsQse = vehicleStatsQseDTO,
@@ -163,6 +166,12 @@ open class VehicleService(
             "%02d:%02d",
             (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } / 3600),
             (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } % 3600) / 60)
+        val averageRangeAvg = String.format("%02d:%02d", (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() / 3600), (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() % 3600)/ 60)
+        val idleDurationTotal = String.format(
+            "%02d:%02d",
+            (vehiclesStats.sumOf { convertHHMMToSeconds(it.idleDuration) } / 3600),
+            (vehiclesStats.sumOf { convertHHMMToSeconds(it.idleDuration) } % 3600) / 60)
+        val longestTrip=vehiclesStats.maxOf { it.distanceMax ?:0 }
         val selectionScore = "A"
         val severityOfUseTurn = "B"
         val severityOfAcceleration ="C"
@@ -173,7 +182,10 @@ open class VehicleService(
             "totalWaitingTime" to totalWaitingTime,
             "selectionScore" to selectionScore,
             "severityOfUseTurn" to severityOfUseTurn,
-            "severityOfAcceleration" to severityOfAcceleration
+            "severityOfAcceleration" to severityOfAcceleration,
+            "averageRangeAvg" to averageRangeAvg,
+            "idleDurationTotal" to idleDurationTotal,
+            "longestTrip" to longestTrip
         )
     }
 

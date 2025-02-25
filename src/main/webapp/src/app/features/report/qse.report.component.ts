@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {VehicleService} from "../vehicle/vehicle.service";
+import {TeamHierarchyNodeStats, TeamHierarchyNodeStatsQSE, VehicleService} from "../vehicle/vehicle.service";
 import {Subscription} from "rxjs";
 import {dto} from "../../../habarta/dto";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
@@ -9,6 +9,8 @@ import {DateRangePickerComponent} from "../dateRange/dateRange.component";
 import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
 import {TreeTableModule} from "primeng/treetable";
 import {NgClass, NgIf} from "@angular/common";
+import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
+import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
 
 @Component({
   selector: 'app-qse-report',
@@ -18,7 +20,7 @@ import {NgClass, NgIf} from "@angular/common";
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
       [buttonColor]="'var(--p-red-100)'"
-      [sliceRange]="[0, 3]"
+      [sliceRange]="[0, 4]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
     </app-indicator-buttons>
@@ -27,7 +29,7 @@ import {NgClass, NgIf} from "@angular/common";
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
       [buttonColor]="'var(--p-gray-300)'"
-      [sliceRange]="[3, 6]"
+      [sliceRange]="[4, 9]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
     </app-indicator-buttons>
@@ -47,7 +49,7 @@ import {NgClass, NgIf} from "@angular/common";
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
           'dynamic-tt-leaf': rowData.vehicle
         }">
-          <td *ngIf="!rowData.vehicle" colspan="13">
+          <td *ngIf="!rowData.vehicle" colspan="15">
             <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
@@ -59,6 +61,8 @@ import {NgClass, NgIf} from "@angular/common";
           <td rowspan="3">Conducteur</td>
           <td rowspan="3">Distance parcourue</td>
           <td rowspan="3">Durée de conduite moyenne (en HH:MM)</td>
+          <td rowspan="3">Amplitude moyenne (en HH:MM)</td>
+          <td rowspan="3">Temps de moteur tournant estimé total (en HH:MM)</td>
 
           <!-- Grouped Columns -->
           <td colspan="3">Accélération et freinage (/20)</td>
@@ -107,6 +111,8 @@ import {NgClass, NgIf} from "@angular/common";
           </ng-template>
           <td>{{ rowData.vehicle.vehicleStatsQse.distanceSum }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.accelerationAR }}/20</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.accelerationR }}/20</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.accelerationV }}/20</td>
@@ -250,19 +256,24 @@ export class QseReportComponent implements OnInit {
   vehicleStatsQse: any [] = [];
   vehiclesStatsTree: TreeNode[] = [];
   vehiclesStatsTotal: Record<string, any>;
+  filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = [];
 
 
-  keyToPropertyMap: Record<string, keyof VehicleStatsDTO> = {
+  keyToPropertyMap: Record<string, keyof VehicleStatsQseDTO> = {
     // example# totalHasLastTripLong: "hasLastTripLong",
+    longestTrip : "distanceMax"
   };
 
   keyLabels: Record<string, string> = {
     totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
-    totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
+    totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
     totalDistanceSum: "DISTANCE PARCOURUE (en km)",
     selectionScore: "SCORE DE LA SELECTION",
     severityOfUseTurn: "SEVERITE D'USAGE VIRAGE",
-    severityOfAcceleration: "SEVERITE D'USAGE ACCELERATION-FREINAGE"
+    severityOfAcceleration: "SEVERITE D'USAGE ACCELERATION-FREINAGE",
+    averageRangeAvg: "AMPLITUDE MOYENNE",
+    idleDurationTotal:"TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)",
+    longestTrip:"LE TRAJET LE PLUS LONG"
   };
 
 
@@ -325,7 +336,45 @@ export class QseReportComponent implements OnInit {
     })
   };
 
-  filterByKey(key: string) {
-    console.log("Hello");
+
+  filterByKey(key: string): void {
+    const property = this.keyToPropertyMap[key];
+
+    console.log(property);
+    if (property) {
+      const longestTripValue = this.vehiclesStatsTotal?.[key];
+
+      if (typeof longestTripValue !== 'number') {
+        return;
+      }
+
+      //Filter vehicles that match `longestTrip` value for `distanceMax`
+      this.filteredVehiclesStats = this.vehicleStatsQse.map((node: TeamHierarchyNodeStatsQSE) => ({
+        ...node,
+        vehicles: node.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
+          const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
+          return distanceMaxValue === longestTripValue; // Filter vehicles with the same `distanceMax` as `longestTrip`
+        }) || [],
+        children: node.children?.map((childNode: TeamHierarchyNodeStatsQSE) => ({
+          ...childNode,
+          vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
+            const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
+            return distanceMaxValue === longestTripValue; // Same filter logic for children
+          }) || [],
+        }))
+          .filter((childNode) => childNode.vehicles.length > 0) || [],
+      }))
+        .filter((node) => node.children.length > 0 || node.vehicles.length > 0);
+
+      //Update the table or tree structure
+      this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
+        this.filteredVehiclesStats,
+        (vehicle: VehiclesStatsQseDTO) => ({
+          driverName: vehicle.vehicleStatsQse.driverName || '',
+          licensePlate: vehicle.vehicleStatsQse.licensePlate || 'unknown',
+        })
+      );
+    }
   }
+
 }

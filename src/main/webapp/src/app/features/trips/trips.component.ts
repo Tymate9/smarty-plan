@@ -57,14 +57,15 @@ import {NgIf} from "@angular/common";
           id="date-selector"
           [(ngModel)]="calendarDate"
           [showIcon]="true"
-          [readonlyInput]="true"
-          inputId="buttondisplay"
           [showButtonBar]="true"
           [maxDate]="now"
-          [showOnFocus]="true"
           [showOtherMonths]="true"
           [selectOtherMonths]="true"
           />
+
+<!--        inputId="buttondisplay"
+          [showOnFocus]="true"
+                    [readonlyInput]="true"-->
 
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">
@@ -183,6 +184,8 @@ export class TripsComponent implements OnInit {
   protected now = new Date();
   @ViewChild('calendar')
   calendar!: Calendar;
+
+
 
   get calendarDate(): string {
     return this.date;

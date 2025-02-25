@@ -6,7 +6,7 @@ export const dataTableConfig = {
     },
     header: {
       background: "{content.background}",
-      borderColor: "{datatable.border.color}",
+      borderColor: nmColors.darkGray,
       color: "{content.color}",
       borderWidth: "1px 0 1px 0",
       padding: "0.75rem 1rem"
@@ -48,12 +48,12 @@ export const dataTableConfig = {
       }
     },
     bodyCell: {
-      borderColor: "{datatable.border.color}",
+      borderColor: nmColors.darkGray,
       padding: "0.75rem 1rem"
     },
     footerCell: {
       background: "{content.background}",
-      borderColor: "{datatable.border.color}",
+      borderColor: nmColors.darkGray,
       color: "{content.color}",
       padding: "0.75rem 1rem"
     },
@@ -62,7 +62,7 @@ export const dataTableConfig = {
     },
     footer: {
       background: "{content.background}",
-      borderColor: "{datatable.border.color}",
+      borderColor:nmColors.darkGray,
       color: "{content.color}",
       borderWidth: "0 0 1px 0",
       padding: "0.75rem 1rem"
@@ -150,7 +150,7 @@ export const dataTableConfig = {
     colorScheme: {
       light: {
         root: {
-          borderColor: "{surface.300}"
+          borderColor: nmColors.darkGray
         },
         row: {
           stripedBackground: "{surface.50}"

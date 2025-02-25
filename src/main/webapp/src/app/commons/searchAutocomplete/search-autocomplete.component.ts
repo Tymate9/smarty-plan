@@ -111,7 +111,7 @@
       width: 100%;
       max-height: 150px;
       overflow-y: auto;
-      z-index: 100000;
+      z-index: 9999;
       color: black;
 
     }
@@ -227,7 +227,7 @@ export class SearchAutocompleteComponent implements OnChanges{
   onDropdownClick(): void {
     this.isDropdownClicked = true;
   }
-}
 
+}
 
 

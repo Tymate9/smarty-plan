@@ -40,12 +40,7 @@ export class IndicatorButtonsComponent {
   @Output() filterClicked = new EventEmitter<string>();
 
   onFilterByKey(key: string) {
-    // if (['totalHasLastTripLong', 'totalHasLateStartSum', 'totalHasLateStop'].includes(key)) {
-    //   console.log(`Filtering by key: ${key}`);
-    //   // Implement filtering logic or emit an event
-    // }
     if (this.keyToPropertyMap[key]) {
-      console.log(`Filtering by key: ${key}`);
       this.filterClicked.emit(key);
     }
   }

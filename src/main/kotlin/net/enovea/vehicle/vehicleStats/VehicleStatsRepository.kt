@@ -172,6 +172,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         vehicle_id,
                         ARRAY_JOIN(ARRAY_AGG(DISTINCT driver_name), ', ') AS driver_name,
                         license_plate,
+                        ROUND(MAX(longest_trip_distance_daily)/1000) AS longest_trip_distance,
                         SUM(trip_count) AS trip_count,
                         :startDate AS trip_date,      
                         ROUND(SUM(distance_sum)/1000) AS distance_sum,
@@ -180,16 +181,27 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         CONCAT(
                             LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
                             LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS waiting_duration
+                        ) AS waiting_duration,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(AVG(`range`) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((AVG(`range`) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS range_avg,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(SUM(daily_idle_duration) / 3600) AS STRING), 2, '0'), 
+                            ':',
+                            LPAD(CAST(FLOOR((SUM(daily_idle_duration) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS idle_duration
                     FROM (
                         SELECT
                             vehicle_id,
                             driver_name,
                             license_plate,
                             COUNT(*) AS trip_count,
+                            MAX(distance) As longest_trip_distance_daily,
                             SUM(distance) AS distance_sum,
                             SUM(duration) AS duration_sum,
-                            time_to_sec(timediff(max(end_time), min(start_time))) AS `range`
+                            time_to_sec(timediff(max(end_time), min(start_time))) AS `range`,
+                            SUM(idle_duration) As daily_idle_duration
                             
                         FROM trips_vehicle_team_view
                         WHERE DATE(start_time) = DATE(end_time)

@@ -1,4 +1,4 @@
-import {Component, OnInit, OnDestroy, inject} from '@angular/core';
+import {Component, OnInit, OnDestroy, inject, NgModule} from '@angular/core';
 import { Router } from '@angular/router';
 import { FilterService } from './filter.service';
 import Keycloak from 'keycloak-js';
@@ -15,11 +15,14 @@ import {forkJoin, Subscription} from "rxjs";
 import {NotificationService} from "../notification/notification.service";
 import {Button, ButtonDirective} from "primeng/button";
 import {Menubar} from "primeng/menubar";
-import {PrimeTemplate} from "primeng/api";
+import {PrimeTemplate, TreeNode} from "primeng/api";
 import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomplete.component";
 import {AppConfig} from "../../app.config";
 import { AutoCompleteModule } from 'primeng/autocomplete';
-import { NgModel } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { TreeSelectModule } from 'primeng/treeselect';
+
+
 
 @Component({
   // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
@@ -41,16 +44,53 @@ import { NgModel } from '@angular/forms';
             </div>
           </div>
           <div class="filters center">
-            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"
-                           [selectedItems]="agencySelected"></app-team-tree>
-            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions"
-                                     (selectedTagsChange)="updateVehicles($event)"
-                                     [selectedItems]="vehicleSelected"></app-search-autocomplete>
-            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions"
-                                     (selectedTagsChange)="updateDrivers($event)"
-                                     [selectedItems]="driverSelected"></app-search-autocomplete>
+<!--            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"-->
+<!--                           [selectedItems]="agencySelected"></app-team-tree>-->
+<!--            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions"-->
+<!--                                     (selectedTagsChange)="updateVehicles($event)"-->
+<!--                                     [selectedItems]="vehicleSelected"></app-search-autocomplete>-->
+<!--            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions"-->
+<!--                                     (selectedTagsChange)="updateDrivers($event)"-->
+<!--                                     [selectedItems]="driverSelected"></app-search-autocomplete>-->
+            <p-treeSelect
+            [options]="agencyOptions1"
+            [(ngModel)]="agencySelected"
+            [placeholder]="'Filtrer Agence...'"
+            selectionMode="checkbox"
+            [filter]="true"
+            [showClear]="true"
+            (onNodeSelect)="onNodeSelect($event)"
+            (onNodeUnselect)="onNodeUnselect($event)"
+            (ngModelChange)="onSelectionChange($event)">
+          </p-treeSelect>
 
-
+            <p-autoComplete
+              [suggestions]="filteredVehicleOptions"
+              [(ngModel)]="vehicleSelected"
+              (completeMethod)="filterVehicles($event)"
+              [multiple]="true"
+              (ngModelChange)="updateVehicles($event)"
+              [placeholder]="'Filtrer Véhicles..'"
+              [dropdown]="true">
+            </p-autoComplete>
+            <p-autoComplete
+            [suggestions]="filteredDriverOptions"
+            [(ngModel)]="driverSelected"
+            (completeMethod)="filterDrivers($event)"
+            [multiple]="true"
+            (ngModelChange)="updateDrivers($event)"
+            [placeholder]="'Filtrer Conducteurs'"
+            [dropdown]="true">
+            </p-autoComplete>
+<!--            <p-autoComplete-->
+<!--              [(ngModel)]="selectedItems"-->
+<!--              [suggestions]="filteredItems"-->
+<!--              (completeMethod)="filterItems($event)"-->
+<!--              [dropdown]="true"-->
+<!--              [multiple]="true"-->
+<!--              (click)="showDropdown($event, autoComplete)"-->
+<!--              #autoComplete>-->
+<!--            </p-autoComplete>-->
             <p-button type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></p-button>
             <p-button (onClick)="saveFilters()" icon="pi pi-save" ></p-button>
           </div>
@@ -120,6 +160,29 @@ import { NgModel } from '@angular/forms';
       background: transparent;
       border: none;
     }
+    ::ng-deep .p-autocomplete-input-multiple {
+      max-height: 50px !important;
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      max-width: 150px !important;
+      min-width: 100px !important;
+    }
+
+    ::ng-deep .p-treeselect {
+      max-width: 150px !important;  /* Restrict the overall width */
+    }
+
+    ::ng-deep .p-treeselect-label-container {
+      max-height: 50px !important;
+      overflow-y: auto !important;  /* Enable vertical scrolling */
+      overflow-x: auto !important;  /* Prevent horizontal scroll */
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      white-space: nowrap !important;
+      min-width: 100px !important;
+    }
 
   `],
   imports: [
@@ -129,6 +192,8 @@ import { NgModel } from '@angular/forms';
     TeamTreeComponent,
     SearchAutocompleteComponent,
     AutoCompleteModule,
+    FormsModule,
+    TreeSelectModule
   ],
   standalone: true
 })
@@ -149,8 +214,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   userName: string = '';
   userRole: string = '';
-
   agencyOptions: Option[] = [];
+  agencyOptions1: TreeNode[] = [];
   agencyTree: Option[] = [];
   driverOptions: DriverDTO[] = [];
   vehicleOptions: VehicleSummaryDTO[] = [];
@@ -166,26 +231,129 @@ export class NavbarComponent implements OnInit, OnDestroy {
   logoutURL: string = ''; // Propriété pour stocker la logoutURL
   private configSubscription: Subscription; // Abonnement pour la configuration
 
-  updateAgencies(tags: string[]) {
-    const previouslySelectedAgencies = [...this.agencySelected];
-    this.agencySelected = tags;
+  // updateAgencies(tags: string[]) {
+  //   const previouslySelectedAgencies = [...this.agencySelected];
+  //   this.agencySelected = tags;
+  //
+  //
+  //   // Gérer uniquement les suppressions d'agences
+  //   if (this.agencySelected.length < previouslySelectedAgencies.length) {
+  //     const removedAgencies = previouslySelectedAgencies.filter(
+  //       agency => !this.agencySelected.includes(agency)
+  //     );
+  //
+  //     removedAgencies.forEach(agency => {
+  //       this.removeVehiclesAndDriversForAgency(agency);
+  //     });
+  //   }
+  //
+  //   this.emitSelectedTags();
+  //   this.filterVehiclesAndDrivers();
+  // }
 
 
 
-    // Gérer uniquement les suppressions d'agences
-    if (this.agencySelected.length < previouslySelectedAgencies.length) {
-      const removedAgencies = previouslySelectedAgencies.filter(
-        agency => !this.agencySelected.includes(agency)
-      );
 
-      removedAgencies.forEach(agency => {
-        this.removeVehiclesAndDriversForAgency(agency);
-      });
+
+  /////test
+  // updateAgencies(selectedNodes: TreeNode[]) {
+  //   const selectedLabels: string[] = selectedNodes
+  //     .map(node => node.label)
+  //     .filter((label): label is string => label !== undefined); // Ensures only strings
+  //
+  //   const previouslySelectedAgencies = [...this.agencySelected];
+  //   this.agencySelected = selectedLabels;
+  //
+  //   // Handle only removals
+  //   if (this.agencySelected.length < previouslySelectedAgencies.length) {
+  //     const removedAgencies = previouslySelectedAgencies.filter(
+  //       agency => !this.agencySelected.includes(agency)
+  //     );
+  //
+  //     removedAgencies.forEach(agency => {
+  //       this.removeVehiclesAndDriversForAgency(agency);
+  //     });
+  //   }
+  //
+  //   this.emitSelectedTags();
+  //   this.filterVehiclesAndDrivers();
+  // }
+
+  onNodeSelect(event: any) {
+    if (event.node) {
+      const selectedLabel: string | undefined = event.node.label;
+
+      if (selectedLabel) {
+        // Assuming this.agencySelected is an array of selected labels
+        this.agencySelected.push(selectedLabel);
+      }
+
+   //   console.log('Node Selected:', event.node.label);
+
+       this.emitSelectedTags();
+       this.filterVehiclesAndDrivers();
     }
-
-    this.emitSelectedTags();
-    this.filterVehiclesAndDrivers();
   }
+
+  onNodeUnselect(event: any) {
+    if (event.node) {
+      const selectedLabel: string = event.node.label; // Only take the label or other non-circular properties
+      this.agencySelected = this.agencySelected.filter(label => label !== selectedLabel);
+      this.removeVehiclesAndDriversForAgency(selectedLabel)
+
+      this.emitSelectedTags();
+      this.filterVehiclesAndDrivers();
+
+      console.log('Node Unselected:', selectedLabel);
+    }
+  }
+  onSelectionChange(event: any) {
+    if (!event || event.length === 0) {
+      this.agencySelected = [];
+      this.emitSelectedTags();
+      this.filterVehiclesAndDrivers();
+    }
+  }
+
+
+
+
+
+  ////////////////////test
+  // Static list of items
+  // items: string[] = ['Apple', 'Banana', 'Cherry', 'Date', 'Grape', 'Mango', 'Orange', 'Pineapple', 'Strawberry'];
+  //
+  // // Holds selected values
+  // selectedItems: string[] = [];
+  //
+  // // Filtered items for autocomplete
+  // filteredItems: string[] = [];
+  //
+  // // Filters the items based on user input
+  // filterItems(event: any) {
+  //   const query = event.query.toLowerCase();
+  //   this.filteredItems = this.items.filter(item => item.toLowerCase().includes(query));
+  // }
+  //
+  // // Opens the dropdown when clicking inside the input field
+  // showDropdown(event: any, autoComplete: any) {
+  //   autoComplete.show();
+  // }
+  ///////////////
+  // Method to filter driver options based on user input
+  filterDrivers(event: any) {
+    const query = event.query.toLowerCase();
+    this.filteredDriverOptions = this.filteredDriverOptions.filter(driver =>
+      driver.toLowerCase().includes(query)
+    );
+  }
+  filterVehicles(event: any) {
+    const query = event.query.toLowerCase();
+    this.filteredVehicleOptions = this.filteredVehicleOptions.filter(vehicle =>
+      vehicle.toLowerCase().includes(query)
+    );
+  }
+
 
   transformToHierarchy(teams: TeamDTO[]): any[] {
     const teamMap = new Map<number, any>();
@@ -241,15 +409,24 @@ export class NavbarComponent implements OnInit, OnDestroy {
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
     };
+    console.log("heeeeeeeeeeeeere");
+    console.log(newFilters);
 
     if (!this.areFiltersEqual(this.filterService.getCurrentFilters(), newFilters)) {
       this.filterService.updateFilters(newFilters);
     }
   }
 
+  // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
+  //   return JSON.stringify(filters1) === JSON.stringify(filters2);
   private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-    return JSON.stringify(filters1) === JSON.stringify(filters2);
-  }
+    return Object.keys(filters1).every((key) =>
+      filters1[key].length === filters2[key]?.length &&
+      filters1[key].every((value, index) => value === filters2[key][index])
+    );
+
+
+}
 
   async ngOnInit() {
     try {
@@ -301,6 +478,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
         // Traitement des agences
         this.agencyOptions = this.transformToHierarchy(agencies);
+        this.agencyOptions1=this.agencyOptions;
         this.agencyTree = this.agencyOptions;
 
         // Traitement des véhicules
@@ -511,5 +689,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.configSubscription.unsubscribe();
     }
   }
+
+
 }
 

@@ -176,5 +176,14 @@ html, body {
   border-color: var(--p-gray-400) !important;
   color: white !important;
 }
-
-
+.p-button.p-component:focus,
+.p-button.p-component:active {
+  border-color: white !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
+}
+//
+//::ng-deep .p-autocomplete-multiple-container {
+//  max-height: 10px; /* Set a max height */
+//  overflow-y: auto;  /* Add scrolling when content overflows */
+//  flex-wrap: nowrap;  /* Prevent excessive wrapping */
+//}

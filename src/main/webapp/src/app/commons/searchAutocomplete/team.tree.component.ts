@@ -151,7 +151,7 @@ export interface Option {
       max-height: 150px;
       overflow-y: auto;
       color: black;
-      //z-index: 100000;
+      z-index: 9999;
     }
 
     .autocomplete-list li {

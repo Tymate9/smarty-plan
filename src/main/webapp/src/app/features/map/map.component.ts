@@ -32,12 +32,10 @@ import {
       <p-button
         label="Alerting véhicules"
         icon="{{ isCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up' }}"
-        [raised]="true" severity="info"
         (onClick)="toggleDiv()"
-        styleClass="custom-button-red">
+        >
       </p-button>
-      <p-button label="Mettre à jour les positions" [raised]="true" severity="info" (click)="refreshVehiclePositions()"
-                styleClass="custom-button-red"></p-button>
+      <p-button label="Mettre à jour les positions" (click)="refreshVehiclePositions()"></p-button>
     </div>
     <div [ngClass]="{ 'hidden': isCollapsed }" class="collapsible-content">
       <p>{{ noComVehicle }}</p>
@@ -67,13 +65,13 @@ import {
       border: 1px solid #ddd;
       background-color: var(--gray-100);
     }
-
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      font-weight: 600;
-    }
+    //
+    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red {
+    //  background-color: #aa001f !important;
+    //  border-color: #aa001f !important;
+    //  color: white !important;
+    //  font-weight: 600;
+    //}
   `]
 })
 export class MapComponent implements OnInit, OnDestroy {

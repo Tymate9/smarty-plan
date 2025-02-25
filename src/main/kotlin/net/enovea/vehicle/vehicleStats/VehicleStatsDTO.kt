@@ -31,11 +31,15 @@ data class VehicleStatsQseDTO(
     val vehicleId: String?,
     val tripCount: Int,
     val distanceSum: Int?,
+    val distanceMax: Int?,
     val drivingTime: String?,
     val durationPerTripAvg: String?,
     val waitingDuration: String?,
+    val rangeAvg: String,
     var licensePlate: String? = null,
     var driverName: String? = null,
+    val idleDuration: String?,
+
     //TODO A changer les noms des variables suivants
     var accelerationAR: Int? = 18,
     var accelerationR: Int? = 15,

@@ -13,7 +13,6 @@ import java.time.LocalTime
 
 @Entity(name = TeamEntity.ENTITY_NAME )
 @Table(name = TeamEntity.TABLE_NAME)
-
 class TeamEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
@@ -43,16 +42,28 @@ class TeamEntity(
     )
     val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
 
-    // Nouvelles colonnes pour la pause déjeuner
+    // Colonnes persistées sous forme de String (correspondant aux colonnes de la base)
     @Column(name = "lunch_break_start", nullable = true)
-    val lunchBreakStart: LocalTime? = null,
+    private var lunchBreakStartStr: String? = null,
 
     @Column(name = "lunch_break_end", nullable = true)
-    val lunchBreakEnd: LocalTime? = null
-
-
+    private var lunchBreakEndStr: String? = null
 
 ) : Serializable , PanacheEntityBase {
+    // Propriétés transitoires exposées en LocalTime
+    @get:Transient
+        var lunchBreakStart: LocalTime?
+            get() = lunchBreakStartStr?.let { LocalTime.parse(it) }
+            set(value) {
+                lunchBreakStartStr = value?.toString()
+            }
+
+    @get:Transient
+        var lunchBreakEnd: LocalTime?
+            get() = lunchBreakEndStr?.let { LocalTime.parse(it) }
+            set(value) {
+                lunchBreakEndStr = value?.toString()
+            }
 
         companion object : PanacheCompanionBase<TeamEntity, Int> {
         const val ENTITY_NAME = "TeamEntity"
@@ -86,5 +97,4 @@ class TeamEntity(
             }
 
    }
-
 }

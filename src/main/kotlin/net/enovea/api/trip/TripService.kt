@@ -8,9 +8,7 @@ import net.enovea.domain.vehicle.DeviceVehicleInstallEntity
 import net.enovea.domain.vehicle.VehicleEntity
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
-import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.Point
-import org.locationtech.jts.io.WKTReader
 import org.locationtech.jts.io.WKTWriter
 import java.time.*
 import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
@@ -224,11 +222,6 @@ class TripService(
             emptyList()
         }
 
-        // Ajuster les timestamps (ajout d'une heure pour compenser un éventuel décalage)
-        val adjustedDatapoints = datapoints.map { dp ->
-            dp.copy(/*timestamp = dp.timestamp.plusHours(1)*/)
-        }
-
         val pStart = originalTrip.startTime.toLocalTime()
         val pEnd = originalTrip.endTime.toLocalTime()
 
@@ -237,11 +230,11 @@ class TripService(
             // Cas 1 : p inclut lunchBreakStart et lunchBreakEnd
             pStart <= lunchBreakStart && pEnd >= lunchBreakEnd -> {
                 // Segment avant la pause : tous les datapoints dont l'heure est <= lunchBreakStart
-                val segmentBeforeDatapoints = adjustedDatapoints.filter { dp ->
+                val segmentBeforeDatapoints = datapoints.filter { dp ->
                     dp.timestamp.toLocalTime() <= lunchBreakStart
                 }.sortedBy { it.timestamp }
                 // Segment après la pause : tous les datapoints dont l'heure est >= lunchBreakEnd
-                val segmentAfterDatapoints = adjustedDatapoints.filter { dp ->
+                val segmentAfterDatapoints = datapoints.filter { dp ->
                     dp.timestamp.toLocalTime() >= lunchBreakEnd
                 }.sortedBy { it.timestamp }
 
@@ -297,7 +290,7 @@ class TripService(
             // Cas 2 : p inclut lunchBreakStart seulement (début avant ou à lunchBreakStart, fin avant lunchBreakEnd)
             pStart <= lunchBreakStart && pEnd < lunchBreakEnd -> {
                 // Filtrer les datapoints pour ne conserver que ceux dont l'heure locale est <= lunchBreakStart
-                val segmentDatapoints = adjustedDatapoints.filter { dp ->
+                val segmentDatapoints = datapoints.filter { dp ->
                     dp.timestamp.toLocalTime() <= lunchBreakStart
                 }.sortedBy { it.timestamp }
 
@@ -335,7 +328,7 @@ class TripService(
             // Cas 3 : p inclut lunchBreakEnd seulement (début après lunchBreakStart et fin après ou à lunchBreakEnd)
             pStart > lunchBreakStart && pEnd >= lunchBreakEnd -> {
                 // Filtrer les datapoints pour ne conserver que ceux dont l'heure locale est < lunchBreakEnd
-                val segmentDatapoints = adjustedDatapoints.filter { dp ->
+                val segmentDatapoints = datapoints.filter { dp ->
                     dp.timestamp.toLocalTime() < lunchBreakEnd
                 }.sortedBy { it.timestamp }
 

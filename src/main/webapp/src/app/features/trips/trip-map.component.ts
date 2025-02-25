@@ -155,11 +155,11 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                       <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
 
                       Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong><br/>
-                      <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakStartEvent)">
-                        La pause déjeuner à débuter pendant cette évènement
-                      </div>
-                      <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakEndEvent)">
-                        La pause déjeuner s'est terminer pendant cette évènement
+                      <!-- Affichage des subTripEvent descriptions -->
+                      <div *ngIf="event.subTripEvents?.length">
+                        <div *ngFor="let subEvent of event.subTripEvents">
+                          {{ subEvent.description }}
+                        </div>
                       </div>
                     </div>
 
@@ -201,11 +201,11 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                         minute: '2-digit'
                       })
                     }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
-                    <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakStartEvent)">
-                      La pause déjeuner à débuter pendant cette évènement
-                    </div>
-                    <div *ngIf="event.subTripEvents?.some(itemHasLunchBreakEndEvent)">
-                      La pause déjeuner s'est terminer pendant cette évènement
+                    <!-- Affichage des subTripEvent descriptions -->
+                    <div *ngIf="event.subTripEvents?.length">
+                      <div *ngFor="let subEvent of event.subTripEvents">
+                        {{ subEvent.description }}
+                      </div>
                     </div>
                   </div>
                 </ng-template>

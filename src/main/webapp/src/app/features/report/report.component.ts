@@ -26,7 +26,7 @@ import {TableModule} from "primeng/table";
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
       [buttonColor]="'var(--p-red-100)'"
-      [sliceRange]="[0, 5]"
+      [sliceRange]="[0, 6]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
     </app-indicator-buttons>
@@ -35,7 +35,7 @@ import {TableModule} from "primeng/table";
       [statsMap]="vehiclesStatsTotal"
       [keyLabels]="keyLabels"
       [buttonColor]="'var(--p-gray-300)'"
-      [sliceRange]="[5, 10]"
+      [sliceRange]="[6, 12]"
       [keyToPropertyMap]="keyToPropertyMap"
       (filterClicked)="filterByKey($event)">
     </app-indicator-buttons>
@@ -373,6 +373,7 @@ export class ReportComponent implements OnInit {
 
   dateFrom: Date = new Date();
   dateTo: Date = new Date();
+  vehiclesType:string='';
   protected now = new Date();
   vehiclesStatsTree: TreeNode[] = [];
   vehicleStats: any[] = [];
@@ -415,7 +416,7 @@ export class ReportComponent implements OnInit {
     totalHasLateStop: "ARRETS TARDIFS",
     totalTripCount: "TRAJETS EFFECTUES (en nb)",
     totalVehicles: "NOMBRE TOTAL DE VEHICULES",
-    totalWaitingTime: "TEMPS D\'ATTENTE TOTAL (en hh:mm)",
+    totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
   };
 
 
@@ -440,7 +441,7 @@ export class ReportComponent implements OnInit {
         String(this.dateTo.getDate()).padStart(2, '0');
 
 
-      this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers ).subscribe({
+      this.vehicleService.getVehiclesStats(startDate, endDate ,this.filters.agencies, this.filters.vehicles, this.filters.drivers , this.vehiclesType).subscribe({
         next: (data) => {
           const { teamHierarchyNodes, stats } = data;
 
@@ -486,7 +487,7 @@ export class ReportComponent implements OnInit {
         String(this.dateTo.getDate()).padStart(2, '0');
 
 
-      this.vehicleService.getVehicleDailyStats(startDate, endDate ,vehicleId ).subscribe({
+      this.vehicleService.getVehicleDailyStats(startDate, endDate ,vehicleId ,this.vehiclesType).subscribe({
         next: (data) => {
           this.vehicleDailyStats = data;
           this.displayDailyStats = true;
@@ -544,9 +545,10 @@ export class ReportComponent implements OnInit {
     this.displayDailyStats = false;
   }
 
-  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date }) {
+  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date ; vehiclesType:string }) {
     this.dateFrom=event.dateFrom;
     this.dateTo=event.dateTo;
+    this.vehiclesType=event.vehiclesType;
     this.fetchVehicleStats();
   }
 

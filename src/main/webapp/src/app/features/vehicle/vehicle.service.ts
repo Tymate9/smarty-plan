@@ -104,14 +104,16 @@ export class VehicleService {
     endDate: string,
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
-    driversIds: string[]=[]
+    driversIds: string[]=[],
+    vehiclesType:string
   ): Observable<{ teamHierarchyNodes: TeamHierarchyNodeStats[]; stats: Record<string, any> }> {
     const params = {
       startDate: startDate,
       endDate: endDate,
       teamLabels: teamLabels.length ? teamLabels : [],
       vehicleIds: vehicleIds.length ? vehicleIds : [],
-      driversIds: driversIds.length ? driversIds :[]
+      driversIds: driversIds.length ? driversIds :[],
+      vehiclesType:vehiclesType
     };
     return this.http.get<{ teamHierarchyNodes: TeamHierarchyNodeStats[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats`, { params });
   }
@@ -120,12 +122,14 @@ export class VehicleService {
   getVehicleDailyStats(
     startDate: string,
     endDate: string,
-   vehicleId: string,
+    vehicleId: string,
+    vehiclesType:string
   ): Observable<VehicleStatsDTO[]> {
     const params = {
       startDate: startDate,
       endDate: endDate,
-      vehicleId:vehicleId
+      vehicleId:vehicleId,
+      vehiclesType:vehiclesType
     };
     return this.http.get<VehicleStatsDTO[]>(`${this.baseUrl}/vehicleStats/daily`, { params });
   }
@@ -136,14 +140,16 @@ export class VehicleService {
     endDate: string,
     teamLabels: string[]=[],
     vehicleIds: string[]=[],
-    driversIds: string[]=[]
+    driversIds: string[]=[],
+    vehiclesType:string
   ) :Observable<{ teamHierarchyNodes: TeamHierarchyNodeStatsQSE[]; stats: Record<string, any> }>  {
     const params = {
       startDate: startDate,
       endDate: endDate,
       teamLabels: teamLabels.length ? teamLabels : [],
       vehicleIds: vehicleIds.length ? vehicleIds : [],
-      driversIds: driversIds.length ? driversIds :[]
+      driversIds: driversIds.length ? driversIds :[],
+      vehiclesType: vehiclesType
     };
     return this.http.get<{ teamHierarchyNodes: TeamHierarchyNodeStatsQSE[]; stats: Record<string, any> }>(`${this.baseUrl}/vehicleStats/report-qse`, { params });
   }

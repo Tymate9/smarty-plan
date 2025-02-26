@@ -1,7 +1,7 @@
 import {nmColors} from "../constants/colors";
 export const selectButtonConfig ={
   root: {
-    borderRadius: '{form.field.border.radius}'
+    borderRadius: '5px'
   },
   colorScheme: {
     light: {

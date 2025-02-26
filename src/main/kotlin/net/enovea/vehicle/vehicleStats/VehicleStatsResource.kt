@@ -19,9 +19,10 @@ class VehicleStatsResource (
         @QueryParam("endDate") endDate: String,
         @QueryParam("teamLabels") teamLabels: List<String>?,
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
-        @QueryParam("driversIds") driversIds: List<String>?
+        @QueryParam("driversIds") driversIds: List<String>?,
+        @QueryParam("vehiclesType") vehiclesType: String,
     ): Response {
-        val result = vehicleService.getVehiclesStatsOverPeriod(startDate, endDate ,teamLabels,vehicleIds, driversIds)
+        val result = vehicleService.getVehiclesStatsOverPeriod(startDate, endDate ,teamLabels,vehicleIds, driversIds , vehiclesType)
         return if (result != null) {
             val (teamHierarchyNodes, statsMap) = result
             Response.ok(
@@ -45,32 +46,24 @@ class VehicleStatsResource (
         @QueryParam("startDate") startDate: String,
         @QueryParam("endDate") endDate: String,
         @QueryParam("vehicleId") vehicleId: String,
+        @QueryParam("vehiclesType") vehiclesType: String,
     ): List<VehicleStatsDTO> {
-        return vehicleService.getVehicleStatsDaily(startDate,endDate,vehicleId)
+        return vehicleService.getVehicleStatsDaily(startDate,endDate,vehicleId,vehiclesType)
     }
 
     @GET
     @Path("/report-qse")
     @Produces(MediaType.APPLICATION_JSON)
 
-//    fun getVehicleStatsQse(
-//        @QueryParam("startDate") startDate: String,
-//        @QueryParam("endDate") endDate: String,
-//        @QueryParam("teamLabels") teamLabels: List<String>?,
-//        @QueryParam("vehicleIds") vehicleIds: List<String>?,
-//        @QueryParam("driversIds") driversIds: List<String>?
-//    ): List<TeamHierarchyNode> {
-//        return vehicleService.getVehiclesStatsQSEReport(startDate, endDate ,teamLabels,vehicleIds, driversIds)
-//    }
-
     fun getVehicleStatsQse(
         @QueryParam("startDate") startDate: String,
         @QueryParam("endDate") endDate: String,
         @QueryParam("teamLabels") teamLabels: List<String>?,
         @QueryParam("vehicleIds") vehicleIds: List<String>?,
-        @QueryParam("driversIds") driversIds: List<String>?
+        @QueryParam("driversIds") driversIds: List<String>?,
+        @QueryParam("vehiclesType") vehiclesType: String
     ): Response {
-        val result = vehicleService.getVehiclesStatsQSEReport(startDate, endDate ,teamLabels,vehicleIds, driversIds)
+        val result = vehicleService.getVehiclesStatsQSEReport(startDate, endDate ,teamLabels,vehicleIds, driversIds, vehiclesType)
         return if (result != null) {
             val (teamHierarchyNodes, statsMap) = result
             Response.ok(

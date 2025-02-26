@@ -39,6 +39,7 @@ import {InputText} from "primeng/inputtext";
           [(ngModel)]="inputType"
           optionLabel="label"
           optionValue="value"
+          [allowEmpty]="false"
         ></p-selectButton>
       </div>
 

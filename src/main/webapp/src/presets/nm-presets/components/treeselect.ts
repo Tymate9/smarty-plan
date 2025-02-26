@@ -44,7 +44,7 @@ export const treeSelectConfig ={
   },
   overlay: {
     background: "{overlay.select.background}",
-    borderColor: "{overlay.select.border.color}",
+    borderColor: nmColors.borderGray,
     borderRadius: "{overlay.select.border.radius}",
     color: "{overlay.select.color}",
     shadow: "{overlay.select.shadow}",

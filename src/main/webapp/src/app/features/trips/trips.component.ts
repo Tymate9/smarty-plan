@@ -41,17 +41,6 @@ import {NgIf} from "@angular/common";
                   title="Télécharger un CSV des trajets de la journée de ce véhicule"
                   icon="pi pi-download">
         </p-button>
-<!--        <p-calendar #calendar-->
-<!--                    id="date-selector"-->
-<!--                    [(ngModel)]="calendarDate"-->
-<!--                    [showIcon]="true"-->
-<!--                    [readonlyInput]="true"-->
-<!--                    [showButtonBar]="true"-->
-<!--                    [maxDate]="now"-->
-<!--                    dateFormat="yymmdd"-->
-<!--                    [showOtherMonths]="true"-->
-<!--                    [selectOtherMonths]="true"-->
-<!--        ></p-calendar>-->
         <p-datepicker
           #calendar
           id="date-selector"
@@ -59,8 +48,10 @@ import {NgIf} from "@angular/common";
           [showIcon]="true"
           [showButtonBar]="true"
           [maxDate]="now"
+          [readonlyInput]="true"
           [showOtherMonths]="true"
           [selectOtherMonths]="true"
+          dateFormat="yymmdd"
           />
 
 <!--        inputId="buttondisplay"

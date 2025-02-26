@@ -53,12 +53,13 @@ import { TreeSelectModule } from 'primeng/treeselect';
 <!--                                     (selectedTagsChange)="updateDrivers($event)"-->
 <!--                                     [selectedItems]="driverSelected"></app-search-autocomplete>-->
             <p-treeSelect
-            [options]="agencyOptions1"
+            [options]="agencyOptionsTree"
             [(ngModel)]="agencySelected"
             [placeholder]="'Filtrer Agence...'"
             selectionMode="checkbox"
             [filter]="true"
             [showClear]="true"
+            appendTo="body"
             (onNodeSelect)="onNodeSelect($event)"
             (onNodeUnselect)="onNodeUnselect($event)"
             (ngModelChange)="onSelectionChange($event)">
@@ -71,7 +72,8 @@ import { TreeSelectModule } from 'primeng/treeselect';
               [multiple]="true"
               (ngModelChange)="updateVehicles($event)"
               [placeholder]="'Filtrer Véhicles..'"
-              [dropdown]="true">
+              [dropdown]="true"
+              appendTo="body">
             </p-autoComplete>
             <p-autoComplete
             [suggestions]="filteredDriverOptions"
@@ -80,7 +82,8 @@ import { TreeSelectModule } from 'primeng/treeselect';
             [multiple]="true"
             (ngModelChange)="updateDrivers($event)"
             [placeholder]="'Filtrer Conducteurs'"
-            [dropdown]="true">
+            [dropdown]="true"
+            appendTo="body">
             </p-autoComplete>
 <!--            <p-autoComplete-->
 <!--              [(ngModel)]="selectedItems"-->
@@ -215,7 +218,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   userName: string = '';
   userRole: string = '';
   agencyOptions: Option[] = [];
-  agencyOptions1: TreeNode[] = [];
+  agencyOptionsTree: TreeNode[] = [];
   agencyTree: Option[] = [];
   driverOptions: DriverDTO[] = [];
   vehicleOptions: VehicleSummaryDTO[] = [];
@@ -478,7 +481,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
         // Traitement des agences
         this.agencyOptions = this.transformToHierarchy(agencies);
-        this.agencyOptions1=this.agencyOptions;
+        this.agencyOptionsTree=this.agencyOptions;
         this.agencyTree = this.agencyOptions;
 
         // Traitement des véhicules

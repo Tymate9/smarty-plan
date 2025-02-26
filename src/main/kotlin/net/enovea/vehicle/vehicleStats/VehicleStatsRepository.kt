@@ -10,7 +10,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         endDate: String,
         teamLabels: List<String>? = null,
         vehicleIds: List<String>? = null,
-        driversIds: List<String>? = null
+        driversIds: List<String>? = null,
+        dorisView: String
     ): List<VehicleStatsDTO> {
         return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
             handle.createQuery(
@@ -50,7 +51,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             hour(MAX(end_time)) > 18 AS has_late_stop,
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long
                     
-                        FROM trips_vehicle_team_view
+                        FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
@@ -94,6 +95,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
             )
                 .bind("startDate", startDate)
                 .bind("endDate", endDate)
+                .define("dorisView", dorisView)
                 .apply {
                     if (!teamLabels.isNullOrEmpty()) {
                         bindList("teamLabels", teamLabels)
@@ -111,7 +113,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
     }
 
     fun findVehicleDailyStats(
-        startDate: String, endDate: String, vehicleId: String
+        startDate: String, endDate: String, vehicleId: String , dorisView: String
     ): List<VehicleStatsDTO> {
         return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
             handle.createQuery(
@@ -138,7 +140,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                                 LPAD(CAST(FLOOR(((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) % 3600) / 60) AS STRING), 2, '0')
                             ) AS waiting_duration
                     
-                        FROM trips_vehicle_team_view
+                        FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
@@ -151,6 +153,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 .bind("startDate", startDate)
                 .bind("endDate", endDate)
                 .bind("vehicleId", vehicleId)
+                .define("dorisView", dorisView)
                 .mapTo(VehicleStatsDTO::class.java)
                 .list()
         }
@@ -163,7 +166,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         endDate: String,
         teamLabels: List<String>? = null,
         vehicleIds: List<String>? = null,
-        driversIds: List<String>? = null
+        driversIds: List<String>? = null,
+        dorisView: String
     ): List<VehicleStatsQseDTO> {
         return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseDTO>, Exception> { handle ->
             handle.createQuery(
@@ -203,7 +207,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             time_to_sec(timediff(max(end_time), min(start_time))) AS `range`,
                             SUM(idle_duration) As daily_idle_duration
                             
-                        FROM trips_vehicle_team_view
+                        FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
@@ -247,6 +251,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
             )
                 .bind("startDate", startDate)
                 .bind("endDate", endDate)
+                .define("dorisView", dorisView)
                 .apply {
                     if (!teamLabels.isNullOrEmpty()) {
                         bindList("teamLabels", teamLabels)

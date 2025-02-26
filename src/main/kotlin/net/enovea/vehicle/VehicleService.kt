@@ -32,9 +32,14 @@ open class VehicleService(
 
 
     //function returns trips statistics displayed on the page ('suivi d'activité')
-    fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
+    fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>? , vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
 
-        val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds )
+        //choose the doris view depending on the vehiclesType (all, tracked or untracked)
+        println(vehiclesType)
+        val dorisView = getDorisView(vehiclesType)
+        println(dorisView)
+
+        val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds ,dorisView )
 
         val totalVehiclesStatsMap = calculateTotalVehiclesStats(vehiclesStats)
         val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
@@ -110,14 +115,16 @@ open class VehicleService(
 
 
     //function to get the daily statistics of a vehicle over a period
-    fun getVehicleStatsDaily(startDate: String, endDate: String , vehicleId: String): List<VehicleStatsDTO>{
-        return  vehicleStatsRepository.findVehicleDailyStats(startDate,endDate,vehicleId)
+    fun getVehicleStatsDaily(startDate: String, endDate: String , vehicleId: String, vehiclesType: String): List<VehicleStatsDTO>{
+        val dorisView = getDorisView(vehiclesType)
+        return  vehicleStatsRepository.findVehicleDailyStats(startDate,endDate,vehicleId,dorisView)
     }
 
     //function returns vehicles statistics displayed on the page ('QSE  reports')
-    fun getVehiclesStatsQSEReport(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
+    fun getVehiclesStatsQSEReport(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?, vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
 
-        val vehiclesStatsQse = vehicleStatsRepository.findVehicleStatsQSEOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds )
+        val dorisView = getDorisView(vehiclesType)
+        val vehiclesStatsQse = vehicleStatsRepository.findVehicleStatsQSEOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds , dorisView )
 
         val totalVehiclesStatsQSEMap = calculateTotalVehiclesStatsQSE(vehiclesStatsQse)
         val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
@@ -535,6 +542,15 @@ fun <T> buildTeamHierarchyForest(vehicles: List<T>, extractTeamHierarchy: (T) ->
     val topLevelNodes = allNodes.subtract(childNodes)
 
     return topLevelNodes.toList()
+}
+
+private fun getDorisView(vehiclesType: String="tracked"): String {
+    return when (vehiclesType) {
+        "tracked" -> "trips_tracked_view"
+        "untracked" -> "trips_untracked_view"
+        "allVehicles" -> "trips_vehicle_team_view"
+        else -> "trips_vehicle_team_view"
+    }
 }
 
 fun Instant?.until(duration: Temporal): Duration {

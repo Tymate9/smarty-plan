@@ -3,6 +3,7 @@ import {Calendar} from "primeng/calendar";
 import {FormsModule} from "@angular/forms";
 import {Button} from "primeng/button";
 import {DatePicker} from "primeng/datepicker";
+import {SelectButton} from "primeng/selectbutton";
 
 @Component({
   selector: 'app-date-range',
@@ -40,6 +41,14 @@ import {DatePicker} from "primeng/datepicker";
         (click)="fetchVehicleStats()"
         >
       </p-button>
+      <p-selectButton
+        [options]="inputVehicleOptions"
+        [(ngModel)]="vehiclesTypeList"
+        optionLabel="label"
+        optionValue="value"
+        [multiple]="true"
+        (ngModelChange)="onVehicleSelectionChange()"
+      ></p-selectButton>
     </div>
 
   `,
@@ -48,7 +57,8 @@ import {DatePicker} from "primeng/datepicker";
     Calendar,
     FormsModule,
     Button,
-    DatePicker
+    DatePicker,
+    SelectButton
   ],
   styles: [`
     .calendar-container {
@@ -60,53 +70,6 @@ import {DatePicker} from "primeng/datepicker";
       margin-top: 20px;
     }
 
-    //::ng-deep .p-calendar .p-inputtext:focus,
-    //::ng-deep .p-calendar .p-inputtext:hover,
-    //::ng-deep .p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
-    //  outline: 0 none;
-    //  outline-offset: 0;
-    //  color: black;
-    //  border-color: white !important;
-    //  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    //}
-    //
-    //::ng-deep .p-calendar .p-datepicker {
-    //  z-index: 1000;
-    //  top: 50px;
-    //  border-color: white !important;
-    //  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    //}
-    //
-    //::ng-deep .p-calendar .p-button {
-    //  background-color: #aa001f;
-    //  border-color: #aa001f !important;
-    //  color: white !important;
-    //  font-weight: 600;
-    //}
-    //
-    ///*style de bouton personnalisé*/
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button {
-    //  background-color: #aa001f !important;
-    //  border-color: #aa001f !important;
-    //  color: white !important;
-    //  font-weight: 600;
-    //}
-    //
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:focus,
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:active {
-    //  border-color: white !important;
-    //  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    //}
-    //
-    //::ng-deep .p-button.p-button-text {
-    //  color: white !important;
-    //}
-    //
-    //::ng-deep .p-button:active, ::ng-deep .p-button:focus {
-    //  border-color: white !important;
-    //  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    //}
-
   `]
 })
 export class DateRangePickerComponent {
@@ -114,12 +77,38 @@ export class DateRangePickerComponent {
   dateTo: Date= new Date();
   now: Date = new Date();
 
-  @Output() fetchStats = new EventEmitter<{ dateFrom: Date; dateTo: Date }>();
+  inputVehicleOptions = [
+    { label: 'Géo', value: 'tracked' },
+    { label:'Non Géo', value:'untracked'}
+  ];
+  vehiclesTypeList: string[] = ['tracked'];
+  vehiclesType:string='';
+
+  @Output() fetchStats = new EventEmitter<{ dateFrom: Date; dateTo: Date ; vehiclesType: string }>();
 
   constructor(private cdr: ChangeDetectorRef) {}
 
   fetchVehicleStats() {
-    this.fetchStats.emit({ dateFrom: this.dateFrom, dateTo: this.dateTo });
+    this.fetchStats.emit({ dateFrom: this.dateFrom, dateTo: this.dateTo ,vehiclesType:this.vehiclesType });
+  }
+  // onVehicleSelectionChange() {
+  //   if (this.vehiclesTypeList.includes('tracked') && this.vehiclesTypeList.includes('untracked')) {
+  //     this.vehiclesType = 'allVehicles';
+  //     console.log('heeeeellllllooo')
+  //   }
+  //   else {
+  //     // Handle the case where either only "tracked" or "untracked" is selected
+  //     this.vehiclesType = this.vehiclesTypeList.join(', ');
+  //     console.log('heee')
+  //   }
+  // }
+  onVehicleSelectionChange() {
+    if (this.vehiclesTypeList.includes('tracked') && this.vehiclesTypeList.includes('untracked')) {
+      this.vehiclesType = 'allVehicles'
+    } else {
+      this.vehiclesType = this.vehiclesTypeList.join(',');
+
+    }
   }
 
 }

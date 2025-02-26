@@ -29,7 +29,7 @@ export const autocompleteConfig ={
     },
     overlay: {
       background: "{overlay.select.background}",
-      borderColor: "{overlay.select.border.color}",
+      borderColor: nmColors.borderGray,
       borderRadius: "5px",
       color: "{overlay.select.color}",
       shadow: "{overlay.select.shadow}"

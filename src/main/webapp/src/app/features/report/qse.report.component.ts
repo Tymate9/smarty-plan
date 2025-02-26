@@ -253,6 +253,7 @@ export class QseReportComponent implements OnInit {
   };
   dateFrom: Date = new Date();
   dateTo: Date = new Date();
+  vehiclesType:string='';
   vehicleStatsQse: any [] = [];
   vehiclesStatsTree: TreeNode[] = [];
   vehiclesStatsTotal: Record<string, any>;
@@ -285,9 +286,10 @@ export class QseReportComponent implements OnInit {
     this.filtersSubscription?.unsubscribe()
   }
 
-  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date }) {
+  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date ;vehiclesType:string}) {
     this.dateFrom = event.dateFrom;
     this.dateTo = event.dateTo;
+    this.vehiclesType=event.vehiclesType;
     this.fetchVehicleStatsQse();
   }
 
@@ -303,7 +305,7 @@ export class QseReportComponent implements OnInit {
         String(this.dateTo.getDate()).padStart(2, '0');
 
 
-      this.vehicleService.getVehiclesStatsQse(startDate, endDate, this.filters.agencies, this.filters.vehicles, this.filters.drivers).subscribe({
+      this.vehicleService.getVehiclesStatsQse(startDate, endDate, this.filters.agencies, this.filters.vehicles, this.filters.drivers, this.vehiclesType).subscribe({
         next: (data) => {
           const {teamHierarchyNodes, stats} = data;
 

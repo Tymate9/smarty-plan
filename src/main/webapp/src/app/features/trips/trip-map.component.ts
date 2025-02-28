@@ -9,7 +9,7 @@ import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
 import {GeoUtils} from "../../commons/geo/geo-utils";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf, NgStyle} from "@angular/common";
 import {PrimeTemplate} from "primeng/api";
 import {Timeline} from "primeng/timeline";
 import {TabPanel, TabView} from "primeng/tabview";
@@ -24,6 +24,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
   template: `
     <div id="trip-container">
       <div id="map" [style.visibility]="isMapVisible ? 'visible' : 'hidden'"></div>
+      <div id="map-non-geoloc" >Trajets non géolocalisés pour ce véhicule et ce jour.</div>
       <div id="side-panel" class="h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
         <p-toggleButton
           [(ngModel)]="showSidePanel"
@@ -261,7 +262,8 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
     FormsModule,
     TabView,
     NgForOf,
-    PoiNavigationButtonComponent
+    PoiNavigationButtonComponent,
+    NgStyle
   ],
   styles: [`
     #trip-container {
@@ -280,6 +282,21 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
           margin-top: 70px;
         }
       }
+    }
+
+    #map-non-geoloc {
+      height: 80vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      text-align: center;
+      padding: 25rem 0;
+      font-size: x-large;
+      color: grey;
+      z-index: 2;
     }
 
     #side-panel {
@@ -421,6 +438,14 @@ export class TripMapComponent {
     protected tripsService: TripsService,
     protected tilesService: TilesService
   ) {
+    console.log("=== trip-map.component.ts constructor")
+  }
+
+  @Input() set tripGeoloc(geoloc : boolean | null){
+    if(geoloc == null){
+      return;
+    }
+    this.isMapVisible = geoloc && !(location.pathname.indexOf('-non-geoloc')>0)
   }
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {
@@ -428,13 +453,7 @@ export class TripMapComponent {
       return;
     }
 
-    this.isMapVisible = !(location.pathname.indexOf('-non-geoloc')>0)
-
-
-
     this._tripData = tripEventsDTO;
-    console.log("=== trip-map.component ::: tripData : "+tripEventsDTO)
-    // init map
     if (this.map) {
       this.featureGroup.clearLayers();
     } else {
@@ -448,17 +467,6 @@ export class TripMapComponent {
 
       // add gmaps redirect control
       GeoUtils.getGMapsRedirectControl(this.map).addTo(this.map);
-
-      // this.tilesService.getTileUrls().subscribe(tileUrls => {
-      //   const baseLayers = {
-      //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
-      //     "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
-      //   };
-      //
-      //   L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
-      //
-      //   baseLayers["Carte routière"].addTo(this.map!);
-      // })
     }
 
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {

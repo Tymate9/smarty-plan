@@ -25,7 +25,11 @@ import {NgIf} from "@angular/common";
           <ng-template pTemplate="header">
             <i class="pi pi-map"></i>
           </ng-template>
-          <app-trip-map [tripData]="tripData"></app-trip-map>
+          <app-trip-map
+            [tripGeoloc]="tripGeoloc"
+            [tripData]="tripData"
+          >
+          </app-trip-map>
         </p-tabPanel>
         <p-tabPanel>
           <ng-template pTemplate="header">
@@ -191,6 +195,7 @@ export class TripsComponent implements OnInit {
 
   protected tripData: TripEventsDTO | null = null;
   protected loading: boolean = true;
+  public tripGeoloc:boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -213,6 +218,7 @@ export class TripsComponent implements OnInit {
       next: (data) => {
         this.loading = false;
         this.tripData = data.tripEvents;
+        this.tripGeoloc = data.geolocDay;
       },
       error: (error) => {
         console.error('Erreur lors de la récupération du trajet:', error);
@@ -241,7 +247,8 @@ export class TripsComponent implements OnInit {
         tripEvent.eventType === dto.TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-',
         tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance || 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
       ].join(',')) || [];
-    downloadAsCsv([headers.join(','), ...dataRows], `trips_${this.vehicleId}_${this.date}.csv`);
+    downloadAsCsv([headers.join(','), ...dataRows], `trips_` +
+      (this.tripGeoloc ? `` : `non_geoloc_`) + `${this.vehicleId}_${this.date}.csv`);
   }
 
   protected hideCalendar(event: Event) {

@@ -727,7 +727,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString('fr-FR'); // Format: dd/mm/yyyy
     const formattedTime = currentDate.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}); // Format: hh:mm
-    const fileName = `Positions Au ${formattedDate} ${formattedTime}.csv`.replace(/[:]/g, '-'); // Replace colons in time for compatibility
+    const fileName = `Positions ` + (this.non_geoloc ? ` non géolocalisées` : ``) + ` Au ${formattedDate} ${formattedTime}.csv`.replace(/[:]/g, '-'); // Replace colons in time for compatibility
 
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');

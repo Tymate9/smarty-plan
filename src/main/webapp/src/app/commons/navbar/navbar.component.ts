@@ -20,6 +20,9 @@ import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomp
 import {AppConfig} from "../../app.config";
 
 @Component({
+  // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
+  // return this.http.get<{ geolocDay: boolean; tripEvents: TripEventsDTO | null }>
+  // (`${this.apiUrl}/vehicle`+(nonGeolocalized?'-non-geoloc':'')+
   selector: 'app-navbar',
   template: `
     <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}"
@@ -28,7 +31,7 @@ import {AppConfig} from "../../app.config";
         <div class="nav-container">
           <div class="nav-buttons">
             <div class="nav-buttons-row">
-              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" styleClass="custom-button-bg" title="Tableau de bord"></p-button>
+              <p-button (onClick)="navigateTo('dashboard'+(this.router.url.includes('non-geoloc')?'-non-geoloc':''))" icon="pi pi-th-large" styleClass="custom-button-bg" title="Tableau de bord"></p-button>
               <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg" title="Cartographie"></p-button>
               <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg" title="POIs"></p-button>
               <p-button (onClick)="navigateTo('report')" icon="pi pi-chart-bar" styleClass="custom-button-bg" title="Suivi d'activité"></p-button>
@@ -127,7 +130,7 @@ import {AppConfig} from "../../app.config";
 export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private filterService: FilterService,
-    private router: Router,
+    protected router: Router,
     private vehicleService: VehicleService,
     private teamService: TeamService,
     private driverService: DriverService,
@@ -270,7 +273,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
           }
         } else if (tokenParsed["realm_access"]) {
           console.log('realm_access:', tokenParsed["realm_access"]);
-          roles = tokenParsed["realm_access"].roles;
+          if(tokenParsed["realm_access"]!.roles)
+            roles = tokenParsed["realm_access"]!.roles;
         } else {
           console.warn('Aucune propriété resourceAccess ou realm_access dans le token');
         }

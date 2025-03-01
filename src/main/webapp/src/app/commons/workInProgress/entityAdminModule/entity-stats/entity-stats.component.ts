@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {dto} from "../../../../../habarta/dto";
 import {DrawerComponent} from "../../drawer/drawer.component";
@@ -131,6 +131,16 @@ export class EntityStatsComponent implements OnInit {
   stats: Array<{ label: string; value: number; description: string }> = [];
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['entityService'] && !changes['entityService'].firstChange) {
+      this.loadData();
+    }
+  }
+
+  loadData():void{
     if (!this.entityService) {
       this.errorMsg = 'Aucun service fourni pour charger les stats.';
       return;
@@ -140,7 +150,7 @@ export class EntityStatsComponent implements OnInit {
 
     // 1) Récupérer les stats (contient date + tableau d’objets stats)
     this.entityService.getStats().subscribe({
-      next: (dto: dto.TeamEntityStatsDTO) => {
+      next: (dto: dto.StatsDTO) => {
         this.loading = false;
         if (dto) {
           // On suppose que dto = { date: '2023-12-31T23:59:59', stats: [...] }

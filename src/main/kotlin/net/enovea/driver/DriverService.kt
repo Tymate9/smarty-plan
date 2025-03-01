@@ -1,9 +1,18 @@
 package net.enovea.driver
 
 import jakarta.transaction.Transactional
-import net.enovea.team.TeamEntity
 import java.sql.Timestamp
 import java.time.LocalTime
+import jakarta.ws.rs.BadRequestException
+import jakarta.ws.rs.NotFoundException
+import net.enovea.api.workInProgress.DriverForm
+import net.enovea.api.workInProgress.DriverNodeDTO
+import net.enovea.api.workInProgress.Stat
+import net.enovea.api.workInProgress.StatsDTO
+import net.enovea.team.TeamEntity
+import net.enovea.team.teamCategory.TeamCategoryEntity
+import net.enovea.vehicle.VehicleEntity
+import java.time.LocalDateTime
 
 class DriverService(
     private val driverMapper: DriverMapper,
@@ -110,6 +119,93 @@ class DriverService(
 
         return Pair(earliestStart, latestEnd)
     }
+
+
+    fun getDriverById(id: Int): DriverDTO {
+        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
+        return driverMapper.toDto(entity)
+    }
+
+    @Transactional
+    fun createDriver(form: DriverForm): DriverDTO {
+        val entity = DriverEntity()
+        entity.firstName = form.firstName
+        entity.lastName = form.lastName
+        entity.phoneNumber = form.phoneNumber
+        entity.persist()
+        return driverMapper.toDto(entity)
+    }
+
+    @Transactional
+    fun updateDriver(id: Int, form: DriverForm): DriverDTO {
+        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
+        // Mettre à jour les champs
+        entity.firstName = form.firstName
+        entity.lastName = form.lastName
+        entity.phoneNumber = form.phoneNumber
+        entity.persist()
+        return driverMapper.toDto(entity)
+    }
+
+    @Transactional
+    fun deleteDriver(id: Int) {
+        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
+        entity.delete()
+    }
+
+    @Transactional
+    fun getAuthorizedNodeData() : List<DriverNodeDTO> {
+        return DriverEntity.buildVehicleNodeTreeAtDate()
+    }
+
+    @Transactional
+    fun getDriverStats(): StatsDTO {
+        // 1. Récupérer la catégorie "Agency" pour identifier les agences.
+        val agencyCategoryEntity = TeamCategoryEntity.find("label", "Agence").firstResult()
+            ?: throw BadRequestException("Aucune catégorie 'Agency' trouvée")
+        val agencyCategoryId = agencyCategoryEntity.id
+
+        // 2. Nombre total de conducteurs
+        val totalDrivers: Long = DriverEntity.count()
+
+        // 3. Nombre total d'agences dont la catégorie correspond
+        val totalAgencies: Long? = agencyCategoryId?.let { TeamEntity.count("category.id", it) }
+
+        // 4. Calcul de la moyenne des conducteurs par agence (avec protection contre la division par zéro)
+        val avgDriversPerAgency: Double = if (totalAgencies!! > 0L) {
+            totalDrivers.toDouble() / totalAgencies.toDouble()
+        } else {
+            0.0
+        }
+
+        // 5. Nombre de véhicules non affectés
+        // On considère qu'un véhicule est non affecté s'il n'existe aucune VehicleTeamEntity active (endDate IS NULL) pour ce véhicule.
+        val nonAffectedVehicles: Long = VehicleEntity.find(
+            "id NOT IN (SELECT vt.vehicle.id FROM VehicleTeamEntity vt WHERE vt.endDate IS NULL)"
+        ).count()
+
+        // 6. Construire la liste des statistiques
+        val statsList = listOf(
+            Stat(
+                label = "Conducteurs moyen par agence",
+                value = avgDriversPerAgency,
+                description = "Nombre total de conducteurs divisé par le nombre d'agences"
+            ),
+            Stat(
+                label = "Véhicules non affectés",
+                value = nonAffectedVehicles.toDouble(),
+                description = "Nombre de véhicules sans affectation active"
+            )
+        )
+
+        // 7. Retourner un StatsDTO avec la date actuelle et la liste des stats
+        return StatsDTO(
+            date = LocalDateTime.now(),
+            stats = statsList
+        )
+    }
+
+
 
 
 }

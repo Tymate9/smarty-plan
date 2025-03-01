@@ -745,7 +745,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
     // Transformer en TreeNode
     this.teamHierarchy = filteredHierarchy;
-    console.log(this.teamHierarchy);
+    //console.log(this.teamHierarchy);
     //this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
     this.vehiclesTree = VehicleService.transformToTreeNodes(
       filteredHierarchy,
@@ -827,7 +827,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             vehicle.lastPositionAddress,
             vehicle.lastPositionAddressInfo?.label,
             vehicle.distance,
-            vehicle.driver?.team.label,
+            vehicle.driver?.team?.label,
             parentLabel || teamLabel,
             teamLabel,
           ].join(','));

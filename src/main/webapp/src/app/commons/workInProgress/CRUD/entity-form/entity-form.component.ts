@@ -126,9 +126,6 @@ export class EntityFormComponent implements OnInit, OnChanges {
   protected readonly FormInputUtils = FormInputUtils;
 
   ngOnInit(): void {
-    console.log("Je suis dans ce foutu init dans lequelle je ne suis pas sensé être")
-    console.log(this.formDescription)
-    console.log(this.entity)
     this.initializeReactiveForm();
   }
 
@@ -198,7 +195,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
       }
 
       if (this.entityService) {
-        console.log("finalEntity \n", finalEntity)
+        //console.log("finalEntity \n", finalEntity)
         const request = this.mode === 'update'
           ? this.entityService.update(finalEntity)
           : this.entityService.create(finalEntity);
@@ -211,7 +208,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
         this.receiveResponse.emit(finalEntity);
       }
     } else {
-      console.log('Formulaire invalide :', this.entityForm.errors);
+      //console.log('Formulaire invalide :', this.entityForm.errors);
     }
   }
 

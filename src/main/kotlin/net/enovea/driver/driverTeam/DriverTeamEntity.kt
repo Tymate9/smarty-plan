@@ -3,6 +3,7 @@ package net.enovea.driver.driverTeam
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import net.enovea.api.workInProgress.IAffectationEntity
 import net.enovea.driver.DriverEntity
 import net.enovea.team.TeamEntity
 import java.io.Serializable
@@ -16,7 +17,7 @@ data class DriverTeamEntity (
     val id: DriverTeamId = DriverTeamId(),
 
     @Column(name = "end_date", nullable = true)
-    val endDate : Timestamp? = Timestamp(System.currentTimeMillis()),
+    override val endDate : Timestamp? = Timestamp(System.currentTimeMillis()),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("driverId")
@@ -26,14 +27,17 @@ data class DriverTeamEntity (
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("teamId")
     @JoinColumn(name = "team_id",  referencedColumnName = "id", nullable = false)
-    val team: TeamEntity? = null,
+    override val team: TeamEntity? = null,
 
-    ): PanacheEntityBase {
-
+    ): PanacheEntityBase, IAffectationEntity<DriverEntity> {
     companion object : PanacheCompanionBase<DriverTeamEntity, DriverTeamId> {
         const val ENTITY_NAME = "DriverTeamEntity"
         const val TABLE_NAME = "driver_team"
     }
+
+    override fun getStartDate(): Timestamp = id.startDate
+
+    override fun getSubject(): DriverEntity? = driver
 }
 @Embeddable
 data class DriverTeamId(

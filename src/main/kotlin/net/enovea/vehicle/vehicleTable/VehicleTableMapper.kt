@@ -50,7 +50,7 @@ abstract class VehicleTableMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "licenseplate", source = "licenseplate")
     @Mapping(source = "category",target = "category")
-    @Mapping(target = "driver", expression = "java(vehicleMapper.mapMostRecentDriver(vehicleEntity.retrieveVehicleDrivers()))")
+    @Mapping(target = "driver", expression = "java(vehicleMapper.mapDriverAtDate(vehicleEntity, null))")
     @Mapping(source ="vehicleDevices",target = "device")
     @Mapping(source ="vehicleTeams",target = "team")
     @Mapping(source =".",target = "lastPositionDate", qualifiedByName = ["lastPositionDateMapperInTable"])

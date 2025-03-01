@@ -66,8 +66,6 @@ const urlCondition = createInterceptorCondition({
 
 fetch('/api/config')
   .then((response) => {
-    console.log("Preset de base :", Nora)
-    console.log("Preset NmPreset chargé :", NmPreset);
     if (!response.ok) {
       throw new Error(`Erreur lors du chargement de la config : ${response.statusText}`);
     }

@@ -4,6 +4,8 @@ import {TeamService} from "../../../../features/vehicle/team.service";
 import {EntityButtonTabContentComponent} from "../entity-button-tab-content/entity-button-tab-content.component";
 import {EntityAdminTabViewComponent} from "../entity-admin-tab-view/entity-admin-tab-view.component";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
+import {DriverService} from "../../../../features/vehicle/driver.service";
+import {VehicleService} from "../../../../features/vehicle/vehicle.service";
 
 /**
  * On peut étendre cette interface selon les besoins
@@ -83,21 +85,23 @@ export class EntityAdminComponent implements OnInit {
       count: 0,
       icon: 'pi pi-id-card',
       iconType: 'css',
-      service: this.teamService
+      service: this.driverService
     },
     {
       name: 'Vehicles',
       count: 0,
       icon: 'pi pi-car',
       iconType: 'css',
-      service: this.teamService
+      service: this.vehicleService
     }
   ];
 
   public selectedEntity: EntityDefinition;
 
   constructor(
-    private teamService: TeamService
+    private teamService: TeamService,
+    private driverService: DriverService,
+    private vehicleService: VehicleService
   ) {}
 
   ngOnInit(): void {

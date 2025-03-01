@@ -3,6 +3,7 @@ package net.enovea.vehicle.vehicleTeam
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
+import net.enovea.api.workInProgress.IAffectationEntity
 import net.enovea.team.TeamEntity
 import net.enovea.team.TeamMapper
 import net.enovea.team.TeamDTO
@@ -19,7 +20,7 @@ data class VehicleTeamEntity (
 
     //TODO(Vérifier si la nullité est ok ici)
     @Column(name = "end_date", nullable = true)
-    val endDate: Timestamp?= null,
+    override val endDate: Timestamp?= null,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("vehicleId")
@@ -29,9 +30,13 @@ data class VehicleTeamEntity (
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("teamId")
     @JoinColumn(name = "team_id",  referencedColumnName = "id", nullable = false)
-    val team: TeamEntity? = null,
+    override  val team: TeamEntity? = null,
 
-    ): PanacheEntityBase {
+    ): PanacheEntityBase, IAffectationEntity<VehicleEntity> {
+
+    override fun getStartDate(): Timestamp = id.startDate
+
+    override fun getSubject(): VehicleEntity? = vehicle
 
     companion object : PanacheCompanionBase<VehicleTeamEntity, VehicleTeamId> {
         const val ENTITY_NAME = "VehicleTeamEntity"

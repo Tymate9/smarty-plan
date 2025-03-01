@@ -11,7 +11,7 @@ import { PrimeTemplate } from 'primeng/api';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { NgIf } from '@angular/common';
 import { Drawer } from 'primeng/drawer';
-import {DrawerService} from "../service/component/drawer.service";
+import { DrawerService } from "../service/component/drawer.service";
 
 /**
  * Interface pour la configuration d'un composant enfant dynamique
@@ -49,35 +49,40 @@ export interface DrawerOptions {
       [(visible)]="visible"
       [modal]="true"
       [autoZIndex]="true"
-      [dismissible]="true"
+      [dismissible]="false"
+      [closeOnEscape]="false"
       [position]="position"
-      [closable]="showCloseIcon"
+      [closable]="false"
       (onShow)="onSidebarShow()"
+      (onHide)="onTryClose()"
       [styleClass]="styleClass"
     >
-      <!-- Header -->
-      <ng-template pTemplate="header">
-        <div class="drawer-header">
-          <span>{{ headerTitle }}</span>
-        </div>
-      </ng-template>
+    <!-- Header -->
+    <ng-template pTemplate="header">
+      <div class="drawer-header">
+        <span>{{ headerTitle }}</span>
+      </div>
+    </ng-template>
 
-      <!-- Contenu : Affiche le composant dynamique si configuré, sinon affiche le contenu statique via ng-content -->
-      <ng-template pTemplate="content">
-        <ng-container *ngIf="child; else staticContent">
-          <ng-container #childHost></ng-container>
-        </ng-container>
-        <ng-template #staticContent>
-          <ng-content></ng-content>
-        </ng-template>
+    <!-- Contenu : Affiche le composant dynamique si configuré, sinon affiche le contenu statique via ng-content -->
+    <ng-template pTemplate="content">
+      <ng-container *ngIf="child; else staticContent">
+        <ng-container #childHost></ng-container>
+      </ng-container>
+      <ng-template #staticContent>
+        <ng-content></ng-content>
       </ng-template>
+    </ng-template>
 
-      <!-- Footer -->
-      <ng-template pTemplate="footer">
-        <div class="drawer-footer">
-          <!-- Ajouter ici le contenu du footer si nécessaire -->
-        </div>
-      </ng-template>
+    <!-- Footer -->
+    <ng-template pTemplate="footer">
+      <div class="drawer-footer">
+        <!-- Bouton Close que l'on contrôle nous-même -->
+        <button type="button" (click)="onTryClose()">
+          Fermer le Drawer
+        </button>
+      </div>
+    </ng-template>
     </p-drawer>
   `,
   styles: [`
@@ -98,14 +103,18 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
   @Input() headerTitle: string = 'Titre du Drawer';
   @Input() styleClass: string = '';
   @Input() position: 'left' | 'right' | 'top' | 'bottom' = 'right';
-  @Input() showCloseIcon: boolean = true;
+
+  /**
+   * Si tu souhaites toujours afficher un bouton close en haut,
+   * tu pourrais le faire via un Input, ex. showCloseIcon: boolean.
+   */
   @Input() closeConfirmationMessage?: string;
 
   /**
    * Configuration pour insérer un composant enfant dynamique
-   * (Si non défini, le contenu statique passé via ng-content sera affiché)
    */
   @Input() child?: DynamicChildConfig;
+
   @ViewChild('childHost', { read: ViewContainerRef }) childHost!: ViewContainerRef;
   private childComponentRef: any;
 
@@ -116,50 +125,29 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
     return this._visible;
   }
 
-  public set visible(value:boolean){
-    if (!value){
-      // Si aucune confirmation n'est requise, on ferme directement
-      if (!this.closeConfirmationMessage) {
-        this._visible = false;
-        this.childComponentRef.destroy()
-      } else {
-        // Sinon, on affiche le dialogue de confirmation
-        this.confirmationService.confirm({
-          message: this.closeConfirmationMessage,
-          header: 'Confirmation',
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            this._visible = false;
-            this.childComponentRef.destroy()
-          },
-          reject: () => {
-            // En cas de refus, on garde le Drawer ouvert
-            this._visible = true;
-            this.childComponentRef.destroy()
-          }
-        });
-      }
-    }
-    else{
-      this._visible = value
-    }
+  public set visible(value: boolean){
+    this._visible = value;
   }
 
   constructor(
     private confirmationService: ConfirmationService,
     private drawerService: DrawerService
   ) {
-    // Enregistrement de cette instance dans le service pour y accéder globa_lement
+    // Enregistrement de cette instance dans le service pour y accéder globalement
     this.drawerService.registerDrawer(this);
   }
 
   ngAfterViewInit(): void {}
 
   ngOnDestroy(): void {
+    // Optionnel: détruire le composant enfant si on souhaite libérer des ressources
+    if (this.childComponentRef) {
+      this.childComponentRef.destroy();
+    }
   }
 
   /**
-   * Méthode appelée lors de l'affichage du Drawer.
+   * Méthode appelée lors de l'affichage effectif du Drawer.
    * Crée dynamiquement le composant enfant si nécessaire.
    */
   onSidebarShow(): void {
@@ -171,7 +159,7 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
   /** Crée dynamiquement l'enfant dans le conteneur */
   private createChildComponent(): void {
     if (this.child && this.childHost) {
-      this.childHost.clear(); // Nettoyage de tout composant précédent
+      this.childHost.clear(); // Nettoyage
       this.childComponentRef = this.childHost.createComponent(this.child.compClass);
       if (this.child.inputs) {
         Object.assign(this.childComponentRef.instance, this.child.inputs);
@@ -181,10 +169,14 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
 
   /**
    * Ouvre le Drawer en appliquant, le cas échéant, les options de configuration fournies.
-   * @param options Options pour personnaliser l'affichage du Drawer
    */
   public openDrawer(options?: DrawerOptions): void {
-    this.childComponentRef.destroy()
+    // Si un composant enfant existe déjà, on le détruit
+    if (this.childComponentRef) {
+      this.childComponentRef.destroy();
+      this.childComponentRef = null;
+    }
+
     if (options) {
       if (options.headerTitle !== undefined) {
         this.headerTitle = options.headerTitle;
@@ -195,9 +187,6 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
       if (options.position !== undefined) {
         this.position = options.position;
       }
-      if (options.showCloseIcon !== undefined) {
-        this.showCloseIcon = options.showCloseIcon;
-      }
       if (options.closeConfirmationMessage !== undefined) {
         this.closeConfirmationMessage = options.closeConfirmationMessage;
       }
@@ -205,13 +194,46 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
         this.child = options.child;
       }
     }
+
+    // Rendre le Drawer visible => déclenche (onShow)
     this.visible = true;
   }
 
   /**
-   * Ferme le Drawer.
+   * Ferme le Drawer (sans confirmation).
+   * Si tu veux un "forçage" de fermeture, tu peux l'appeler directement.
    */
   public closeDrawer(): void {
     this.visible = false;
+    // On détruit éventuellement le composant enfant
+    if (this.childComponentRef) {
+      this.childComponentRef.destroy();
+      this.childComponentRef = null;
+    }
+  }
+
+  /**
+   * Méthode appelée par le bouton "Fermer le Drawer" : on demande confirmation.
+   */
+  public onTryClose(): void {
+    // Si aucune confirmation n’est requise, on ferme directement.
+    if (!this.closeConfirmationMessage) {
+      this.closeDrawer();
+      return;
+    }
+
+    // Sinon, on affiche le dialogue de confirmation.
+    this.confirmationService.confirm({
+      message: this.closeConfirmationMessage,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // L’utilisateur confirme => on ferme vraiment le Drawer
+        this.closeDrawer();
+      },
+      reject: () => {
+        // L’utilisateur annule => le Drawer reste ouvert, on ne détruit pas le composant
+      }
+    });
   }
 }

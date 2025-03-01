@@ -3,6 +3,8 @@ package net.enovea.vehicle
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import net.dilivia.lang.StopWatch
+import net.enovea.api.workInProgress.Stat
+import net.enovea.api.workInProgress.StatsDTO
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.driver.driverUntrackedPeriod.DriverUntrackedPeriodEntity
 import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
@@ -481,6 +483,81 @@ open class VehicleService(
         return Pair(earliestStart, latestEnd)
     }
 
+
+    fun getCount(): Long {
+        return VehicleEntity.count()
+    }
+
+    /**
+     * Retourne un objet StatsDTO contenant :
+     * - Le nombre de véhicules non liés à un driver actif.
+     * - Le nombre de véhicules non liés à un device actif.
+     * - Le nombre de véhicules non liés à une équipe active.
+     *
+     * Pour chaque statistique, nous utilisons une requête JPQL avec une sous-requête NOT EXISTS.
+     */
+    fun getStats(): StatsDTO {
+        // Récupération de l'EntityManager via Panache
+        val em = VehicleEntity.getEntityManager()
+
+        // Véhicules sans driver actif : aucun enregistrement dans VehicleDriverEntity avec endDate IS NULL
+        val countNoDriver: Long = em
+            .createQuery(
+                "select count(v) from VehicleEntity v " +
+                        "where not exists (" +
+                        "   select 1 from VehicleDriverEntity vd " +
+                        "   where vd.vehicle = v and vd.endDate is null" +
+                        ")",
+                Long::class.java
+            ).singleResult
+
+        // Véhicules sans device actif : aucun enregistrement dans DeviceVehicleInstallEntity avec endDate IS NULL
+        val countNoDevice: Long = em
+            .createQuery(
+                "select count(v) from VehicleEntity v " +
+                        "where not exists (" +
+                        "   select 1 from DeviceVehicleInstallEntity dvi " +
+                        "   where dvi.vehicle = v and dvi.endDate is null" +
+                        ")",
+                Long::class.java
+            ).singleResult
+
+        // Véhicules sans équipe active : aucun enregistrement dans VehicleTeamEntity avec endDate IS NULL
+        val countNoTeam: Long = em
+            .createQuery(
+                "select count(v) from VehicleEntity v " +
+                        "where not exists (" +
+                        "   select 1 from VehicleTeamEntity vt " +
+                        "   where vt.vehicle = v and vt.endDate is null" +
+                        ")",
+                Long::class.java
+            ).singleResult
+
+        // Construction de la liste de Stat
+        val stats = listOf(
+            Stat(
+                label = "Véhicules non liés à un driver",
+                value = countNoDriver.toDouble(),
+                description = "Nombre de véhicules sans driver actif"
+            ),
+            Stat(
+                label = "Véhicules non liés à un device",
+                value = countNoDevice.toDouble(),
+                description = "Nombre de véhicules sans device actif"
+            ),
+            Stat(
+                label = "Véhicules non liés à une équipe",
+                value = countNoTeam.toDouble(),
+                description = "Nombre de véhicules sans équipe active"
+            )
+        )
+
+        // Création et retour de l'objet StatsDTO avec la date du moment
+        return StatsDTO(
+            date = LocalDateTime.now(),
+            stats = stats
+        )
+    }
 }
 
 //To convert time from HH:MM format to second

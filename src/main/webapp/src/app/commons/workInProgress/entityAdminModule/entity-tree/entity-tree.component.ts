@@ -6,14 +6,14 @@ import {
   AfterViewInit,
   ViewChildren,
   QueryList,
-  Type
+  Type, SimpleChanges
 } from '@angular/core';
 import { IEntityService } from '../../CRUD/ientity-service';
 import { TreeNode } from 'primeng/api';
 import { CellHostDirective } from '../../cell-host.directive';
 import { forkJoin } from 'rxjs';
 import {TreeTableModule} from "primeng/treetable";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 
 export interface EntityColumn {
   field?: string;
@@ -31,19 +31,6 @@ interface DynamicComponentConfig {
 @Component({
   selector: 'app-entity-tree',
   template: `
-    <div class="entity-tree-container">
-      <h4>Liste pour {{ entityName }}</h4>
-
-      <div *ngIf="loading">Chargement en cours...</div>
-      <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
-
-      <ul *ngIf="!loading && !errorMsg">
-        <li *ngFor="let item of items">
-          {{ item.label }}
-        </li>
-      </ul>
-    </div>
-
     <p-treeTable
       [value]="treeData"
       (onNodeExpand)="handleExpand($event)"
@@ -57,7 +44,7 @@ interface DynamicComponentConfig {
 
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
         <!-- Nœud parent -->
-        <tr class="dynamic-tt-parent-node">
+        <tr [ngClass]="{'dynamic-tt-parent-node': !rowNode.parent, 'simple-tt-parent-node': rowNode.parent}">
           <td
             *ngIf="rowNode.node.children?.length > 0"
             [attr.colspan]="columns.length"
@@ -79,8 +66,8 @@ interface DynamicComponentConfig {
                 Trier
               </button>
               <span *ngIf="col.field && col.comparator">
-                ({{ col.ascending ? 'Asc' : 'Desc' }})
-              </span>
+            ({{ col.ascending ? 'Asc' : 'Desc' }})
+          </span>
             </td>
           </tr>
         </ng-container>
@@ -104,14 +91,14 @@ interface DynamicComponentConfig {
           </ng-container>
         </tr>
       </ng-template>
-    </p-treeTable>
-  `,
+    </p-treeTable>  `,
   standalone: true,
   imports: [
     TreeTableModule,
     CellHostDirective,
     NgIf,
-    NgForOf
+    NgForOf,
+    NgClass
   ],
   styles: [`
 
@@ -128,7 +115,7 @@ interface DynamicComponentConfig {
     }
   `]
 })
-export class EntityTreeComponent implements OnInit/*, AfterViewInit*/ {
+export class EntityTreeComponent implements OnInit{
   @Input() entityName: string = '';
   @Input() entityService?: IEntityService<any, any>;
 
@@ -147,6 +134,17 @@ export class EntityTreeComponent implements OnInit/*, AfterViewInit*/ {
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['entityService'] && !changes['entityService'].firstChange) {
+      // Recharger les données si le service change
+      this.loadData();
+    }
+  }
+
+  private loadData(): void {
     if (!this.entityService) {
       this.errorMsg = 'Aucun service fourni.';
       return;
@@ -162,7 +160,6 @@ export class EntityTreeComponent implements OnInit/*, AfterViewInit*/ {
         this.items = results.data;
         this.columns = results.cols;
         this.treeData = this.sortTreeNodes(results.nodes);
-
         this.loading = false;
         this.cdr.markForCheck();
 
@@ -176,6 +173,8 @@ export class EntityTreeComponent implements OnInit/*, AfterViewInit*/ {
         this.loading = false;
       }
     });
+    console.log("Voici mon treeData du sang de tes morts !! ")
+    console.log(this.treeData)
   }
 
   handleExpand(event: any): void {

@@ -2,18 +2,50 @@ package net.enovea.team
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
+import net.enovea.api.workInProgress.GenericNodeDTO
 import net.enovea.api.workInProgress.Stat
-import net.enovea.api.workInProgress.TeamEntityStatsDTO
+import net.enovea.api.workInProgress.StatsDTO
 import net.enovea.api.workInProgress.TeamForm
+import net.enovea.driver.DriverDTO
+import net.enovea.driver.DriverMapper
+import net.enovea.driver.driverTeam.DriverTeamEntity
 import net.enovea.team.teamCategory.TeamCategoryDTO
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import java.time.LocalDateTime
 import net.enovea.team.teamCategory.TeamCategoryMapper
+import net.enovea.vehicle.VehicleDTO
+import net.enovea.vehicle.VehicleMapper
+import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
+import org.hibernate.Hibernate
+import java.sql.Timestamp
 
 class TeamService (
     private val teamMapper: TeamMapper,
     private val teamCategoryMapper: TeamCategoryMapper
 ) {
+    @Transactional
+    fun getDriverTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<DriverDTO>> {
+        return TeamEntity.buildNodeTreeAtDate(
+            affectationClass = DriverTeamEntity::class,
+            dateParam = dateParam,
+            subjectToDto = { driver, ts ->
+                DriverMapper.INSTANCE.toDto(driver, ts)
+            }
+        )
+    }
+
+    @Transactional
+    fun getVehicleTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<VehicleDTO>> {
+        return TeamEntity.buildNodeTreeAtDate(
+            affectationClass = VehicleTeamEntity::class,
+            dateParam = dateParam,
+            subjectToDto = { vehicle, ts ->
+                Hibernate.initialize(vehicle)
+                VehicleMapper.INSTANCE.toVehicleDTO(vehicle)
+            }
+        )
+    }
+
     fun getAllTeamCategory() : List<TeamCategoryDTO>{
         val teamCategories = TeamCategoryEntity.listAll()
         return teamCategories.map {teamCategoryMapper.toDto(it)}
@@ -90,7 +122,7 @@ class TeamService (
      * Calcule les 4 stats demandées
      */
     @Transactional
-    fun getTeamStats(): TeamEntityStatsDTO {
+    fun getTeamStats(): StatsDTO {
         val agencyCategoryId = TeamCategoryEntity.find("label", "Agence").firstResult()?.id ?: throw BadRequestException("Agency not found")
 
         // A) Nombre total d’agences (via categoryId = 1)
@@ -128,7 +160,7 @@ class TeamService (
             )
         )
 
-        return TeamEntityStatsDTO(
+        return StatsDTO(
             date = LocalDateTime.now(),
             stats = statList
         )

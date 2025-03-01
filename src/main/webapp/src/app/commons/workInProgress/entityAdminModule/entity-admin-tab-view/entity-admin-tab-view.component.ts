@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {EntityTreeComponent} from "../entity-tree/entity-tree.component";
 import {EntityStatsComponent} from "../entity-stats/entity-stats.component";
@@ -56,6 +56,14 @@ export class EntityAdminTabViewComponent implements OnInit {
   @Input() service?: IEntityService<any, any>;
 
   ngOnInit(): void {
-    // rien de spécial
+    console.log('ngOnInit - service:', this.service);
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['service']) {
+      console.log('ngOnChanges - service changed:', changes['service'].currentValue);
+      console.log(this.service)
+    }
+  }
+
 }

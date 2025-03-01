@@ -10,7 +10,7 @@ export interface IEntityService<D, R> {
   update(entity: R): Observable<D>;
   delete(id: number): Observable<void>;
   getCount(): Observable<number>;
-  getStats(): Observable<dto.TeamEntityStatsDTO>;
+  getStats(): Observable<dto.StatsDTO>;
   getTreeColumns():Observable<EntityColumn[]>;
   getTreeNodes():Observable<TreeNode[]>;
 }

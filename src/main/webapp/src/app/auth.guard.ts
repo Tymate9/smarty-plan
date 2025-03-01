@@ -7,7 +7,7 @@ const isAccessAllowed = async (
   _: RouterStateSnapshot,
   authData: AuthGuardData
 ): Promise<boolean | UrlTree> => {
-  console.log('AuthGuardData:', authData);
+  //console.log('AuthGuardData:', authData);
   const { authenticated, grantedRoles } = authData;
 
   // Vérification optionnelle des rôles requis
@@ -21,21 +21,21 @@ const isAccessAllowed = async (
       return resourceRoles.includes(role) || realmRoles.includes(role);
     });
     if (authenticated && hasRequiredRoles) {
-      console.log('Utilisateur authentifié et possédant les rôles requis');
+      //console.log('Utilisateur authentifié et possédant les rôles requis');
       return true;
     }
-    console.log('Rôles insuffisants ou utilisateur non authentifié');
+    //console.log('Rôles insuffisants ou utilisateur non authentifié');
   } else {
     // Si aucun rôle requis n'est spécifié, vérifier simplement l'authentification
     if (authenticated) {
-      console.log('Utilisateur authentifié');
+      //console.log('Utilisateur authentifié');
       return true;
     }
-    console.log('Utilisateur non authentifié');
+    //console.log('Utilisateur non authentifié');
   }
 
   const router = inject(Router);
-  console.log('Redirection vers /forbidden');
+  //console.log('Redirection vers /forbidden');
   return router.parseUrl('/login');
 };
 

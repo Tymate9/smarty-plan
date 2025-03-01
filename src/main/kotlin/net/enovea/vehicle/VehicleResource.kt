@@ -9,6 +9,7 @@ import net.enovea.spatial.SpatialService
 import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.device.DeviceEntity
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
+import net.enovea.team.TeamService
 import org.jboss.logging.Logger
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -25,6 +26,7 @@ import kotlin.time.DurationUnit
 class VehicleResource(
     private val vehicleService: VehicleService,
     private val deviceDataStateSpatialService: SpatialService,
+    private val teamService: TeamService,
     private val vehicleMapper: VehicleMapper
 ) {
     private val logger = Logger.getLogger(VehicleResource::class.java)
@@ -232,5 +234,30 @@ class VehicleResource(
         val vehicles = installEntities.mapNotNull { it.vehicle }
 
         return vehicles
+    }
+
+    @GET
+    @Path("/authorized-data")
+    fun getAuthorizedData(): Response {
+        val list = teamService.getVehicleTreeAtDate()
+        return Response.ok(list).build()
+    }
+
+    @GET
+    @Path("/count")
+    fun getCount(): Response {
+        // Récupération du nombre total de véhicules via le service
+        val count: Long = vehicleService.getCount()
+        // Retour d'une réponse HTTP 200 OK contenant le nombre
+        return Response.ok(count).build()
+    }
+
+    @GET
+    @Path("/stats")
+    fun getStats(): Response {
+        // Appel du service pour récupérer les statistiques des véhicules
+        val statsDTO = vehicleService.getStats()
+        // Retourne une réponse HTTP 200 OK avec l'objet StatsDTO
+        return Response.ok(statsDTO).build()
     }
 }

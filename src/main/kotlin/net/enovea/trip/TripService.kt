@@ -1,12 +1,12 @@
 package net.enovea.trip
 
+import net.enovea.api.trip.TripRepository
+import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
+import net.enovea.driver.DriverEntity
 import net.enovea.poi.PointOfInterestEntity
 import net.enovea.spatial.SpatialService
-import net.enovea.domain.driver.DriverEntity
-import net.enovea.domain.team.TeamEntity
-import net.enovea.domain.vehicle.DeviceVehicleInstallEntity
+import net.enovea.team.TeamEntity
 import net.enovea.vehicle.VehicleEntity
-import net.enovea.repository.TripRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
@@ -18,7 +18,7 @@ class TripService(
     private val tripRepository: TripRepository,
     private val spatialService: SpatialService,
 
-) {
+    ) {
     private val geometryFactory = GeometryFactory()
 
     fun computeTripEventsDTO(vehicleId: String, date: String, geolocalized: Boolean = true): TripEventsDTO? {

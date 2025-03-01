@@ -219,65 +219,6 @@ data class VehicleEntity(
         ): Pair<String,  MutableMap<String, Any>> {
             val params = mutableMapOf<String, Any>()
             var query = ""
-            println("=== VehicleEntity.getFilteredVehicles(...)")
-            var query =
-                """
-            SELECT v
-            FROM VehicleEntity v
-            JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
-            JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
-            LEFT JOIN t.parentTeam parent_team
-            LEFT JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
-                AND vd.id.startDate <= current_date()
-                AND (vd.endDate IS NULL OR vd.endDate >= current_date())   
-            LEFT JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
-            JOIN FETCH DeviceVehicleInstallEntity dvi ON v.id = dvi.id.vehicleId
-                AND dvi.id.startDate <= current_date()
-                AND (dvi.endDate IS NULL OR dvi.endDate >= current_date())   
-            JOIN FETCH DeviceEntity de ON dvi.id.deviceId = de.id
-            LEFT JOIN FETCH DeviceDataStateEntity ds ON de.id = ds.device_id 
-            LEFT JOIN VehicleUntrackedPeriodEntity vup 
-                ON vup.id.vehicleId = v.id 
-                AND vup.id.startDate <= current_date()
-                AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
-            LEFT JOIN DriverUntrackedPeriodEntity dup 
-                ON dup.id.driverId = d.id 
-                AND dup.id.startDate <= current_date() 
-                AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
-            WHERE 1 = 1
-            AND vt.endDate IS NULL
-            AND vd.endDate IS NULL
-            AND vup.id.startDate IS NULL
-            AND dup.id.startDate IS NULL
-            """
-
-            var (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)
-            val panacheQuery = VehicleEntity.find(BASE_QUERY+GEOLOCALIZED_CONDITION+queryTemp, params)
-
-            return panacheQuery.list()
-        }
-
-        @Transactional
-        fun getFilteredNonGeolocVehicles(
-            teamLabels: List<String>? = null,
-            vehicleIds: List<String>? = null,
-            driverNames: List<String>? = null,
-        ): List<VehicleEntity> {
-            var (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)
-            val panacheQuery = VehicleEntity.find(BASE_QUERY+NON_GEOLOCALIZED_CONDITION+queryTemp, params)
-
-            return panacheQuery.list()
-        }
-
-
-
-        private fun getFiltersRequest(
-            teamLabels: List<String>? = null,
-            vehicleIds: List<String>? = null,
-            driverNames: List<String>? = null,
-        ): Pair<String,  Map<String, Any>> {
-            val params = mutableMapOf<String, Any>()
-            var query = ""
             if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {
 
                 query += "AND (t.label IN :teamLabels OR (parent_team IS NOT NULL AND parent_team.label IN :teamLabels))" +

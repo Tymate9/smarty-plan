@@ -67,7 +67,10 @@ export class TeamFormComponent implements OnInit {
       label: '',
       path: null,
       parentTeam: null,
-      category: { id: 0, label: '' }
+      category: { id: 0, label: '' },
+      //TODO(Fix pour éviter de modifier ces heures !)
+      lunchBreakEnd: null,
+      lunchBreakStart: null
     };
     this.mode = 'create';
     this.buildFormDescription(this.teamEntity);

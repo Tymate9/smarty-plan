@@ -1,6 +1,8 @@
 package net.enovea.api.trip
 
 import net.enovea.DorisJdbiContext
+import net.enovea.trip.DatapointDTO
+import net.enovea.trip.DatapointSimpleRowMapper
 import net.enovea.trip.TripDTO
 import net.enovea.trip.TripDailyStatsDTO
 import net.enovea.vehicle.vehicleStats.VehicleStatsDTO

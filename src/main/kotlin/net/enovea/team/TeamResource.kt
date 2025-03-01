@@ -1,18 +1,12 @@
 package net.enovea.team
 
 import io.quarkus.security.Authenticated
-import jakarta.inject.Inject
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.Validator
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import net.enovea.api.workInProgress.TeamEntityStatsDTO
-import net.enovea.dto.TeamCategoryDTO
-import net.enovea.domain.team.TeamEntity
-import net.enovea.dto.TeamDTO
-import net.enovea.service.TeamService
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import net.enovea.api.workInProgress.TeamForm

@@ -6,11 +6,10 @@ import jakarta.persistence.*
 import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import jakarta.transaction.Transactional
-import net.enovea.api.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
-import net.enovea.domain.driver.DriverEntity
-import net.enovea.domain.vehicle.DeviceVehicleInstallEntity
-import net.enovea.domain.vehicle.VehicleDriverEntity
-import net.enovea.domain.vehicle.VehicleEntity
+import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
+import net.enovea.driver.DriverEntity
+import net.enovea.vehicle.VehicleEntity
+import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point

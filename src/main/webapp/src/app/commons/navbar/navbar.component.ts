@@ -186,7 +186,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const sortByLabel = (a: any, b: any) => a.label.localeCompare(b.label);
     // Mapper toutes les équipes par ID
     teams.forEach(team => {
-      teamMap.set(team.id, { ...team, children: [] });
+      if (team.id != null) {
+        teamMap.set(team.id, {...team, children: []});
+      }
     });
 
     // Lier les enfants à leurs parents
@@ -194,11 +196,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
       if (team.parentTeam?.id) {
         const parent = teamMap.get(team.parentTeam.id);
         if (parent) {
-          parent.children.push(teamMap.get(team.id));
+          if (team.id != null) {
+            parent.children.push(teamMap.get(team.id));
+          }
         }
       } else {
         // Équipe de niveau racine
-        roots.push(teamMap.get(team.id));
+        if (team.id != null) {
+          roots.push(teamMap.get(team.id));
+        }
       }
     });
 

@@ -13,8 +13,11 @@ import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.eve
 import {NotificationService} from "../../commons/notification/notification.service";
 import {TilesService} from "../../services/tiles.service";
 import {Button} from "primeng/button";
-import {NgClass} from "@angular/common";
+import {NgClass, NgIf} from "@angular/common";
 import {TeamService} from "../vehicle/team.service";
+import {
+  ScrollingInfoBannerComponent
+} from "../../commons/app-scrolling-info-banner/app-scrolling-info-banner.component";
 
 
 @Component({
@@ -45,7 +48,9 @@ import {TeamService} from "../vehicle/team.service";
   standalone: true,
   imports: [
     Button,
-    NgClass
+    NgClass,
+    ScrollingInfoBannerComponent,
+    NgIf
   ],
   styles: [`
     #cartography-map {

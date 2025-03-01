@@ -1,8 +1,9 @@
 package net.enovea.device
 
 
-import net.enovea.dto.DeviceDataStateDTO
+import net.enovea.device.deviceData.DeviceDataStateMapper
 import net.enovea.device.deviceData.DeviceDataStateEntity
+import net.enovea.device.deviceData.DeviceDataStateDTO
 import net.enovea.device.deviceData.until
 import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper

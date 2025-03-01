@@ -652,8 +652,8 @@ export class PoiListComponent implements OnInit {
 
         const newPoi: PointOfInterestEntity = {
           id: -1,
-          client_code: "0000",
-          client_label: `${adresse}`,
+          client_code: "",
+          client_label: ``,
           denomination: "",
           category: defaultCategory,
           address: adresse,
@@ -699,8 +699,8 @@ export class PoiListComponent implements OnInit {
 
     const newPoi: PointOfInterestEntity = {
       id: -1,
-      client_code: "0000",
-      client_label: `${address}`,
+      client_code: "",
+      client_label: ``,
       denomination: "",
       category: defaultCategory,
       address: address,

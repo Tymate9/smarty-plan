@@ -573,9 +573,65 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
     });
   }
+  //TODO make it more general (>3 levels)
+  //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
+  transformToTreeNodes(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): TreeNode[] {
+    // Helper function to sort by label alphabetically
+    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
+      a.data.label.localeCompare(b.data.label);
+
+    // Helper function to sort vehicles by driver's lastName and firstName
+    const sortByDriverName = (
+      a: { data: { vehicle: dto.VehicleTableDTO } },
+      b: { data: { vehicle: dto.VehicleTableDTO } }
+    ) => {
+      const driverA = a.data.vehicle?.driver || { lastName: '', firstName: '' };
+      const driverB = b.data.vehicle?.driver || { lastName: '', firstName: '' };
+
+      // First compare by lastName
+      const lastNameComparison = driverA.lastName.localeCompare(driverB.lastName);
+      if (lastNameComparison !== 0) {
+        return lastNameComparison;
+      }
+
+      // If lastName is the same, compare by firstName
+      return driverA.firstName.localeCompare(driverB.firstName);
+    };
+
+    return teamNodes.map((team) => {
+      return {
+        data: {
+          label: team.label,
+          vehicle: null,
+        },
+        expanded: true,
+        children: [
+          ...(team.children || []).map((child: TeamHierarchyNode<dto.VehicleTableDTO>) => ({
+            data: {
+              label: child.label,
+              vehicle: null
+            },
+            expanded: true,
+            children: [
+              ...(child.vehicles || []).map((vehicle: dto.VehicleTableDTO) => ({
+                data: {
+                  label: vehicle.licenseplate,
+                  vehicle: vehicle,
+                },
+                expanded: true,
+                children: []
+              }))
+                .sort(sortByDriverName),
+            ]
+          }))
+            .sort(sortByLabel),
+        ]
+      };
+    }).sort(sortByLabel);
+  }
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
-  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): Record<string, number> {
+  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): { state: string; count: number }[] {
     const counts: Record<string, number> = {};
 
     function traverseTeams(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): void {
@@ -603,6 +659,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0 },
     ];
   }
+
 
   //Cette méthode permet de filtrer les véhicule en fonction du statut sélectionné
   filterByStatus(state: string) {

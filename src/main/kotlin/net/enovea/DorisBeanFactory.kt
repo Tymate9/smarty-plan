@@ -7,10 +7,6 @@ import jakarta.inject.Named
 import net.enovea.trip.TripService
 import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
 import net.enovea.spatial.SpatialService
-import net.enovea.repository.TripRepository
-import net.enovea.api.trip.TripService
-import net.enovea.api.vehicleStats.VehicleStatsRepository
-import net.enovea.common.geo.SpatialService
 import net.enovea.api.trip.TripRepository
 import javax.sql.DataSource
 import io.quarkus.agroal.DataSource as AgroalDataSource

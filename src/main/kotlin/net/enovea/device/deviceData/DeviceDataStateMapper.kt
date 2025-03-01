@@ -1,12 +1,9 @@
 package net.enovea.device.deviceData
 
-import mu.KotlinLogging
-import net.enovea.api.vehicle.VehicleResource
-import net.enovea.domain.driver.DriverEntity
-import net.enovea.domain.team.TeamEntity
-import net.enovea.domain.vehicle.VehicleEntity
-import net.enovea.dto.DeviceDataStateDTO
-import org.jboss.logging.Logger
+import net.enovea.device.DeviceEntity
+import net.enovea.driver.DriverEntity
+import net.enovea.team.TeamEntity
+import net.enovea.vehicle.VehicleEntity
 import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
@@ -98,7 +95,7 @@ interface DeviceDataStateMapper {
      * - on récupère la liste de (start, end) non-null
      * - on prend la plus tôt pour start, la plus tard pour end
      */
-    private fun computeFinalLunchBreakWindow( vehicles: List<VehicleEntity>, drivers: List<DriverEntity>, refDate: Timestamp ): Pair<LocalTime?, LocalTime?> {
+    private fun computeFinalLunchBreakWindow(vehicles: List<VehicleEntity>, drivers: List<DriverEntity>, refDate: Timestamp ): Pair<LocalTime?, LocalTime?> {
         // 1. Récupérer TOUTES les teams actives (driverTeam, vehicleTeam)
         val allTeams = mutableSetOf<TeamEntity>()
         drivers.forEach { driver ->

@@ -10,7 +10,7 @@ import jakarta.validation.Payload
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
-import net.enovea.domain.team.TeamCategoryEntity
+import net.enovea.team.teamCategory.TeamCategoryEntity
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 

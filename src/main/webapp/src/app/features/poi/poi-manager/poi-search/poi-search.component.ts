@@ -21,7 +21,7 @@ import {AutoComplete} from "primeng/autocomplete";
           [(ngModel)]="searchQuery"
           [suggestions]="filteredPois"
           (completeMethod)="searchPois($event)"
-          field="client_label"
+          optionLabel="denomination"
           placeholder="Rechercher un POI"
           (onSelect)="onPoiSelected($event)"
           [minLength]="2"

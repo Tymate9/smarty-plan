@@ -15,6 +15,7 @@ import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {ButtonDirective} from "primeng/button";
 import {InputText} from "primeng/inputtext";
 import {GeoJSON} from "leaflet";
+import {ConfirmationService} from "primeng/api";
 
 @Component({
   selector: 'app-poi-list',
@@ -375,15 +376,17 @@ export class PoiListComponent implements OnInit {
   @Input() poiPanels: PoiPanel[] = [];
   poiCategories: PointOfInterestCategoryEntity[] = [];
 
-  @Output() poiDrawingRequested = new EventEmitter<{ poi: dto.PointOfInterestEntity, shape: 'polygon'|'circle' }>();
+  @Output() poiDrawingRequested = new EventEmitter<{ poi: dto.PointOfInterestEntity, shape: 'polygon' | 'circle' }>();
   @Output() poiMarkerAdded = new EventEmitter<dto.PointOfInterestEntity>();
   @Output() poiMarkerUpdated = new EventEmitter<dto.PointOfInterestEntity>();
   @Output() poiMarkerRemoved = new EventEmitter<number>();
 
   constructor(
     private poiService: PoiService,
-    private geocodingService: GeocodingService
-  ) {}
+    private geocodingService: GeocodingService,
+    private confirmationService: ConfirmationService
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadCategories();
@@ -407,7 +410,7 @@ export class PoiListComponent implements OnInit {
   onCategoryChange(categoryId: number, poiPanel: PoiPanel) {
     const selectedCategory = this.poiCategories.find(cat => cat.id === categoryId);
     if (selectedCategory) {
-      poiPanel.poi.category = { ...selectedCategory };
+      poiPanel.poi.category = {...selectedCategory};
       poiPanel.isModified = true;
     } else {
       console.warn(`Catégorie avec l'ID ${categoryId} non trouvée.`);
@@ -420,11 +423,11 @@ export class PoiListComponent implements OnInit {
   }
 
   startPolygonDrawing(poiPanel: PoiPanel) {
-    this.poiDrawingRequested.emit({ poi: poiPanel.poi, shape: 'polygon' });
+    this.poiDrawingRequested.emit({poi: poiPanel.poi, shape: 'polygon'});
   }
 
   startCircleDrawing(poiPanel: PoiPanel) {
-    this.poiDrawingRequested.emit({ poi: poiPanel.poi, shape: 'circle' });
+    this.poiDrawingRequested.emit({poi: poiPanel.poi, shape: 'circle'});
   }
 
   circleDialogVisible = false;
@@ -480,7 +483,7 @@ export class PoiListComponent implements OnInit {
           if (poiPanel.hasLocationChanged()) {
             const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
             if (confirmUpdate) {
-              const circle = L.circle([latitude, longitude], { radius: 20 });
+              const circle = L.circle([latitude, longitude], {radius: 20});
               const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
               const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
               poi.area = geoJsonPolygon;
@@ -505,7 +508,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -520,7 +523,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -551,7 +554,7 @@ export class PoiListComponent implements OnInit {
           if (poiPanel.hasLocationChanged()) {
             const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
             if (confirmUpdate) {
-              const circle = L.circle([latitude, longitude], { radius: 20 });
+              const circle = L.circle([latitude, longitude], {radius: 20});
               const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
               const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
               poi.area = geoJsonPolygon;
@@ -576,7 +579,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -591,7 +594,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -644,9 +647,13 @@ export class PoiListComponent implements OnInit {
         const latitude = result.latitude;
         const longitude = result.longitude;
         const adresse = result.adresse
-        const defaultCategory = this.poiCategories.length > 0 ? { ...this.poiCategories[0] } : { id: 1, label: 'Default', color: '#000000' } as PointOfInterestCategoryEntity;
+        const defaultCategory = this.poiCategories.length > 0 ? {...this.poiCategories[0]} : {
+          id: 1,
+          label: 'Default',
+          color: '#000000'
+        } as PointOfInterestCategoryEntity;
 
-        const circle = L.circle([latitude, longitude], { radius: 50 });
+        const circle = L.circle([latitude, longitude], {radius: 50});
         const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
         const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
 
@@ -691,9 +698,13 @@ export class PoiListComponent implements OnInit {
   }
 
   private createDraftPoiFromLatLong(address: string, latitude: number, longitude: number) {
-    const defaultCategory = this.poiCategories.length > 0 ? { ...this.poiCategories[0] } : { id: 1, label: 'Default', color: '#000000' } as PointOfInterestCategoryEntity;
+    const defaultCategory = this.poiCategories.length > 0 ? {...this.poiCategories[0]} : {
+      id: 1,
+      label: 'Default',
+      color: '#000000'
+    } as PointOfInterestCategoryEntity;
 
-    const circle = L.circle([latitude, longitude], { radius: 50 });
+    const circle = L.circle([latitude, longitude], {radius: 50});
     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
 
@@ -725,7 +736,7 @@ export class PoiListComponent implements OnInit {
     }
 
     const poiData: PointOfInterestForm = {
-      clientCode: poi.client_code?? '0000',
+      clientCode: poi.client_code ?? '0000',
       clientLabel: poi.client_label,
       type: poi.category.id,
       WKTPoint: wktPoint,
@@ -738,7 +749,7 @@ export class PoiListComponent implements OnInit {
     this.poiService.createPOI(poiData).subscribe(
       (createdPoi) => {
         poi.id = createdPoi.id;
-        poi.client_code = createdPoi.client_code?? '0000';
+        poi.client_code = createdPoi.client_code ?? '0000';
         poi.client_label = createdPoi.client_label;
         poi.category = createdPoi.category;
         poi.address = createdPoi.address;
@@ -755,7 +766,17 @@ export class PoiListComponent implements OnInit {
       },
       (error) => {
         console.error('Erreur lors de la création du POI :', error);
-        alert('Erreur lors de la création du POI. Veuillez réessayer.');
+        // Par défaut, un message générique
+        let errorMsg = "Erreur lors de la création du POI. Veuillez réessayer.";
+        // Si le back-end renvoie une erreur structurée dans error.error.error, l'utiliser
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        }
+        this.confirmationService.confirm({
+          message: errorMsg,
+          header: "Erreur lors de la création du nouveaux POI.",
+          icon: "pi pi-exclamation-triangle",
+        });
       }
     );
   }
@@ -769,12 +790,12 @@ export class PoiListComponent implements OnInit {
     }
 
     const poiData: PointOfInterestForm = {
-      clientCode: poi.client_code?? '0000',
+      clientCode: poi.client_code ?? '0000',
       clientLabel: poi.client_label,
       type: poi.category.id,
       WKTPoint: wktPoint,
       WKTPolygon: wktPolygon,
-      adresse:poi.address
+      adresse: poi.address
     };
 
     this.poiService.updatePOI(poi.id, poiData).subscribe(

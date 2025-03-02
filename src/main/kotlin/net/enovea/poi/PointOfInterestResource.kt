@@ -200,16 +200,17 @@ class PointOfInterestResource (
 
             // 4. Créer l'entité POI avec le Polygon et le Point
             val poiEntity = PointOfInterestEntity(
-                client_code = if(poiForm.clientCode == "0000") null else poiForm.clientCode,
+                client_code = if (poiForm.clientCode == "0000") null else poiForm.clientCode,
                 client_label = poiForm.clientLabel,
                 category = category,
-                coordinate = pointGeometry, // Coordonnées indépendantes de la zone
+                coordinate = pointGeometry,
                 area = polygonGeometry,
                 address = poiForm.adresse
             )
 
             // 5. Persister l'entité
             PointOfInterestEntity.persist(poiEntity)
+            PointOfInterestEntity.flush()
 
             // 6. Retourner la réponse avec le POI créé
             return Response.status(Response.Status.CREATED)
@@ -217,11 +218,36 @@ class PointOfInterestResource (
                 .build()
 
         } catch (e: Exception) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(mapOf("error" to "Erreur lors de la création du POI: ${e.message}"))
-                .build()
+            var cause: Throwable? = e
+            var messageToReturn: String? = null
+
+            while (cause != null) {
+                if (cause is org.hibernate.exception.ConstraintViolationException) {
+                    val errorMsg = cause.message ?: ""
+                    // On vérifie si le message d'erreur contient le nom de la contrainte
+                    messageToReturn = when {
+                        errorMsg.contains("unique_client_code", ignoreCase = true) ->
+                            "Le code client existe déjà."
+                        errorMsg.contains("unique_client_label", ignoreCase = true) ->
+                            "Le libellé client existe déja."
+                        else -> "Une erreur de type ConstraintViolationException est survenu !"
+                    }
+                    break
+                }
+                cause = cause.cause
+            }
+            return if (messageToReturn != null) {
+                Response.status(Response.Status.CONFLICT)
+                    .entity(mapOf("error" to messageToReturn))
+                    .build()
+            } else {
+                Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(mapOf("error" to "Erreur lors de la création du POI: ${e.message}"))
+                    .build()
+            }
         }
     }
+
 
     /**
      * Méthode PUT pour mettre à jour un POI existant avec une zone polygonale et une coordonnée définies par WKT.
@@ -366,7 +392,10 @@ class PointOfInterestResource (
         }
 
         return try {
-            val pois = PointOfInterestEntity.find("client_label ILIKE ?1", "%$label%").list()
+            val searchTerm = "%$label%"
+            val pois = PointOfInterestEntity.find(
+                "client_label ILIKE ?1 OR client_code ILIKE ?1", searchTerm
+            ).list()
             Response.ok(pois).build()
         } catch (e: Exception) {
             Response.status(Response.Status.INTERNAL_SERVER_ERROR)

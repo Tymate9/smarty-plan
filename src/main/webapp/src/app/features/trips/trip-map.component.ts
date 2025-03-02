@@ -9,13 +9,14 @@ import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
 import {GeoUtils} from "../../commons/geo/geo-utils";
-import {NgIf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 import {PrimeTemplate} from "primeng/api";
 import {Timeline} from "primeng/timeline";
 import {TabPanel, TabView} from "primeng/tabview";
 import {Card} from "primeng/card";
 import {ToggleButton} from "primeng/togglebutton";
 import {FormsModule} from "@angular/forms";
+import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-navigation-button.component";
 
 
 @Component({
@@ -110,6 +111,13 @@ import {FormsModule} from "@angular/forms";
                       <p style="position: absolute; top:-0.6rem; left:0.2rem;">{{ event.distance.toFixed(0) }} Km</p>
                       <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="bottom:0.4rem; right:0rem; position: absolute; color: darkred;"></i>
                     </div>
+                    <!-- Ajout du bouton pour les événements STOP sans POI existant -->
+                    <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 0.1vh; transform: scale(0.8);">
+                      <app-poi-navigation-button
+                        [buttonLabel]="'Créer POI'"
+                        [coords]="[event.lat + ',' + event.lng]">
+                      </app-poi-navigation-button>
+                    </div>
                   </div>
                   <div
                     class="p-3 bg-black-alpha-20 border-round cursor-pointer"
@@ -117,7 +125,7 @@ import {FormsModule} from "@angular/forms";
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                    style="position: relative"
+                    style="position: relative; padding-right: 10vh !important"
                   > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
                     <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
                     <i class="pi pi-caret-right"></i> {{
@@ -133,6 +141,13 @@ import {FormsModule} from "@angular/forms";
                       </div>
                     </div>
                     <i *ngIf="event.sourceIndexes?.length > 0" class="pi pi-star-fill" style="right: 1rem; bottom: 1rem; position: absolute; color:darkred"></i>
+                    <!-- Ajout du bouton pour les événements STOP sans POI existant -->
+                    <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 0.1vh; transform: scale(0.8);">
+                      <app-poi-navigation-button
+                        [buttonLabel]="'Créer POI'"
+                        [coords]="[event.lat + ',' + event.lng]">
+                      </app-poi-navigation-button>
+                    </div>
                   </div>
                 </ng-template>
               </p-timeline>
@@ -201,6 +216,7 @@ import {FormsModule} from "@angular/forms";
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
+                    style="position: relative; padding-right: 10vh !important"
                   > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
                     <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
                     <i class="pi pi-caret-right"></i> {{
@@ -214,6 +230,13 @@ import {FormsModule} from "@angular/forms";
                       <div *ngFor="let subEvent of event.subTripEvents">
                         {{ subEvent.description }}
                       </div>
+                    </div>
+                    <!-- Ajout du bouton pour les événements STOP sans POI existant -->
+                    <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 1vh; transform: scale(0.8);">
+                      <app-poi-navigation-button
+                        [buttonLabel]="'Créer POI'"
+                        [coords]="[event.lat + ',' + event.lng]">
+                      </app-poi-navigation-button>
                     </div>
                   </div>
                 </ng-template>
@@ -236,7 +259,9 @@ import {FormsModule} from "@angular/forms";
     Card,
     ToggleButton,
     FormsModule,
-    TabView
+    TabView,
+    NgForOf,
+    PoiNavigationButtonComponent
   ],
   styles: [`
     #trip-container {

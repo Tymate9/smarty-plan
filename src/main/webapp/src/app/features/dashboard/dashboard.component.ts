@@ -49,7 +49,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 
     </div>
 
-
     <p-treeTable *ngIf="vehiclesTree.length"
                  #treeTable
                  [value]="vehiclesTree"

@@ -65,13 +65,6 @@ import {
       border: 1px solid #ddd;
       background-color: var(--gray-100);
     }
-    //
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red {
-    //  background-color: #aa001f !important;
-    //  border-color: #aa001f !important;
-    //  color: white !important;
-    //  font-weight: 600;
-    //}
   `]
 })
 export class MapComponent implements OnInit, OnDestroy {

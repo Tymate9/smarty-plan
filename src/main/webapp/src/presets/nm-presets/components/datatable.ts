@@ -8,14 +8,14 @@ export const dataTableConfig = {
       background: "{content.background}",
       borderColor: nmColors.darkGray,
       color: "{content.color}",
-      borderWidth: "1px 0 1px 0",
+      borderWidth: "1px 1px 1px 1px",
       padding: "0.75rem 1rem"
     },
     headerCell: {
       background: nmColors.brandRed,
       hoverBackground: "{content.hover.background}",
       selectedBackground: "{highlight.background}",
-      borderColor: nmColors.brandRed,
+      borderColor: nmColors.darkGray,
       color: nmColors.brandWhite,
       hoverColor: "{content.hover.color}",
       selectedColor: "{highlight.color}",
@@ -64,7 +64,7 @@ export const dataTableConfig = {
       background: "{content.background}",
       borderColor:nmColors.darkGray,
       color: "{content.color}",
-      borderWidth: "0 0 1px 0",
+      borderWidth: "1px 1px 1px 1px",
       padding: "0.75rem 1rem"
     },
     dropPoint: {
@@ -141,11 +141,11 @@ export const dataTableConfig = {
     },
     paginatorTop: {
       borderColor: "{datatable.border.color}",
-      borderWidth: "0 0 1px 0"
+      borderWidth: "1px 1px 1px 1px"
     },
     paginatorBottom: {
       borderColor: "{datatable.border.color}",
-      borderWidth: "0 0 1px 0"
+      borderWidth: "1px 1px 1px 1px"
     },
     colorScheme: {
       light: {

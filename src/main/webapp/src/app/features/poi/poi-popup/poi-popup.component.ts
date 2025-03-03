@@ -61,30 +61,17 @@ import {Select} from "primeng/select";
                 <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
               </div>
               <div class="vehicle-actions">
-                <!--                <button pButton label="Zoom" icon="pi pi-search-plus"-->
-                <!--                        (click)="centerMapOnVehicle(vehicle.second)"-->
-                <!--                        style="background-color: #aa001f; border:#aa001f;"></button>-->
-                <!--                <button-->
-                <!--                  pButton-->
-                <!--                  [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"-->
-                <!--                  [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"-->
-                <!--                  (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"-->
-                <!--                  style="background-color: #515151; border:#515151"-->
-                <!--                ></button>-->
                 <p-button
                   label="Zoom"
                   icon="pi pi-search-plus"
-                  (click)="centerMapOnVehicle(vehicle.second)"
-                >
+                  (click)="centerMapOnVehicle(vehicle.second)" >
                 </p-button>
-
                 <p-button
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
                   styleClass="custom-gray-button">
                 </p-button>
-
               </div>
             </div>
           </div>
@@ -144,18 +131,6 @@ import {Select} from "primeng/select";
               </div>
               <div class="p-field">
                 <label for="category">Type : </label>
-                <!--                <select-->
-                <!--                  id="category"-->
-                <!--                  [(ngModel)]="selectedCategoryId"-->
-                <!--                  name="category"-->
-                <!--                  required-->
-                <!--                >-->
-                <!--                  <option [ngValue]="null" disabled>Sélectionner une catégorie</option>-->
-                <!--                  <option *ngFor="let category of categoryOptions" [ngValue]="category.value">-->
-                <!--                    {{ category.label }}-->
-                <!--                  </option>-->
-                <!--                </select>-->
-
                 <div class="p-field">
                   <p-select
                     id="category"
@@ -178,46 +153,20 @@ import {Select} from "primeng/select";
             </div>
             <div class="form-actions">
               <div class="button-row">
-                <!--                <button-->
-                <!--                  pButton-->
-                <!--                  type="submit"-->
-                <!--                  label="Mettre à jour"-->
-                <!--                  icon="pi pi-check"-->
-                <!--                  [disabled]="!poiForm.form.valid"-->
-                <!--                  style="background-color: #aa001f; border: #aa001f;"-->
-
-                <!--                ></button>-->
                 <p-button
                   type="submit"
                   label="Mettre à jour"
                   icon="pi pi-check"
                   [disabled]="!poiForm.form.valid"
                 ></p-button>
-
                 <p-button
                   type="button"
                   label="Supprimer le POI"
                   icon="pi pi-trash"
                   (onClick)="deletePOI()"
                 ></p-button>
-                <!--                <button-->
-                <!--                  pButton-->
-                <!--                  type="button"-->
-                <!--                  label="Supprimer le POI"-->
-                <!--                  icon="pi pi-trash"-->
-                <!--                  (click)="deletePOI()"-->
-                <!--                  style="background-color: #aa001f; border: #aa001f;"-->
-                <!--                ></button>-->
               </div>
               <div class="button-row">
-                <!--                <button-->
-                <!--                  pButton-->
-                <!--                  type="button"-->
-                <!--                  label="Aller à l'Édition POI"-->
-                <!--                  icon="pi pi-external-link"-->
-                <!--                  (click)="navigateToPoiEdit()"-->
-                <!--                  style="background-color: #515151; border: #515151;"-->
-                <!--                ></button>-->
                 <p-button
                   type="button"
                   label="Aller à l'Édition POI"
@@ -225,7 +174,6 @@ import {Select} from "primeng/select";
                   (onClick)="navigateToPoiEdit()"
                   styleClass="custom-gray-button"
                 ></p-button>
-
               </div>
             </div>
           </form>
@@ -258,10 +206,6 @@ import {Select} from "primeng/select";
     .form-actions .button-row button:last-child {
       margin-right: 0;
     }
-
-    .poi-popup {
-    }
-
     .vehicle-item {
       border: 1px solid #ccc;
       padding: 10px;

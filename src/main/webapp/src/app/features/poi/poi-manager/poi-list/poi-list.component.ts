@@ -33,8 +33,6 @@ import { ButtonModule } from 'primeng/button';
           <span class="poi-title">{{ poiPanel.poi.denomination }}</span>
           <span class="poi-address">{{ poiPanel.poi.address }}</span>
           <span class="expand-icon">{{ poiPanel.expanded ? '▼' : '►' }}</span>
-<!--          <button pButton label="✖" class="delete-button"-->
-<!--                  (click)="onRemovePanel(poiPanel); $event.stopPropagation();"></button>-->
           <p-button
             icon="pi pi-times"
             class="delete-button"
@@ -256,14 +254,6 @@ import { ButtonModule } from 'primeng/button';
     .expand-icon {
       font-size: 16px;
     }
-
-    //.delete-button {
-    //  background: none;
-    //  border: none;
-    //  font-size: 16px;
-    //  cursor: pointer;
-    //  color: #ff0000;
-    //}
 
     /* Corps du panel (zone "formulaire") */
     .poi-body {

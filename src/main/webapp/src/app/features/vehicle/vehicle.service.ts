@@ -161,46 +161,6 @@ export class VehicleService {
     getVehicleData: (vehicle: V) => { driverName: string; licensePlate: string | null }
   ): TreeNode[] {
     // Helper function to sort by label alphabetically
-    // Helper function to sort by label alphabetically
-    // const sortByLabel = (a: {expanded: boolean, data: {label: string, vehicle: null},
-    //                        children: {expanded: boolean, data: {label: string, vehicle: V}, children: any[]}[]},
-    //                         b: {expanded: boolean, data: {label: string, vehicle: null},
-    //                           children: {expanded: boolean, data: {label: string, vehicle: V}, children: any[]}[]}) =>
-    //   a.data.label.localeCompare(b.data.label);
-
-   // const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-
-   // const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-   //   a.data.label.localeCompare(b.data.label);
-
-
-    // const sortByTeamLabel = (
-    //   a: { expanded: boolean, data: { label: string, vehicle: null }, children: { expanded: boolean, data: { label: string, vehicle: V }, children: any[] }[] },
-    //   b: { expanded: boolean, data: { label: string, vehicle: null }, children: { expanded: boolean, data: { label: string, vehicle: V }, children: any[] }[] }
-    // )=>
-    //   a.data.label.localeCompare(b.data.label);
-    //
-    // const sortByAgencyLabel = (
-    //   a: {  expanded: boolean; data: { label: string; vehicle: V| null  };children:{expanded: boolean; data: { label: string; vehicle: null }; children: { expanded: boolean; data: { label: string; vehicle: V }; children: any[] }[] } []},
-    //   b: {  expanded: boolean; data: { label: string; vehicle: V| null  };children:{expanded: boolean; data: { label: string; vehicle: null }; children: { expanded: boolean; data: { label: string; vehicle: V }; children: any[] }[] }[]},
-    // ) => a.data.label.localeCompare(b.data.label);
-    //
-
-    // Helper function to sort vehicles by driverName
-    // const sortByDriverName = (
-    //   a: { data: { vehicle: V | null } },
-    //   b: { data: { vehicle: V | null } }
-    // ) =>
-    // const sortByDriverName = (
-    //   a: { data: { vehicle: V | null } },
-    //   b: { data: { vehicle: V | null } }
-    // ) => {
-    //   const driverA = a.data.vehicle ? getVehicleData(a.data.vehicle).driverName : '';
-    //   const driverB = b.data.vehicle ? getVehicleData(b.data.vehicle).driverName : '';
-    //
-    //   return driverA.localeCompare(driverB);
-    // };
-
     const sortByTeamLabel = (
       a: { expanded: boolean, data: { label: string, vehicle: null }, children: { expanded: boolean, data: { label: string, vehicle: V }, children: any[] }[] },
       b: { expanded: boolean, data: { label: string, vehicle: null }, children: { expanded: boolean, data: { label: string, vehicle: V }, children: any[] }[] }

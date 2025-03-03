@@ -83,6 +83,7 @@ export class DateRangePickerComponent {
   ];
   vehiclesTypeList: string[] = ['tracked'];
   vehiclesType:string='';
+  previousSelection: string[] = ['tracked'];
 
   @Output() fetchStats = new EventEmitter<{ dateFrom: Date; dateTo: Date ; vehiclesType: string }>();
 
@@ -91,18 +92,18 @@ export class DateRangePickerComponent {
   fetchVehicleStats() {
     this.fetchStats.emit({ dateFrom: this.dateFrom, dateTo: this.dateTo ,vehiclesType:this.vehiclesType });
   }
-  // onVehicleSelectionChange() {
-  //   if (this.vehiclesTypeList.includes('tracked') && this.vehiclesTypeList.includes('untracked')) {
-  //     this.vehiclesType = 'allVehicles';
-  //     console.log('heeeeellllllooo')
-  //   }
-  //   else {
-  //     // Handle the case where either only "tracked" or "untracked" is selected
-  //     this.vehiclesType = this.vehiclesTypeList.join(', ');
-  //     console.log('heee')
-  //   }
-  // }
+
   onVehicleSelectionChange() {
+    // Prevent empty selection
+    if (!this.vehiclesTypeList || this.vehiclesTypeList.length === 0) {
+      setTimeout(() => {
+        this.vehiclesTypeList = [...this.previousSelection]; // Restore last valid selection
+      }, 0);
+      return;
+    }
+
+    // Store last valid selection
+    this.previousSelection = [...this.vehiclesTypeList];
     if (this.vehiclesTypeList.includes('tracked') && this.vehiclesTypeList.includes('untracked')) {
       this.vehiclesType = 'allVehicles'
     } else {

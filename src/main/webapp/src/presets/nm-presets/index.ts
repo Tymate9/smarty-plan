@@ -18,6 +18,9 @@ import {iconConfig} from "./components/iconfield";
 import {autocompleteConfig} from "./components/autocomplete";
 import {treeSelectConfig} from "./components/treeselect";
 import {checkboxConfig} from "./components/checkbox";
+import {tabsConfig} from "./components/tabs";
+
+
 
 
 export const NmPreset = definePreset(Nora, {
@@ -38,7 +41,7 @@ export const NmPreset = definePreset(Nora, {
     iconfield:iconConfig,
     autocomplete:autocompleteConfig,
     treeselect:treeSelectConfig,
-    checkbox:checkboxConfig
+    tabs:tabsConfig
 
   }
 });

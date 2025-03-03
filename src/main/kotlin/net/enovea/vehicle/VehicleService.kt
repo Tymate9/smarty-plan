@@ -544,12 +544,12 @@ fun <T> buildTeamHierarchyForest(vehicles: List<T>, extractTeamHierarchy: (T) ->
     return topLevelNodes.toList()
 }
 
-private fun getDorisView(vehiclesType: String="tracked"): String {
+private fun getDorisView(vehiclesType: String): String {
     return when (vehiclesType) {
         "tracked" -> "trips_tracked_view"
         "untracked" -> "trips_untracked_view"
         "allVehicles" -> "trips_vehicle_team_view"
-        else -> "trips_vehicle_team_view"
+        else -> "trips_tracked_view"
     }
 }
 

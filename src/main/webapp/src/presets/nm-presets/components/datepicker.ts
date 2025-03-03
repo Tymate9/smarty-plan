@@ -17,8 +17,8 @@ export const datePickerConfig = {
     color: nmColors.brandBlack,
     padding: "0 0 0.5rem 0",
     navIcon:{
-      color: nmColors.brandRed, // Change arrow icon color
-      hoverColor: nmColors.brandRedHover, // Optional for hover state
+      color: nmColors.brandRed,
+      hoverColor: nmColors.brandRedHover,
     }
   },
   title: { gap: "0.5rem", fontWeight: "500" },

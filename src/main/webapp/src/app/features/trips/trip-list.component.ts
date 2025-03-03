@@ -10,7 +10,7 @@ import {TableModule} from "primeng/table";
   selector: 'app-trip-list',
   template: `
     <div>
-      <p-table [value]="tripData?.tripEvents ?? []" [tableStyle]="{ 'min-width': '50rem' }">
+      <p-table [value]="tripData?.tripEvents ?? []" [tableStyle]="{ 'min-width': '50rem' }" showGridlines stripedRows  >
         <ng-template pTemplate="header">
           <tr>
             <th>Type / Adresse</th>

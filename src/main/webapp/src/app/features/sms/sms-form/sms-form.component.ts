@@ -14,7 +14,7 @@ import { TextareaModule } from 'primeng/textarea';
     <div class="sms-form-container">
       <!-- (A) Affichage des statistiques SMS -->
       <h4>SMS disponible</h4>
-      <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
+      <p-table [value]="[smsStatistics]" *ngIf="smsStatistics" showGridlines stripedRows>
         <ng-template pTemplate="header">
           <tr>
             <th>Total SMS achetés</th>

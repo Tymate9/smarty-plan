@@ -4,26 +4,26 @@
 
 
 // Variables de couleur
-$color-primary-dark: #3B6997;        // Bleu sombre, principal
+$color-primary-dark: #3B6997; // Bleu sombre, principal
 $color-primary-dark-secondary: #598392; // Bleu sombre, secondaire
-$color-primary-light: #51B3DE;       // Bleu clair, principal
-$color-green-primary: #79D841;       // Vert pomme, principal
-$color-light-secondary: #C2D5EF;     // Bleu clair, fond secondaire
-$color-red: #C71400;                 // Rouge Smarty
-$color-warning: #FE8F2B;             // Orange, Warning
-$color-warning-semi: #FED42A;        // Jaune, Semi Warning
-$color-green-ok: #21A179;            // Vert, OK
-$color-gray-secondary: #E5E5E5;      // Gris, fond secondaire
-$color-brown-tertiary: #EEE3D4;      // Marron clair, fond tertiaire
+$color-primary-light: #51B3DE; // Bleu clair, principal
+$color-green-primary: #79D841; // Vert pomme, principal
+$color-light-secondary: #C2D5EF; // Bleu clair, fond secondaire
+$color-red: #C71400; // Rouge Smarty
+$color-warning: #FE8F2B; // Orange, Warning
+$color-warning-semi: #FED42A; // Jaune, Semi Warning
+$color-green-ok: #21A179; // Vert, OK
+$color-gray-secondary: #E5E5E5; // Gris, fond secondaire
+$color-brown-tertiary: #EEE3D4; // Marron clair, fond tertiaire
 $primary-color: #aa001f;
-$secondary-color:#808080;
+$secondary-color: #808080;
 
 // Classe pour créer un effet transparent ( verre dépoli )
 .transparent-blur-bg {
-  background-color: rgba(255, 255, 255, 0.3);  // Couleur de fond blanche avec une opacité de 30%
-  backdrop-filter: blur(10px);  // Applique un flou de 10px aux éléments en arrière-plan
-  -webkit-backdrop-filter: blur(10px);  // Compatibilité avec Safari  <!! Non testé !!>
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  // Optionnel : légère ombre pour un effet de profondeur
+  background-color: rgba(255, 255, 255, 0.3); // Couleur de fond blanche avec une opacité de 30%
+  backdrop-filter: blur(10px); // Applique un flou de 10px aux éléments en arrière-plan
+  -webkit-backdrop-filter: blur(10px); // Compatibilité avec Safari  <!! Non testé !!>
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Optionnel : légère ombre pour un effet de profondeur
   display: inline-block;
 
 }
@@ -48,7 +48,6 @@ html, body {
 }
 
 
-
 :host {
   display: flex;
   flex-direction: column;
@@ -65,7 +64,8 @@ html, body {
 .custom-vehicle-icon {
   width: 30px !important;
   height: 45px !important;
-  &>img {
+
+  & > img {
     width: 180% !important;
     height: 180% !important;
   }
@@ -74,13 +74,14 @@ html, body {
 .highlighted-marker {
   width: 45px !important; // Augmenter la largeur de 15px
   height: 60px !important; // Augmenter la hauteur de 15px
-  &>svg {
+  & > svg {
     margin: -7.5px 0 0 -7.5px;
     width: 100% !important;
     height: 100% !important;
     animation: grow 0.5s ease-in-out infinite alternate;
   }
-  &>img {
+
+  & > img {
     margin: 7.5px 0 0 7.5px;
     width: 100% !important;
     height: 100% !important;
@@ -131,6 +132,7 @@ html, body {
   background-color: gold;
   border-radius: 50%;
 }
+
 .selected-marker svg {
   transform: scale(1.5);
   background-color: gold;
@@ -171,19 +173,34 @@ html, body {
   margin: 0;
   width: 100%;
 }
+
+//a custom class for all gray buttons
 .custom-gray-button {
   background-color: var(--p-gray-400) !important;
   border-color: var(--p-gray-400) !important;
   color: white !important;
 }
+
+.space-bottom {
+  margin-bottom: 10px;
+}
+
+//to change the focus and active color for p-button
 .p-button.p-component:focus,
 .p-button.p-component:active {
   border-color: white !important;
   box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
 }
-//
-//::ng-deep .p-autocomplete-multiple-container {
-//  max-height: 10px; /* Set a max height */
-//  overflow-y: auto;  /* Add scrolling when content overflows */
-//  flex-wrap: nowrap;  /* Prevent excessive wrapping */
-//}
+
+//to change the background color of the selected tab in tabview
+.p-tab-active {
+  background: #aa001f !important;
+}
+
+//to change the font size of the autocomplete component in filters
+.p-autocomplete-option {
+  font-size: 0.75rem !important;
+}
+.p-chip {
+  font-size: 0.75rem !important;
+}

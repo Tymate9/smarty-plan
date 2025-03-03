@@ -54,10 +54,6 @@ import {NgIf} from "@angular/common";
           dateFormat="yymmdd"
           />
 
-<!--        inputId="buttondisplay"
-          [showOnFocus]="true"
-                    [readonlyInput]="true"-->
-
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">
         Données en cours de chargement...
@@ -112,12 +108,6 @@ import {NgIf} from "@angular/common";
           }
         }
 
-        //.p-calendar .p-button {
-        //  background-color: #aa001f;
-        //  border-color: #aa001f !important;
-        //  color: white !important;
-        //  font-weight: 600;
-        //}
       }
 
       #download-csv-button {
@@ -143,27 +133,16 @@ import {NgIf} from "@angular/common";
           }
         }
       }
-
-      ::ng-deep {
-        .p-tabview-nav-container {
-          z-index: 10000;
-          padding: 5px;
-        }
-
-        .p-tabview-nav {
-          background: transparent;
-          border: none;
-
-          .p-tabview-nav-link {
-            margin-left: 5px;
-            border-radius: 10px;
-          }
-        }
-
-        .p-tabview-panels {
-          padding: 0;
-        }
-      }
+    }
+    :host ::ng-deep .p-tablist-tab-list
+    {
+      z-index: 999 !important;
+      background-color: transparent !important;
+      border:none !important;
+    }
+    :host ::ng-deep .p-tabpanels
+    {
+      padding: 10px 0px 10px 0px !important;
     }
   `]
 })

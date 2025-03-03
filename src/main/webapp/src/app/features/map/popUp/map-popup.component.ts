@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
       <h4>Adresse : {{ address }}</h4>
       <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
       <!-- Create POI Tab -->
-      <p-button (click)="redirectToPoiEditWithCoords()" >Créer un POI
+      <p-button (click)="redirectToPoiEditWithCoords()" styleClass="space-bottom custom-gray-button" >Créer un POI
       </p-button>
       <p-tabView (onChange)="selectTab($event)">
         <!-- Véhicule Tab -->
@@ -89,30 +89,12 @@ import { ButtonModule } from 'primeng/button';
       color: white;
     }
 
-    //::ng-deep .p-button.p-component.p-button-raised.custom-button-red {
-    //  background-color: #aa001f !important;
-    //  border-color: #aa001f !important;
-    //  color: white !important;
-    //  font-weight: 600;
-    //  padding: 0.2rem;
-    //}
-
-    //::ng-deep .custom-gray-button.p-button {
-    //  //background-color: #515151 !important;
-    //  //border-color: #515151 !important;
-    //  //color: white !important; /* Ensures text visibility */
-    //  background-color: var(--p-gray-400) !important;
-    //  border-color: var(--p-gray-400) !important;
-    //  color: white !important;
-    //  //font-weight: 600;
-    //  //padding: 0.2rem;
-    //}
-
     .mapContextMenu {
       width: 300px;
       height: 300px;
       overflow: auto;
     }
+
   `]
 })
 export class MapPopupComponent implements OnInit {

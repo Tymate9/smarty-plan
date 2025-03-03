@@ -31,7 +31,6 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
           onIcon="pi pi-angle-right"
           offIcon="pi pi-angle-left"
           id="side-panel-toggle"
-
         />
         <div class="container">
           <h3 *ngIf="tripData">{{ tripData.driverName ?? 'Véhicule non attribué' }} - {{ tripData.licensePlate }}</h3>
@@ -383,22 +382,17 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
         margin: 0.5rem;
         width: 28%;
         text-align: center;
-       // border-radius: 5px;
-       // font-weight: bold;
-       // font-size: 1.0rem;
 
         .p-card {
           height: 15vh;
         }
 
         .p-card-title {
-         // font-size: 0.7rem;
           background-color: lightgray;
           margin: -1.25rem;
           padding: .5rem 0;
           border-radius: 5px 5px 0 0;
           height: 2.5rem;
-         // font-weight: bold;
         }
       }
     }

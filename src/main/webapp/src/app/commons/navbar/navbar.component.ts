@@ -1,11 +1,10 @@
 import {Component, OnInit, OnDestroy, inject, NgModule} from '@angular/core';
-import { Router } from '@angular/router';
-import { FilterService } from './filter.service';
+import {Router} from '@angular/router';
+import {FilterService} from './filter.service';
 import Keycloak from 'keycloak-js';
 import {VehicleService} from "../../features/vehicle/vehicle.service";
 import {TeamService} from "../../features/vehicle/team.service";
 import {DriverService} from "../../features/vehicle/driver.service";
-import {Option, TeamTreeComponent} from '../searchAutocomplete/team.tree.component';
 import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
@@ -16,13 +15,15 @@ import {NotificationService} from "../notification/notification.service";
 import {Button, ButtonDirective} from "primeng/button";
 import {Menubar} from "primeng/menubar";
 import {PrimeTemplate, TreeNode} from "primeng/api";
-import {SearchAutocompleteComponent} from "../searchAutocomplete/search-autocomplete.component";
 import {AppConfig} from "../../app.config";
-import { AutoCompleteModule } from 'primeng/autocomplete';
-import { FormsModule } from '@angular/forms';
-import { TreeSelectModule } from 'primeng/treeselect';
+import {AutoCompleteModule} from 'primeng/autocomplete';
+import {FormsModule} from '@angular/forms';
+import {TreeSelectModule} from 'primeng/treeselect';
 
-
+export interface Option {
+  label: string;
+  children?: Option[];
+}
 
 @Component({
   // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
@@ -44,58 +45,40 @@ import { TreeSelectModule } from 'primeng/treeselect';
             </div>
           </div>
           <div class="filters center">
-<!--            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)"-->
-<!--                           [selectedItems]="agencySelected"></app-team-tree>-->
-<!--            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions"-->
-<!--                                     (selectedTagsChange)="updateVehicles($event)"-->
-<!--                                     [selectedItems]="vehicleSelected"></app-search-autocomplete>-->
-<!--            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions"-->
-<!--                                     (selectedTagsChange)="updateDrivers($event)"-->
-<!--                                     [selectedItems]="driverSelected"></app-search-autocomplete>-->
             <p-treeSelect
-            [options]="agencyOptionsTree"
-            [(ngModel)]="agencySelected"
-            [placeholder]="'Filtrer Agence...'"
-            selectionMode="checkbox"
-            [filter]="true"
-            [showClear]="true"
-            appendTo="body"
-            (onNodeSelect)="onNodeSelect($event)"
-            (onNodeUnselect)="onNodeUnselect($event)"
-            (ngModelChange)="onSelectionChange($event)">
-          </p-treeSelect>
-
+              [options]="agencyOptionsTree"
+              [(ngModel)]="agencySelected"
+              [placeholder]="'Filtrer Agence...'"
+              selectionMode="checkbox"
+              [filter]="true"
+              [showClear]="true"
+              appendTo="body"
+              (onNodeSelect)="onNodeSelect($event)"
+              (onNodeUnselect)="onNodeUnselect($event)"
+              (ngModelChange)="onSelectionChange($event)">
+            </p-treeSelect>
             <p-autoComplete
               [suggestions]="filteredVehicleOptions"
               [(ngModel)]="vehicleSelected"
               (completeMethod)="filterVehicles($event)"
               [multiple]="true"
               (ngModelChange)="updateVehicles($event)"
-              [placeholder]="'Filtrer Véhicles..'"
+              [placeholder]="'Filtrer Véhicles...'"
               [dropdown]="true"
               appendTo="body">
             </p-autoComplete>
             <p-autoComplete
-            [suggestions]="filteredDriverOptions"
-            [(ngModel)]="driverSelected"
-            (completeMethod)="filterDrivers($event)"
-            [multiple]="true"
-            (ngModelChange)="updateDrivers($event)"
-            [placeholder]="'Filtrer Conducteurs'"
-            [dropdown]="true"
-            appendTo="body">
+              [suggestions]="filteredDriverOptions"
+              [(ngModel)]="driverSelected"
+              (completeMethod)="filterDrivers($event)"
+              [multiple]="true"
+              (ngModelChange)="updateDrivers($event)"
+              [placeholder]="'Filtrer Conducteurs...'"
+              [dropdown]="true"
+              appendTo="body">
             </p-autoComplete>
-<!--            <p-autoComplete-->
-<!--              [(ngModel)]="selectedItems"-->
-<!--              [suggestions]="filteredItems"-->
-<!--              (completeMethod)="filterItems($event)"-->
-<!--              [dropdown]="true"-->
-<!--              [multiple]="true"-->
-<!--              (click)="showDropdown($event, autoComplete)"-->
-<!--              #autoComplete>-->
-<!--            </p-autoComplete>-->
             <p-button type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></p-button>
-            <p-button (onClick)="saveFilters()" icon="pi pi-save" ></p-button>
+            <p-button (onClick)="saveFilters()" icon="pi pi-save"></p-button>
           </div>
         </div>
       </ng-template>
@@ -163,28 +146,26 @@ import { TreeSelectModule } from 'primeng/treeselect';
       background: transparent;
       border: none;
     }
+    /*Modifier la taille du texte dans les filtres et la taille de 'inputtext'  */
+    ::ng-deep .p-treeselect-label {
+      max-height: 50px !important;
+      max-width: 200px !important;
+      min-width: 175px !important;
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      font-size: 0.75rem !important;
+    }
     ::ng-deep .p-autocomplete-input-multiple {
       max-height: 50px !important;
       overflow-y: auto !important;
       overflow-x: auto !important;
       flex-wrap: nowrap !important;
-      max-width: 150px !important;
-      min-width: 100px !important;
+      max-width: 200px !important;
+      min-width: 150px !important;
     }
-
-    ::ng-deep .p-treeselect {
-      max-width: 150px !important;  /* Restrict the overall width */
-    }
-
-    ::ng-deep .p-treeselect-label-container {
-      max-height: 50px !important;
-      overflow-y: auto !important;  /* Enable vertical scrolling */
-      overflow-x: auto !important;  /* Prevent horizontal scroll */
-      display: flex !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-      white-space: nowrap !important;
-      min-width: 100px !important;
+    ::ng-deep .p-autocomplete-input-chip input {
+      font-size: 0.75rem !important;
     }
 
   `],
@@ -192,8 +173,6 @@ import { TreeSelectModule } from 'primeng/treeselect';
     Button,
     Menubar,
     PrimeTemplate,
-    TeamTreeComponent,
-    SearchAutocompleteComponent,
     AutoCompleteModule,
     FormsModule,
     TreeSelectModule
@@ -208,8 +187,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private teamService: TeamService,
     private driverService: DriverService,
     private configService: ConfigService,
-    private notificationService : NotificationService
-  ) {}
+    private notificationService: NotificationService
+  ) {
+  }
 
   // Injection directe de l'instance Keycloak via l'injection token
   private keycloak: Keycloak = inject(Keycloak);
@@ -234,54 +214,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   logoutURL: string = ''; // Propriété pour stocker la logoutURL
   private configSubscription: Subscription; // Abonnement pour la configuration
 
-  // updateAgencies(tags: string[]) {
-  //   const previouslySelectedAgencies = [...this.agencySelected];
-  //   this.agencySelected = tags;
-  //
-  //
-  //   // Gérer uniquement les suppressions d'agences
-  //   if (this.agencySelected.length < previouslySelectedAgencies.length) {
-  //     const removedAgencies = previouslySelectedAgencies.filter(
-  //       agency => !this.agencySelected.includes(agency)
-  //     );
-  //
-  //     removedAgencies.forEach(agency => {
-  //       this.removeVehiclesAndDriversForAgency(agency);
-  //     });
-  //   }
-  //
-  //   this.emitSelectedTags();
-  //   this.filterVehiclesAndDrivers();
-  // }
-
-
-
-
-
-  /////test
-  // updateAgencies(selectedNodes: TreeNode[]) {
-  //   const selectedLabels: string[] = selectedNodes
-  //     .map(node => node.label)
-  //     .filter((label): label is string => label !== undefined); // Ensures only strings
-  //
-  //   const previouslySelectedAgencies = [...this.agencySelected];
-  //   this.agencySelected = selectedLabels;
-  //
-  //   // Handle only removals
-  //   if (this.agencySelected.length < previouslySelectedAgencies.length) {
-  //     const removedAgencies = previouslySelectedAgencies.filter(
-  //       agency => !this.agencySelected.includes(agency)
-  //     );
-  //
-  //     removedAgencies.forEach(agency => {
-  //       this.removeVehiclesAndDriversForAgency(agency);
-  //     });
-  //   }
-  //
-  //   this.emitSelectedTags();
-  //   this.filterVehiclesAndDrivers();
-  // }
-
   onNodeSelect(event: any) {
     if (event.node) {
       const selectedLabel: string | undefined = event.node.label;
@@ -291,10 +223,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.agencySelected.push(selectedLabel);
       }
 
-   //   console.log('Node Selected:', event.node.label);
+      //   console.log('Node Selected:', event.node.label);
 
-       this.emitSelectedTags();
-       this.filterVehiclesAndDrivers();
+      this.emitSelectedTags();
+      this.filterVehiclesAndDrivers();
     }
   }
 
@@ -307,42 +239,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.emitSelectedTags();
       this.filterVehiclesAndDrivers();
 
-      console.log('Node Unselected:', selectedLabel);
     }
   }
+
   onSelectionChange(event: any) {
     if (!event || event.length === 0) {
       this.agencySelected = [];
+      this.vehicleSelected=[];
+      this.driverSelected=[];
       this.emitSelectedTags();
       this.filterVehiclesAndDrivers();
     }
   }
 
 
-
-
-
-  ////////////////////test
-  // Static list of items
-  // items: string[] = ['Apple', 'Banana', 'Cherry', 'Date', 'Grape', 'Mango', 'Orange', 'Pineapple', 'Strawberry'];
-  //
-  // // Holds selected values
-  // selectedItems: string[] = [];
-  //
-  // // Filtered items for autocomplete
-  // filteredItems: string[] = [];
-  //
-  // // Filters the items based on user input
-  // filterItems(event: any) {
-  //   const query = event.query.toLowerCase();
-  //   this.filteredItems = this.items.filter(item => item.toLowerCase().includes(query));
-  // }
-  //
-  // // Opens the dropdown when clicking inside the input field
-  // showDropdown(event: any, autoComplete: any) {
-  //   autoComplete.show();
-  // }
-  ///////////////
   // Method to filter driver options based on user input
   filterDrivers(event: any) {
     const query = event.query.toLowerCase();
@@ -350,13 +260,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
       driver.toLowerCase().includes(query)
     );
   }
+
   filterVehicles(event: any) {
     const query = event.query.toLowerCase();
     this.filteredVehicleOptions = this.filteredVehicleOptions.filter(vehicle =>
       vehicle.toLowerCase().includes(query)
     );
   }
-
 
   transformToHierarchy(teams: TeamDTO[]): any[] {
     const teamMap = new Map<number, any>();
@@ -365,9 +275,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const sortByLabel = (a: any, b: any) => a.label.localeCompare(b.label);
     // Mapper toutes les équipes par ID
     teams.forEach(team => {
-      if (team.id != null) {
-        teamMap.set(team.id, {...team, children: []});
-      }
+      teamMap.set(team.id, {...team, children: []});
     });
 
     // Lier les enfants à leurs parents
@@ -412,24 +320,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
     };
-    console.log("heeeeeeeeeeeeere");
-    console.log(newFilters);
 
     if (!this.areFiltersEqual(this.filterService.getCurrentFilters(), newFilters)) {
       this.filterService.updateFilters(newFilters);
     }
   }
-
   // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-  //   return JSON.stringify(filters1) === JSON.stringify(filters2);
+  //   return Object.keys(filters1).every((key) =>
+  //     filters1[key].length === filters2[key]?.length &&
+  //     filters1[key].every((value, index) => value === filters2[key][index])
+  //   );
+
   private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-    return Object.keys(filters1).every((key) =>
-      filters1[key].length === filters2[key]?.length &&
-      filters1[key].every((value, index) => value === filters2[key][index])
-    );
+      return JSON.stringify(filters1) === JSON.stringify(filters2);
 
-
-}
+    }
 
   async ngOnInit() {
     try {
@@ -474,14 +379,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
         agencies: this.teamService.getAgencies(),
         vehicles: this.vehicleService.getVehiclesList(),
         drivers: this.driverService.getDrivers()
-      }).subscribe(({ agencies, vehicles, drivers }) => {
+      }).subscribe(({agencies, vehicles, drivers}) => {
         console.log('Agencies:', agencies);
         console.log('Vehicles:', vehicles);
         console.log('Drivers:', drivers);
 
         // Traitement des agences
         this.agencyOptions = this.transformToHierarchy(agencies);
-        this.agencyOptionsTree=this.agencyOptions;
+        this.agencyOptionsTree = this.agencyOptions;
         this.agencyTree = this.agencyOptions;
 
         // Traitement des véhicules
@@ -520,7 +425,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   // Méthode de déconnexion utilisant directement l'instance Keycloak injectée
   logout() {
     if (this.keycloak) {
-      this.keycloak.logout({ redirectUri: this.logoutURL });
+      this.keycloak.logout({redirectUri: this.logoutURL});
     } else {
       console.error('Instance Keycloak non disponible pour la déconnexion.');
       alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
@@ -621,7 +526,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private loadInitialFilters(): void {
     // Récupérer les filtres initiaux depuis le FilterService
-    const currentFilters = this.filterService.getCurrentFilters() as { agencies: string[], vehicles: string[], drivers: string[] };
+    const currentFilters = this.filterService.getCurrentFilters() as {
+      agencies: string[],
+      vehicles: string[],
+      drivers: string[]
+    };
 
     // Mettre à jour les sélections locales avec les filtres chargés
     this.agencySelected = currentFilters.agencies || [];
@@ -686,13 +595,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.updateFilteredOptionsAfterLoading();
     this.emitSelectedTags();
   }
-
   ngOnDestroy() {
     if (this.configSubscription) {
       this.configSubscription.unsubscribe();
     }
   }
-
-
 }
-

@@ -65,30 +65,17 @@ import {ProgressSpinner} from "primeng/progressspinner";
                 : {{ poi.distance | number:'1.0-2' }} km
               </div>
               <div class="poi-actions">
-<!--                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus"-->
-<!--                        (click)="centerMapOnPOI(poi.poi)"-->
-<!--                        style="background-color: #aa001f; border: #aa001f;"></button>-->
-<!--                <button-->
-<!--                  pButton-->
-<!--                  [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"-->
-<!--                  [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"-->
-<!--                  (click)="toggleHighlightMarker('poi-' + poi.poi.id)"-->
-<!--                  style="background-color: #515151; border: #515151;"-->
-<!--                ></button>-->
                 <p-button
                   label="Centrer sur ce POI"
                   icon="pi pi-search-plus"
-                  (click)="centerMapOnPOI(poi.poi)"
-                  >
+                  (click)="centerMapOnPOI(poi.poi)">
                 </p-button>
-
                 <p-button
                   [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
                   styleClass="custom-gray-button">
                 </p-button>
-
               </div>
             </div>
           </div>
@@ -102,11 +89,9 @@ import {ProgressSpinner} from "primeng/progressspinner";
             [callingCode]="'+33'"
             [companyName]="'Normandie Manutention'"
             (smsSent)="onSmsSent()"
-            (packPurchased)="onPackPurchased()"
-          >
+            (packPurchased)="onPackPurchased()">
           </app-sms-form>
         </p-tabPanel>
-
       </p-tabView>
     </div>
   `,

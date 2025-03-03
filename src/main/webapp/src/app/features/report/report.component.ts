@@ -122,7 +122,7 @@ import {TableModule} from "primeng/table";
               [draggable]="false"
               (onHide)="closeDialog()">
       <div class="table-container">
-        <p-table [value]="vehicleDailyStats">
+        <p-table [value]="vehicleDailyStats" showGridlines stripedRows>
           <ng-template #header>
             <tr>
               <th>Date</th>
@@ -140,7 +140,6 @@ import {TableModule} from "primeng/table";
             </tr>
           </ng-template>
           <ng-template #body let-dailyStat>
-<!--            <tr *ngFor="let dailyStat of vehicleDailyStats">-->
             <tr>
               <td>{{ dailyStat.tripDate }}</td>
               <td>{{ dailyStat.driverName }}</td>
@@ -165,9 +164,6 @@ import {TableModule} from "primeng/table";
         </p-table>
       </div>
     </p-dialog>
-
-
-
   `,
   standalone: true,
   imports: [
@@ -183,127 +179,13 @@ import {TableModule} from "primeng/table";
     TableModule
   ],
   styles: [`
-
-    ///*style de treeTable*/
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts th {
-    //  background-color: #007ad9 !important;
-    //  color: white !important;
-    //  text-align: center !important;
-    //  padding: 2px 8px !important;
-    //}
-    //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts td {
-      //padding: 2px 8px !important;
-      //border: 1px solid #dddddd !important;
-      //width: auto;
-     // font-weight: 700;
-    //}
-    //
-    //.table.ts-header {
-    //  background-color: var(--gray-500);
-    //  color: white;
-    //  padding: 10px !Important;
-    //  font-weight: 700 !Important;
-    //}
-    //
-    //.table.ts-header td {
-    //  text-align: center !Important;
-    //}
-    //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr.no-vehicle {
-    //  background-color: var(--gray-200) !important;
-    //  //color: var(--blue-600) !important;
-    //  font-weight: 700;
-    //  color: red;
-    //}
-    //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr.has-vehicle {
-    //  background-color: var(--gray-200) !important;
-    //  font-weight: 600;
-    //}
-    //
-    //:host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table.ts tr:hover {
-    //  background-color: var(--bluegray-100) !important;
-    //}
-    //
-    //.p-treeTable .p-treetable-toggler {
-    //  color: white !important;
-    //}
-    //
-    //::ng-deep .p-treetable .p-treetable-tbody > tr > td .p-treetable-toggler {
-    //  color: white;
-    //  background: #aa001f !important;
-    //  width: 1.3rem;
-    //  height: 1.3rem;
-    //}
-    //
-    //.custom-cell {
-    //  width: 1%;
-    //  white-space: nowrap;
-    //  text-align: center;
-    //  padding: 0;
-    //  align-items: center
-    //}
-    //
-    ///*fin de style de treeTable*/
-    //
-    ///*style de treeTable parent ligne*/
-    //:host ::ng-deep .p-treetable.custom-tree-table.ts .root-node {
-    //  background-color: #aa001f;
-    //  color: white;
-    //  border-radius: 15px 15px 0px 0px !important;
-    //  border: none !important;
-    //  width: 100% !important;
-    //  margin: 0 auto !important;
-    //  box-shadow: 0 2px 4px #0000001a !important;
-    //  font-weight: 700 !important;
-    //  clip-path: polygon(0% 100%, 0% 15%, 25% 15%, 27% 75%, 100% 75%, 100% 100%) !important;
-    //  height: 50px;
-    //  line-height: 50px;
-    //}
-    //
-    //:host ::ng-deep .p-treetable.custom-tree-table.ts .root-node td {
-    //  padding: 12px;
-    //  border-width: 0px;
-    //  font-weight: 700 !important;
-    //}
-    //
-    ///*fin de style de treeTable parent ligne*/
-    //
-    //
-    ///*style de bouton personnalisé*/
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button {
-    //  background-color: #aa001f !important;
-    //  border-color: #aa001f !important;
-    //  color: white !important;
-    //  font-weight: 600;
-    //}
-    //
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:focus,
-    //::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button:active {
-    //  border-color: white !important;
-    //  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
-    //}
-    //
-    //::ng-deep .p-button.p-component.p-button-icon-only.red-button {
-    //  background-color: #aa001f !important;
-    //  border-color: #aa001f !important;
-    //  color: white !important;
-    //  margin: 1px !important;
-    //}
-
-    /*fin de style de bouton personnalisé*/
-
-
     /* Make dialog content flexible */
     ::ng-deep .p-dialog {
       max-width: 95%;
       width: auto !important;
       height: auto !important;
       max-height: 90vh;
-
     }
-
     ::ng-deep .p-dialog .p-dialog-header {
       border-top-left-radius: 20px !important;
       border-top-right-radius: 20px !important;
@@ -311,7 +193,7 @@ import {TableModule} from "primeng/table";
 
     /* Ensure modal adjusts based on content */
     ::ng-deep .p-dialog-content {
-      overflow: hidden; /* Prevents unwanted scrolling */
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       border-bottom-left-radius: 20px !important;
@@ -320,52 +202,9 @@ import {TableModule} from "primeng/table";
 
     /* Table container with scrolling */
     .table-container {
-      max-height: 60vh; /* Ensures the table.ts scrolls within the dialog */
+      max-height: 60vh;
       overflow-y: auto;
     }
-
-    ///* Make table.ts fully responsive */
-    //table {
-    //  width: 100%;
-    //  border-collapse: collapse;
-    //  table-layout: auto; /* Adjusts column width dynamically */
-    //  border-radius: 12px;
-    //  white-space: nowrap;
-    //}
-    //
-    ///* Sticky table.ts header */
-    //thead th {
-    //  background-color: #aa001f;
-    //  color: white;
-    //  padding: 10px;
-    //  text-align: left;
-    //  font-weight: bold;
-    //  position: sticky;
-    //  top: 0;
-    //  z-index: 2;
-    //}
-    //
-    ///* Table row styling */
-    //td {
-    //  padding: 8px;
-    //  border: 1px solid #ddd;
-    //}
-    //
-    //tbody tr:nth-child(odd) {
-    //  background-color: #f9f9f9;
-    //}
-    //
-    //tbody tr:hover {
-    //  background-color: #f1f1f1;
-    //}
-    //::ng-deep .p-table-tbody tr:nth-child(odd) {
-    //  background-color: var(--surface-50) !important;
-    //}
-    //
-    //::ng-deep .p-table-tbody tr:nth-child(even) {
-    //  background-color: var(--surface-100) !important;
-    //}
-
   `]
 })
 
@@ -555,9 +394,7 @@ export class ReportComponent implements OnInit {
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-
       this.fetchVehicleStats();
-
     })
   };
 }

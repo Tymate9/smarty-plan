@@ -293,7 +293,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
       height: 100%;
 
       text-align: center;
-      padding: 25rem 0;
+      padding: 30rem 0;
       font-size: x-large;
       color: grey;
       z-index: 2;

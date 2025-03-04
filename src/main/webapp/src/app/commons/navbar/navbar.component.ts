@@ -258,7 +258,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const sortByLabel = (a: any, b: any) => a.label.localeCompare(b.label);
     // Mapper toutes les équipes par ID
     teams.forEach(team => {
-      teamMap.set(team.id, {...team, children: []});
+      if (team.id != null) {
+        teamMap.set(team.id, {...team, children: []});
+      }
     });
 
     // Lier les enfants à leurs parents

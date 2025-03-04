@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {AutocompleteFormInput, FormInput, IFormInput} from "../iform-input";
-import {TeamValidator} from "../team-validator";
+import {TeamValidator} from "./team-validator";
 import {TeamService} from "../../../../features/vehicle/team.service";
 import {dto} from "../../../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
@@ -10,6 +10,7 @@ import {FormDescription} from "../form-description";
 import {forkJoin} from "rxjs";
 import {EntityFormComponent} from "../entity-form/entity-form.component";
 import {NgIf} from "@angular/common";
+import {NotificationService} from "../../../notification/notification.service";
 
 @Component({
   selector: 'app-team-form',
@@ -31,6 +32,8 @@ import {NgIf} from "@angular/common";
   `
 })
 export class TeamFormComponent implements OnInit {
+  @Input() manageNotifications: boolean = true;
+
   @Output() entityCreated = new EventEmitter<TeamDTO>();
   @Output() entityUpdated = new EventEmitter<TeamDTO>();
   @Output() errorInRequest = new EventEmitter<any>();
@@ -40,7 +43,10 @@ export class TeamFormComponent implements OnInit {
   public formDescription!: IFormDescription;
   public mode: 'create' | 'update' = 'create';
 
-  constructor(public teamService: TeamService) {}
+  constructor(
+    public teamService: TeamService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     if (this.teamId != null) {
@@ -146,15 +152,33 @@ export class TeamFormComponent implements OnInit {
   public handleResponse(response: any): void {
     if (response && !response.error) {
       if (this.mode === 'create') {
+        if (this.manageNotifications) {
+          // Ajout d'un détail fournissant le résumé de l'action et l'état actuel (ici, le label par exemple)
+          this.notificationService.success(
+            'Team créée avec succès',
+            `Team "${response.label}" a été créée.`
+          );
+        }
         this.entityCreated.emit(response);
         this.mode = 'update';
         this.teamEntity = response;
         this.buildFormDescription(response);
       } else {
+        if (this.manageNotifications) {
+          this.notificationService.success(
+            'Team mise à jour avec succès',
+            `Team "${response.label}" a été mise à jour.`
+          );
+        }
         this.entityUpdated.emit(response);
       }
     } else if (response && response.error) {
+      if(this.manageNotifications) {
+        this.notificationService.error(
+          'Erreur lors de la sauvegarde du team',
+          'Veuillez vérifier les informations et réessayer.'
+        );
+      }
       this.errorInRequest.emit(response.error);
     }
-  }
-}
+  }}

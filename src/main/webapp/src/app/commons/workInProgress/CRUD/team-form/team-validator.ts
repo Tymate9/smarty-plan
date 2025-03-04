@@ -81,7 +81,7 @@ export class TeamValidator {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
       if (!value) {
-        return null; // Laissez le validator required s'en charger.
+        return null;
       }
       const isValid = options.some(opt => compareFn ? compareFn(opt, value) : opt.id === value.id);
       return isValid ? null : { invalidOption: 'La valeur sélectionnée n\'est pas dans la liste.' };

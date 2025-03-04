@@ -8,6 +8,7 @@ import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
+import {DriverFormComponent} from "./commons/workInProgress/CRUD/driver-Form/driver-form.component";
 
 export const routes: Routes = [
   {
@@ -24,7 +25,8 @@ export const routes: Routes = [
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'workinprogress', component: EntityAdminComponent }
+      { path: 'workinprogress', component: EntityAdminComponent },
+      { path: 'workinprogress2', component: DriverFormComponent}
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

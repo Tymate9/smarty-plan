@@ -41,7 +41,8 @@ export const NmPreset = definePreset(Nora, {
     iconfield:iconConfig,
     autocomplete:autocompleteConfig,
     treeselect:treeSelectConfig,
-    tabs:tabsConfig
+    tabs:tabsConfig,
+    checkbox:checkboxConfig
 
   }
 });

@@ -47,14 +47,12 @@ export interface Option {
           <div class="filters center">
             <p-treeSelect
               [options]="agencyOptionsTree"
-              [(ngModel)]="agencySelected"
+              [(ngModel)]="selectedNodes"
               [placeholder]="'Filtrer Agence...'"
               selectionMode="checkbox"
               [filter]="true"
               [showClear]="true"
               appendTo="body"
-              (onNodeSelect)="onNodeSelect($event)"
-              (onNodeUnselect)="onNodeUnselect($event)"
               (ngModelChange)="onSelectionChange($event)">
             </p-treeSelect>
             <p-autoComplete
@@ -202,6 +200,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   agencyTree: Option[] = [];
   driverOptions: DriverDTO[] = [];
   vehicleOptions: VehicleSummaryDTO[] = [];
+  selectedNodes:any[]=[];
 
   // Options filtrées en fonction des agences sélectionnées
   filteredVehicleOptions: string[] = [];
@@ -214,42 +213,26 @@ export class NavbarComponent implements OnInit, OnDestroy {
   logoutURL: string = ''; // Propriété pour stocker la logoutURL
   private configSubscription: Subscription; // Abonnement pour la configuration
 
-  onNodeSelect(event: any) {
-    if (event.node) {
-      const selectedLabel: string | undefined = event.node.label;
 
-      if (selectedLabel) {
-        // Assuming this.agencySelected is an array of selected labels
-        this.agencySelected.push(selectedLabel);
-      }
+  onSelectionChange(selectedNodes: any[]) {
+    const previousSelection = [...this.agencySelected]; // Store previous state
 
-      //   console.log('Node Selected:', event.node.label);
-
-      this.emitSelectedTags();
-      this.filterVehiclesAndDrivers();
-    }
-  }
-
-  onNodeUnselect(event: any) {
-    if (event.node) {
-      const selectedLabel: string = event.node.label; // Only take the label or other non-circular properties
-      this.agencySelected = this.agencySelected.filter(label => label !== selectedLabel);
-      this.removeVehiclesAndDriversForAgency(selectedLabel)
-
-      this.emitSelectedTags();
-      this.filterVehiclesAndDrivers();
-
-    }
-  }
-
-  onSelectionChange(event: any) {
-    if (!event || event.length === 0) {
+    if (!selectedNodes || selectedNodes.length === 0) {
       this.agencySelected = [];
-      this.vehicleSelected=[];
-      this.driverSelected=[];
-      this.emitSelectedTags();
-      this.filterVehiclesAndDrivers();
+      this.vehicleSelected = [];
+      this.driverSelected = [];
+    } else {
+      // Extract only the labels of selected nodes
+      this.agencySelected = selectedNodes.map(node => node.label);
     }
+
+    const removedNodes = previousSelection.filter(label => !this.agencySelected.includes(label));
+    removedNodes.forEach(label => this.removeVehiclesAndDriversForAgency(label));
+
+    console.log('Updated agencySelected:', this.agencySelected);
+
+    this.emitSelectedTags();
+    this.filterVehiclesAndDrivers();
   }
 
 
@@ -325,16 +308,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.filterService.updateFilters(newFilters);
     }
   }
-  // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-  //   return Object.keys(filters1).every((key) =>
-  //     filters1[key].length === filters2[key]?.length &&
-  //     filters1[key].every((value, index) => value === filters2[key][index])
-  //   );
-
   private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-      return JSON.stringify(filters1) === JSON.stringify(filters2);
+    return Object.keys(filters1).every((key) =>
+      filters1[key].length === filters2[key]?.length &&
+      filters1[key].every((value, index) => value === filters2[key][index])
+    );
+  }
 
-    }
+  // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
+  //     return JSON.stringify(filters1) === JSON.stringify(filters2);
+  //
+  //   }
 
   async ngOnInit() {
     try {

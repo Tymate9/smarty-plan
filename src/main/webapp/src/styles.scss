@@ -180,6 +180,13 @@ html, body {
   border-color: var(--p-gray-400) !important;
   color: white !important;
 }
+.custom-gray-button:focus,
+.custom-gray-button:active {
+  border-color: white !important;
+  box-shadow: 0 0 0 0.2rem rgba(20, 20, 20, 0.25);
+}
+
+
 
 .space-bottom {
   margin-bottom: 10px;

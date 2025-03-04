@@ -55,7 +55,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
                  [scrollable]="true"
                  [tableStyle]="{'width': '95%', 'margin': '0 auto' , 'table-layout' :'auto'}"
                  [resizableColumns]="true"
-                 styleClass="p-treetable-gridlines custom-tree-table">
+                 styleClass="p-treetable-gridlines">
 
       <ng-template pTemplate="header">
       </ng-template>

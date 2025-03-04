@@ -188,9 +188,10 @@ export class TripsComponent implements OnInit {
   }
 
   set calendarDate(date: Date) {
+    const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
     date.setHours(3);
     this.loading = true;
-    this.router.navigate(['/trip', this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
+    this.router.navigate(['/trip'+(nonGeolocalized?'-non-geoloc':''), this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
   }
 
   protected tripData: TripEventsDTO | null = null;

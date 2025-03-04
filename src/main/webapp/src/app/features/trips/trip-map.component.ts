@@ -445,7 +445,7 @@ export class TripMapComponent {
     if(geoloc == null){
       return;
     }
-    this.isMapVisible = geoloc && !(location.pathname.indexOf('-non-geoloc')>0)
+    this.isMapVisible = geoloc
   }
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {

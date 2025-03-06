@@ -39,6 +39,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles()"></p-button>
       <p-button icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()"></p-button>
       <p-button label="Exporter CSV" (click)="exportToCSV()"
@@ -217,7 +218,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
         </svg>
       </span>
               </ng-template>
-
               <!-- #4 L'adresse s'affiche (que ce soit 'pause midi...' ou non) -->
               <span>
       {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
@@ -551,60 +551,125 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.filtersSubscription?.unsubscribe()
   }
+  //Cette méthode permet de récupérer la liste des véhicules et de les transformer en TreeNode
+  loadFilteredVehicles(): void {
+
+    if (this.non_geoloc) {
+      this.vehicleService.getFilteredNonGeolocVehiclesDashboard(
+        this.filters.agencies,
+        this.filters.vehicles,
+        this.filters.drivers
+      ).subscribe(filteredVehicles => {
+        this.teamHierarchy = filteredVehicles;
+
+        this.vehiclesTree = VehicleService.transformToTreeNodes(
+          filteredVehicles,
+          (vehicle: dto.VehicleTableDTO) => ({
+            driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+            licensePlate: vehicle.licenseplate,
+          })
+        );
+        this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
+      });
+    }
+    else {
+      this.vehicleService.getFilteredVehiclesDashboard(
+        this.filters.agencies,
+        this.filters.vehicles,
+        this.filters.drivers
+      ).subscribe(filteredVehicles => {
+        this.teamHierarchy = filteredVehicles;
+
+        this.vehiclesTree = VehicleService.transformToTreeNodes(
+          filteredVehicles,
+          (vehicle: dto.VehicleTableDTO) => ({
+            driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+            licensePlate: vehicle.licenseplate,
+          })
+        );
+        this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
+      });
+    }
+  }
+
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
+      this.loadFilteredVehicles();
 
-      // Fetch the filtered vehicles based on the selected filters
-      if(this.non_geoloc){
-        this.vehicleService.getFilteredNonGeolocVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
-          .subscribe(filteredVehicles => {
-
-            this.teamHierarchy = filteredVehicles
-            this.vehiclesTree = VehicleService.transformToTreeNodes(
-              filteredVehicles,
-              (vehicle: dto.VehicleTableDTO) => ({
-                driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
-                licensePlate: vehicle.licenseplate,
-              }))
-
-            const stateCounts = this.calculateStatusCounts(filteredVehicles);
-            this.vehicleStatusCounts = [
-              {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
-              {state: 'PARKED', count: stateCounts['PARKED'] || 0},
-              {state: 'IDLE', count: stateCounts['IDLE'] || 0},
-              {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
-              {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
-            ];
-          });
-      }else{
-        this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
-          .subscribe(filteredVehicles => {
-
-            this.teamHierarchy = filteredVehicles
-            this.vehiclesTree = VehicleService.transformToTreeNodes(
-              filteredVehicles,
-              (vehicle: dto.VehicleTableDTO) => ({
-                driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
-                licensePlate: vehicle.licenseplate,
-              }))
-
-            const stateCounts = this.calculateStatusCounts(filteredVehicles);
-            this.vehicleStatusCounts = [
-              {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
-              {state: 'PARKED', count: stateCounts['PARKED'] || 0},
-              {state: 'IDLE', count: stateCounts['IDLE'] || 0},
-              {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
-              {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
-            ];
-          });
-      }
+      // // Fetch the filtered vehicles based on the selected filters
+      // if(this.non_geoloc){
+      //   this.vehicleService.getFilteredNonGeolocVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+      //     .subscribe(filteredVehicles => {
+      //
+      //       this.teamHierarchy = filteredVehicles
+      //       this.vehiclesTree = VehicleService.transformToTreeNodes(
+      //         filteredVehicles,
+      //         (vehicle: dto.VehicleTableDTO) => ({
+      //           driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+      //           licensePlate: vehicle.licenseplate,
+      //         }))
+      //
+      //       const stateCounts = this.calculateStatusCounts(filteredVehicles);
+      //       this.vehicleStatusCounts = [
+      //         {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
+      //         {state: 'PARKED', count: stateCounts['PARKED'] || 0},
+      //         {state: 'IDLE', count: stateCounts['IDLE'] || 0},
+      //         {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
+      //         {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
+      //       ];
+      //     });
+      // }else{
+      //   this.vehicleService.getFilteredVehiclesDashboard(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
+      //     .subscribe(filteredVehicles => {
+      //
+      //       this.teamHierarchy = filteredVehicles
+      //       this.vehiclesTree = VehicleService.transformToTreeNodes(
+      //         filteredVehicles,
+      //         (vehicle: dto.VehicleTableDTO) => ({
+      //           driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+      //           licensePlate: vehicle.licenseplate,
+      //         }))
+      //
+      //       const stateCounts = this.calculateStatusCounts(filteredVehicles);
+      //       this.vehicleStatusCounts = [
+      //         {state: 'DRIVING', count: stateCounts['DRIVING'] || 0},
+      //         {state: 'PARKED', count: stateCounts['PARKED'] || 0},
+      //         {state: 'IDLE', count: stateCounts['IDLE'] || 0},
+      //         {state: 'NO_COM', count: stateCounts['NO_COM'] || 0},
+      //         {state: 'UNPLUGGED', count: stateCounts['UNPLUGGED'] || 0},
+      //       ];
+      //     });
+      // }
     })
   };
 
+  // //Cette méthode permet de calculer le nombre de véhicules pour chaque état
+  // calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): Record<string, number> {
+  //   const counts: Record<string, number> = {};
+  //
+  //   function traverseTeams(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): void {
+  //     teamNodes.forEach((team) => {
+  //       // Count states from the vehicles at this team level
+  //       team.vehicles.forEach((vehicle) => {
+  //         const state = vehicle.device?.deviceDataState?.state;
+  //         if (state) {
+  //           counts[state] = (counts[state] || 0) + 1;
+  //         }
+  //       });
+  //       // Recursively process child teams
+  //       if (team.children && team.children.length > 0) {
+  //         traverseTeams(team.children);
+  //       }
+  //     });
+  //   }
+  //
+  //   traverseTeams(teams);
+  //   return counts;
+  // }
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
-  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): Record<string, number> {
+  calculateStatusCounts(teams: TeamHierarchyNode<dto.VehicleTableDTO>[]): { state: string; count: number }[] {
     const counts: Record<string, number> = {};
 
     function traverseTeams(teamNodes: TeamHierarchyNode<dto.VehicleTableDTO>[]): void {
@@ -616,15 +681,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
             counts[state] = (counts[state] || 0) + 1;
           }
         });
+
         // Recursively process child teams
         if (team.children && team.children.length > 0) {
           traverseTeams(team.children);
         }
       });
     }
-
     traverseTeams(teams);
-    return counts;
+    //return counts;
+    return [
+      { state: 'DRIVING', count: counts['DRIVING'] || 0 },
+      { state: 'PARKED', count: counts['PARKED'] || 0 },
+      { state: 'IDLE', count: counts['IDLE'] || 0 },
+      { state: 'NO_COM', count: counts['NO_COM'] || 0 },
+      { state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0 },
+    ];
   }
 
 

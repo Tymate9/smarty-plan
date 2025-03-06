@@ -49,14 +49,14 @@ export interface Option {
               [options]="agencyOptionsTree"
               [(ngModel)]="selectedNodes"
               [placeholder]="'Filtrer Agence...'"
+              filter="true"
               selectionMode="checkbox"
-              [filter]="true"
               [showClear]="true"
               appendTo="body"
               (ngModelChange)="onSelectionChange($event)">
             </p-treeSelect>
             <p-autoComplete
-              [suggestions]="filteredVehicleOptions"
+              [suggestions]="filteredVehicleAutocomplete"
               [(ngModel)]="vehicleSelected"
               (completeMethod)="filterVehicles($event)"
               [multiple]="true"
@@ -66,7 +66,7 @@ export interface Option {
               appendTo="body">
             </p-autoComplete>
             <p-autoComplete
-              [suggestions]="filteredDriverOptions"
+              [suggestions]="filteredDriverAutocomplete"
               [(ngModel)]="driverSelected"
               (completeMethod)="filterDrivers($event)"
               [multiple]="true"
@@ -206,6 +206,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   filteredVehicleOptions: string[] = [];
   filteredDriverOptions: string[] = [];
 
+  // Options filtrées en fonction d'autocomplete component
+  filteredVehicleAutocomplete: string[] = [];
+  filteredDriverAutocomplete: string[] = [];
+
   agencySelected: string[] = [];
   vehicleSelected: string[] = [];
   driverSelected: string[] = [];
@@ -216,7 +220,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   onSelectionChange(selectedNodes: any[]) {
     const previousSelection = [...this.agencySelected]; // Store previous state
-
     if (!selectedNodes || selectedNodes.length === 0) {
       this.agencySelected = [];
       this.vehicleSelected = [];
@@ -228,9 +231,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     const removedNodes = previousSelection.filter(label => !this.agencySelected.includes(label));
     removedNodes.forEach(label => this.removeVehiclesAndDriversForAgency(label));
-
-    console.log('Updated agencySelected:', this.agencySelected);
-
     this.emitSelectedTags();
     this.filterVehiclesAndDrivers();
   }
@@ -239,54 +239,67 @@ export class NavbarComponent implements OnInit, OnDestroy {
   // Method to filter driver options based on user input
   filterDrivers(event: any) {
     const query = event.query.toLowerCase();
-    this.filteredDriverOptions = this.filteredDriverOptions.filter(driver =>
+    this.filteredDriverAutocomplete = this.filteredDriverOptions.filter(driver =>
       driver.toLowerCase().includes(query)
     );
   }
-
   filterVehicles(event: any) {
     const query = event.query.toLowerCase();
-    this.filteredVehicleOptions = this.filteredVehicleOptions.filter(vehicle =>
+    this.filteredVehicleAutocomplete = this.filteredVehicleOptions.filter(vehicle =>
       vehicle.toLowerCase().includes(query)
     );
   }
-
-  transformToHierarchy(teams: TeamDTO[]): any[] {
-    const teamMap = new Map<number, any>();
-    const roots: any[] = [];
+  transformToHierarchy(agencies: TeamDTO[]): any[] {
+    const teamMap = new Map<number, any>(); // Map to store all teams
+    const roots: any[] = []; // Root-level teams (agencies)
 
     const sortByLabel = (a: any, b: any) => a.label.localeCompare(b.label);
-    // Mapper toutes les équipes par ID
-    teams.forEach(team => {
-      if (team.id != null) {
-        teamMap.set(team.id, {...team, children: []});
+
+    //Create a map of teams
+    agencies.forEach(team => {
+      if (team.id !== null) {
+        teamMap.set(team.id, {
+          label: team.label,
+          key: `team-${team.id}`,
+          selectable: true, // Teams should be selectable
+          children: []
+        });
       }
     });
 
-    // Lier les enfants à leurs parents
-    teams.forEach(team => {
-      if (team.parentTeam?.id) {
+    //Link child teams to their parent team
+    agencies.forEach(team => {
+      if (team.id !== null && team.parentTeam && team.parentTeam?.id !== null) {
         const parent = teamMap.get(team.parentTeam.id);
-        if (parent) {
-          if (team.id != null) {
-            parent.children.push(teamMap.get(team.id));
-          }
-        }
-      } else {
-        // Équipe de niveau racine
-        if (team.id != null) {
-          roots.push(teamMap.get(team.id));
+        const child = teamMap.get(team.id);
+
+        if (parent && child) {
+          parent.children.push(child);
         }
       }
     });
 
-    teamMap.forEach(team => {
-      team.children.sort(sortByLabel);
+    //Identify root-level teams (agencies)
+    agencies.forEach(team => {
+      if (team.id !== null && !team.parentTeam) {
+        const agencyNode = teamMap.get(team.id);
+        if (agencyNode) {
+          agencyNode.selectable = true; // Agencies should not be selectable
+          roots.push(agencyNode);
+        }
+      }
     });
 
+    //Sort the teams within each agency
+    teamMap.forEach(team => {
+      if (team.children) {
+        team.children.sort(sortByLabel);
+      }
+    });
+
+    // Sort the root-level agencies
     roots.sort(sortByLabel);
     return roots;
-
   }
 
   updateVehicles(tags: string[]) {
@@ -310,17 +323,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.filterService.updateFilters(newFilters);
     }
   }
-  private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-    return Object.keys(filters1).every((key) =>
-      filters1[key].length === filters2[key]?.length &&
-      filters1[key].every((value, index) => value === filters2[key][index])
-    );
-  }
-
   // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
-  //     return JSON.stringify(filters1) === JSON.stringify(filters2);
-  //
-  //   }
+  //   return Object.keys(filters1).every((key) =>
+  //     filters1[key].length === filters2[key]?.length &&
+  //     filters1[key].every((value, index) => value === filters2[key][index])
+  //   );
+  // }
+
+  private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
+      return JSON.stringify(filters1) === JSON.stringify(filters2);
+
+    }
 
   async ngOnInit() {
     try {
@@ -366,9 +379,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         vehicles: this.vehicleService.getVehiclesList(),
         drivers: this.driverService.getDrivers()
       }).subscribe(({agencies, vehicles, drivers}) => {
-        console.log('Agencies:', agencies);
-        console.log('Vehicles:', vehicles);
-        console.log('Drivers:', drivers);
 
         // Traitement des agences
         this.agencyOptions = this.transformToHierarchy(agencies);
@@ -573,6 +583,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.agencySelected = [];
     this.vehicleSelected = [];
     this.driverSelected = [];
+    this.selectedNodes=[];
 
     this.filterService.resetFilters();
     this.filterService.triggerReset();

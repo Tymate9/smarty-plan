@@ -47,7 +47,7 @@ export const datePickerConfig = {
   selectYear: { hoverBackground: "{content.hover.background}", color: "{content.color}", hoverColor: "{content.hover.color}", padding: "0.25rem 0.5rem" },
   group: { borderColor: "{content.border.color}", gap: "{overlay.popover.padding}" },
   dayView: { margin: "0.5rem 0 0 0" },
-  weekDay: { padding: "0.25rem", fontWeight: "700", color: nmColors.darkGray },
+  weekDay: { padding: "0.25rem", fontWeight: "700", color: nmColors.brandRed },
   date: {
     hoverBackground: "{content.hover.background}",
     selectedBackground: "{content.hover.background}",

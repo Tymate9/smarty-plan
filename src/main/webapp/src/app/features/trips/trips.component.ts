@@ -81,7 +81,7 @@ import {NgIf} from "@angular/common";
   styles: [`
     #trip-container {
       position: relative;
-      z-index: 10000;
+      z-index: 0;
 
       .full-screen-info {
         position: absolute;

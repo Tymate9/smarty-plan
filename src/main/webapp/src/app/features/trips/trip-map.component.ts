@@ -24,7 +24,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
   template: `
     <div id="trip-container">
       <div id="map" [style.visibility]="isMapVisible ? 'visible' : 'hidden'"></div>
-      <div id="map-non-geoloc" >Trajets non géolocalisés pour ce véhicule et ce jour.</div>
+      <div id="map-non-geoloc" *ngIf="non_geoloc">Trajets non géolocalisés pour ce véhicule et ce jour.</div>
       <div id="side-panel" class="h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
         <p-toggleButton
           [(ngModel)]="showSidePanel"
@@ -114,6 +114,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
                     <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 0.1vh; transform: scale(0.8);">
                       <app-poi-navigation-button
+                        *ngIf="!non_geoloc"
                         [buttonLabel]="'Créer POI'"
                         [coords]="[event.lat + ',' + event.lng]">
                       </app-poi-navigation-button>
@@ -144,6 +145,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
                     <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 0.1vh; transform: scale(0.8);">
                       <app-poi-navigation-button
+                        *ngIf="!non_geoloc"
                         [buttonLabel]="'Créer POI'"
                         [coords]="[event.lat + ',' + event.lng]">
                       </app-poi-navigation-button>
@@ -234,6 +236,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
                     <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 1vh; transform: scale(0.8);">
                       <app-poi-navigation-button
+                        *ngIf="!non_geoloc"
                         [buttonLabel]="'Créer POI'"
                         [coords]="[event.lat + ',' + event.lng]">
                       </app-poi-navigation-button>
@@ -292,7 +295,8 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
       height: 100%;
 
       text-align: center;
-      padding: 30rem 0;
+      padding-top: 20%;
+      padding-right: 20%;
       font-size: x-large;
       color: grey;
       z-index: 2;
@@ -400,6 +404,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
     #trips-timeline {
       overflow-y: auto;
       height: 60%;
+      padding-left:15px;
 
       ::ng-deep {
         .p-timeline-event-opposite {
@@ -424,15 +429,18 @@ export class TripMapComponent {
 
   protected isMapVisible = true
 
+
+
   public itemHasLunchBreakStartEvent = (item:any): boolean => item.type === 'START_LUNCH_BREAK';
 
   public itemHasLunchBreakEndEvent = (item:any): boolean => item.type === 'END_LUNCH_BREAK';
 
-
+  non_geoloc : boolean = false;
   constructor(
     protected tripsService: TripsService,
     protected tilesService: TilesService
   ) {
+    this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
     console.log("=== trip-map.component.ts constructor")
   }
 

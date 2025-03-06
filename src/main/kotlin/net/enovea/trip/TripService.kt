@@ -191,7 +191,8 @@ class TripService(
                         address = "Adresse non géolocalisée",
                         lat = null,
                         lng = null,
-                        trace = null
+                        trace = null,
+                        color="black"
                     )
                 },
                 compactedTripEvents = result.compactedTripEvents.map { event ->
@@ -201,7 +202,8 @@ class TripService(
                         address = "Adresse non géolocalisée",
                         lat = null,
                         lng = null,
-                        trace = null
+                        trace = null,
+                        color="black"
                     )
                 }
             )

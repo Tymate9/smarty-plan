@@ -8,7 +8,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "cdi")
 interface DeviceDataMapper {
 
     @Mapping(source = "deviceDataState", target = "deviceDataState", qualifiedByName = ["deviceDataStateMapper"])
@@ -18,10 +18,5 @@ interface DeviceDataMapper {
 
     @Named("deviceDataStateMapper")
     fun toDeviceDataDTO(deviceDataState: DeviceDataStateEntity?): DeviceDataStateDTO? = deviceDataState?.let { CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(deviceDataState) }
-
-    companion object {
-        val INSTANCE: DeviceDataMapper = Mappers.getMapper(DeviceDataMapper::class.java)
-    }
-
 }
 

@@ -11,8 +11,4 @@ interface VehicleCategoryMapper {
 
     // Map from CategoryDTO to CategoryEntity
     fun toEntity(categoryDTO: VehicleCategoryDTO): VehicleCategoryEntity
-
-    companion object {
-        val INSTANCE: VehicleCategoryMapper = Mappers.getMapper(VehicleCategoryMapper::class.java)
-    }
 }

@@ -17,9 +17,4 @@ class TeamServiceConfiguration {
     ): TeamService {
         return TeamService(teamMapper)
     }
-
-    @Produces
-    @ApplicationScoped
-    fun teamMapper(): TeamMapper = TeamMapper.INSTANCE
-
 }

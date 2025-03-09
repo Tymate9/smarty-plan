@@ -36,12 +36,4 @@ class VehicleServiceConfiguration {
             tripService
         )
     }
-
-/*    @Produces
-    @ApplicationScoped
-    fun vehicleMapper(): VehicleMapper = VehicleMapper.INSTANCE*/
-
-/*    @Produces
-    @ApplicationScoped
-    fun deviceDataStateMapper(): DeviceDataStateMapper = DeviceDataStateMapper.INSTANCE*/
 }

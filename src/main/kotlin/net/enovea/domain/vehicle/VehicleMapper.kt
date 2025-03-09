@@ -1,11 +1,9 @@
 package net.enovea.domain.vehicle
 
-import jakarta.enterprise.inject.spi.CDI
 import jakarta.inject.Inject
 import net.enovea.domain.device.DeviceDataStateMapper
 import net.enovea.domain.device.DeviceMapper
 import net.enovea.domain.device.DeviceSummaryMapper
-import net.enovea.domain.device.until
 import net.enovea.domain.driver.DriverEntity
 import net.enovea.domain.driver.DriverMapper
 import net.enovea.domain.team.TeamEntity
@@ -19,9 +17,7 @@ import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
-import org.mapstruct.factory.Mappers
 import java.sql.Timestamp
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -34,6 +30,24 @@ abstract class VehicleMapper {
 
     @Inject
     protected lateinit var driverService: DriverService
+
+    @Inject
+    protected lateinit var driverMapper: DriverMapper
+
+    @Inject
+    protected lateinit var deviceMapper: DeviceMapper
+
+    @Inject
+    protected lateinit var deviceSummaryMapper: DeviceSummaryMapper
+
+    @Inject
+    protected lateinit var teamMapper: TeamMapper
+
+    @Inject
+    protected lateinit var teamSummaryMapper: TeamSummaryMapper
+
+    @Inject
+    protected lateinit var deviceDataStateMapper: DeviceDataStateMapper
 
     //////////////////////////
     // Vehicle Summary Mapper
@@ -51,7 +65,7 @@ abstract class VehicleMapper {
         return if (driverEntity == null) {
             null
         } else {
-            DriverMapper.INSTANCE.toDto(driverEntity)
+            driverMapper.toDto(driverEntity)
         }
     }
 
@@ -61,7 +75,7 @@ abstract class VehicleMapper {
         return if (deviceEntity == null) {
             null
         } else {
-            DeviceSummaryMapper.INSTANCE.toDeviceDTOsummary(deviceEntity)
+            deviceSummaryMapper.toDeviceDTOsummary(deviceEntity)
         }
     }
 
@@ -70,7 +84,7 @@ abstract class VehicleMapper {
         return vehicleTeams
             .filter { it.endDate == null }
             .maxByOrNull { it.id.startDate }
-            ?.let { TeamSummaryMapper.INSTANCE.toDto(it.team!!) }
+            ?.let { teamSummaryMapper.toDto(it.team!!) }
     }
 
     //////////////////////////
@@ -89,7 +103,7 @@ abstract class VehicleMapper {
         vehicleDrivers.associate {
             val startDate = it.id.startDate
             val endDate = it.endDate
-            TimestampRange(startDate, endDate) to DriverMapper.INSTANCE.toDto(it.driver!!)
+            TimestampRange(startDate, endDate) to driverMapper.toDto(it.driver!!)
         }
 
     //Map DeviceVehicleInstallEntity to DeviceDTOs with start and end date
@@ -97,7 +111,7 @@ abstract class VehicleMapper {
         vehicleDevices.associate {
             val startDate = it.id.startDate
             val endDate = it.endDate
-            TimestampRange(startDate, endDate) to DeviceMapper.INSTANCE.toDto(it.device!!)
+            TimestampRange(startDate, endDate) to deviceMapper.toDto(it.device!!)
         }
 
     //Map VehicleTeamEntity to TeamDTOs with start and end date
@@ -105,7 +119,7 @@ abstract class VehicleMapper {
         vehicleTeams.associate {
             val startDate = it.id.startDate
             val endDate = it.endDate
-            TimestampRange(startDate, endDate) to TeamMapper.INSTANCE.toDto(it.team!!)
+            TimestampRange(startDate, endDate) to teamMapper.toDto(it.team!!)
         }
 
     //////////////////////////
@@ -130,7 +144,7 @@ abstract class VehicleMapper {
         }
 
         // On applique le mapper DeviceDataStateMapper
-        val dto = CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(deviceDataState)
+        val dto = deviceDataStateMapper.toDto(deviceDataState)
 
         // dto.coordinate sera déjà anonymisé si la pause est en cours
         return dto.coordinate
@@ -149,7 +163,7 @@ abstract class VehicleMapper {
         }
 
         // On applique le mapper
-        val dto = CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(deviceDataState)
+        val dto = deviceDataStateMapper.toDto(deviceDataState)
         // dto.state sera déjà transformé par le custom mapper @Named("BR_StateMapper")
         return dto.state
     }

@@ -18,8 +18,4 @@ interface DeviceMapper {
 
     // Map from DeviceDTO to DeviceEntity
     fun toEntity(deviceDTO: DeviceDTO): DeviceEntity
-
-    companion object {
-        val INSTANCE: DeviceMapper = Mappers.getMapper(DeviceMapper::class.java)
-    }
 }

@@ -53,5 +53,60 @@ class DriverService(
 
     }
 
+    // ====================================================
+    // Méthodes pour récupérer la fenêtre de pause d’un Driver
+    // ====================================================
+
+    /**
+     * Récupère la liste des teams actives pour un driver, à la date [refDate].
+     * (endDate IS NULL ou endDate >= refDate)
+     */
+    @Transactional
+    fun findActiveDriverTeams(driver: DriverEntity, refDate: Timestamp): List<TeamEntity> {
+        return driver.driverTeams
+            .filter { it.endDate == null || it.endDate!! >= refDate }
+            .mapNotNull { it.team }
+            .distinct()
+    }
+
+    /**
+     * Remonte l’héritage pour trouver la lunchBreakStart s’il est null
+     * dans la team courante.
+     */
+    fun findInheritedStart(team: TeamEntity?): LocalTime? {
+        if (team == null) return null
+        return team.lunchBreakStart ?: findInheritedStart(team.parentTeam)
+    }
+
+    /**
+     * Remonte l’héritage pour trouver la lunchBreakEnd s’il est null
+     * dans la team courante.
+     */
+    fun findInheritedEnd(team: TeamEntity?): LocalTime? {
+        if (team == null) return null
+        return team.lunchBreakEnd ?: findInheritedEnd(team.parentTeam)
+    }
+
+    /**
+     * Calcule la fenêtre de pause pour UN driver (donc pas forcément “globale”).
+     * - Récupère les teams actives du driver
+     * - Applique l’héritage pour chaque team
+     * - Retrouve la plage [earliestStart, latestEnd]
+     */
+    fun getDriverPauseWindow(driver: DriverEntity, refDate: Timestamp): Pair<LocalTime?, LocalTime?> {
+        val activeTeams = findActiveDriverTeams(driver, refDate)
+
+        val timeRanges = activeTeams.mapNotNull { team ->
+            val finalStart = findInheritedStart(team)
+            val finalEnd   = findInheritedEnd(team)
+            if (finalStart != null && finalEnd != null) Pair(finalStart, finalEnd) else null
+        }
+
+        val earliestStart = timeRanges.minByOrNull { it.first }?.first
+        val latestEnd     = timeRanges.maxByOrNull { it.second }?.second
+
+        return Pair(earliestStart, latestEnd)
+    }
+
 
 }

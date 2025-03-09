@@ -16,16 +16,24 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.Temporal
 
+//TODO ça c'est vraiment dégueu mais en l'absence d'une homogénéité au sein de l'utilisation de nos mapper je dois le conserver pour pouvoir continuer à l'utiliser.
+// Il ne faut plus passer par l'instance à partir de maintenant mais systématiquement passer par l'injection de dépendance sinon on ne peux plus se charger des cas complexe.
+@Unremovable
+@Mapper(componentModel = "cdi")
+abstract class DeviceDataStateMapper ()
+{
+    @Inject
+    protected lateinit var vehicleService: VehicleService
 
-@Mapper
-interface DeviceDataStateMapper {
+    @Inject
+    protected lateinit var driverService: DriverService
 
     @Mapping(source=".", target = "state", qualifiedByName = ["BR_StateMapper"])
     @Mapping(source = ".", target = "coordinate", qualifiedByName = ["BR_LunchBreakPositionMapper"])
     @Mapping(source = ".", target = "address", qualifiedByName = ["BR_LunchBreakAddressMapper"])
-    fun toDto(deviceDataState: DeviceDataStateEntity): DeviceDataStateDTO
+    abstract fun toDto(deviceDataState: DeviceDataStateEntity): DeviceDataStateDTO
 
-    fun toEntity(deviceDataStateDTO: DeviceDataStateDTO): DeviceDataStateEntity
+    abstract fun toEntity(deviceDataStateDTO: DeviceDataStateDTO): DeviceDataStateEntity
 
     @Named("BR_StateMapper")
     fun StateMapper(deviceDataState: DeviceDataStateEntity) : String? {
@@ -36,10 +44,9 @@ interface DeviceDataStateMapper {
         }
     }
 
-    companion object {
+/*    companion object {
         val INSTANCE: DeviceDataStateMapper = Mappers.getMapper(DeviceDataStateMapper::class.java)
-
-    }
+    }*/
 
     @Named("BR_LunchBreakPositionMapper")
     fun mapPositionDuringLunchBreak(entity: DeviceDataStateEntity): Point? {
@@ -47,6 +54,7 @@ interface DeviceDataStateMapper {
 
         val (vehicles, drivers) = DeviceEntity.findVehiclesAndDriversActiveAt(entity.device_id, referenceDate)
 
+        // On conserve computeFinalLunchBreakWindow ici
         val (earliestStart, latestEnd) = computeFinalLunchBreakWindow(vehicles, drivers, referenceDate)
 
         return if (isInPause(entity.lastPositionTime, earliestStart, latestEnd)) {
@@ -55,16 +63,19 @@ interface DeviceDataStateMapper {
             entity.coordinate
         }
     }
+
     @Named("BR_LunchBreakAddressMapper")
     fun mapAddressDuringLunchBreak(entity: DeviceDataStateEntity): String? {
         val referenceDate = Timestamp(System.currentTimeMillis())
         val (vehicles, drivers) = DeviceEntity.findVehiclesAndDriversActiveAt(entity.device_id, referenceDate)
+
+        // Idem, on appelle computeFinalLunchBreakWindow
         val (earliestStart, latestEnd) = computeFinalLunchBreakWindow(vehicles, drivers, referenceDate)
 
         return if (isInPause(entity.lastPositionTime, earliestStart, latestEnd)) {
             val startStr = earliestStart?.toString() ?: "??:??"
             val endStr   = latestEnd?.toString()   ?: "??:??"
-            "pause midi de $startStr à $endStr"
+            "pause déjeuner de $startStr à $endStr"
         } else {
             entity.address
         }
@@ -74,95 +85,65 @@ interface DeviceDataStateMapper {
 
     /**
      * Vérifie si [lastPositionTime] tombe dans l’intervalle [earliestStart, latestEnd].
-     * On compare uniquement l'heure du jour, pas la date complète.
-     * - earliestStart / latestEnd peuvent être null -> aucune pause => false
      */
-    private fun isInPause( lastPositionTime: Timestamp?, earliestStart: LocalTime?, latestEnd: LocalTime? ): Boolean {
+    private fun isInPause(
+        lastPositionTime: Timestamp?,
+        earliestStart: LocalTime?,
+        latestEnd: LocalTime?
+    ): Boolean {
         if (lastPositionTime == null || earliestStart == null || latestEnd == null) return false
         val localTime = lastPositionTime.toInstant()
             .atZone(ZoneId.of("Europe/Paris"))
             .toLocalTime()
 
-        // On considère [start <= localTime <= end] comme "dans la pause"
         return !localTime.isBefore(earliestStart) && !localTime.isAfter(latestEnd)
     }
 
     /**
-     * Calcule la fenêtre de pause "globale" en fonction de :
-     * - toutes les teams actives du driver (si existant)
-     * - toutes les teams actives du véhicule
-     * - pour chacune, on remonte le parentTeam si besoin (héritage)
-     * - on récupère la liste de (start, end) non-null
-     * - on prend la plus tôt pour start, la plus tard pour end
+     * Calcule la fenêtre de pause "globale" en combinant drivers + vehicles.
+     * (On la laisse pour le moment ici, même si l’idéal est de la déplacer plus tard dans un service.)
      */
-    private fun computeFinalLunchBreakWindow(vehicles: List<VehicleEntity>, drivers: List<DriverEntity>, refDate: Timestamp ): Pair<LocalTime?, LocalTime?> {
-        // 1. Récupérer TOUTES les teams actives (driverTeam, vehicleTeam)
+    private fun computeFinalLunchBreakWindow(
+        vehicles: List<VehicleEntity>,
+        drivers: List<DriverEntity>,
+        refDate: Timestamp
+    ): Pair<LocalTime?, LocalTime?> {
+        // 1. Récupérer toutes les teams (driver + vehicle)
         val allTeams = mutableSetOf<TeamEntity>()
+
+        // On appelle désormais les services pour trouver les teams actives
         drivers.forEach { driver ->
-            val activeDriverTeams = findActiveDriverTeams(driver, refDate)
+            val activeDriverTeams = driverService.findActiveDriverTeams(driver, refDate)
             allTeams.addAll(activeDriverTeams)
         }
+
         vehicles.forEach { vehicle ->
-            val activeVehicleTeams = findActiveVehicleTeams(vehicle, refDate)
+            val activeVehicleTeams = vehicleService.findActiveVehicleTeams(vehicle, refDate)
             allTeams.addAll(activeVehicleTeams)
         }
 
-        // 2. Pour chacune de ces teams, on remonte le parentTeam si lunchBreakStart ou lunchBreakEnd est null
-        //    ou selon les règles d’héritage. Par simplicité, on va chercher la "vraie" start / end
-        //    en grimpant les parents tant que c’est null. (On devras itérer plus proprement)
+        // 2. On applique l’héritage via les services
         val timeRanges = allTeams.mapNotNull { team ->
-            val finalStart = findInheritedStart(team)
-            val finalEnd = findInheritedEnd(team)
-            // si un des deux est null, on ignore => pas de pause valable
+            val finalStart = driverService.findInheritedStart(team)
+                ?: vehicleService.findInheritedStart(team)  // si vous préférez prioriser le driverService ou vice versa
+            val finalEnd   = driverService.findInheritedEnd(team)
+                ?: vehicleService.findInheritedEnd(team)
+
             if (finalStart != null && finalEnd != null) Pair(finalStart, finalEnd) else null
         }
 
-        // 3. On récupère le plus tôt (min) et le plus tard (max)
         val earliestStart = timeRanges.minByOrNull { it.first }?.first
         val latestEnd     = timeRanges.maxByOrNull { it.second }?.second
 
         return Pair(earliestStart, latestEnd)
     }
 
-    /**
-     * Retourne la liste des teams "actives" pour un driver, à la date [refDate].
-     * => endDate IS NULL ou endDate >= refDate
-     */
-    private fun findActiveDriverTeams(driver: DriverEntity, refDate: Timestamp): List<TeamEntity> {
-        return driver.driverTeams
-            .filter { it.endDate == null || it.endDate!! >= refDate }
-            .mapNotNull { it.team }
-            .distinct()
-    }
-
-    /**
-     * Retourne la liste des teams "actives" pour un véhicule, à la date [refDate].
-     */
-    private fun findActiveVehicleTeams(vehicle: VehicleEntity, refDate: Timestamp): List<TeamEntity> {
-        return vehicle.vehicleTeams
-            .filter { it.endDate == null || it.endDate!! >= refDate }
-            .mapNotNull { it.team }
-            .distinct()
-    }
-
-    /**
-     * Héritage : si [team.lunchBreakStart] est null, on remonte dans team.parentTeam
-     * jusqu’à trouver une valeur non-nulle ou arriver en haut.
-     */
-    private fun findInheritedStart(team: TeamEntity?): LocalTime? {
-        if (team == null) return null
-        return team.lunchBreakStart ?: findInheritedStart(team.parentTeam)
-    }
-
-    /**
-     * Idem pour la fin de pause
-     */
-    private fun findInheritedEnd(team: TeamEntity?): LocalTime? {
-        if (team == null) return null
-        return team.lunchBreakEnd ?: findInheritedEnd(team.parentTeam)
+    fun Instant?.until(duration: Temporal): Duration {
+        return this?.let { Duration.between(it, duration) } ?: Duration.ZERO
     }
 
 }
+
 
 fun Instant?.until(duration: Temporal): Duration {
     return this?.let { Duration.between(this, duration) } ?: Duration.ZERO

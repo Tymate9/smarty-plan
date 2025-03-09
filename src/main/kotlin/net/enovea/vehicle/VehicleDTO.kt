@@ -4,7 +4,8 @@ import net.enovea.device.DeviceDTO
 import net.enovea.driver.DriverDTO
 import net.enovea.team.TeamDTO
 import net.enovea.vehicle.vehicle_category.VehicleCategoryDTO
-
+import java.sql.Timestamp
+import net.enovea.domain.vehicle.TimestampRange
 
 data class VehicleDTO (
     val id: String,
@@ -17,5 +18,6 @@ data class VehicleDTO (
     val drivers: Map<TimestampRange, DriverDTO>? = null,
     val devices: Map<TimestampRange, DeviceDTO>? = null,
     val teams: Map<TimestampRange, TeamDTO>? = null,
+    val ranges: List<Range<VehicleDTO>>? = null,
+    val lastPositionDate: Timestamp? = null
 )
-

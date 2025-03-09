@@ -1,6 +1,6 @@
 package net.enovea.device
 
-
+import jakarta.enterprise.inject.spi.CDI
 import net.enovea.device.deviceData.DeviceDataStateMapper
 import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.device.deviceData.DeviceDataStateDTO
@@ -64,11 +64,10 @@ interface DeviceSummaryMapper {
 
     private fun mapDeviceDataStateToDto(entity: DeviceDataStateEntity?): DeviceDataStateDTO? {
         if (entity == null) return null
-        return DeviceDataStateMapper.INSTANCE.toDto(entity)
+        return CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(entity)
     }
 
     companion object {
         val INSTANCE: DeviceSummaryMapper = Mappers.getMapper(DeviceSummaryMapper::class.java)
     }
-
 }

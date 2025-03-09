@@ -1,5 +1,6 @@
 package net.enovea.device.deviceData
 
+import jakarta.enterprise.inject.spi.CDI
 import net.enovea.device.DeviceEntity
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
@@ -15,9 +16,11 @@ interface DeviceDataMapper {
     fun toEntity(deviceDataDTO: DeviceDataDTO): DeviceEntity
 
     @Named("deviceDataStateMapper")
-    fun toDeviceDataDTO(deviceDataState: DeviceDataStateEntity?): DeviceDataStateDTO? = deviceDataState?.let { DeviceDataStateMapper.INSTANCE.toDto(deviceDataState) }
+    fun toDeviceDataDTO(deviceDataState: DeviceDataStateEntity?): DeviceDataStateDTO? = deviceDataState?.let { CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(deviceDataState) }
 
     companion object {
         val INSTANCE: DeviceDataMapper = Mappers.getMapper(DeviceDataMapper::class.java)
     }
+
 }
+

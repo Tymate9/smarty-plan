@@ -8,12 +8,14 @@ import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
+import net.enovea.domain.team.TeamEntity
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
 import net.enovea.workInProgress.LogExecutionTime
+import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
 
@@ -198,7 +200,6 @@ open class VehicleService(
         return allVehicleDTOs
     }
 
-
     @Transactional
     fun getVehiclesList(agencyIds: List<String>?): List<VehicleSummaryDTO> {
 
@@ -246,6 +247,59 @@ open class VehicleService(
             .filter { DeviceVehicleInstallEntity.getActiveDevice(it.id!!, LocalDate.now()) != null && it.vehicleTeams.isNotEmpty() }
             .map { vehicleMapper.toVehicleDTOSummary(it) }
     }
+
+
+    // ====================================================
+    // Méthodes pour récupérer la fenêtre de pause d’un Conducteur
+    // ====================================================
+
+    /**
+     * findActiveVehicleTeams : Retourne la liste des teams actives pour un véhicule, à la date [refDate].
+     * => endDate IS NULL ou endDate >= refDate
+     */
+    @Transactional
+    fun findActiveVehicleTeams(vehicle: VehicleEntity, refDate: Timestamp): List<TeamEntity> {
+        return vehicle.vehicleTeams
+            .filter { it.endDate == null || it.endDate!! >= refDate }
+            .mapNotNull { it.team }
+            .distinct()
+    }
+
+    /**
+     * Si besoin, on peut reprendre la logique d’héritage
+     * dans le VehicleService si vous souhaitez qu'elle soit spécifique au véhicule.
+     * Mais si c’est identique, on peut la laisser aussi dans le DriverService,
+     * ou la dupliquer ici pour séparer strictement les responsabilités.
+     */
+    fun findInheritedStart(team: TeamEntity?): LocalTime? {
+        if (team == null) return null
+        return team.lunchBreakStart ?: findInheritedStart(team.parentTeam)
+    }
+
+    fun findInheritedEnd(team: TeamEntity?): LocalTime? {
+        if (team == null) return null
+        return team.lunchBreakEnd ?: findInheritedEnd(team.parentTeam)
+    }
+
+    /**
+     * Calcule la fenêtre de pause pour UN véhicule (pas forcément “globale”).
+     */
+    fun getVehiclePauseWindow(vehicle: VehicleEntity, refDate: Timestamp): Pair<LocalTime?, LocalTime?> {
+        val activeTeams = findActiveVehicleTeams(vehicle, refDate)
+
+        val timeRanges = activeTeams.mapNotNull { team ->
+            val finalStart = findInheritedStart(team)
+            val finalEnd   = findInheritedEnd(team)
+            if (finalStart != null && finalEnd != null) Pair(finalStart, finalEnd) else null
+        }
+
+        val earliestStart = timeRanges.minByOrNull { it.first }?.first
+        val latestEnd     = timeRanges.maxByOrNull { it.second }?.second
+
+        return Pair(earliestStart, latestEnd)
+    }
+
+
 }
 
 

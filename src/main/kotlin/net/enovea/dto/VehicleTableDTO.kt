@@ -1,5 +1,6 @@
 package net.enovea.dto
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
+import java.sql.Timestamp
 import java.time.LocalTime
 
 data class VehicleTableDTO (
@@ -16,5 +17,7 @@ data class VehicleTableDTO (
     val team: TeamDTO,
     var distance : Number?,
     var firstTripStart : LocalTime?,
-    val teamHierarchy: String? = null
+    val teamHierarchy: String? = null,
+    val ranges: List<Range<VehicleTableDTO>>? = null,
+    val lastPositionDate: Timestamp? = null
 )

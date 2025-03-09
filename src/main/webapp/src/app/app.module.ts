@@ -57,6 +57,7 @@ import {DialogModule} from "primeng/dialog";
 import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
 import {NgOptimizedImage} from "@angular/common";
 import { ScrollingInfoBannerComponent } from './commons/app-scrolling-info-banner/app-scrolling-info-banner.component';
+import { MaskToggleComponent } from './commons/mask-toggle/mask-toggle.component';
 
 @NgModule({
   declarations: [
@@ -83,7 +84,8 @@ import { ScrollingInfoBannerComponent } from './commons/app-scrolling-info-banne
     LogoComponent,
     TestBannerComponent,
     SmsFormComponent,
-    ScrollingInfoBannerComponent
+    ScrollingInfoBannerComponent,
+    MaskToggleComponent
   ],
   imports: [
     BrowserModule,

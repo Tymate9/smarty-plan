@@ -4,7 +4,7 @@ import net.enovea.dto.VehicleCategoryDTO
 import org.mapstruct.Mapper
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "cdi")
 interface VehicleCategoryMapper {
     // Map from CategoryEntity to CategoryDTO
     fun toDto(category: VehicleCategoryEntity): VehicleCategoryDTO

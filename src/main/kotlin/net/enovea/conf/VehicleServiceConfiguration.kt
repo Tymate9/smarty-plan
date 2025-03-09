@@ -37,11 +37,11 @@ class VehicleServiceConfiguration {
         )
     }
 
-    @Produces
+/*    @Produces
     @ApplicationScoped
-    fun vehicleMapper(): VehicleMapper = VehicleMapper.INSTANCE
+    fun vehicleMapper(): VehicleMapper = VehicleMapper.INSTANCE*/
 
-    @Produces
+/*    @Produces
     @ApplicationScoped
-    fun deviceDataStateMapper(): DeviceDataStateMapper = DeviceDataStateMapper.INSTANCE
+    fun deviceDataStateMapper(): DeviceDataStateMapper = DeviceDataStateMapper.INSTANCE*/
 }

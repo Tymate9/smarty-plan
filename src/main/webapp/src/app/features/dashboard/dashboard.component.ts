@@ -1,13 +1,14 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
 import {TeamHierarchyNode, VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
 import {Router} from "@angular/router";
-import {DatePipe} from "@angular/common";
 import {TreeTable} from "primeng/treetable";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {Subscription} from "rxjs";
+import VehicleDTO = dto.VehicleDTO;
+import VehicleLocalizationDTO = dto.VehicleLocalizationDTO;
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +30,8 @@ import {Subscription} from "rxjs";
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-      <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()" styleClass="custom-button"></p-button>
+      <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()"
+                styleClass="custom-button"></p-button>
       <p-button [raised]="true" severity="info" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()" styleClass="custom-button"></p-button>
       <p-button label="Exporter CSV" [raised]="true" severity="info" (click)="exportToCSV()"
@@ -178,46 +180,72 @@ import {Subscription} from "rxjs";
             <span *ngIf="rowData.vehicle.firstTripStart">{{ rowData.vehicle.firstTripStart }}</span>
             <span *ngIf="!rowData.vehicle.firstTripStart">Journée <br/>non commencée</span>
           </td>
-
           <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <!-- #1 Vérifie si l'adresse commence par 'pause midi' -->
-              <ng-container *ngIf="rowData.vehicle.lastPositionAddress?.startsWith('pause midi'); else defaultIcon">
-                <!-- #2 Si oui, on affiche l'icône lunch-break.svg -->
-                <img
-                  ngSrc="../../../assets/icon/lunch-break.svg"
-                  width="30"
-                  height="30"
-                  alt="Pause midi icon"
-                />
-              </ng-container>
-
-              <!-- #3 Sinon, on affiche le SVG existant -->
-              <ng-template #defaultIcon>
-      <span
-        [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
-        class="poi-icon"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="30"
-          height="30"
-          [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}"
-        >
-          <path
-            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38
-               0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"
-          ></path>
-        </svg>
-      </span>
+            <app-mask-toggle
+              [canMask]="isVehicleInLunchBreak(rowData.vehicle)"
+              [canToggle]="false"
+            >
+              <!-- Template MASQUÉ : icône lunch-break + texte range -->
+              <ng-template #maskedTemplate>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img
+                    ngSrc="../../../assets/icon/lunch-break.svg"
+                    width="30"
+                    height="30"
+                    alt="Pause midi icon"
+                  />
+                  <span>{{ getLunchBreakRangeDescription(rowData.vehicle) }}</span>
+                </div>
               </ng-template>
 
-              <!-- #4 L'adresse s'affiche (que ce soit 'pause midi...' ou non) -->
-              <span>
-      {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
-    </span>
-            </div>
+              <!-- Template NON MASQUÉ : la logique historique -->
+              <ng-template #unmaskedTemplate>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <!-- Vérifie si l'adresse commence par 'pause midi' -->
+                  <ng-container *ngIf="rowData.vehicle.lastPositionAddress?.startsWith('pause déjeuner'); else defaultIcon">
+                    <img
+                      ngSrc="../../../assets/icon/lunch-break.svg"
+                      width="30"
+                      height="30"
+                      alt="Pause midi icon"
+                    />
+                  </ng-container>
+
+                  <!-- Sinon, on affiche le SVG existant -->
+                  <ng-template #defaultIcon>
+                    <span
+                      [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
+                      class="poi-icon"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="30"
+                        height="30"
+                        [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}"
+                      >
+                        <path
+                          d="M12 2C8.13 2 5 5.13 5 9
+                            c0 5.25 7 13 7 13s7-7.75 7-13
+                            c0-3.87-3.13-7-7-7zm0
+                            9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62
+                            6.5 12 6.5s2.5 1.12 2.5 2.5S13.38
+                            11.5 12 11.5z"
+                        ></path>
+                      </svg>
+                    </span>
+                  </ng-template>
+                  <!-- L'adresse s'affiche (que ce soit 'pause midi...' ou non) -->
+                  <span
+                    [title]="rowData.vehicle.lastPositionDate
+                            ? ('Position calculée à ' + (rowData.vehicle.lastPositionDate | date:'dd/MM/yyyy HH:mm:ss':'Europe/Paris'))
+                            : 'Erreur lors de la récupération de l\\'heure de la position'"
+                  >
+                    {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
+                  </span>
+                </div>
+              </ng-template>
+            </app-mask-toggle>
           </td>
           <td class="custom-cell">{{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km</td>
           <td class="custom-cell">
@@ -570,13 +598,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   smsOverlayVisible = false;
 
-  smsModalDriverLabel : string;
-  smsModalPhoneNumber : string;
-  smsModalCallingCode : string;
-  smsModalCompanyName : string;
+  smsModalDriverLabel: string;
+  smsModalPhoneNumber: string;
+  smsModalCallingCode: string;
+  smsModalCompanyName: string;
 
   // Ouvre la modale
-  openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode:string, companyName:string) {
+  openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode: string, companyName: string) {
     this.smsModalDriverLabel = driverLabel
     this.smsModalPhoneNumber = phoneNumber
     this.smsModalCallingCode = callingCode
@@ -631,11 +659,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
-      this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
-      this.loadFilteredVehicles();
-    }
+        this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
+        this.loadFilteredVehicles();
+      }
     )
   };
+
   //Cette méthode permet de récupérer la liste des véhicules et de les transformer en TreeNode
   loadFilteredVehicles(): void {
     this.vehicleService.getFilteredVehiclesDashboard(
@@ -649,6 +678,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.vehicleStatusCounts = this.calculateStatusCounts(filteredVehicles);
     });
   }
+
   //TODO make it more general (>3 levels)
   //Cette méthode permet de transformer les résultats obtenus par la requête en TreeNode
   transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {
@@ -661,8 +691,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       a: { data: { vehicle: dto.VehicleTableDTO } },
       b: { data: { vehicle: dto.VehicleTableDTO } }
     ) => {
-      const driverA = a.data.vehicle?.driver || { lastName: '', firstName: '' };
-      const driverB = b.data.vehicle?.driver || { lastName: '', firstName: '' };
+      const driverA = a.data.vehicle?.driver || {lastName: '', firstName: ''};
+      const driverB = b.data.vehicle?.driver || {lastName: '', firstName: ''};
 
       // First compare by lastName
       const lastNameComparison = driverA.lastName.localeCompare(driverB.lastName);
@@ -728,11 +758,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     traverseTeams(teams);
     return [
-      { state: 'DRIVING', count: counts['DRIVING'] || 0 },
-      { state: 'PARKED', count: counts['PARKED'] || 0 },
-      { state: 'IDLE', count: counts['IDLE'] || 0 },
-      { state: 'NO_COM', count: counts['NO_COM'] || 0 },
-      { state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0 },
+      {state: 'DRIVING', count: counts['DRIVING'] || 0},
+      {state: 'PARKED', count: counts['PARKED'] || 0},
+      {state: 'IDLE', count: counts['IDLE'] || 0},
+      {state: 'NO_COM', count: counts['NO_COM'] || 0},
+      {state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0},
     ];
   }
 
@@ -778,7 +808,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   resetTreeNode() {
     this.vehiclesTree = this.transformToTreeNodes(this.teamHierarchy);
   }
-
 
   //Cette méthode permet d'exporter un fichier CSV
   exportToCSV(): void {
@@ -846,6 +875,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   //Cette méthode permet d'agrandir la table et vice versa
   toggleTree() {
+    console.log(this.vehiclesTree)
     if (this.vehiclesTree && this.vehiclesTree.length > 0) {
       this.isExpanded = !this.isExpanded;
       this.vehiclesTree = this.vehiclesTree.map(vehicle => ({
@@ -868,5 +898,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
       minute: '2-digit',
     }).format(date);
     return formattedDate;
+  }
+
+  isVehicleInLunchBreak(vehicle: VehicleSummaryDTO | VehicleDTO | VehicleLocalizationDTO): boolean {
+    if (!vehicle.ranges) return false;
+
+    const lunchBreak = vehicle.ranges.find(r => r.label === 'LUNCH_BREAK');
+    if (!lunchBreak) return false;
+
+    const now = new Date();
+    const start = new Date(lunchBreak.range.start);
+    const end = lunchBreak.range.end ? new Date(lunchBreak.range.end) : null;
+
+    if (!end) return false; // Pas de plage fermée
+
+    // On vérifie que now est compris entre start et end
+    return (start <= now && now <= end);
+  }
+
+  getLunchBreakRangeDescription(vehicle: VehicleSummaryDTO | VehicleDTO | VehicleLocalizationDTO): string {
+    if (!vehicle.ranges) return '';
+
+    const lunchBreak = vehicle.ranges.find(r => r.label === 'LUNCH_BREAK');
+    return lunchBreak?.description ?? '';
   }
 }

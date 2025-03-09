@@ -30,6 +30,12 @@ abstract class VehicleTableMapper {
     @Inject
     protected lateinit var driverService: DriverService
 
+    @Inject
+    protected lateinit var deviceDataMapper: DeviceDataMapper
+
+    @Inject
+    protected lateinit var teamMapper: TeamMapper
+
     @Mapping(target = "id", source = "id")
     @Mapping(target = "licenseplate", source = "licenseplate")
     @Mapping(source = "category",target = "category")
@@ -46,7 +52,7 @@ abstract class VehicleTableMapper {
         return vehicleDevices
             .filter { it.endDate == null }
             .maxByOrNull { it.id.startDate }
-            ?.let { DeviceDataMapper.INSTANCE.toDto(it.device!!) }
+            ?.let { deviceDataMapper.toDto(it.device!!) }
     }
 
     //Map the most recent team to TeamDTO
@@ -54,7 +60,7 @@ abstract class VehicleTableMapper {
         return vehicleTeams
             .filter { it.endDate == null }
             .maxByOrNull { it.id.startDate }
-            ?.let { TeamMapper.INSTANCE.toDto(it.team!!) }
+            ?.let { teamMapper.toDto(it.team!!) }
     }
 
     //region  Common function

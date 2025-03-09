@@ -13,8 +13,4 @@ class DriverServiceConfiguration {
     ): DriverService {
         return DriverService(driverMapper)
     }
-
-    @Produces
-    @ApplicationScoped
-    fun driverMapper(): DriverMapper = DriverMapper.INSTANCE
 }

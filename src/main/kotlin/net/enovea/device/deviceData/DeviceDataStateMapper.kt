@@ -16,9 +16,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.Temporal
 
-//TODO ça c'est vraiment dégueu mais en l'absence d'une homogénéité au sein de l'utilisation de nos mapper je dois le conserver pour pouvoir continuer à l'utiliser.
-// Il ne faut plus passer par l'instance à partir de maintenant mais systématiquement passer par l'injection de dépendance sinon on ne peux plus se charger des cas complexe.
-@Unremovable
+
 @Mapper(componentModel = "cdi")
 abstract class DeviceDataStateMapper ()
 {
@@ -43,10 +41,6 @@ abstract class DeviceDataStateMapper ()
             deviceDataState.state
         }
     }
-
-/*    companion object {
-        val INSTANCE: DeviceDataStateMapper = Mappers.getMapper(DeviceDataStateMapper::class.java)
-    }*/
 
     @Named("BR_LunchBreakPositionMapper")
     fun mapPositionDuringLunchBreak(entity: DeviceDataStateEntity): Point? {

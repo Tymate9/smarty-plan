@@ -102,7 +102,7 @@ class TeamResource(private val teamService: TeamService, private val validator: 
         // 4) Si toutes les équipes sont en pause, on retourne le message groupé
         if (inPauseTeams.size == allTeams.size) {
             val allCategories = allTeams.mapNotNull { it.category?.label }.distinct()
-            val categoriesString = allCategories.joinToString(separator = ", ")
+            val categoriesString = allCategories.map { it.lowercase() + "s" }.joinToString(separator = ", ")
             val message = "Toutes les $categoriesString sont en pause déjeuner."
             return Response.ok(message).build()
         }

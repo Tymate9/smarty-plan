@@ -22,6 +22,7 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 
 @Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleMapper::class, DeviceDataStateMapper::class  ])
 abstract class VehicleTableMapper {
@@ -102,14 +103,20 @@ abstract class VehicleTableMapper {
         val description = "pause déjeuner de $earliestStart à $latestEnd"
 
         // 7. Créer notre Range<VehicleDTO> unique
+        val parisZone = ZoneId.of("Europe/Paris")
+        val todayInParis = LocalDate.now(parisZone)
         val lunchBreakRange = Range<VehicleTableDTO>(
-            label       = "LUNCH_BREAK",
+            label = "LUNCH_BREAK",
             description = description,
-            range       = TimestampRange(
-                start = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), earliestStart)),
-                end   = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), latestEnd))
+            range = TimestampRange(
+                start = Timestamp.from(
+                    earliestStart.atDate(todayInParis).atZone(parisZone).toInstant()
+                ),
+                end = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
+                )
             ),
-            transform = { t -> t } // transformation identité
+            transform = { t -> t }
         )
         return listOf(lunchBreakRange)
     }

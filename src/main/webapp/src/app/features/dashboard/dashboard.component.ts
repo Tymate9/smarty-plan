@@ -906,19 +906,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const lunchBreak = vehicle.ranges.find(r => r.label === 'LUNCH_BREAK');
     if (!lunchBreak) return false;
 
-    const now = new Date();
-    const parisNowString = now.toLocaleString('sv-SE', { timeZone: 'Europe/Paris' }).replace(' ', 'T');
-    const parisNow = new Date(parisNowString);
+    const nowParisString = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+    const nowHoursMinutes = nowParisString.split(' ')[1].substring(0,5); // HH:mm
 
-    const start = new Date(lunchBreak.range.start);
-    const end = lunchBreak.range.end ? new Date(lunchBreak.range.end) : null;
+    const startDate = new Date(lunchBreak.range.start);
+    const endDate = lunchBreak.range.end ? new Date(lunchBreak.range.end) : null;
 
-    if (!end) return false; // Pas de plage fermée
+    if (!endDate) return false; // Pas de plage fermée
 
-    // On vérifie que now est compris entre start et end
-    console.log("start : " + start)
-    console.log("end :" + end)
-    return (start <= parisNow && parisNow <= end);
+    const startHoursMinutes = startDate.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false }).split(' ')[1].substring(0,5);
+    const endHoursMinutes = endDate.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false }).split(' ')[1].substring(0,5);
+
+    console.log("Now Paris: " + nowHoursMinutes);
+    console.log("Start: " + startHoursMinutes);
+    console.log("End: " + endHoursMinutes);
+
+    return (startHoursMinutes <= nowHoursMinutes && nowHoursMinutes <= endHoursMinutes);
   }
 
   getLunchBreakRangeDescription(vehicle: VehicleSummaryDTO | VehicleDTO | VehicleLocalizationDTO): string {

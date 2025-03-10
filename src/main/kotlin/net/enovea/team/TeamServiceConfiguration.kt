@@ -5,7 +5,9 @@ import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
 import jakarta.validation.Validation
 import jakarta.validation.Validator
+import net.enovea.driver.DriverMapper
 import net.enovea.team.teamCategory.TeamCategoryMapper
+import net.enovea.vehicle.VehicleMapper
 
 
 @ApplicationScoped
@@ -15,9 +17,11 @@ class TeamServiceConfiguration {
     @Named("teamService")
     fun teamService(
         teamMapper: TeamMapper,
-        teamCategoryMapper : TeamCategoryMapper
+        teamCategoryMapper : TeamCategoryMapper,
+        driverMapper: DriverMapper,
+        vehicleMapper: VehicleMapper,
     ): TeamService {
-        return TeamService(teamMapper, teamCategoryMapper)
+        return TeamService(teamMapper, teamCategoryMapper, driverMapper, vehicleMapper)
     }
 
     @Produces

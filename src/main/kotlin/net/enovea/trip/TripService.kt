@@ -130,6 +130,7 @@ class TripService(
         if (lunchBreakStart != null && lunchBreakEnd != null) {
             if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
                 addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
+                poiAtEnd = null
                 lastPosition = null
             }
         }

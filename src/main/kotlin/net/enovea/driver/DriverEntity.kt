@@ -2,6 +2,7 @@ package net.enovea.driver
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+import jakarta.inject.Inject
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.api.workInProgress.DriverNodeDTO
@@ -53,6 +54,9 @@ data class DriverEntity(
         const val ENTITY_NAME = "DriverEntity"
         const val TABLE_NAME = "driver"
 
+        @Inject
+        lateinit var driverMapper: DriverMapper
+
         @Transactional
         fun findByFullNames(fullNames: List<String>): List<DriverEntity> {
             return list("CONCAT(firstName, ' ', lastName) IN ?1", fullNames)
@@ -79,7 +83,7 @@ data class DriverEntity(
                 val teamId = dt.team?.id
                 //TODO(Retirer cet appel à Hibernate.initialize car ici on réalise autant de requête que l'on a de conducteur actif à cette date)
                 Hibernate.initialize(dt.driver!!)
-                val driverDto = DriverMapper.INSTANCE.toDto(dt.driver!!, refTimestamp)
+                val driverDto = driverMapper.toDto(dt.driver!!, refTimestamp)
                 teamIdToDrivers.computeIfAbsent(teamId!!) { mutableListOf() }.add(driverDto)
             }
 

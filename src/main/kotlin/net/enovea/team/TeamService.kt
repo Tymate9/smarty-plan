@@ -21,7 +21,9 @@ import java.sql.Timestamp
 
 class TeamService (
     private val teamMapper: TeamMapper,
-    private val teamCategoryMapper: TeamCategoryMapper
+    private val teamCategoryMapper: TeamCategoryMapper,
+    private val driverMapper: DriverMapper,
+    private val vehicleMapper: VehicleMapper,
 ) {
     @Transactional
     fun getDriverTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<DriverDTO>> {
@@ -29,7 +31,7 @@ class TeamService (
             affectationClass = DriverTeamEntity::class,
             dateParam = dateParam,
             subjectToDto = { driver, ts ->
-                DriverMapper.INSTANCE.toDto(driver, ts)
+                driverMapper.toDto(driver, ts)
             }
         )
     }
@@ -41,7 +43,7 @@ class TeamService (
             dateParam = dateParam,
             subjectToDto = { vehicle, ts ->
                 Hibernate.initialize(vehicle)
-                VehicleMapper.INSTANCE.toVehicleDTO(vehicle)
+                vehicleMapper.toVehicleDTO(vehicle)
             }
         )
     }

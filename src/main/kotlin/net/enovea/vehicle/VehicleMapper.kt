@@ -20,6 +20,7 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 
 @Mapper(componentModel = "cdi" ,uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class, DeviceDataStateMapper::class])
 abstract class VehicleMapper {
@@ -207,14 +208,20 @@ abstract class VehicleMapper {
         val description = "pause déjeuner de $earliestStart à $latestEnd"
 
         // 7. Créer notre Range<VehicleDTO> unique
+        val parisZone = ZoneId.of("Europe/Paris")
+        val todayInParis = LocalDate.now(parisZone)
         val lunchBreakRange = Range<VehicleDTO>(
-            label       = "LUNCH_BREAK",
+            label = "LUNCH_BREAK",
             description = description,
-            range       = TimestampRange(
-                start = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), earliestStart)),
-                end   = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), latestEnd))
+            range = TimestampRange(
+                start = Timestamp.from(
+                    earliestStart.atDate(todayInParis).atZone(parisZone).toInstant()
+                ),
+                end = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
+                )
             ),
-            transform = { t -> t } // transformation identité
+            transform = { t -> t }
         )
         return listOf(lunchBreakRange)
     }
@@ -244,14 +251,20 @@ abstract class VehicleMapper {
         val description = "pause déjeuner de $earliestStart à $latestEnd"
 
         // 7. Créer notre Range<VehicleDTO> unique
+        val parisZone = ZoneId.of("Europe/Paris")
+        val todayInParis = LocalDate.now(parisZone)
         val lunchBreakRange = Range<VehicleSummaryDTO>(
-            label       = "LUNCH_BREAK",
+            label = "LUNCH_BREAK",
             description = description,
-            range       = TimestampRange(
-                start = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), earliestStart)),
-                end   = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), latestEnd))
+            range = TimestampRange(
+                start = Timestamp.from(
+                    earliestStart.atDate(todayInParis).atZone(parisZone).toInstant()
+                ),
+                end = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
+                )
             ),
-            transform = { t -> t } // transformation identité
+            transform = { t -> t }
         )
         return listOf(lunchBreakRange)
     }
@@ -281,14 +294,20 @@ abstract class VehicleMapper {
         val description = "pause déjeuner de $earliestStart à $latestEnd"
 
         // 7. Créer notre Range<VehicleDTO> unique
+        val parisZone = ZoneId.of("Europe/Paris")
+        val todayInParis = LocalDate.now(parisZone)
         val lunchBreakRange = Range<VehicleLocalizationDTO>(
-            label       = "LUNCH_BREAK",
+            label = "LUNCH_BREAK",
             description = description,
-            range       = TimestampRange(
-                start = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), earliestStart)),
-                end   = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), latestEnd))
+            range = TimestampRange(
+                start = Timestamp.from(
+                    earliestStart.atDate(todayInParis).atZone(parisZone).toInstant()
+                ),
+                end = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
+                )
             ),
-            transform = { t -> t } // transformation identité
+            transform = { t -> t }
         )
         return listOf(lunchBreakRange)
     }
@@ -312,7 +331,7 @@ abstract class VehicleMapper {
         // 2. On applique l’héritage via les services
         val timeRanges = allTeams.mapNotNull { team ->
             val finalStart = driverService.findInheritedStart(team)
-                ?: vehicleService.findInheritedStart(team)  // si vous préférez prioriser le driverService ou vice versa
+                ?: vehicleService.findInheritedStart(team)
             val finalEnd   = driverService.findInheritedEnd(team)
                 ?: vehicleService.findInheritedEnd(team)
 

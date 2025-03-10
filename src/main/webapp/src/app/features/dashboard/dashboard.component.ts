@@ -882,13 +882,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!lunchBreak) return false;
 
     const now = new Date();
+    const parisNowString = now.toLocaleString('sv-SE', { timeZone: 'Europe/Paris' }).replace(' ', 'T');
+    const parisNow = new Date(parisNowString);
+
+    console.log(parisNow);
+
     const start = new Date(lunchBreak.range.start);
     const end = lunchBreak.range.end ? new Date(lunchBreak.range.end) : null;
 
     if (!end) return false; // Pas de plage fermée
 
     // On vérifie que now est compris entre start et end
-    return (start <= now && now <= end);
+    return (start <= parisNow && parisNow <= end);
   }
 
   getLunchBreakRangeDescription(vehicle: VehicleSummaryDTO | VehicleDTO | VehicleLocalizationDTO): string {

@@ -286,9 +286,12 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     const now = new Date();
+    const parisNowString = now.toLocaleString('sv-SE', { timeZone: 'Europe/Paris' }).replace(' ', 'T');
+    const parisNow = new Date(parisNowString);
 
-    // Vérifie si "now" est compris entre startDate et endDate
-    return (startDate <= now && now <= endDate);
+    console.log(parisNow);
+
+    return (startDate <= parisNow && parisNow <= endDate);
   }
 
   private startVehiclePositionUpdater(): Subscription {

@@ -289,8 +289,9 @@ export class MapComponent implements OnInit, OnDestroy {
     const parisNowString = now.toLocaleString('sv-SE', { timeZone: 'Europe/Paris' }).replace(' ', 'T');
     const parisNow = new Date(parisNowString);
 
-    console.log(parisNow);
-
+    console.log("start : " + startDate)
+    console.log("end :" + endDate)
+    console.log("result : " + (startDate <= parisNow && parisNow <= endDate))
     return (startDate <= parisNow && parisNow <= endDate);
   }
 

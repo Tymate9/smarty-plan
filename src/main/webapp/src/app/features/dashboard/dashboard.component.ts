@@ -885,14 +885,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const parisNowString = now.toLocaleString('sv-SE', { timeZone: 'Europe/Paris' }).replace(' ', 'T');
     const parisNow = new Date(parisNowString);
 
-    console.log(parisNow);
-
     const start = new Date(lunchBreak.range.start);
     const end = lunchBreak.range.end ? new Date(lunchBreak.range.end) : null;
 
     if (!end) return false; // Pas de plage fermée
 
     // On vérifie que now est compris entre start et end
+    console.log("start : " + start)
+    console.log("end :" + end)
     return (start <= parisNow && parisNow <= end);
   }
 

@@ -261,38 +261,39 @@ export class MapComponent implements OnInit, OnDestroy {
 
   }
 
-  private isVehicleInLunchBreak(ranges : Range<any>[] | undefined | null): boolean {
-    // S’il n’y a pas de ranges, on n’est pas en pause
+  private isVehicleInLunchBreak(ranges: Range<any>[] | undefined | null): boolean {
     if (!ranges || ranges.length === 0) {
       return false;
     }
 
-    // Trouver l’entrée "LUNCH_BREAK"
     const lunchBreakRange = ranges.find(range => range.label === "LUNCH_BREAK");
     if (!lunchBreakRange) {
-      // Pas de pause déjeuner pour ce véhicule
       return false;
     }
 
-    // Convertir start / end en objets Date (venant de "Timestamp" côté back)
-    // Attention aux formats : si c’est une string, c’est parseable directement
-    // via new Date(...). Sinon, adapter en fonction du format reçu.
-    const startDate = new Date(lunchBreakRange.range.start);
-    const endDate   = lunchBreakRange.range.end ? new Date(lunchBreakRange.range.end) : null;
+    // Conversion du timestamp (en secondes ou millisecondes) en objet Date UTC
+    const startDateUTC = new Date(lunchBreakRange.range.start);
+    const endDateUTC = lunchBreakRange.range.end ? new Date(lunchBreakRange.range.end) : null;
 
-    if (!endDate) {
-      // S’il n’y a pas de end => impossible de définir une plage fermée
+    if (!endDateUTC) {
       return false;
     }
 
-    const now = new Date();
-    const parisNowString = now.toLocaleString('sv-SE', { timeZone: 'Europe/Paris' }).replace(' ', 'T');
-    const parisNow = new Date(parisNowString);
+    // Récupérer uniquement les heures/minutes côté Paris
+    const nowParisString = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+    const nowParisHoursMinutes = nowParisString.split(' ')[1].substring(0,5); // "HH:mm"
 
-    console.log("start : " + startDate)
-    console.log("end :" + endDate)
-    console.log("result : " + (startDate <= parisNow && parisNow <= endDate))
-    return (startDate <= parisNow && parisNow <= endDate);
+    // Extraire uniquement HH:mm pour start et end
+    const startParisString = startDateUTC.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+    const endParisString = endDateUTC.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+
+    const startHoursMinutes = startParisString.split(' ')[1].substring(0,5); // "HH:mm"
+    const endHoursMinutes = endParisString.split(' ')[1].substring(0,5);     // "HH:mm"
+
+    console.log(`Now Paris: ${nowParisHoursMinutes}, Start: ${startHoursMinutes}, End: ${endHoursMinutes}`);
+
+    // Comparaison uniquement basée sur les heures/minutes
+    return (startHoursMinutes <= nowParisHoursMinutes && nowParisHoursMinutes <= endHoursMinutes);
   }
 
   private startVehiclePositionUpdater(): Subscription {

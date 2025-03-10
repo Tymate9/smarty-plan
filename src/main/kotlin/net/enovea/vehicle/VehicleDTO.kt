@@ -5,7 +5,6 @@ import net.enovea.driver.DriverDTO
 import net.enovea.team.TeamDTO
 import net.enovea.vehicle.vehicle_category.VehicleCategoryDTO
 import java.sql.Timestamp
-import net.enovea.domain.vehicle.TimestampRange
 
 data class VehicleDTO (
     val id: String,

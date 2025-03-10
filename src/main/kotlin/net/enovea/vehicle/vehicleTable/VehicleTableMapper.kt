@@ -1,5 +1,6 @@
 package net.enovea.vehicle.vehicleTable
 
+import jakarta.inject.Inject
 import net.enovea.device.deviceData.DeviceDataDTO
 import net.enovea.device.deviceData.DeviceDataMapper
 import net.enovea.device.deviceData.DeviceDataStateMapper
@@ -8,8 +9,10 @@ import net.enovea.driver.DriverMapper
 import net.enovea.team.TeamMapper
 import net.enovea.team.TeamDTO
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
-import net.enovea.vehicle.VehicleEntity
-import net.enovea.vehicle.VehicleMapper
+import net.enovea.driver.DriverEntity
+import net.enovea.driver.DriverService
+import net.enovea.team.TeamEntity
+import net.enovea.vehicle.*
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import org.mapstruct.Context
 import org.mapstruct.Mapper

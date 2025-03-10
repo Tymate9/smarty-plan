@@ -15,13 +15,13 @@ import {
   NgSwitchDefault
 } from "@angular/common";
 import {TreeTable, TreeTableModule} from "primeng/treetable";
-import {TreeTable} from "primeng/treetable";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {Subscription} from "rxjs";
 import VehicleDTO = dto.VehicleDTO;
 import VehicleLocalizationDTO = dto.VehicleLocalizationDTO;
-import {Button, ButtonDirective} from "primeng/button";
+import {Button, ButtonDirective, ButtonModule} from "primeng/button";
 import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
+import {MaskToggleComponent} from "../../commons/mask-toggle/mask-toggle.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -291,7 +291,6 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
   `,
   standalone: true,
   imports: [
-    Button,
     NgStyle,
     NgClass,
     TreeTableModule,
@@ -301,9 +300,10 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
     NgSwitchCase,
     NgSwitch,
     NgForOf,
-    ButtonDirective,
     DatePipe,
-    SmsFormComponent
+    SmsFormComponent,
+    ButtonModule,
+    MaskToggleComponent
   ],
   styles: [`
 

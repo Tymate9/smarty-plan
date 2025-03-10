@@ -1,15 +1,15 @@
 package net.enovea.vehicle
 
+import jakarta.inject.Inject
 import net.enovea.device.*
 import net.enovea.device.deviceData.DeviceDataStateMapper
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.driver.DriverDTO
+import net.enovea.driver.DriverEntity
 import net.enovea.driver.DriverMapper
-import net.enovea.team.TeamMapper
-import net.enovea.team.TeamSummaryMapper
+import net.enovea.driver.DriverService
+import net.enovea.team.*
 import net.enovea.vehicle.vehicle_category.VehicleCategoryMapper
-import net.enovea.team.TeamDTO
-import net.enovea.team.TeamSummaryDTO
 import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import org.locationtech.jts.geom.Point

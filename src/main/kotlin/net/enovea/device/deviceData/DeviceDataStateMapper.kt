@@ -1,9 +1,12 @@
 package net.enovea.device.deviceData
 
+import jakarta.inject.Inject
 import net.enovea.device.DeviceEntity
 import net.enovea.driver.DriverEntity
+import net.enovea.driver.DriverService
 import net.enovea.team.TeamEntity
 import net.enovea.vehicle.VehicleEntity
+import net.enovea.vehicle.VehicleService
 import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping

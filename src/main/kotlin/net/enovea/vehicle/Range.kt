@@ -1,6 +1,5 @@
-package net.enovea.dto
+package net.enovea.vehicle
 
-import net.enovea.domain.vehicle.TimestampRange
 
 data class Range<T> (
     val label : String,

@@ -1,5 +1,6 @@
 package net.enovea.driver
 
+import jakarta.inject.Inject
 import net.enovea.driver.driverTeam.DriverTeamEntity
 import net.enovea.team.TeamSummaryMapper
 import net.enovea.team.TeamSummaryDTO

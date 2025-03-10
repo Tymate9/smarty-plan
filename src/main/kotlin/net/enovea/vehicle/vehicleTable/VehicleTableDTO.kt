@@ -3,6 +3,7 @@ import net.enovea.device.deviceData.DeviceDataDTO
 import net.enovea.driver.DriverDTO
 import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.team.TeamDTO
+import net.enovea.vehicle.Range
 import net.enovea.vehicle.vehicle_category.VehicleCategoryDTO
 import java.sql.Timestamp
 import java.time.LocalTime

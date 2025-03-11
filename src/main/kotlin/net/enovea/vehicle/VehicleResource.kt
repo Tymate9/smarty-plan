@@ -1,6 +1,9 @@
 package net.enovea.vehicle
 
 import io.quarkus.security.Authenticated
+import jakarta.transaction.Transactional
+import jakarta.validation.ConstraintViolation
+import jakarta.validation.Validator
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -10,6 +13,8 @@ import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.device.DeviceEntity
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.team.TeamService
+import net.enovea.workInProgress.common.ICRUDResource
+import net.enovea.workInProgress.vehicleCRUD.VehicleForm
 import org.jboss.logging.Logger
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -27,9 +32,70 @@ class VehicleResource(
     private val vehicleService: VehicleService,
     private val deviceDataStateSpatialService: SpatialService,
     private val teamService: TeamService,
-    private val vehicleMapper: VehicleMapper
-) {
+    private val vehicleMapper: VehicleMapper,
+    private val validator: Validator
+) : ICRUDResource<VehicleForm, VehicleDTO, String> {
     private val logger = Logger.getLogger(VehicleResource::class.java)
+
+    /**
+     * Récupérer un véhicule par son identifiant.
+     * Retourne 404 si l'entité n'existe pas.
+     */
+    @GET
+    @Path("/{id}")
+    override fun readOne(@PathParam("id") id: String): Response {
+        val vehicleDTO = vehicleService.getById(id)
+        return Response.ok(vehicleDTO).build()
+    }
+
+    /**
+     * Créer un nouveau véhicule.
+     * Retourne 400 si le formulaire est invalide.
+     */
+    @POST
+    @Transactional
+    override fun create(form: VehicleForm): Response {
+        val violations: Set<ConstraintViolation<VehicleForm>> = validator.validate(form)
+        if (violations.isNotEmpty()) {
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val createdVehicle = vehicleService.create(form)
+        return Response.ok(createdVehicle).build()
+    }
+
+    /**
+     * Mettre à jour un véhicule existant.
+     * Retourne 400 si le formulaire est invalide et 404 si l'entité n'existe pas.
+     */
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    override fun update(@PathParam("id") id: String, form: VehicleForm): Response {
+        form.id = id
+        val violations: Set<ConstraintViolation<VehicleForm>> = validator.validate(form)
+        if (violations.isNotEmpty()) {
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val updatedVehicle = vehicleService.update(form)
+        return Response.ok(updatedVehicle).build()
+    }
+
+    /**
+     * Supprimer un véhicule.
+     * Retourne 404 si l'entité n'existe pas.
+     * Retourne le DTO du véhicule supprimé.
+     */
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    override fun delete(@PathParam("id") id: String): Response {
+        val deletedVehicle = vehicleService.delete(id)
+        return Response.ok(deletedVehicle).build()
+    }
+
+    /// Other
 
     @GET
     @Path("/list")

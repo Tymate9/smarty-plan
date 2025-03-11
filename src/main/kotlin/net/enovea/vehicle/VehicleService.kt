@@ -2,6 +2,8 @@ package net.enovea.vehicle
 
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import jakarta.ws.rs.BadRequestException
+import jakarta.ws.rs.NotFoundException
 import net.dilivia.lang.StopWatch
 import net.enovea.workInProgress.common.Stat
 import net.enovea.workInProgress.common.StatsDTO
@@ -18,6 +20,9 @@ import net.enovea.vehicle.vehicleStats.*
 import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import net.enovea.vehicle.vehicleUntrackedPeriod.VehicleUntrackedPeriodEntity
+import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
+import net.enovea.workInProgress.common.ICRUDService
+import net.enovea.workInProgress.vehicleCRUD.VehicleForm
 import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
@@ -32,8 +37,58 @@ open class VehicleService(
     private val entityManager: EntityManager,
     private val tripService: TripService,
     private val vehicleStatsRepository: VehicleStatsRepository
-) {
+) : ICRUDService<VehicleForm, VehicleDTO, String> {
 
+    @Transactional
+    override fun getById(id: String): VehicleDTO {
+        val entity = VehicleEntity.findById(id)
+            ?: throw NotFoundException("Vehicle with id=$id not found")
+        return vehicleMapper.toVehicleDTO(entity)
+    }
+
+    @Transactional
+    override fun create(form: VehicleForm): VehicleDTO {
+        val entity = VehicleEntity().apply {
+            energy = form.energy
+            engine = form.engine
+            externalId = form.externalid
+            licenseplate = form.licenseplate
+            // Récupérer la catégorie à partir de l'id fourni
+            category = VehicleCategoryEntity.findById(form.category!!)
+                ?: throw NotFoundException("Vehicle category with id=${form.category} not found")
+            validated = form.validated
+        }
+        entity.persistAndFlush()
+        return vehicleMapper.toVehicleDTO(entity)
+    }
+
+    @Transactional
+    override fun update(form: VehicleForm): VehicleDTO {
+        val id = form.id ?: throw BadRequestException("Id not provided")
+        val entity = VehicleEntity.findById(id)
+            ?: throw NotFoundException("Vehicle with id=$id not found")
+        // Mise à jour des champs
+        entity.energy = form.energy
+        entity.engine = form.engine
+        entity.externalId = form.externalid
+        entity.licenseplate = form.licenseplate
+        // Mise à jour de la catégorie via son id
+        val categoryEntity = VehicleCategoryEntity.findById(form.category!!)
+            ?: throw NotFoundException("Vehicle category with id=${form.category} not found")
+        entity.category = categoryEntity
+        entity.validated = form.validated
+        entity.persistAndFlush()
+        return vehicleMapper.toVehicleDTO(entity)
+    }
+
+    @Transactional
+    override fun delete(id: String): VehicleDTO {
+        val entity = VehicleEntity.findById(id)
+            ?: throw NotFoundException("Vehicle with id=$id not found")
+        val dto = vehicleMapper.toVehicleDTO(entity)
+        entity.delete()
+        return dto
+    }
 
     //function returns trips statistics displayed on the page ('suivi d'activité')
     fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>? , vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {

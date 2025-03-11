@@ -2,12 +2,14 @@ package net.enovea.vehicle.vehicleTeam
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+import jakarta.inject.Inject
 import jakarta.persistence.*
 import net.enovea.api.workInProgress.IAffectationEntity
 import net.enovea.team.TeamEntity
 import net.enovea.team.TeamMapper
 import net.enovea.team.TeamDTO
 import net.enovea.vehicle.VehicleEntity
+import net.enovea.vehicle.VehicleMapper
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -42,11 +44,13 @@ data class VehicleTeamEntity (
         const val ENTITY_NAME = "VehicleTeamEntity"
         const val TABLE_NAME = "vehicle_team"
 
+        @Inject
+        lateinit var teamMapper: TeamMapper
+
         /**
          * Returns a map of vehicle IDs with their latest team (where endDate is null).
          */
-        fun getLatestTeams(): Map<String, TeamDTO> {
-            val teamMapper = TeamMapper.INSTANCE // Get the mapper instance
+        fun getLatestTeams(): Map<String, TeamDTO> { // Get the mapper instance
 
             // Find all entities where endDate is null
             return find("endDate IS NULL")

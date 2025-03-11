@@ -59,7 +59,7 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
   }
 
   getTeamsInPause(time: string): Observable<string> {
-    return this.http.get(`${this.apiUrl}/pause`, {
+    return this.http.get(`${this.baseUrl}/pause`, {
       params: { time },
       responseType: 'text'
     });

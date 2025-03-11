@@ -26,10 +26,6 @@ class TeamServiceConfiguration {
 
     @Produces
     @ApplicationScoped
-    fun teamMapper(): TeamMapper = TeamMapper.INSTANCE
-
-    @Produces
-    @ApplicationScoped
     fun teamCategoryMapper(): TeamCategoryMapper = TeamCategoryMapper.INSTANCE
 
     @Produces

@@ -1,0 +1,170 @@
+### ----------------------------------------------------
+### Définition des variables
+### ----------------------------------------------------
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = admin
+@password_admin = root
+
+### ----------------------------------------------------
+### 1) Obtenir le token d'accès
+### ----------------------------------------------------
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {% client.global.set("access_token_admin", response.body.access_token); %}
+
+
+### ----------------------------------------------------
+### Tests de validation du formulaire et des contraintes
+### ----------------------------------------------------
+
+### ----------------------------------------------------
+### 2) Créer une nouvelle Team valide (non "Agence")
+###    Utilisation d'une catégorie autre que "Agence" (ex: id=2)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Equipe Test Valide",
+  "path": "chemin/initial",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "12:00:00",
+  "lunchBreakEndStr": "13:00:00"
+}
+
+> {% client.global.set("test_team_id", response.body.id); %}
+
+
+### ----------------------------------------------------
+### 3) Tenter de créer une Team avec un format d'heure invalide pour lunchBreakStartStr (Erreur 400)
+###    "25:00:00" n'est pas un format valide (heure > 23)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Equipe Format Invalide",
+  "path": "chemin/invalide",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "25:00:00",
+  "lunchBreakEndStr": "13:00:00"
+}
+
+
+### ----------------------------------------------------
+### 4) Tenter de créer une Team avec des horaires incohérents (start >= end) (Erreur 400)
+###    Ici, lunchBreakStartStr "14:00:00" n'est pas antérieur à lunchBreakEndStr "13:00:00"
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Equipe Horaires Incohérents",
+  "path": "chemin/incoherent",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "14:00:00",
+  "lunchBreakEndStr": "13:00:00"
+}
+
+
+### ----------------------------------------------------
+### 5) Tester la contrainte: Pour une équipe de catégorie "Agence" (id=1), parentTeam doit être null.
+###    a) Créer d'abord une équipe "Agence" valide (parentTeam=null)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Agence Valide",
+  "path": "chemin/agence",
+  "category": 1,
+  "parentTeam": null,
+  "lunchBreakStartStr": "11:00:00",
+  "lunchBreakEndStr": "12:00:00"
+}
+
+> {% client.global.set("agence_id", response.body.id); %}
+
+### ----------------------------------------------------
+### 5b) Tenter de créer une équipe "Agence" avec un parentTeam renseigné (Erreur 400)
+###     Ici, on essaie de créer une équipe avec catégorie "Agence" (id=1) et parentTeam non-null (ex: agence_id)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Agence avec Parent",
+  "path": "chemin/agence_parent",
+  "category": 1,
+  "parentTeam": {{agence_id}},
+  "lunchBreakStartStr": "11:00:00",
+  "lunchBreakEndStr": "12:00:00"
+}
+
+
+### ----------------------------------------------------
+### Tests CRUD classiques sur l'équipe créée en étape 2
+### ----------------------------------------------------
+
+### ----------------------------------------------------
+### 6) Mettre à jour spécifiquement l'équipe créée en étape 2 (UPDATE)
+###    Modification des horaires de pause et d'autres champs
+### ----------------------------------------------------
+PUT http://{{api_host}}/api/teams/{{test_team_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": {{test_team_id}},
+  "label": "Equipe Modifiée",
+  "path": "chemin/modifie",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "11:30:00",
+  "lunchBreakEndStr": "12:30:00"
+}
+
+
+### ----------------------------------------------------
+### 7) Récupérer l'équipe mise à jour (READ)
+###    Vérifier que la mise à jour a bien été prise en compte
+### ----------------------------------------------------
+GET http://{{api_host}}/api/teams/{{test_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+
+### ----------------------------------------------------
+### 8) Supprimer spécifiquement l'équipe créée en étape 2 (DELETE)
+###    La réponse renvoie l'entité supprimée
+### ----------------------------------------------------
+DELETE http://{{api_host}}/api/teams/{{test_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+
+### ----------------------------------------------------
+### 9) Vérifier la suppression (READ)
+###    Cette requête devrait retourner une 404 Not Found
+### ----------------------------------------------------
+GET http://{{api_host}}/api/teams/{{test_team_id}}
+Authorization: Bearer {{access_token_admin}}

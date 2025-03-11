@@ -8,7 +8,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "cdi")
 interface TeamMapper {
     // Map from TeamEntity to TeamDTO
     fun toDto(team: TeamEntity): TeamDTO
@@ -31,9 +31,5 @@ interface TeamMapper {
     @Named("mapCategory")
     fun mapCategory(categoryId: Int): TeamCategoryEntity? {
         return TeamCategoryEntity.findById(categoryId)
-    }
-
-    companion object {
-        val INSTANCE: TeamMapper = Mappers.getMapper(TeamMapper::class.java)
     }
 }

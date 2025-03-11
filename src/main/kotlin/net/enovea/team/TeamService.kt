@@ -2,6 +2,7 @@ package net.enovea.team
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
+import net.enovea.api.service.ICRUDService
 import net.enovea.api.workInProgress.GenericNodeDTO
 import net.enovea.api.workInProgress.Stat
 import net.enovea.api.workInProgress.StatsDTO
@@ -23,8 +24,8 @@ class TeamService (
     private val teamMapper: TeamMapper,
     private val teamCategoryMapper: TeamCategoryMapper,
     private val driverMapper: DriverMapper,
-    private val vehicleMapper: VehicleMapper,
-) {
+    private val vehicleMapper: VehicleMapper
+) : ICRUDService<TeamForm, TeamDTO, Int> {
     @Transactional
     fun getDriverTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<DriverDTO>> {
         return TeamEntity.buildNodeTreeAtDate(
@@ -58,46 +59,46 @@ class TeamService (
         return teams.map { teamMapper.toDto(it) }
     }
 
-    fun getTeamById(id: Int): TeamDTO {
+
+    override fun getById(id: Int): TeamDTO {
         val existingEntity = TeamEntity.findById(id)
             ?: throw NotFoundException("Team with id=$id not found")
         return teamMapper.toDto(existingEntity)
     }
 
-    /**
-     * Crée une nouvelle Team en base, et retourne le DTO créé.
-     */
-    fun createTeam(teamForm: TeamForm): TeamDTO {
-        // Convertir le TeamForm en entité TeamEntity à l'aide du mapper
-        val newEntity = TeamMapper.INSTANCE.toEntity(teamForm)
+    @Transactional
+    override  fun create(form: TeamForm): TeamDTO {
+        // Convertir le TeamForm en entité TeamEntity via le mapper
+        val newEntity = teamMapper.toEntity(form)
 
-        // Persister et forcer la synchronisation pour obtenir le nouvel ID
+        // Persister l'entité
         newEntity.persistAndFlush()
 
-        // Retourner le DTO correspondant à l'entité créée, maintenant avec le nouvel ID
+        // Retourner le DTO correspondant à l'entité créée
         return teamMapper.toDto(newEntity)
     }
 
-    /**
-     * Met à jour une Team existante, selon l'ID contenu dans le DTO.
-     * Si l'entité n'existe pas, on peut lever une exception ou retourner un DTO vide.
-     */
-    fun updateTeam(teamForm: TeamForm): TeamDTO {
-        // Vérifier que l'ID est fourni dans le formulaire
-        val teamId = teamForm.id ?: throw BadRequestException("Id not provided")
+    @Transactional
+    override fun update(form: TeamForm): TeamDTO {
+        // Vérifier que l'ID est fourni
+        val teamId = form.id ?: throw BadRequestException("Id not provided")
 
         // Récupérer l'entité existante en base
         val existingEntity = TeamEntity.findById(teamId)
             ?: throw NotFoundException("Team with id=$teamId not found")
 
-        // Convertir le TeamForm en une nouvelle instance d'entité
-        val updatedEntity = TeamMapper.INSTANCE.toEntity(teamForm)
+        // Convertir le TeamForm en entité (via le mapper)
+        val updatedEntity = teamMapper.toEntity(form)
 
-        // Mettre à jour les champs de l'entité existante avec les valeurs du formulaire
-        existingEntity.label = updatedEntity.label
-        existingEntity.path = updatedEntity.path
+        // Mettre à jour les champs de l'entité existante
+        existingEntity.label      = updatedEntity.label
+        existingEntity.path       = updatedEntity.path
         existingEntity.parentTeam = updatedEntity.parentTeam
-        existingEntity.category = updatedEntity.category
+        existingEntity.category   = updatedEntity.category
+
+        // Affecter directement les chaînes de lunchBreak via les variables publiques
+        existingEntity.lunchBreakStartStr = updatedEntity.lunchBreakStartStr
+        existingEntity.lunchBreakEndStr   = updatedEntity.lunchBreakEndStr
 
         // Persister les modifications
         existingEntity.persistAndFlush()
@@ -109,10 +110,15 @@ class TeamService (
     /**
      * Supprime une Team via son ID, si elle existe.
      */
-    fun deleteTeam(id: Int) {
+    override fun delete(id: Int): TeamDTO {
         val existingEntity = TeamEntity.findById(id)
             ?: throw NotFoundException("Team with id=$id not found")
+
+        val dtoBeforeDelete = teamMapper.toDto(existingEntity)
         existingEntity.delete()
+
+        // On retourne le DTO de l'entité supprimée
+        return dtoBeforeDelete
     }
 
     @Transactional

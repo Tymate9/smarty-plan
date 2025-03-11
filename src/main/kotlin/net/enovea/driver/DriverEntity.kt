@@ -11,6 +11,7 @@ import net.enovea.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.team.TeamDTO
 import net.enovea.team.TeamEntity
 import net.enovea.team.TeamMapper
+import net.enovea.vehicle.VehicleMapper
 import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import org.hibernate.Hibernate
 import java.sql.Timestamp
@@ -57,6 +58,9 @@ data class DriverEntity(
         @Inject
         lateinit var driverMapper: DriverMapper
 
+        @Inject
+        lateinit var teamMapper: TeamMapper
+
         @Transactional
         fun findByFullNames(fullNames: List<String>): List<DriverEntity> {
             return list("CONCAT(firstName, ' ', lastName) IN ?1", fullNames)
@@ -100,7 +104,7 @@ data class DriverEntity(
             val drivers = teamIdToDrivers[team.id].orEmpty()
 
             // Convertir le TeamEntity -> TeamDTO via teamMapper
-            val teamDTO = TeamMapper.INSTANCE.toDto(team)
+            val teamDTO = teamMapper.toDto(team)
 
             // Repérer les enfants (ceux dont parentTeam == team)
             val childEntities = idToTeam.values.filter { it.parentTeam?.id == team.id }

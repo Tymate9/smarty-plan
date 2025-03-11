@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.Panache
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Parameters
+import jakarta.inject.Inject
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.api.workInProgress.GenericNodeDTO
@@ -45,12 +46,13 @@ class TeamEntity(
 
     // Colonnes persistées sous forme de String (correspondant aux colonnes de la base)
     @Column(name = "lunch_break_start", nullable = true)
-    private var lunchBreakStartStr: String? = null,
+    var lunchBreakStartStr: String? = null,
 
     @Column(name = "lunch_break_end", nullable = true)
-    private var lunchBreakEndStr: String? = null
+    var lunchBreakEndStr: String? = null
 
 ) : Serializable , PanacheEntityBase {
+
     // Propriétés transitoires exposées en LocalTime
     @get:Transient
         var lunchBreakStart: LocalTime?
@@ -70,6 +72,9 @@ class TeamEntity(
         const val ENTITY_NAME = "TeamEntity"
         const val TABLE_NAME = "team"
         const val ID_SEQUENCE = "team_id_seq"
+
+        @Inject
+        lateinit var teamMapper: TeamMapper
 
         @Transactional
         fun <E, S, SDTO> buildNodeTreeAtDate(
@@ -124,7 +129,7 @@ class TeamEntity(
             // Récupérer la liste des sujets associés à ce team (drivers ou vehicles)
             val subjects = teamIdToSubjects[team.id].orEmpty()
             // Mapper TeamEntity en TeamDTO à l'aide du mapper (ici, TeamMapper.INSTANCE)
-            val teamDTO = TeamMapper.INSTANCE.toDto(team)
+            val teamDTO = teamMapper.toDto(team)
             // Trouver les sous-teams dont le parent est ce team
             val childEntities = idToTeam.values.filter { it.parentTeam?.id == team.id }
             val children = childEntities.map { convertToGenericNodeDTO(it, idToTeam, teamIdToSubjects) }

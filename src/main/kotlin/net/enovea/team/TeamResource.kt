@@ -39,7 +39,7 @@ class TeamResource(private val teamService: TeamService, private val validator: 
     @Path("/{id}")
     override fun readOne(@PathParam("id") id: Int): Response {
         // Si le service lève NotFoundException, Quarkus renverra 404
-        val teamDTO = teamService.getTeamById(id)
+        val teamDTO = teamService.getById(id)
         return Response.ok(teamDTO).build()
     }
 
@@ -58,7 +58,7 @@ class TeamResource(private val teamService: TeamService, private val validator: 
             return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
         }
 
-        val createdTeam = teamService.createTeam(form)
+        val createdTeam = teamService.create(form)
         return Response.ok(createdTeam).build()
     }
 
@@ -82,7 +82,7 @@ class TeamResource(private val teamService: TeamService, private val validator: 
         }
 
         // NotFoundException => 404 par défaut
-        val updatedTeam = teamService.updateTeam(form)
+        val updatedTeam = teamService.update(form)
         return Response.ok(updatedTeam).build()
     }
 
@@ -96,7 +96,7 @@ class TeamResource(private val teamService: TeamService, private val validator: 
     @Transactional
     override fun delete(@PathParam("id") id: Int): Response {
         // NotFoundException => 404 par défaut
-        val deletedTeam = teamService.deleteTeam(id)
+        val deletedTeam = teamService.delete(id)
         // On renvoie le TeamDTO supprimé (ex. pour l'afficher dans le front, ou annuler l'action)
         return Response.ok(deletedTeam).build()
     }

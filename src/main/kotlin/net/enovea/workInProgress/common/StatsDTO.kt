@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress.common
 
 import java.time.LocalDateTime
 

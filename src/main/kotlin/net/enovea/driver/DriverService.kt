@@ -5,19 +5,58 @@ import java.sql.Timestamp
 import java.time.LocalTime
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
-import net.enovea.api.workInProgress.DriverForm
-import net.enovea.api.workInProgress.DriverNodeDTO
-import net.enovea.api.workInProgress.Stat
-import net.enovea.api.workInProgress.StatsDTO
+import net.enovea.workInProgress.driverCRUD.DriverForm
+import net.enovea.workInProgress.DriverNodeDTO
+import net.enovea.workInProgress.common.Stat
+import net.enovea.workInProgress.common.StatsDTO
 import net.enovea.team.TeamEntity
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.VehicleEntity
+import net.enovea.workInProgress.common.ICRUDService
 import java.time.LocalDateTime
 
 class DriverService(
     private val driverMapper: DriverMapper,
-) {
+) : ICRUDService<DriverForm, DriverDTO, Int> {
 
+    // Méthodes CRUD implémentées via l'interface ICRUDService
+
+    @Transactional
+    override fun getById(id: Int): DriverDTO {
+        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
+        return driverMapper.toDto(entity)
+    }
+
+    @Transactional
+    override fun create(form: DriverForm): DriverDTO {
+        val entity = DriverEntity().apply {
+            firstName = form.firstName
+            lastName = form.lastName
+            phoneNumber = form.phoneNumber
+        }
+        entity.persistAndFlush()
+        return driverMapper.toDto(entity)
+    }
+
+    @Transactional
+    override fun update(form: DriverForm): DriverDTO {
+        val id = form.id ?: throw BadRequestException("Id not provided")
+        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
+        // Mise à jour des champs
+        entity.firstName = form.firstName
+        entity.lastName = form.lastName
+        entity.phoneNumber = form.phoneNumber
+        entity.persistAndFlush()
+        return driverMapper.toDto(entity)
+    }
+
+    @Transactional
+    override fun delete(id: Int): DriverDTO {
+        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
+        val dto = driverMapper.toDto(entity)
+        entity.delete()
+        return dto
+    }
 
     @Transactional
     fun getDrivers(agencyIds: List<String>?): List<DriverDTO> {
@@ -64,7 +103,6 @@ class DriverService(
         return panacheQuery.list().map { driverMapper.toDto(it) }
 
     }
-
     // ====================================================
     // Méthodes pour récupérer la fenêtre de pause d’un Driver
     // ====================================================
@@ -118,39 +156,6 @@ class DriverService(
         val latestEnd     = timeRanges.maxByOrNull { it.second }?.second
 
         return Pair(earliestStart, latestEnd)
-    }
-
-
-    fun getDriverById(id: Int): DriverDTO {
-        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
-        return driverMapper.toDto(entity)
-    }
-
-    @Transactional
-    fun createDriver(form: DriverForm): DriverDTO {
-        val entity = DriverEntity()
-        entity.firstName = form.firstName
-        entity.lastName = form.lastName
-        entity.phoneNumber = form.phoneNumber
-        entity.persist()
-        return driverMapper.toDto(entity)
-    }
-
-    @Transactional
-    fun updateDriver(id: Int, form: DriverForm): DriverDTO {
-        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
-        // Mettre à jour les champs
-        entity.firstName = form.firstName
-        entity.lastName = form.lastName
-        entity.phoneNumber = form.phoneNumber
-        entity.persist()
-        return driverMapper.toDto(entity)
-    }
-
-    @Transactional
-    fun deleteDriver(id: Int) {
-        val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
-        entity.delete()
     }
 
     @Transactional

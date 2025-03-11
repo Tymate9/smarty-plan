@@ -7,8 +7,8 @@ import io.quarkus.panache.common.Parameters
 import jakarta.inject.Inject
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
-import net.enovea.api.workInProgress.GenericNodeDTO
-import net.enovea.api.workInProgress.IAffectationEntity
+import net.enovea.workInProgress.GenericNodeDTO
+import net.enovea.workInProgress.IAffectationEntity
 import net.enovea.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity

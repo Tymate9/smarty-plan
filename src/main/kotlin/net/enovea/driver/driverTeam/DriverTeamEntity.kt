@@ -3,7 +3,7 @@ package net.enovea.driver.driverTeam
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
-import net.enovea.api.workInProgress.IAffectationEntity
+import net.enovea.workInProgress.IAffectationEntity
 import net.enovea.driver.DriverEntity
 import net.enovea.team.TeamEntity
 import java.io.Serializable

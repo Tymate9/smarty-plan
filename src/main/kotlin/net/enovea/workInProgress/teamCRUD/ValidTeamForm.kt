@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress.teamCRUD
 
 import jakarta.transaction.Transactional
 import jakarta.validation.Constraint

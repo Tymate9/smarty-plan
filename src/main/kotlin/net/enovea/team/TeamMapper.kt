@@ -1,12 +1,11 @@
 package net.enovea.team
 
 
-import net.enovea.api.workInProgress.TeamForm
+import net.enovea.workInProgress.teamCRUD.TeamForm
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
-import org.mapstruct.factory.Mappers
 
 @Mapper(componentModel = "cdi")
 interface TeamMapper {

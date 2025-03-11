@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress.common
 
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType

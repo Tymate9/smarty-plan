@@ -3,8 +3,8 @@ package net.enovea.vehicle
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import net.dilivia.lang.StopWatch
-import net.enovea.api.workInProgress.Stat
-import net.enovea.api.workInProgress.StatsDTO
+import net.enovea.workInProgress.common.Stat
+import net.enovea.workInProgress.common.StatsDTO
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.driver.driverUntrackedPeriod.DriverUntrackedPeriodEntity
 import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity

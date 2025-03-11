@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress
 
 import net.enovea.team.TeamDTO
 import net.enovea.team.TeamEntity

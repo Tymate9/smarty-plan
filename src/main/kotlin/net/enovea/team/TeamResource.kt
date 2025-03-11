@@ -7,10 +7,10 @@ import jakarta.validation.Validator
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import net.enovea.api.workInProgress.ICRUDResource
+import net.enovea.workInProgress.common.ICRUDResource
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import net.enovea.api.workInProgress.TeamForm
+import net.enovea.workInProgress.teamCRUD.TeamForm
 import net.enovea.team.teamCategory.TeamCategoryDTO
 
 @Path("/api/teams")

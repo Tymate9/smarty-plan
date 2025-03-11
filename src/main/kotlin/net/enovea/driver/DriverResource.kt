@@ -1,18 +1,25 @@
 package net.enovea.driver
 
 import io.quarkus.security.Authenticated
+import jakarta.transaction.Transactional
+import jakarta.validation.ConstraintViolation
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import net.enovea.api.workInProgress.DriverForm
+import net.enovea.workInProgress.driverCRUD.DriverForm
 import net.enovea.team.TeamService
+import net.enovea.workInProgress.common.ICRUDResource
+import jakarta.validation.Validator
 
 @Path("/api/drivers")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Authenticated
 class DriverResource(
     private val driverService: DriverService,
-    private val teamService: TeamService) {
+    private val teamService: TeamService,
+    private val validator: Validator ) : ICRUDResource<DriverForm, DriverDTO, Int> {
+
 
     @GET
     fun getDrivers(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<DriverDTO> {
@@ -38,27 +45,66 @@ class DriverResource(
         return Response.ok(driverService.getDriverStats()).build()
     }
 
+    /**
+     * Récupérer un conducteur par son ID (ReadOne).
+     * Retourne 404 si l'entité n'existe pas.
+     */
     @GET
     @Path("/{id}")
-    fun getDriverById(@PathParam("id") id: Int): DriverDTO {
-        return driverService.getDriverById(id)
+    override fun readOne(@PathParam("id") id: Int): Response {
+        // Le service lève NotFoundException si l'entité n'existe pas.
+        val driverDTO = driverService.getById(id)
+        return Response.ok(driverDTO).build()
     }
 
+    /**
+     * Créer un nouveau conducteur (Create).
+     * Retourne 400 si le formulaire est invalide.
+     */
     @POST
-    fun createDriver(form: DriverForm): DriverDTO {
-        return driverService.createDriver(form)
+    @Transactional
+    override fun create(form: DriverForm): Response {
+        // Valider manuellement le formulaire
+        val violations: Set<ConstraintViolation<DriverForm>> = validator.validate(form)
+        if (violations.isNotEmpty()) {
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val createdDriver = driverService.create(form)
+        return Response.ok(createdDriver).build()
     }
 
+    /**
+     * Mettre à jour un conducteur existant (Update).
+     * Retourne 400 si le formulaire est invalide et 404 si l'entité n'existe pas.
+     */
     @PUT
+    @Transactional
     @Path("/{id}")
-    fun updateDriver(@PathParam("id") id: Int, form: DriverForm): DriverDTO {
-        return driverService.updateDriver(id, form)
+    override fun update(@PathParam("id") id: Int, form: DriverForm): Response {
+        // Forcer l'ID dans le formulaire
+        form.id = id
+
+        // Valider le formulaire
+        val violations: Set<ConstraintViolation<DriverForm>> = validator.validate(form)
+        if (violations.isNotEmpty()) {
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val updatedDriver = driverService.update(form)
+        return Response.ok(updatedDriver).build()
     }
 
+    /**
+     * Supprimer un conducteur (Delete).
+     * Retourne 404 si l'entité n'existe pas.
+     * Retourne le DTO du conducteur supprimé pour permettre une éventuelle annulation.
+     */
     @DELETE
     @Path("/{id}")
-    fun deleteDriver(@PathParam("id") id: Int): Response {
-        driverService.deleteDriver(id)
-        return Response.noContent().build()
+    @Transactional
+    override fun delete(@PathParam("id") id: Int): Response {
+        val deletedDriver = driverService.delete(id)
+        return Response.ok(deletedDriver).build()
     }
 }

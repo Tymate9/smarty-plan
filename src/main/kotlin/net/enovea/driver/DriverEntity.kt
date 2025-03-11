@@ -5,7 +5,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.inject.Inject
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
-import net.enovea.api.workInProgress.DriverNodeDTO
+import net.enovea.workInProgress.DriverNodeDTO
 import net.enovea.driver.driverTeam.DriverTeamEntity
 import net.enovea.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.team.TeamDTO

@@ -4,7 +4,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.inject.Inject
 import jakarta.persistence.*
-import net.enovea.api.workInProgress.IAffectationEntity
+import net.enovea.workInProgress.IAffectationEntity
 import net.enovea.team.TeamEntity
 import net.enovea.team.TeamMapper
 import net.enovea.team.TeamDTO

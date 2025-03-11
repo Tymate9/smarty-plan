@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress.teamCRUD
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import jakarta.transaction.Transactional

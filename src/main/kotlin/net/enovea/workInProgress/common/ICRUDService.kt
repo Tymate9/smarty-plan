@@ -1,4 +1,4 @@
-package net.enovea.api.service
+package net.enovea.workInProgress.common
 
 interface ICRUDService<F, D, ID> {
 

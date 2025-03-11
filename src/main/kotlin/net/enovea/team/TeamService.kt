@@ -2,11 +2,11 @@ package net.enovea.team
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
-import net.enovea.api.service.ICRUDService
-import net.enovea.api.workInProgress.GenericNodeDTO
-import net.enovea.api.workInProgress.Stat
-import net.enovea.api.workInProgress.StatsDTO
-import net.enovea.api.workInProgress.TeamForm
+import net.enovea.workInProgress.common.ICRUDService
+import net.enovea.workInProgress.GenericNodeDTO
+import net.enovea.workInProgress.common.Stat
+import net.enovea.workInProgress.common.StatsDTO
+import net.enovea.workInProgress.teamCRUD.TeamForm
 import net.enovea.driver.DriverDTO
 import net.enovea.driver.DriverMapper
 import net.enovea.driver.driverTeam.DriverTeamEntity

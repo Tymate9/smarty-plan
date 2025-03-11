@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress
 
 import net.enovea.driver.DriverDTO
 import net.enovea.team.TeamDTO

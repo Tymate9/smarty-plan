@@ -1,4 +1,4 @@
-package net.enovea.api.workInProgress
+package net.enovea.workInProgress.common
 
 data class Stat(
     val label: String,

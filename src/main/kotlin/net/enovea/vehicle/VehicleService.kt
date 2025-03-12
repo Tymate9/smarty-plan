@@ -538,7 +538,6 @@ open class VehicleService(
         return Pair(earliestStart, latestEnd)
     }
 
-
     fun getCount(): Long {
         return VehicleEntity.count()
     }

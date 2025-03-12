@@ -3,9 +3,15 @@ package net.enovea.driver.driverTeam
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
-import net.enovea.workInProgress.IAffectationEntity
+import net.enovea.workInProgress.affectationCRUD.IAffectationEntity
 import net.enovea.driver.DriverEntity
 import net.enovea.team.TeamEntity
+import net.enovea.vehicle.VehicleEntity
+import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
+import net.enovea.vehicle.vehicleDriver.VehicleDriverId
+import net.enovea.workInProgress.affectationCRUD.AffectationForm
+import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
+import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -14,10 +20,10 @@ import java.sql.Timestamp
 data class DriverTeamEntity (
 
     @EmbeddedId
-    val id: DriverTeamId = DriverTeamId(),
+    override var id: DriverTeamId = DriverTeamId(),
 
     @Column(name = "end_date", nullable = true)
-    override val endDate : Timestamp? = Timestamp(System.currentTimeMillis()),
+    override var endDate : Timestamp? = Timestamp(System.currentTimeMillis()),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("driverId")
@@ -27,18 +33,41 @@ data class DriverTeamEntity (
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("teamId")
     @JoinColumn(name = "team_id",  referencedColumnName = "id", nullable = false)
-    override val team: TeamEntity? = null,
+    val team: TeamEntity? = null,
 
-    ): PanacheEntityBase, IAffectationEntity<DriverEntity> {
-    companion object : PanacheCompanionBase<DriverTeamEntity, DriverTeamId> {
-        const val ENTITY_NAME = "DriverTeamEntity"
-        const val TABLE_NAME = "driver_team"
-    }
+    ): IAffectationPanacheEntity<DriverEntity, TeamEntity, DriverTeamId> {
 
     override fun getStartDate(): Timestamp = id.startDate
 
     override fun getSubject(): DriverEntity? = driver
+
+    override fun getBuildId(): String = "${id.driverId}-${id.teamId}-${id.startDate.time}"
+
+    override fun getTarget(): TeamEntity? = team
+
+    companion object : PanacheCompanionBase<DriverTeamEntity, DriverTeamId>, IAffectationFactory<DriverTeamEntity, DriverTeamId> {
+        const val ENTITY_NAME = "DriverTeamEntity"
+        const val TABLE_NAME = "driver_team"
+
+        override fun createFromForm(form: AffectationForm): DriverTeamEntity {
+            return DriverTeamEntity(
+                id = createIdFromForm(form),
+                endDate = form.endDate,
+                team = TeamEntity.findById(form.targetId.toString().toInt()),
+                driver = DriverEntity.findById(form.subjectId.toString().toInt())
+            )
+        }
+
+        override fun createIdFromForm(form: AffectationForm): DriverTeamId {
+            return DriverTeamId(
+                teamId = form.targetId.toString().toInt(),
+                driverId = form.subjectId.toString().toInt(),
+                startDate = form.startDate
+            )
+        }
+    }
 }
+
 @Embeddable
 data class DriverTeamId(
     @Column(name = "driver_id", nullable = false)

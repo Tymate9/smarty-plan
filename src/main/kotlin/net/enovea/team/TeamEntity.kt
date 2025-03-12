@@ -4,19 +4,12 @@ import io.quarkus.hibernate.orm.panache.Panache
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Parameters
-import jakarta.inject.Inject
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
-import net.enovea.workInProgress.GenericNodeDTO
-import net.enovea.workInProgress.IAffectationEntity
-import net.enovea.poi.PointOfInterestEntity.Companion.ID_SEQUENCE
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import java.io.Serializable
 import java.time.LocalTime
-import java.sql.Timestamp
-import java.time.LocalDate
-import kotlin.reflect.KClass
 
 @Entity(name = TeamEntity.ENTITY_NAME)
 @Table(name = TeamEntity.TABLE_NAME)
@@ -72,71 +65,6 @@ class TeamEntity(
         const val ENTITY_NAME = "TeamEntity"
         const val TABLE_NAME = "team"
         const val ID_SEQUENCE = "team_id_seq"
-
-        @Inject
-        lateinit var teamMapper: TeamMapper
-
-        @Transactional
-        fun <E, S, SDTO> buildNodeTreeAtDate(
-            affectationClass: KClass<E>, dateParam: Timestamp? = null, subjectToDto: (S, Timestamp?) -> SDTO
-        ): List<GenericNodeDTO<SDTO>> where E : IAffectationEntity<S>, E : PanacheEntityBase {
-            // 1) Valeur par défaut => date courante à minuit
-            val refTimestamp = dateParam ?: Timestamp.valueOf(LocalDate.now().atStartOfDay())
-
-            // 2) Charger tous les TeamEntity en une requête
-            val allTeams = TeamEntity.listAll().map { it as TeamEntity }
-
-            // 3) Charger les entités d’affectation (ex. DriverTeamEntity ou VehicleTeamEntity) actives
-            // Construire dynamiquement la requête JPQL à l'aide de l'EntityManager
-            val em: EntityManager = Panache.getEntityManager()
-            // Récupérer le nom de l'entité, par exemple "DriverTeamEntity" ou "VehicleTeamEntity"
-            val entityName = affectationClass.simpleName
-                ?: throw IllegalArgumentException("La classe ${affectationClass} n'a pas de nom simple")
-            val jpql = """
-         SELECT a 
-         FROM $entityName a 
-         WHERE a.id.startDate <= :refDate 
-           AND (a.endDate IS NULL OR a.endDate >= :refDate)
-    """.trimIndent()
-            val query = em.createQuery(jpql, affectationClass.java)
-            query.setParameter("refDate", refTimestamp)
-            val activeAffectations = query.resultList as List<E>
-
-            // 4) Construire Map<teamId, List<SDTO>>
-            val teamIdToSubjects = HashMap<Int, MutableList<SDTO>>()
-            for (aff in activeAffectations) {
-                val teamId = aff.team?.id ?: continue
-                val subject = aff.getSubject() ?: continue
-                // Convertir le sujet (DriverEntity ou VehicleEntity) en SDTO via la fonction fournie
-                val dto = subjectToDto(subject, refTimestamp)
-                teamIdToSubjects.computeIfAbsent(teamId) { mutableListOf() }.add(dto)
-            }
-
-            // 5) Indexer les teams par leur id et repérer les racines (teams sans parent)
-            val idToTeam = allTeams.associateBy { it.id }
-            val rootTeams = allTeams.filter { it.parentTeam == null }
-
-            // 6) Construire récursivement l'arbre via la méthode générique
-            return rootTeams.map { convertToGenericNodeDTO(it, idToTeam, teamIdToSubjects) }
-        }
-
-        /**
-         * Méthode générique pour convertir un TeamEntity en GenericNodeDTO.
-         */
-        private fun <SDTO> convertToGenericNodeDTO(
-            team: TeamEntity, idToTeam: Map<Int, TeamEntity>, teamIdToSubjects: Map<Int, List<SDTO>>
-        ): GenericNodeDTO<SDTO> {
-            // Récupérer la liste des sujets associés à ce team (drivers ou vehicles)
-            val subjects = teamIdToSubjects[team.id].orEmpty()
-            // Mapper TeamEntity en TeamDTO à l'aide du mapper (ici, TeamMapper.INSTANCE)
-            val teamDTO = teamMapper.toDto(team)
-            // Trouver les sous-teams dont le parent est ce team
-            val childEntities = idToTeam.values.filter { it.parentTeam?.id == team.id }
-            val children = childEntities.map { convertToGenericNodeDTO(it, idToTeam, teamIdToSubjects) }
-            return GenericNodeDTO(
-                team = teamDTO, subjects = subjects, children = children
-            )
-        }
 
         @Transactional
         fun findByLabels(labels: List<String>): List<TeamEntity> {

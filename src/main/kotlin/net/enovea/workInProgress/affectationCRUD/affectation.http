@@ -1,0 +1,233 @@
+### ----------------------------------------------------
+### Définition des variables
+### ----------------------------------------------------
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = admin
+@password_admin = root
+
+### ----------------------------------------------------
+### 1) Obtenir le token d'accès
+### ----------------------------------------------------
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {% client.global.set("access_token_admin", response.body.access_token); %}
+
+### ====================================================
+### 2) TESTS SUR DRIVER_TEAM
+###    CREATE / READ / UPDATE / DELETE + tests d'erreur
+### ====================================================
+
+### 2.1) CREATE : Affectation DRIVER_TEAM valide
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/DRIVER_TEAM
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 94,
+  "targetId": 68,
+  "startDate": "2025-03-12T08:00:00.000Z",
+  "endDate": null,
+  "classInfo": {
+    "entityClass": "DriverTeamEntity",
+    "idClass": "DriverTeamId",
+    "subjectClass": "DriverEntity",
+    "targetClass": "TeamEntity"
+  }
+}
+
+> {% client.global.set("driver_team_id", response.body.id); %}
+
+### 2.2) CREATE : Affectation DRIVER_TEAM invalide (subjectId manquant => 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/DRIVER_TEAM
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "targetId": 999,
+  "startDate": "2025-03-12T08:00:00.000Z"
+}
+
+### 2.3) UPDATE : On met fin à l’affectation en précisant endDate
+### ----------------------------------------------------
+PUT http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 42,
+  "targetId": 101,
+  "startDate": "2025-03-12T08:00:00.000Z",
+  "endDate": "2025-03-15T18:00:00.000Z",
+  "classInfo": {
+    "entityClass": "DriverTeamEntity",
+    "idClass": "DriverTeamId",
+    "subjectClass": "DriverEntity",
+    "targetClass": "TeamEntity"
+  }
+}
+
+### 2.4) READ : Vérifier la mise à jour
+### ----------------------------------------------------
+GET http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### 2.5) DELETE
+### ----------------------------------------------------
+DELETE http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### 2.6) READ après DELETE => 404
+### ----------------------------------------------------
+GET http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### ====================================================
+### 3) TESTS SUR VEHICLE_TEAM
+### ====================================================
+
+### 3.1) CREATE : Affectation VEHICLE_TEAM valide
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/VEHICLE_TEAM
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": "XY123",
+  "targetId": 202,
+  "startDate": "2025-04-01T09:00:00.000Z",
+  "endDate": null,
+  "classInfo": {
+    "entityClass": "VehicleTeamEntity",
+    "idClass": "VehicleTeamId",
+    "subjectClass": "VehicleEntity",
+    "targetClass": "TeamEntity"
+  }
+}
+
+> {% client.global.set("vehicle_team_id", response.body.id); %}
+
+### 3.2) CREATE : Affectation VEHICLE_TEAM invalide (teamId = 0 => contrainte positive => 400 ?)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/VEHICLE_TEAM
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": "ZZZ",
+  "targetId": 0,
+  "startDate": "2025-04-01T09:00:00.000Z"
+}
+
+### 3.3) UPDATE : Modifier l’endDate
+### ----------------------------------------------------
+PUT http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": "XY123",
+  "targetId": 202,
+  "startDate": "2025-04-01T09:00:00.000Z",
+  "endDate": "2025-04-10T16:30:00.000Z",
+  "classInfo": {
+    "entityClass": "VehicleTeamEntity",
+    "idClass": "VehicleTeamId",
+    "subjectClass": "VehicleEntity",
+    "targetClass": "TeamEntity"
+  }
+}
+
+### 3.4) READ : Vérifier la mise à jour
+### ----------------------------------------------------
+GET http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### 3.5) DELETE
+### ----------------------------------------------------
+DELETE http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### 3.6) READ après DELETE => 404
+### ----------------------------------------------------
+GET http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### ====================================================
+### 4) TESTS SUR DRIVER_VEHICLE
+### ====================================================
+
+### 4.1) CREATE : Affectation DRIVER_VEHICLE valide
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/DRIVER_VEHICLE
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 777,
+  "targetId": "VH555",
+  "startDate": "2025-05-01T10:00:00.000Z",
+  "endDate": null,
+  "classInfo": {
+    "entityClass": "VehicleDriverEntity",
+    "idClass": "VehicleDriverId",
+    "subjectClass": "DriverEntity",
+    "targetClass": "VehicleEntity"
+  }
+}
+
+> {% client.global.set("driver_vehicle_id", response.body.id); %}
+
+### 4.2) CREATE : Affectation DRIVER_VEHICLE invalide (startDate manquante => 400 ?)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/DRIVER_VEHICLE
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 777,
+  "targetId": "VH999"
+}
+
+### 4.3) UPDATE : Modifier l’endDate
+### ----------------------------------------------------
+PUT http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 777,
+  "targetId": "VH555",
+  "startDate": "2025-05-01T10:00:00.000Z",
+  "endDate": "2025-05-02T15:00:00.000Z",
+  "classInfo": {
+    "entityClass": "VehicleDriverEntity",
+    "idClass": "VehicleDriverId",
+    "subjectClass": "DriverEntity",
+    "targetClass": "VehicleEntity"
+  }
+}
+
+### 4.4) READ : Vérifier la mise à jour
+### ----------------------------------------------------
+GET http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### 4.5) DELETE
+### ----------------------------------------------------
+DELETE http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
+Authorization: Bearer {{access_token_admin}}
+
+### 4.6) READ après DELETE => 404
+### ----------------------------------------------------
+GET http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
+Authorization: Bearer {{access_token_admin}}

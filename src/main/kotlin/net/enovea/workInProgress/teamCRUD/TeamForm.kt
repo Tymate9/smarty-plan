@@ -1,11 +1,5 @@
 package net.enovea.workInProgress.teamCRUD
 
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import jakarta.transaction.Transactional
-import jakarta.validation.Constraint
-import jakarta.validation.ConstraintValidator
-import jakarta.validation.ConstraintValidatorContext
-import jakarta.validation.Payload
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Positive
@@ -13,8 +7,6 @@ import jakarta.validation.constraints.Size
 import net.enovea.team.TeamEntity
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.workInProgress.common.ExistsInDatabase
-import kotlin.reflect.KClass
-import kotlin.reflect.full.companionObjectInstance
 
 @ValidTeamForm
 data class TeamForm (

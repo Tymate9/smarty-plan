@@ -25,10 +25,6 @@ class TeamServiceConfiguration {
     }
 
     @Produces
-    @ApplicationScoped
-    fun teamCategoryMapper(): TeamCategoryMapper = TeamCategoryMapper.INSTANCE
-
-    @Produces
     @Named("validator")
     @ApplicationScoped
     fun validator(): Validator = Validation.buildDefaultValidatorFactory().validator

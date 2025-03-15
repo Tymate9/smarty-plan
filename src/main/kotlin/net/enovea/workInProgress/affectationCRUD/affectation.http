@@ -243,8 +243,7 @@ Authorization: Bearer {{access_token_admin}}
 > {%
     client.test("READ VEHICLE_TEAM après update => 200", function() {
         client.assert(response.status === 200, "Expected 200 OK on read after update");
-        client.log(response.body.endDate)
-        // client.assert(body.endDate === "2025-04-10T16:30:00.000Z", "endDate not updated");
+        client.assert(response.body.endDate === "2025-04-10T16:30:00.000+00:00", "endDate not updated");
     });
 %}
 

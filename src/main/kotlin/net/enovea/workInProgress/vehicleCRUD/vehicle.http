@@ -10,7 +10,7 @@
 @username_admin = admin
 @password_admin = root
 
-### ----------------------------------------------------
+
 ### 1) Obtenir le token d'accès
 ### ----------------------------------------------------
 POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
@@ -20,13 +20,7 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
 
 > {% client.global.set("access_token_admin", response.body.access_token); %}
 
-### ----------------------------------------------------
-### Tests de validation du formulaire VehicleForm
-### ----------------------------------------------------
-
-### ----------------------------------------------------
-### 2) Créer un véhicule valide (CREATE)
-###    Utilisation d'une catégorie existante (ex: id=1)
+### 2) CREATE : Créer un véhicule valide (CREATE)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -37,16 +31,19 @@ Authorization: Bearer {{access_token_admin}}
   "energy": "Electrique",
   "engine": "V8",
   "externalid": "EXT123",
-  "licenseplate": "AB-123-CD",
+  "licenseplate": "AB123CD",
   "category": 1,
   "validated": false
 }
 
-> {% client.global.set("test_vehicle_id", response.body.id); %}
+> {%
+    client.global.set("test_vehicle_id", response.body.id);
+    client.test("CREATE véhicule valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid creation");
+    });
+%}
 
-
-### ----------------------------------------------------
-### 3) Créer un véhicule avec énergie vide (Erreur 400)
+### 3) CREATE : Créer un véhicule avec énergie vide (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -62,9 +59,13 @@ Authorization: Bearer {{access_token_admin}}
   "validated": false
 }
 
+> {%
+    client.test("CREATE véhicule avec énergie vide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when energy is empty");
+    });
+%}
 
-### ----------------------------------------------------
-### 4) Créer un véhicule avec moteur vide (Erreur 400)
+### 4) CREATE : Créer un véhicule avec moteur vide (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -80,9 +81,13 @@ Authorization: Bearer {{access_token_admin}}
   "validated": false
 }
 
+> {%
+    client.test("CREATE véhicule avec moteur vide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when engine is empty");
+    });
+%}
 
-### ----------------------------------------------------
-### 5) Créer un véhicule avec externalid vide (Erreur 400)
+### 5) CREATE : Créer un véhicule avec externalid vide (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -98,9 +103,13 @@ Authorization: Bearer {{access_token_admin}}
   "validated": false
 }
 
+> {%
+    client.test("CREATE véhicule avec externalid vide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when externalid is empty");
+    });
+%}
 
-### ----------------------------------------------------
-### 6) Créer un véhicule avec une plaque d'immatriculation invalide (Erreur 400)
+### 6) CREATE : Créer un véhicule avec une plaque d'immatriculation invalide (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -116,10 +125,13 @@ Authorization: Bearer {{access_token_admin}}
   "validated": false
 }
 
+> {%
+    client.test("CREATE véhicule avec plaque invalide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for invalid license plate");
+    });
+%}
 
-### ----------------------------------------------------
-### 7) Créer un véhicule avec une catégorie inexistante (Erreur 400)
-###    Ici, catégorie 305 n'existe pas.
+### 7) CREATE : Créer un véhicule avec une catégorie inexistante (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -135,9 +147,13 @@ Authorization: Bearer {{access_token_admin}}
   "validated": true
 }
 
+> {%
+    client.test("CREATE véhicule avec catégorie inexistante => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for non-existent category");
+    });
+%}
 
-### ----------------------------------------------------
-### 8) Créer un véhicule avec la catégorie à null (Erreur 400)
+### 8) CREATE : Créer un véhicule avec la catégorie à null (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/vehicles
 Content-Type: application/json
@@ -153,14 +169,13 @@ Authorization: Bearer {{access_token_admin}}
   "validated": true
 }
 
+> {%
+    client.test("CREATE véhicule avec catégorie null => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when category is null");
+    });
+%}
 
-### ----------------------------------------------------
-### Tests CRUD classiques sur le véhicule créé en étape 2
-### ----------------------------------------------------
-
-### ----------------------------------------------------
-### 9) Mettre à jour le véhicule (UPDATE)
-###    Modification de l'énergie, du moteur, de l'externalid, de la plaque et du statut validated.
+### 9) UPDATE : Mettre à jour le véhicule (UPDATE)
 ### ----------------------------------------------------
 PUT http://{{api_host}}/api/vehicles/{{test_vehicle_id}}
 Content-Type: application/json
@@ -171,30 +186,48 @@ Authorization: Bearer {{access_token_admin}}
   "energy": "Hybride",
   "engine": "V8 Turbo",
   "externalid": "EXT789",
-  "licenseplate": "EF-789-GH",
+  "licenseplate": "EF789GH",
   "category": 1,
   "validated": true
 }
 
+> {%
+    client.test("UPDATE véhicule => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on update");
+    });
+%}
 
-### ----------------------------------------------------
-### 10) Récupérer le véhicule mis à jour (READ)
+### 10) READ : Récupérer le véhicule mis à jour (READ)
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/vehicles/{{test_vehicle_id}}
 Authorization: Bearer {{access_token_admin}}
 
+> {%
+    client.test("READ véhicule => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on read after update");
+        client.assert(response.body.energy === "Hybride", "Energy should be updated to Hybride");
+        client.assert(response.body.engine === "V8 Turbo", "Engine should be updated to V8 Turbo");
+    });
+%}
 
-### ----------------------------------------------------
-### 11) Supprimer le véhicule (DELETE)
-###    La réponse doit renvoyer le DTO du véhicule supprimé.
+### 11) DELETE : Supprimer le véhicule (DELETE)
 ### ----------------------------------------------------
 DELETE http://{{api_host}}/api/vehicles/{{test_vehicle_id}}
 Authorization: Bearer {{access_token_admin}}
 
+> {%
+    client.test("DELETE véhicule => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on vehicle delete");
+    });
+%}
 
-### ----------------------------------------------------
-### 12) Vérifier la suppression (READ)
-###    Cette requête devrait retourner une 404 Not Found.
+### 12) READ après DELETE : Vérifier la suppression (READ)
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/vehicles/{{test_vehicle_id}}
 Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ après DELETE véhicule => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after vehicle deletion");
+    });
+%}

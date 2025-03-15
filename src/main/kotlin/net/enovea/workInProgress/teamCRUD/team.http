@@ -10,7 +10,6 @@
 @username_admin = admin
 @password_admin = root
 
-### ----------------------------------------------------
 ### 1) Obtenir le token d'accès
 ### ----------------------------------------------------
 POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
@@ -21,13 +20,7 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
 > {% client.global.set("access_token_admin", response.body.access_token); %}
 
 
-### ----------------------------------------------------
-### Tests de validation du formulaire et des contraintes
-### ----------------------------------------------------
-
-### ----------------------------------------------------
-### 2) Créer une nouvelle Team valide (non "Agence")
-###    Utilisation d'une catégorie autre que "Agence" (ex: id=2)
+### 2) CREATE : Créer une nouvelle Team valide (non "Agence")
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/teams
 Content-Type: application/json
@@ -43,12 +36,14 @@ Authorization: Bearer {{access_token_admin}}
   "lunchBreakEndStr": "13:00:00"
 }
 
-> {% client.global.set("test_team_id", response.body.id); %}
+> {%
+    client.global.set("test_team_id", response.body.id);
+    client.test("CREATE Team valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid team creation");
+    });
+%}
 
-
-### ----------------------------------------------------
-### 3) Tenter de créer une Team avec un format d'heure invalide pour lunchBreakStartStr (Erreur 400)
-###    "25:00:00" n'est pas un format valide (heure > 23)
+### 3) CREATE : Créer une Team avec un format d'heure invalide pour lunchBreakStartStr (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/teams
 Content-Type: application/json
@@ -64,10 +59,13 @@ Authorization: Bearer {{access_token_admin}}
   "lunchBreakEndStr": "13:00:00"
 }
 
+> {%
+    client.test("CREATE Team avec format invalide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for invalid lunchBreakStartStr");
+    });
+%}
 
-### ----------------------------------------------------
-### 4) Tenter de créer une Team avec des horaires incohérents (start >= end) (Erreur 400)
-###    Ici, lunchBreakStartStr "14:00:00" n'est pas antérieur à lunchBreakEndStr "13:00:00"
+### 4) CREATE : Créer une Team avec des horaires incohérents (start >= end) (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/teams
 Content-Type: application/json
@@ -83,10 +81,13 @@ Authorization: Bearer {{access_token_admin}}
   "lunchBreakEndStr": "13:00:00"
 }
 
+> {%
+    client.test("CREATE Team avec horaires incohérents => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for inconsistent lunch break times");
+    });
+%}
 
-### ----------------------------------------------------
-### 5) Tester la contrainte: Pour une équipe de catégorie "Agence" (id=1), parentTeam doit être null.
-###    a) Créer d'abord une équipe "Agence" valide (parentTeam=null)
+### 5) CREATE : Créer une Team de catégorie "Agence" valide (parentTeam null)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/teams
 Content-Type: application/json
@@ -102,11 +103,14 @@ Authorization: Bearer {{access_token_admin}}
   "lunchBreakEndStr": "12:00:00"
 }
 
-> {% client.global.set("agence_id", response.body.id); %}
+> {%
+    client.global.set("agence_id", response.body.id);
+    client.test("CREATE Agence valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid Agence creation");
+    });
+%}
 
-### ----------------------------------------------------
-### 5b) Tenter de créer une équipe "Agence" avec un parentTeam renseigné (Erreur 400)
-###     Ici, on essaie de créer une équipe avec catégorie "Agence" (id=1) et parentTeam non-null (ex: agence_id)
+### 6) CREATE : Tenter de créer une équipe "Agence" avec un parentTeam renseigné (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/teams
 Content-Type: application/json
@@ -122,21 +126,20 @@ Authorization: Bearer {{access_token_admin}}
   "lunchBreakEndStr": "12:00:00"
 }
 
+> {%
+    client.test("CREATE Agence avec parentTeam => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when an Agence has a parentTeam");
+    });
+%}
 
-### ----------------------------------------------------
-### Tests CRUD classiques sur l'équipe créée en étape 2
-### ----------------------------------------------------
-
-### ----------------------------------------------------
-### 6) Mettre à jour spécifiquement l'équipe créée en étape 2 (UPDATE)
-###    Modification des horaires de pause et d'autres champs
+### 7) UPDATE : Mettre à jour l'équipe créée en étape 2 (UPDATE)
 ### ----------------------------------------------------
 PUT http://{{api_host}}/api/teams/{{test_team_id}}
 Content-Type: application/json
 Authorization: Bearer {{access_token_admin}}
 
 {
-  "id": {{test_team_id}},
+  "id": "{{test_team_id}}",
   "label": "Equipe Modifiée",
   "path": "chemin/modifie",
   "category": 2,
@@ -145,26 +148,42 @@ Authorization: Bearer {{access_token_admin}}
   "lunchBreakEndStr": "12:30:00"
 }
 
+> {%
+    client.test("UPDATE Team => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on team update");
+    });
+%}
 
-### ----------------------------------------------------
-### 7) Récupérer l'équipe mise à jour (READ)
-###    Vérifier que la mise à jour a bien été prise en compte
+### 8) READ : Récupérer l'équipe mise à jour (READ)
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/teams/{{test_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
+> {%
+    client.test("READ Team => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on reading updated team");
+        client.assert(response.body.label === "Equipe Modifiée", "Expected team label to be 'Equipe Modifiée'");
+    });
+%}
 
-### ----------------------------------------------------
-### 8) Supprimer spécifiquement l'équipe créée en étape 2 (DELETE)
-###    La réponse renvoie l'entité supprimée
+### 9) DELETE : Supprimer l'équipe créée en étape 2 (DELETE)
 ### ----------------------------------------------------
 DELETE http://{{api_host}}/api/teams/{{test_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
+> {%
+    client.test("DELETE Team => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on team deletion");
+    });
+%}
 
-### ----------------------------------------------------
-### 9) Vérifier la suppression (READ)
-###    Cette requête devrait retourner une 404 Not Found
+### 10) READ : Vérifier la suppression (READ)
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/teams/{{test_team_id}}
 Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ après DELETE Team => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after team deletion");
+    });
+%}

@@ -26,8 +26,8 @@ data class VehicleForm (
 
     @field:NotNull(message = "La plaque d'immatriculation ne doit pas être null.")
     @field:Pattern(
-        regexp = "^[A-Z]{2}-\\d{3}-[A-Z]{2}$",
-        message = "La plaque d'immatriculation doit être valide (format: AA-123-AA)."
+        regexp = "^[A-Z]{2}\\d{3}[A-Z]{2}$",
+        message = "La plaque d'immatriculation doit être valide (format: AA123AA)."
     )
     var licenseplate: String,
 

@@ -1,13 +1,11 @@
 package net.enovea.workInProgress.affectationCRUD
 
 
+import io.quarkus.hibernate.orm.panache.Panache
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import jakarta.enterprise.context.ApplicationScoped
+import jakarta.transaction.Transactional
 import jakarta.ws.rs.NotFoundException
-import net.enovea.driver.driverTeam.DriverTeamEntity
-import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
-import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 
@@ -29,21 +27,10 @@ open class AffectationService(
         val entity = factory.createFromForm(form)
 
         // 4) Persister l’entité via Panache
-        (entity as PanacheEntityBase).persist()
-
-        // 5) Construction de l'identifiant textuel à partir de l'entité persistée
-        val id = entity.getBuildId()
+        (entity as PanacheEntityBase).persistAndFlush()
 
         // 6) Construction du DTO
         return affectationMapper.toDTO(entity)
-        /*AffectationDTO(
-            id = id,
-            startDate = entity.getStartDate(),
-            endDate = entity.endDate,
-            subject = entity.getSubject(),
-            target = entity.getTarget(),
-            affectationType = type
-        )*/
     }
 
     fun <E, ID : Any> getById(entityClass: KClass<E>, id: ID): AffectationDTO<*, *>
@@ -55,31 +42,11 @@ open class AffectationService(
         // Récupération de l'entité par son identifiant
         val entity = companion.findById(id) ?: throw NotFoundException("Aucune affectation trouvée pour l'id: $id")
 
-        // Détermination du type d'affectation
-        val affectationType = when(entity) {
-            is VehicleDriverEntity -> AffectationType.DRIVER_VEHICLE
-            is DriverTeamEntity -> AffectationType.DRIVER_TEAM
-            is VehicleTeamEntity -> AffectationType.VEHICLE_TEAM
-            else -> throw IllegalArgumentException("Type d'affectation non supporté pour ${entity::class.simpleName}")
-        }
-
         // Construction et retour du DTO en utilisant les méthodes de l'interface IAffectationEntity
         return affectationMapper.toDTO(entity)
-/*        AffectationDTO(
-            id = entity.getBuildId(),
-            startDate = entity.getStartDate(),
-            endDate = entity.endDate,
-            subject = entity.getSubject(),
-            target = entity.getTarget(),
-            affectationType = affectationType
-        )*/
     }
 
-    fun <E, ID : Any> update(
-        entityClass: KClass<E>,
-        id: ID,
-        form: AffectationForm
-    ): AffectationDTO<*, *>
+    fun <E, ID : Any> update( entityClass: KClass<E>, id: ID, form: AffectationForm): AffectationDTO<*, *>
             where E : IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, ID>
     {
         // 1) Récupérer l'entité existante
@@ -91,36 +58,25 @@ open class AffectationService(
         // 2) Extraction du companion factory
         val factory = extractAffectationFactoryCompanion<E, ID>(entityClass)
 
-        // 3) Créer une nouvelle entité mise à jour à partir du formulaire
-        val updatedEntity = factory.createFromForm(form)
+        // 3) Calculer le nouvel identifiant à partir du formulaire
+        val newId = factory.createIdFromForm(form)
 
-        // 4) Conserver l'identifiant
-        updatedEntity.id = id
-
-        // 5) Persister l'entité mise à jour
-        (updatedEntity as PanacheEntityBase).persist()
-
-        // 6) Détermination du type d'affectation (depuis le form ou via un when)
-/*        val affectationType = form.classInfo ?: when (updatedEntity) {
-            is VehicleDriverEntity -> AffectationType.DRIVER_VEHICLE
-            is DriverTeamEntity    -> AffectationType.DRIVER_TEAM
-            is VehicleTeamEntity   -> AffectationType.VEHICLE_TEAM
-            else -> throw IllegalArgumentException("Type d'affectation non supporté pour ${updatedEntity::class.simpleName}")
-        }*/
-
-        // 7) Construction du DTO
-        return affectationMapper.toDTO(updatedEntity)
-        /*AffectationDTO(
-            id = updatedEntity.getBuildId(),
-            startDate = updatedEntity.getStartDate(),
-            endDate = updatedEntity.endDate,
-            subject = updatedEntity.getSubject(),
-            target = updatedEntity.getTarget(),
-            affectationType = affectationType
-        )*/
+        return if (existingEntity.id == newId) {
+            // Les identifiants sont identiques : mettre à jour le champ modifiables
+            existingEntity.endDate = form.endDate
+            existingEntity.persistAndFlush()
+            affectationMapper.toDTO(existingEntity)
+        } else {
+            // Les identifiants sont différents : supprimer l'entité existante et en créer une nouvelle
+            existingEntity.delete()
+            val newEntity = factory.createFromForm(form)
+            newEntity.persistAndFlush()
+            affectationMapper.toDTO(newEntity)
+        }
     }
 
     // Fonction delete générique
+    @Transactional
     fun <E, ID : Any> delete(
         entityClass: KClass<E>,
         id: ID
@@ -134,28 +90,15 @@ open class AffectationService(
         val entity = companion.findById(id)
             ?: throw NotFoundException("Aucune affectation trouvée pour l'id: $id")
 
+        // 4) Construction du DTO de retour
+        val dto = affectationMapper.toDTO(entity)
+
+        println(entity.id)
+
         // 3) Suppression de l'entité
-        entity.delete()
+        (entity as PanacheEntityBase).delete()
 
-        // 4) Détermination du type d'affectation
-        val affectationType = when (entity) {
-            is VehicleDriverEntity -> AffectationType.DRIVER_VEHICLE
-            is DriverTeamEntity    -> AffectationType.DRIVER_TEAM
-            is VehicleTeamEntity   -> AffectationType.VEHICLE_TEAM
-            else -> throw IllegalArgumentException("Type d'affectation non supporté pour ${entity::class.simpleName}")
-        }
-
-        // 5) Construction et retour du DTO
-        return affectationMapper.toDTO(entity)
-
-/*        AffectationDTO(
-            id = entity.getBuildId(),
-            startDate = entity.getStartDate(),
-            endDate = entity.endDate,
-            subject = entity.getSubject(),
-            target = entity.getTarget(),
-            affectationType = affectationType
-        )*/
+        return dto
     }
 
     // ==================================================================

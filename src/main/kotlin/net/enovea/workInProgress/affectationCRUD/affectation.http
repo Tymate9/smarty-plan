@@ -10,7 +10,6 @@
 @username_admin = admin
 @password_admin = root
 
-### ----------------------------------------------------
 ### 1) Obtenir le token d'accès
 ### ----------------------------------------------------
 POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
@@ -20,10 +19,6 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
 
 > {% client.global.set("access_token_admin", response.body.access_token); %}
 
-### ====================================================
-### 2) TESTS SUR DRIVER_TEAM
-###    CREATE / READ / UPDATE / DELETE + tests d'erreur
-### ====================================================
 
 ### 2.1) CREATE : Affectation DRIVER_TEAM valide
 ### ----------------------------------------------------
@@ -32,7 +27,7 @@ Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": 94,
+  "subjectId": 97,
   "targetId": 68,
   "startDate": "2025-03-12T08:00:00.000Z",
   "endDate": null,
@@ -44,7 +39,14 @@ Content-Type: application/json
   }
 }
 
-> {% client.global.set("driver_team_id", response.body.id); %}
+> {%
+    client.global.set("driver_team_id", response.body.id);
+    client.test("CREATE : Affectation DRIVER_TEAM valide", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
 
 ### 2.2) CREATE : Affectation DRIVER_TEAM invalide (subjectId manquant => 400)
 ### ----------------------------------------------------
@@ -57,15 +59,38 @@ Content-Type: application/json
   "startDate": "2025-03-12T08:00:00.000Z"
 }
 
-### 2.3) UPDATE : On met fin à l’affectation en précisant endDate
+> {%
+    client.test("CREATE DRIVER_TEAM (subjectId manquant) => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for missing subjectId.");
+    });
+%}
+
+### (NOUVEAU) 2.2bis) CREATE : Affectation DRIVER_TEAM déjà existante => 409
+### ----------------------------------------------------
+POST http://{{api_host}}/api/affectations/DRIVER_TEAM
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 97,
+  "targetId": 68,
+  "startDate": "2025-03-12T08:00:00.000Z"
+}
+> {%
+    client.test("CREATE DRIVER_TEAM (existant) => 409", function() {
+        client.assert(response.status === 409, "Expected 409 Conflict for existing affectation.");
+    });
+%}
+
+### 2.3) UPDATE : On met fin à l’affectation en précisant endDate => 200
 ### ----------------------------------------------------
 PUT http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": 42,
-  "targetId": 101,
+  "subjectId": 97,
+  "targetId": 68,
   "startDate": "2025-03-12T08:00:00.000Z",
   "endDate": "2025-03-15T18:00:00.000Z",
   "classInfo": {
@@ -76,34 +101,56 @@ Content-Type: application/json
   }
 }
 
-### 2.4) READ : Vérifier la mise à jour
+> {%
+    client.test("UPDATE DRIVER_TEAM => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK for valid update.");
+    });
+%}
+
+### 2.4) READ : Vérifier la mise à jour => 200
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### 2.5) DELETE
+> {%
+    client.test("READ DRIVER_TEAM => 200", function() {
+        client.assert(response.status === 200, "Expected 200 after update.");
+        client.assert(response.body.endDate === "2025-03-15T18:00:00.000+00:00", "endDate non mise à jour");
+    });
+%}
+
+### 2.5) DELETE => 200 ou 204 (selon votre logique)
 ### ----------------------------------------------------
 DELETE http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
 Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("DELETE DRIVER_TEAM => 200/204", function() {
+        client.assert(response.status === 200, "Expected 200 on DELETE");
+    });
+%}
 
 ### 2.6) READ après DELETE => 404
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/affectations/DRIVER_TEAM/{{driver_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### ====================================================
-### 3) TESTS SUR VEHICLE_TEAM
-### ====================================================
+> {%
+    client.test("READ DRIVER_TEAM après DELETE => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after deletion.");
+    });
+%}
+
+
 
 ### 3.1) CREATE : Affectation VEHICLE_TEAM valide
-### ----------------------------------------------------
 POST http://{{api_host}}/api/affectations/VEHICLE_TEAM
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": "XY123",
-  "targetId": 202,
+  "subjectId": "05116c8f-ccc9-417c-af06-f594f445da57",
+  "targetId": 63,
   "startDate": "2025-04-01T09:00:00.000Z",
   "endDate": null,
   "classInfo": {
@@ -114,29 +161,64 @@ Content-Type: application/json
   }
 }
 
-> {% client.global.set("vehicle_team_id", response.body.id); %}
+> {%
+    client.global.set("vehicle_team_id", response.body.id);
+    client.test("CREATE VEHICLE_TEAM valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid creation");
+    });
+%}
 
-### 3.2) CREATE : Affectation VEHICLE_TEAM invalide (teamId = 0 => contrainte positive => 400 ?)
-### ----------------------------------------------------
+### 3.2) CREATE : Affectation VEHICLE_TEAM invalide (targetId = 0, doit renvoyer 400)
 POST http://{{api_host}}/api/affectations/VEHICLE_TEAM
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": "ZZZ",
+  "subjectId": "05116c8f-ccc9-417c-af06-f594f445da57",
   "targetId": 0,
   "startDate": "2025-04-01T09:00:00.000Z"
 }
 
-### 3.3) UPDATE : Modifier l’endDate
-### ----------------------------------------------------
+
+
+> {%
+    client.test("CREATE VEHICLE_TEAM invalide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when targetId is 0");
+    });
+%}
+
+### 3.7) CREATE : Affectation VEHICLE_TEAM duplicate (déjà existante) => 409 Conflict
+POST http://{{api_host}}/api/affectations/VEHICLE_TEAM
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": "05116c8f-ccc9-417c-af06-f594f445da57",
+  "targetId": 63,
+  "startDate": "2025-04-01T09:00:00.000Z",
+  "endDate": null,
+  "classInfo": {
+    "entityClass": "VehicleTeamEntity",
+    "idClass": "VehicleTeamId",
+    "subjectClass": "VehicleEntity",
+    "targetClass": "TeamEntity"
+  }
+}
+
+> {%
+    client.test("CREATE VEHICLE_TEAM duplicate => 409", function() {
+        client.assert(response.status === 409, "Expected 409 Conflict for duplicate creation");
+    });
+%}
+
+### 3.3) UPDATE : Modifier l'endDate de l'affectation VEHICLE_TEAM
 PUT http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": "XY123",
-  "targetId": 202,
+  "subjectId": "05116c8f-ccc9-417c-af06-f594f445da57",
+  "targetId": 62,
   "startDate": "2025-04-01T09:00:00.000Z",
   "endDate": "2025-04-10T16:30:00.000Z",
   "classInfo": {
@@ -147,35 +229,54 @@ Content-Type: application/json
   }
 }
 
-### 3.4) READ : Vérifier la mise à jour
-### ----------------------------------------------------
+> {%
+    client.global.set("vehicle_team_id", response.body.id);
+    client.test("UPDATE VEHICLE_TEAM => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on update");
+    });
+%}
+
+### 3.4) READ : Vérifier la mise à jour de l'affectation VEHICLE_TEAM
 GET http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### 3.5) DELETE
-### ----------------------------------------------------
+> {%
+    client.test("READ VEHICLE_TEAM après update => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on read after update");
+        client.log(response.body.endDate)
+        // client.assert(body.endDate === "2025-04-10T16:30:00.000Z", "endDate not updated");
+    });
+%}
+
+### 3.5) DELETE : Supprimer l'affectation VEHICLE_TEAM
 DELETE http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### 3.6) READ après DELETE => 404
-### ----------------------------------------------------
+> {%
+    client.test("DELETE VEHICLE_TEAM => 200/204", function() {
+        client.assert(response.status === 200, "Expected 200 OK");
+    });
+%}
+
+### 3.6) READ après DELETE : Vérifier que l'affectation VEHICLE_TEAM est supprimée (404)
 GET http://{{api_host}}/api/affectations/VEHICLE_TEAM/{{vehicle_team_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### ====================================================
-### 4) TESTS SUR DRIVER_VEHICLE
-### ====================================================
+> {%
+    client.test("READ après DELETE VEHICLE_TEAM => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after deletion");
+    });
+%}
 
 ### 4.1) CREATE : Affectation DRIVER_VEHICLE valide
-### ----------------------------------------------------
 POST http://{{api_host}}/api/affectations/DRIVER_VEHICLE
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": 777,
-  "targetId": "VH555",
-  "startDate": "2025-05-01T10:00:00.000Z",
+  "subjectId": 102,
+  "targetId": "05116c8f-ccc9-417c-af06-f594f445da57",
+  "startDate": "2025-04-01T09:00:00.000Z",
   "endDate": null,
   "classInfo": {
     "entityClass": "VehicleDriverEntity",
@@ -185,10 +286,14 @@ Content-Type: application/json
   }
 }
 
-> {% client.global.set("driver_vehicle_id", response.body.id); %}
+> {%
+    client.global.set("driver_vehicle_id", response.body.id);
+    client.test("CREATE DRIVER_VEHICLE valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid creation");
+    });
+%}
 
-### 4.2) CREATE : Affectation DRIVER_VEHICLE invalide (startDate manquante => 400 ?)
-### ----------------------------------------------------
+### 4.2) CREATE : Affectation DRIVER_VEHICLE invalide (startDate manquante => 400)
 POST http://{{api_host}}/api/affectations/DRIVER_VEHICLE
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
@@ -198,16 +303,45 @@ Content-Type: application/json
   "targetId": "VH999"
 }
 
-### 4.3) UPDATE : Modifier l’endDate
-### ----------------------------------------------------
+> {%
+    client.test("CREATE DRIVER_VEHICLE invalide (startDate manquant) => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for missing startDate");
+    });
+%}
+
+### 4.3) CREATE : Affectation DRIVER_VEHICLE duplicate (déjà existante) => 409 Conflict
+POST http://{{api_host}}/api/affectations/DRIVER_VEHICLE
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "subjectId": 102,
+  "targetId": "05116c8f-ccc9-417c-af06-f594f445da57",
+  "startDate": "2025-04-01T09:00:00.000Z",
+  "endDate": null,
+  "classInfo": {
+    "entityClass": "VehicleDriverEntity",
+    "idClass": "VehicleDriverId",
+    "subjectClass": "DriverEntity",
+    "targetClass": "VehicleEntity"
+  }
+}
+
+> {%
+    client.test("CREATE DRIVER_VEHICLE duplicate => 409", function() {
+        client.assert(response.status === 409, "Expected 409 Conflict for duplicate creation");
+    });
+%}
+
+### 4.4) UPDATE : Modifier l'identifiant (mise à jour d'ID)
 PUT http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
 Authorization: Bearer {{access_token_admin}}
 Content-Type: application/json
 
 {
-  "subjectId": 777,
-  "targetId": "VH555",
-  "startDate": "2025-05-01T10:00:00.000Z",
+  "subjectId": 98,
+  "targetId": "05116c8f-ccc9-417c-af06-f594f445da57",
+  "startDate": "2025-04-01T09:00:00.000Z",
   "endDate": "2025-05-02T15:00:00.000Z",
   "classInfo": {
     "entityClass": "VehicleDriverEntity",
@@ -217,17 +351,50 @@ Content-Type: application/json
   }
 }
 
-### 4.4) READ : Vérifier la mise à jour
-### ----------------------------------------------------
+> {%
+    client.global.set("driver_vehicle_new_id", response.body.id);
+    client.test("UPDATE DRIVER_VEHICLE avec changement d'ID", function() {
+        client.assert(response.status === 200, "Expected 200 OK on update with ID change");
+        client.assert(response.body.id !== "{{driver_vehicle_id}}", "Expected new ID to be different from old ID");
+    });
+%}
+
+### 4.5) READ : Vérifier que l'ancien ID n'existe plus (404)
 GET http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### 4.5) DELETE
-### ----------------------------------------------------
-DELETE http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
+> {%
+    client.test("READ DRIVER_VEHICLE sur ancien ID => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found for old ID after update with ID change");
+    });
+%}
+
+### 4.6) READ : Vérifier la nouvelle affectation (200)
+GET http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_new_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### 4.6) READ après DELETE => 404
-### ----------------------------------------------------
-GET http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_id}}
+> {%
+    client.test("READ DRIVER_VEHICLE sur nouveau ID => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK for new ID after update");
+    });
+%}
+
+### 4.7) DELETE : Supprimer l'affectation DRIVER_VEHICLE via le nouvel ID
+DELETE http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_new_id}}
 Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("DELETE DRIVER_VEHICLE => 200/204", function() {
+        client.assert(response.status === 200, "Expected 200 OK");
+    });
+%}
+
+### 4.8) READ après DELETE : Vérifier que l'affectation est supprimée (404)
+GET http://{{api_host}}/api/affectations/DRIVER_VEHICLE/{{driver_vehicle_new_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ après DELETE DRIVER_VEHICLE => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after deletion");
+    });
+%}

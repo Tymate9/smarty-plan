@@ -10,7 +10,7 @@
 @username_admin = admin
 @password_admin = root
 
-### ----------------------------------------------------
+
 ### 1) Obtenir le token d'accès
 ### ----------------------------------------------------
 POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
@@ -20,13 +20,9 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
 
 > {% client.global.set("access_token_admin", response.body.access_token); %}
 
-### ----------------------------------------------------
-### Tests de validation du formulaire et des contraintes
-### ----------------------------------------------------
 
-### ----------------------------------------------------
+
 ### 2) Créer un conducteur valide (CREATE)
-###    Ce test doit renvoyer un DriverDTO valide et stocker son ID dans la variable test_driver_id.
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/drivers
 Content-Type: application/json
@@ -41,7 +37,7 @@ Authorization: Bearer {{access_token_admin}}
 
 > {% client.global.set("test_driver_id", response.body.id); %}
 
-### ----------------------------------------------------
+
 ### 3) Tenter de créer un conducteur avec un firstName vide (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/drivers
@@ -55,7 +51,7 @@ Authorization: Bearer {{access_token_admin}}
   "phoneNumber": "0612345678"
 }
 
-### ----------------------------------------------------
+
 ### 4) Tenter de créer un conducteur avec un lastName vide (Erreur 400)
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/drivers
@@ -69,9 +65,7 @@ Authorization: Bearer {{access_token_admin}}
   "phoneNumber": "0612345678"
 }
 
-### ----------------------------------------------------
 ### 5) Tenter de créer un conducteur avec un numéro de téléphone invalide (Erreur 400)
-###    Exemple : un numéro qui ne commence pas par 0 ou 6/7.
 ### ----------------------------------------------------
 POST http://{{api_host}}/api/drivers
 Content-Type: application/json
@@ -84,13 +78,10 @@ Authorization: Bearer {{access_token_admin}}
   "phoneNumber": "0512345678"
 }
 
-### ----------------------------------------------------
-### Tests CRUD classiques sur le conducteur créé en étape 2
-### ----------------------------------------------------
 
-### ----------------------------------------------------
+
+
 ### 6) Mettre à jour le conducteur (UPDATE)
-###    On modifie le prénom, et on change le numéro de téléphone.
 ### ----------------------------------------------------
 PUT http://{{api_host}}/api/drivers/{{test_driver_id}}
 Content-Type: application/json
@@ -103,23 +94,20 @@ Authorization: Bearer {{access_token_admin}}
   "phoneNumber": "0712345678"
 }
 
-### ----------------------------------------------------
+
 ### 7) Récupérer le conducteur mis à jour (READ)
-###    Vérifier que les modifications ont bien été prises en compte.
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/drivers/{{test_driver_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### ----------------------------------------------------
+
 ### 8) Supprimer le conducteur créé (DELETE)
-###    La réponse doit renvoyer le DriverDTO du conducteur supprimé.
 ### ----------------------------------------------------
 DELETE http://{{api_host}}/api/drivers/{{test_driver_id}}
 Authorization: Bearer {{access_token_admin}}
 
-### ----------------------------------------------------
+
 ### 9) Vérifier la suppression (READ)
-###    Cette requête devrait retourner une 404 Not Found.
 ### ----------------------------------------------------
 GET http://{{api_host}}/api/drivers/{{test_driver_id}}
 Authorization: Bearer {{access_token_admin}}

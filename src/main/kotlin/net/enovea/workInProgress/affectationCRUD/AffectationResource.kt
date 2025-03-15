@@ -153,74 +153,6 @@ class AffectationResource (
     }
 
     /**
-     * Fonction utilitaire pour convertir l'id (en String) dans le type attendu.
-     * Vous pouvez étendre cette fonction selon vos besoins.
-     */
-    private fun convertId(id: String, idClass: KClass<*>): Any {
-        return when (idClass) {
-            String::class -> id
-            Int::class -> id.toInt()
-
-            // --- Cas des identifiants composites spécifiques ---
-            VehicleDriverId::class -> parseVehicleDriverId(id)
-            DriverTeamId::class    -> parseDriverTeamId(id)
-            VehicleTeamId::class   -> parseVehicleTeamId(id)
-
-            // Sinon, on laisse tel quel ou on lance une exception
-            else -> throw IllegalArgumentException("Type d'identifiant non géré : ${idClass.simpleName}")
-        }
-    }
-
-    private fun parseDriverTeamId(idStr: String): DriverTeamId {
-        // On s'attend à un format ex: "123-456-1678460293000"
-        val parts = idStr.split('-')
-        require(parts.size == 3) {
-            "Format d'ID driverTeam incorrect. Attendu : driverId-teamId-epochTime"
-        }
-        val driverId = parts[0].toInt()
-        val teamId   = parts[1].toInt()
-        val epoch    = parts[2].toLong()
-
-        return DriverTeamId(
-            driverId = driverId,
-            teamId   = teamId,
-            startDate = Timestamp(epoch)
-        )
-    }
-
-    private fun parseVehicleDriverId(idStr: String): VehicleDriverId {
-        val parts = idStr.split('-')
-        require(parts.size == 3) {
-            "Format d'ID vehicleDriver incorrect. Attendu : vehicleId-driverId-epochTime"
-        }
-        val vehicleId = parts[0]
-        val driverId  = parts[1].toInt()
-        val epoch     = parts[2].toLong()
-
-        return VehicleDriverId(
-            vehicleId = vehicleId,
-            driverId  = driverId,
-            startDate = Timestamp(epoch)
-        )
-    }
-
-    private fun parseVehicleTeamId(idStr: String): VehicleTeamId {
-        val parts = idStr.split('-')
-        require(parts.size == 3) {
-            "Format d'ID vehicleTeam incorrect. Attendu : vehicleId-teamId-epochTime"
-        }
-        val vehicleId = parts[0]
-        val teamId    = parts[1].toInt()
-        val epoch     = parts[2].toLong()
-
-        return VehicleTeamId(
-            vehicleId = vehicleId,
-            teamId    = teamId,
-            startDate = Timestamp(epoch)
-        )
-    }
-
-    /**
      * Créer une nouvelle affectation.
      */
     @POST
@@ -252,24 +184,34 @@ class AffectationResource (
         }
 
         // Appel du service
-        val createdAffectation = affectationService.create(
-            typed.entityClass, // KClass<E> où E : IAffectationPanacheEntity
-            form
-        )
-        return Response.ok(createdAffectation).build()
+        return try {
+            val createdAffectation = affectationService.create(
+                typed.entityClass, // KClass<E> où E : IAffectationPanacheEntity
+                form
+            )
+            Response.ok(createdAffectation).build()
+        } catch (e: jakarta.persistence.EntityExistsException) {
+            Response.status(Response.Status.CONFLICT)
+                .entity("L'affectation existe déjà: ${e.message}")
+                .build()
+        } catch (e: jakarta.persistence.PersistenceException) {
+            Response.status(Response.Status.CONFLICT)
+                .entity("Erreur de persistance: ${e.message}")
+                .build()
+        }
     }
 
     @PUT
     @Path("/{id}")
     @Transactional
     override fun update(@PathParam("id") id: String, form: AffectationForm): Response {
-        // 1) Récupération de l'objet scellé depuis la string "type"
+        // 1) Récupération de l'objet scellé via fromString()
         val rawType = AffectationType.fromString(type)
             ?: return Response.status(Response.Status.BAD_REQUEST)
                 .entity("Type d'affectation inconnu : $type")
                 .build()
 
-        // 2) Cast explicite de la projection étoile vers un type paramétrique
+        // 2) Cast explicite pour obtenir le type paramétré
         @Suppress("UNCHECKED_CAST")
         val typed = rawType as AffectationType<
                 IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, Any>,
@@ -278,28 +220,40 @@ class AffectationResource (
                 PanacheEntityBase
                 >
 
-        // 3) Injecter l'objet sealed dans le formulaire
+        // 3) Injection du type scellé dans le formulaire
         form.classInfo = typed
 
-        // 4) Valider le formulaire
+        // 4) Validation du formulaire
         val violations: Set<ConstraintViolation<AffectationForm>> = validator.validate(form)
         if (violations.isNotEmpty()) {
-            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            val errors = violations.joinToString(", ") { "${it.propertyPath}: ${it.message}" }
             return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
         }
 
         // 5) Convertir l'id textuel en l'ID attendu (typed.idClass)
         val convertedId = convertId(id, typed.idClass)
 
-        // 6) Appel du service
-        val updatedAffectation = affectationService.update(
-            typed.entityClass,  // KClass<E> où E : IAffectationPanacheEntity
-            convertedId,        // ID
-            form
-        )
-
-        // Retour 200 OK avec le DTO
-        return Response.ok(updatedAffectation).build()
+        // 6) Appel du service update avec gestion d'exception
+        return try {
+            val updatedAffectation = affectationService.update(
+                typed.entityClass, // KClass<E> où E : IAffectationPanacheEntity
+                convertedId,       // ID
+                form
+            )
+            Response.ok(updatedAffectation).build()
+        } catch (e: jakarta.persistence.EntityExistsException) {
+            Response.status(Response.Status.CONFLICT)
+                .entity("Conflit lors de la mise à jour : ${e.message}")
+                .build()
+        } catch (e: jakarta.persistence.PersistenceException) {
+            Response.status(Response.Status.CONFLICT)
+                .entity("Erreur de persistance lors de la mise à jour : ${e.message}")
+                .build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Erreur inattendue lors de la mise à jour : ${e.message}")
+                .build()
+        }
     }
 
     /**
@@ -333,5 +287,69 @@ class AffectationResource (
             convertedId         // ID
         )
         return Response.ok(deletedAffectation).build()
+    }
+
+    private fun convertId(id: String, idClass: KClass<*>): Any {
+        return when (idClass) {
+            String::class -> id
+            Int::class -> id.toInt()
+
+            // --- Cas des identifiants composites spécifiques ---
+            VehicleDriverId::class -> parseVehicleDriverId(id)
+            DriverTeamId::class    -> parseDriverTeamId(id)
+            VehicleTeamId::class   -> parseVehicleTeamId(id)
+
+            // Sinon, on laisse tel quel ou on lance une exception
+            else -> throw IllegalArgumentException("Type d'identifiant non géré : ${idClass.simpleName}")
+        }
+    }
+
+    private fun parseDriverTeamId(idStr: String): DriverTeamId {
+        // On s'attend à un format ex: "123_456_1678460293000"
+        val parts = idStr.split('_')
+        require(parts.size == 3) {
+            "Format d'ID driverTeam incorrect. Attendu : driverId-teamId-epochTime"
+        }
+        val driverId = parts[0].toInt()
+        val teamId   = parts[1].toInt()
+        val epoch    = parts[2].toLong()
+
+        return DriverTeamId(
+            driverId = driverId,
+            teamId   = teamId,
+            startDate = Timestamp(epoch)
+        )
+    }
+
+    private fun parseVehicleDriverId(idStr: String): VehicleDriverId {
+        val parts = idStr.split('_')
+        require(parts.size == 3) {
+            "Format d'ID vehicleDriver incorrect. Attendu : driverId-vehicleId--epochTime"
+        }
+        val driverId = parts[0].toInt()
+        val vehicleId = parts[1]
+        val epoch     = parts[2].toLong()
+
+        return VehicleDriverId(
+            vehicleId = vehicleId,
+            driverId  = driverId,
+            startDate = Timestamp(epoch)
+        )
+    }
+
+    private fun parseVehicleTeamId(idStr: String): VehicleTeamId {
+        val parts = idStr.split('_')
+        require(parts.size == 3) {
+            "Format d'ID vehicleTeam incorrect. Attendu : vehicleId-teamId-epochTime"
+        }
+        val vehicleId = parts[0]
+        val teamId    = parts[1].toInt()
+        val epoch     = parts[2].toLong()
+
+        return VehicleTeamId(
+            vehicleId = vehicleId,
+            teamId    = teamId,
+            startDate = Timestamp(epoch)
+        )
     }
 }

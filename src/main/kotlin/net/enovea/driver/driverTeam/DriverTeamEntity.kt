@@ -41,7 +41,7 @@ data class DriverTeamEntity (
 
     override fun getSubject(): DriverEntity? = driver
 
-    override fun getBuildId(): String = "${id.driverId}-${id.teamId}-${id.startDate.time}"
+    override fun getBuildId(): String = "${id.driverId}_${id.teamId}_${id.startDate.time}"
 
     override fun getTarget(): TeamEntity? = team
 
@@ -62,12 +62,13 @@ data class DriverTeamEntity (
             return DriverTeamId(
                 teamId = form.targetId.toString().toInt(),
                 driverId = form.subjectId.toString().toInt(),
-                startDate = form.startDate
+                startDate = form.startDate ?: throw IllegalArgumentException("La date de début (startDate) est obligatoire.")
             )
         }
     }
 }
 
+//TODO(Créer un implémenter une interface pour chaque ID)
 @Embeddable
 data class DriverTeamId(
     @Column(name = "driver_id", nullable = false)

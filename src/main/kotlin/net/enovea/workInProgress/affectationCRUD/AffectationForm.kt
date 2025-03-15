@@ -1,6 +1,8 @@
 package net.enovea.workInProgress.affectationCRUD
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import jakarta.transaction.Transactional
 import jakarta.validation.Constraint
@@ -15,6 +17,7 @@ import kotlin.reflect.full.companionObjectInstance
 
 @ValidAffectationForm
 data class AffectationForm(
+
     @field:NotNull(message = "L'identifiant du sujet est requis.")
     var subjectId: Any?,
 
@@ -22,7 +25,8 @@ data class AffectationForm(
     var targetId: Any?,
 
     @field:NotNull(message = "La date de début doit être renseignée.")
-    var startDate: Timestamp,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
+    var startDate: Timestamp?,
 
     // Optionnel : permet de clôturer une affectation
     var endDate: Timestamp? = null,
@@ -55,7 +59,7 @@ class AffectationFormValidator : ConstraintValidator<ValidAffectationForm, Affec
             isValid = false
         } else {
             // Comparaison uniquement si endDate n’est pas null
-            if (form.endDate != null && !form.startDate.before(form.endDate)) {
+            if (form.endDate != null && !form.startDate!!.before(form.endDate)) {
                 context.buildConstraintViolationWithTemplate("La date de début doit être antérieure à la date de fin.")
                     .addPropertyNode("endDate")
                     .addConstraintViolation()

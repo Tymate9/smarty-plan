@@ -1,14 +1,9 @@
 package net.enovea.vehicle.vehicleDriver
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.driver.DriverEntity
-import net.enovea.driver.driverTeam.DriverTeamEntity
-import net.enovea.driver.driverTeam.DriverTeamEntity.Companion
 import net.enovea.vehicle.VehicleEntity
-import net.enovea.vehicle.vehicleTeam.VehicleTeamId
 import net.enovea.workInProgress.affectationCRUD.AffectationForm
-import net.enovea.workInProgress.affectationCRUD.IAffectationEntity
 import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
 import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
 import java.io.Serializable
@@ -41,7 +36,7 @@ data class VehicleDriverEntity (
 
     override fun getSubject(): DriverEntity? = driver
 
-    override fun getBuildId(): String = "${id.driverId}-${id.vehicleId}-${id.startDate.time}"
+    override fun getBuildId(): String = "${id.driverId}_${id.vehicleId}_${id.startDate.time}"
 
     override fun getTarget(): VehicleEntity? = vehicle
 
@@ -62,7 +57,7 @@ data class VehicleDriverEntity (
             return VehicleDriverId(
                 vehicleId = form.targetId.toString(),
                 driverId = form.subjectId.toString().toInt(),
-                startDate = form.startDate
+                startDate = form.startDate ?: throw IllegalArgumentException("La date de début (startDate) est obligatoire.")
             )
         }
     }

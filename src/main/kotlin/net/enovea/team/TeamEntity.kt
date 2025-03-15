@@ -33,7 +33,7 @@ class TeamEntity(
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "team",
-        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        cascade = []
     )
     val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
 

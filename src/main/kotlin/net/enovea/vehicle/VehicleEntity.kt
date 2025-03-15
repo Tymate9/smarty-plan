@@ -45,21 +45,21 @@ data class VehicleEntity(
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
-        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        cascade = []
         )
     val vehicleDevices: List<DeviceVehicleInstallEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
-        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        cascade = []
         )
     val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle",
-        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        cascade = []
         )
     val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
 

@@ -46,7 +46,7 @@ data class VehicleTeamEntity (
 
     override fun getSubject(): VehicleEntity? = vehicle
 
-    override fun getBuildId(): String = "${id.vehicleId}-${id.teamId}-${id.startDate.time}"
+    override fun getBuildId(): String = "${id.vehicleId}_${id.teamId}_${id.startDate.time}"
 
     override fun getTarget(): TeamEntity? = team
 
@@ -76,16 +76,16 @@ data class VehicleTeamEntity (
             return VehicleTeamEntity(
                 id = createIdFromForm(form),
                 endDate = form.endDate,
-                vehicle = VehicleEntity.findById(form.targetId.toString()),
-                team = TeamEntity.findById(form.subjectId.toString().toInt())
+                vehicle = VehicleEntity.findById(form.subjectId.toString()),
+                team = TeamEntity.findById(form.targetId.toString().toInt())
             )
         }
 
         override fun createIdFromForm(form: AffectationForm): VehicleTeamId {
             return VehicleTeamId(
-                vehicleId = form.targetId.toString(),
-                teamId = form.subjectId.toString().toInt(),
-                startDate = form.startDate
+                vehicleId = form.subjectId.toString(),
+                teamId = form.targetId.toString().toInt(),
+                startDate = form.startDate  ?: throw IllegalArgumentException("La date de début (startDate) est obligatoire.")
             )
         }
     }

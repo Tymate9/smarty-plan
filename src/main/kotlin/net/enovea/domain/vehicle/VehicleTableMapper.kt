@@ -1,6 +1,10 @@
 package net.enovea.domain.vehicle
 
 import jakarta.inject.Inject
+import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
+import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.common.geo.GeoCodingService
+import net.enovea.common.geo.SpatialService
 import net.enovea.domain.device.DeviceDataMapper
 import net.enovea.domain.device.DeviceDataStateMapper
 import net.enovea.domain.device.DeviceMapper
@@ -13,14 +17,9 @@ import net.enovea.domain.team.TeamSummaryMapper
 import net.enovea.dto.*
 import net.enovea.service.DriverService
 import net.enovea.service.VehicleService
-import org.mapstruct.Context
-import org.mapstruct.Mapper
-import org.mapstruct.Mapping
-import org.mapstruct.Named
-import org.mapstruct.factory.Mappers
+import org.mapstruct.*
 import java.sql.Timestamp
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 
@@ -39,6 +38,12 @@ abstract class VehicleTableMapper {
     @Inject
     protected lateinit var teamMapper: TeamMapper
 
+    @Inject
+    protected lateinit var spatialService: SpatialService
+
+    @Inject
+    protected lateinit var geoCodingService: GeoCodingService
+
     @Mapping(target = "id", source = "id")
     @Mapping(target = "licenseplate", source = "licenseplate")
     @Mapping(source = "category",target = "category")
@@ -47,8 +52,60 @@ abstract class VehicleTableMapper {
     @Mapping(source ="vehicleTeams",target = "team")
     @Mapping(source =".",target = "lastPositionDate", qualifiedByName = ["lastPositionDateMapperInTable"])
     @Mapping(source = ".", target = "ranges", qualifiedByName = ["mapVehicleRangesVTDTO"])
-    abstract fun toVehicleTableDTO(vehicleEntity: VehicleEntity,
-                          @Context vehicleMapper: VehicleMapper): VehicleTableDTO
+    @Mapping(target = "lastPositionAddress", source = ".", qualifiedByName = ["mapLastPositionAddress"])
+    @Mapping(target = "lastPositionAddressInfo", source = ".", qualifiedByName = ["mapLastPositionAddressInfo"])
+    abstract fun toVehicleTableDTO(vehicleEntity: VehicleEntity, @Context vehicleMapper: VehicleMapper): VehicleTableDTO
+
+    // Méthode custom pour mapper l'adresse à partir du POI
+    @Named("mapLastPositionAddress")
+    fun mapLastPositionAddress(vehicleEntity: VehicleEntity): String? {
+        try {
+            val deviceEntity = VehicleEntity.getCurrentDevice(vehicleEntity.vehicleDevices)
+            val deviceDataState = deviceEntity?.deviceDataState
+            // Récupère le POI en utilisant la coordonnée
+            val poi = deviceDataState?.coordinate?.let { spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity::class) }
+            return if (poi != null) {
+                // Si POI trouvé, retourner "client_code - client_label" (avec valeur par défaut)
+                (poi.client_code ?: "0000") + " - " + poi.client_label
+            } else {
+                // Sinon, si aucune adresse dans le deviceDataState, essayer le géocodage inverse
+                if (deviceDataState?.address.isNullOrEmpty()) {
+                    deviceDataState?.coordinate?.let { geoCodingService.reverseGeocode(it) } ?: "Adresse Inconnue"
+                } else {
+                    deviceDataState?.address
+                }
+            }
+        } catch (e: Exception) {
+            return "Error retrieving location data"
+        }
+    }
+
+    // Méthode custom pour mapper la catégorie du POI (adresse info)
+    @Named("mapLastPositionAddressInfo")
+    fun mapLastPositionAddressInfo(vehicleEntity: VehicleEntity): PointOfInterestCategoryEntity? {
+        try {
+            val deviceEntity = VehicleEntity.getCurrentDevice(vehicleEntity.vehicleDevices)
+            val deviceDataState = deviceEntity?.deviceDataState
+            val poi = deviceDataState?.coordinate?.let { spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity::class) }
+            return poi?.category ?: PointOfInterestCategoryEntity(label = "route", color = "#000")
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    @AfterMapping
+    fun applyRangeTransformations(
+        vehicleEntity: VehicleEntity,
+        @MappingTarget vehicleTableDTO: VehicleTableDTO
+    ) {
+        vehicleTableDTO.ranges?.forEach { range ->
+            // Vérifie que lastPositionDate est défini et qu'elle se situe dans la plage définie
+            if (vehicleTableDTO.lastPositionDate != null && range.range.contains(vehicleTableDTO.lastPositionDate)) {
+                // Applique la transformation en modifiant directement le DTO
+                range.transform(vehicleTableDTO)
+            }
+        }
+    }
 
     //Map most recent Device to DeviceDataDTO
     fun mapRecentDevice(vehicleDevices: List<DeviceVehicleInstallEntity>): DeviceDataDTO? {
@@ -81,8 +138,6 @@ abstract class VehicleTableMapper {
     @Named("mapVehicleRangesVTDTO")
     fun mapVehicleRangesVDTO(vehicleEntity: VehicleEntity): List<Range<VehicleTableDTO>>? {
         // 1. Récupérer la liste de drivers éventuellement associés au même "vehicule"
-        //    -> Au choix : soit on utilise vehicleEntity.vehicleDrivers.map { it.driver },
-        //       soit on a un utilitaire.
         val drivers = vehicleEntity.vehicleDrivers.mapNotNull { it.driver }
 
         // 2. On met le vehicule lui-même dans une liste
@@ -116,7 +171,25 @@ abstract class VehicleTableMapper {
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
                 )
             ),
-            transform = { t -> t }
+            transform = { dto: VehicleTableDTO ->
+                // Récupération de l'heure actuelle
+                val now = Timestamp(System.currentTimeMillis())
+                // Vérification des conditions de non-anonymisation Le véhicule doit être au statut "PARKED" et sur un POI de type "client"
+                if (dto.device.deviceDataState?.state == "PARKED" &&
+                    dto.lastPositionAddressInfo?.label == "Client" &&
+                    now.after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))
+                ) {
+                    // Conditions remplies : on ne modifie pas le DTO, on conserve la position réelle.
+                    return@Range
+                }
+                // Sinon, anonymisation de la position et de l'adresse
+                dto.lastPositionAddress = "Pause déjeuner de $earliestStart à $latestEnd"
+                dto.lastPositionAddressInfo = null
+                dto.device.deviceDataState?.let { state ->
+                    state.coordinate = null
+                    state.address = "Pause déjeuner de $earliestStart à $latestEnd"
+                }
+            }
         )
         return listOf(lunchBreakRange)
     }

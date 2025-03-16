@@ -73,7 +73,7 @@ open class VehicleService(
         }
     }
 
-    // TODO seperate the data treatment method
+    // TODO(Move trip Daily stats to mapper we need to keep DTO initialization logic in the mapstruct mapper)
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
         stopWatch?.start("filter localized vehicles")
         val allVehicles = vehicles ?: VehicleEntity.listAll()
@@ -83,54 +83,15 @@ open class VehicleService(
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         stopWatch?.stopAndStart("MapTo vehicle data DTO")
-        val allVehicleDataDTO =
-            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
-                .map { vehicle ->
-                    // Convert to VehicleTableDTO
-                    val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-
-                    // Enrich the DTO with trip statistics if available
-                    tripStats[vehicle.id]?.let { stats ->
-                        vehicleDTO.distance = (stats.distance) / 1000
-                        vehicleDTO.firstTripStart = stats.firstTripStart
-                    }
-                    vehicleDTO
-                }
-
-        // Find last position info (poi or address)
-        stopWatch?.stopAndStart("Get last position infos")
-        allVehicleDataDTO.forEach { vehicleDataDTO ->
-            try {
-                // Try to fetch POI using spatial service
-                val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity :: class)
-                }
-                if (poi != null) {
-                    vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
-                    vehicleDataDTO.lastPositionAddressInfo = poi.category
-                } else {
-                    // Cannot find POI so Adress Type is "route"
-                    vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
-                        label = "route",
-                        color = "#000"
-                    )
-                    // Get adress from device DataState or geocoding
-                    if (vehicleDataDTO.device.deviceDataState?.address == null) {
-                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                            geoCodingService.reverseGeocode(it)
-                        }
-                        vehicleDataDTO.lastPositionAddress = address
-                    } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
-                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnue"
-                    } else {
-                        vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
-
-                    }
-                }
-            } catch (e: Exception) {
-                // Handle any errors during POI lookup or reverse geocoding
-                vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
+        val allVehicleDataDTO = allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}.map { vehicle ->
+            // Convert to VehicleTableDTO
+            val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+            // Enrich the DTO with trip statistics if available
+            tripStats[vehicle.id]?.let { stats ->
+                vehicleDTO.distance = (stats.distance) / 1000
+                vehicleDTO.firstTripStart = stats.firstTripStart
             }
+            vehicleDTO
         }
         // Now we build the hierarchy of vehicles based on their teams
         stopWatch?.stopAndStart("Build team hierarchy")
@@ -140,7 +101,6 @@ open class VehicleService(
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy)
-
         stopWatch?.stop()
         return teamHierarchy
     }
@@ -248,7 +208,6 @@ open class VehicleService(
             .map { vehicleMapper.toVehicleDTOSummary(it) }
     }
 
-
     // ====================================================
     // Méthodes pour récupérer la fenêtre de pause d’un Conducteur
     // ====================================================
@@ -299,9 +258,7 @@ open class VehicleService(
         return Pair(earliestStart, latestEnd)
     }
 
-
 }
-
 
 // Tree node data class
 data class TeamHierarchyNode(

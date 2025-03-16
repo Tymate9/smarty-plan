@@ -1,5 +1,6 @@
 package net.enovea.dto
 
+import net.enovea.workInProgress.RangedDTO
 import java.sql.Timestamp
 
 
@@ -10,6 +11,6 @@ data class VehicleSummaryDTO (
     val driver: DriverDTO?,
     val device: DeviceSummaryDTO,
     val team: TeamSummaryDTO,
-    val ranges: List<Range<VehicleSummaryDTO>>? = null,
-    val lastPositionDate: Timestamp? = null
-)
+    override var ranges: List<Range<VehicleSummaryDTO>>? = null,
+    override var lastPositionDate: Timestamp? = null
+) : RangedDTO<VehicleSummaryDTO>

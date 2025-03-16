@@ -1,6 +1,9 @@
 package net.enovea.domain.vehicle
 
 import jakarta.inject.Inject
+import net.enovea.api.poi.PointOfInterestEntity
+import net.enovea.common.geo.GeoCodingService
+import net.enovea.common.geo.SpatialService
 import net.enovea.domain.device.DeviceDataStateMapper
 import net.enovea.domain.device.DeviceMapper
 import net.enovea.domain.device.DeviceSummaryMapper
@@ -48,6 +51,9 @@ abstract class VehicleMapper {
 
     @Inject
     protected lateinit var deviceDataStateMapper: DeviceDataStateMapper
+
+    @Inject
+    protected lateinit var spatialService: SpatialService
 
     //////////////////////////
     // Vehicle Summary Mapper
@@ -236,9 +242,13 @@ abstract class VehicleMapper {
             transform = { dto ->
                 // Si la map des devices n'est pas nulle, on parcourt ses entrées
                 dto.devices?.forEach { (_, deviceDto) ->
-/*                    if (deviceDto.deviceDataState?.state == "PARKED") {
-                        return@forEach
-                    }*/
+//                    val isClientPOI = spatialService.getNearestEntityWithinArea(deviceDto.deviceDataState!!.coordinate!!, PointOfInterestEntity::class)
+//                        ?.client_label?.equals("client", ignoreCase = true) ?: false
+//                    if (deviceDto.deviceDataState?.state == "PARKED" &&
+//                        isClientPOI &&
+//                        Timestamp(System.currentTimeMillis()).after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))) {
+//                        return@Range
+//                    }
                     // On anonymise le deviceDataState en mettant la coordinate à null et en modifiant l'adresse
                     deviceDto.deviceDataState?.apply {
                         coordinate = null
@@ -288,10 +298,14 @@ abstract class VehicleMapper {
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
                 )
             ),
-            transform = { dto ->
-/*                if (dto.device.state == "PARKED") {
-                    return@Range
-                }*/
+            transform = { dto:VehicleSummaryDTO ->
+//                val isClientPOI = spatialService.getNearestEntityWithinArea(dto.device.coordinate!!, PointOfInterestEntity::class)
+//                    ?.client_label?.equals("client", ignoreCase = true) ?: false
+//                if (dto.device.state == "PARKED" &&
+//                    isClientPOI &&
+//                    Timestamp(System.currentTimeMillis()).after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))) {
+//                    return@Range
+//                }
                 // On vérifie que le device summary possède un DeviceDataState et on l'anonymise
                 dto.device.apply {
                     coordinate = null
@@ -337,10 +351,14 @@ abstract class VehicleMapper {
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
                 )
             ),
-            transform = { dto ->
-/*                if (dto.state == "PARKED") {
-                    return@Range
-                }*/
+            transform = { dto:VehicleLocalizationDTO ->
+//                val isClientPOI = spatialService.getNearestEntityWithinArea(dto.lastPosition!!, PointOfInterestEntity::class)
+//                    ?.client_label?.equals("client", ignoreCase = true) ?: false
+//                if (dto.state == "PARKED" &&
+//                    isClientPOI &&
+//                    Timestamp(System.currentTimeMillis()).after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))) {
+//                    return@Range
+//                }
                 dto.lastPosition = null
             }
         )

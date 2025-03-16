@@ -1,11 +1,12 @@
 package net.enovea.vehicle
+import net.enovea.workInProgress.RangedDTO
 import org.locationtech.jts.geom.Point
 import java.sql.Timestamp
 
-class VehicleLocalizationDTO(
+data class VehicleLocalizationDTO(
     var id : String ,
     var lastPosition : Point?,
     var state : String?,
-    val ranges: List<Range<VehicleLocalizationDTO>>? = null,
-    val lastPositionDate: Timestamp? = null
-)
+    override var ranges: List<Range<VehicleLocalizationDTO>>? = null,
+    override var lastPositionDate: Timestamp? = null
+) : RangedDTO<VehicleLocalizationDTO>

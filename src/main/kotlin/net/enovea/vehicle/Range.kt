@@ -5,5 +5,5 @@ data class Range<T> (
     val label : String,
     val description : String,
     val range : TimestampRange,
-    val transform : (T) -> T
+    val transform : (T) -> Unit
 )

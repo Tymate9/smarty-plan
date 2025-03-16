@@ -13,9 +13,7 @@ import net.enovea.vehicle.vehicle_category.VehicleCategoryMapper
 import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import org.locationtech.jts.geom.Point
-import org.mapstruct.Mapper
-import org.mapstruct.Mapping
-import org.mapstruct.Named
+import org.mapstruct.*
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -173,6 +171,20 @@ abstract class VehicleMapper {
     // Common function
     ////////////////////////////////////
 
+    @AfterMapping
+    fun <T> applyRangeTransformations(
+        @MappingTarget dto: T
+    ) where T : RangedDTO<T> {
+        dto.lastPositionDate?.let { lastDate ->
+            dto.ranges?.forEach { range ->
+                if (range.range.contains(lastDate)) {
+                    // La lambda de transformation est définie pour modifier le DTO en place.
+                    (range.transform)(dto)
+                }
+            }
+        }
+    }
+
     @Named("lastPositionDateMapper")
     fun mapLastPositionDate(vehicleEntity: VehicleEntity): Timestamp? {
         val deviceEntity = VehicleEntity.getCurrentDevice(vehicleEntity.vehicleDevices)
@@ -186,8 +198,6 @@ abstract class VehicleMapper {
     @Named("mapVehicleRangesVDTO")
     fun mapVehicleRangesVDTO(vehicleEntity: VehicleEntity): List<Range<VehicleDTO>>? {
         // 1. Récupérer la liste de drivers éventuellement associés au même "vehicule"
-        //    -> Au choix : soit on utilise vehicleEntity.vehicleDrivers.map { it.driver },
-        //       soit on a un utilitaire.
         val drivers = vehicleEntity.vehicleDrivers.mapNotNull { it.driver }
 
         // 2. On met le vehicule lui-même dans une liste
@@ -221,7 +231,19 @@ abstract class VehicleMapper {
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
                 )
             ),
-            transform = { t -> t }
+            transform = { dto ->
+                // Si la map des devices n'est pas nulle, on parcourt ses entrées
+                dto.devices?.forEach { (_, deviceDto) ->
+/*                    if (deviceDto.deviceDataState?.state == "PARKED") {
+                        return@forEach
+                    }*/
+                    // On anonymise le deviceDataState en mettant la coordinate à null et en modifiant l'adresse
+                    deviceDto.deviceDataState?.apply {
+                        coordinate = null
+                        address = "pause déjeuner de $earliestStart à $latestEnd"
+                    }
+                }
+            }
         )
         return listOf(lunchBreakRange)
     }
@@ -264,7 +286,15 @@ abstract class VehicleMapper {
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
                 )
             ),
-            transform = { t -> t }
+            transform = { dto ->
+/*                if (dto.device.state == "PARKED") {
+                    return@Range
+                }*/
+                // On vérifie que le device summary possède un DeviceDataState et on l'anonymise
+                dto.device.apply {
+                    coordinate = null
+                }
+            }
         )
         return listOf(lunchBreakRange)
     }
@@ -272,8 +302,6 @@ abstract class VehicleMapper {
     @Named("mapVehicleRangesVLDTO")
     fun mapVehicleRangesVLDTO(vehicleEntity: VehicleEntity): List<Range<VehicleLocalizationDTO>>? {
         // 1. Récupérer la liste de drivers éventuellement associés au même "vehicule"
-        //    -> Au choix : soit on utilise vehicleEntity.vehicleDrivers.map { it.driver },
-        //       soit on a un utilitaire.
         val drivers = vehicleEntity.vehicleDrivers.mapNotNull { it.driver }
 
         // 2. On met le vehicule lui-même dans une liste
@@ -307,11 +335,15 @@ abstract class VehicleMapper {
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()
                 )
             ),
-            transform = { t -> t }
+            transform = { dto ->
+/*                if (dto.state == "PARKED") {
+                    return@Range
+                }*/
+                dto.lastPosition = null
+            }
         )
         return listOf(lunchBreakRange)
     }
-
 
     private fun computeFinalLunchBreakWindow(vehicles: List<VehicleEntity>, drivers: List<DriverEntity>, refDate: Timestamp): Pair<LocalTime?, LocalTime?> {
         // 1. Récupérer toutes les teams (driver + vehicle)

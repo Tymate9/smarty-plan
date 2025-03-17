@@ -22,6 +22,7 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 @Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleMapper::class, DeviceDataStateMapper::class  ])
 abstract class VehicleTableMapper {
@@ -172,14 +173,15 @@ abstract class VehicleTableMapper {
                 )
             ),
             transform = { dto: VehicleTableDTO ->
-                // Récupération de l'heure actuelle
                 val now = Timestamp(System.currentTimeMillis())
-                // Vérification des conditions de non-anonymisation Le véhicule doit être au statut "PARKED" et sur un POI de type "client"
-                if (dto.device.deviceDataState?.state == "PARKED" &&
-                    dto.lastPositionAddressInfo?.label == "Client" &&
-                    now.after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))
-                ) {
-                    // Conditions remplies : on ne modifie pas le DTO, on conserve la position réelle.
+                println(now)
+                // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
+                val threshold = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
+                )
+                println(threshold)
+                // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
+                if (now.after(threshold)) {
                     return@Range
                 }
                 // Sinon, anonymisation de la position et de l'adresse

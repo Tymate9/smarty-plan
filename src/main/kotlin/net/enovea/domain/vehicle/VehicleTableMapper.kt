@@ -22,6 +22,7 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 @Mapper( componentModel = "cdi", uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleMapper::class, DeviceDataStateMapper::class  ])
@@ -173,7 +174,9 @@ abstract class VehicleTableMapper {
                 )
             ),
             transform = { dto: VehicleTableDTO ->
-                val now = Timestamp(System.currentTimeMillis())
+                val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+                    .toInstant()
+                    .let { Timestamp.from(it) }
                 println(now)
                 // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                 val threshold = Timestamp.from(

@@ -20,10 +20,7 @@ import net.enovea.workInProgress.RangedDTO
 import org.locationtech.jts.geom.Point
 import org.mapstruct.*
 import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
+import java.time.*
 import java.time.temporal.ChronoUnit
 
 @Mapper(componentModel = "cdi" ,uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class, DeviceDataStateMapper::class])
@@ -243,7 +240,9 @@ abstract class VehicleMapper {
             transform = { dto ->
                 // Si la map des devices n'est pas nulle, on parcourt ses entrées
                 dto.devices?.forEach { (_, deviceDto) ->
-                    val now = Timestamp(System.currentTimeMillis())
+                    val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+                        .toInstant()
+                        .let { Timestamp.from(it) }
                     println(now)
                     // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                     val threshold = Timestamp.from(
@@ -304,7 +303,9 @@ abstract class VehicleMapper {
                 )
             ),
             transform = { dto:VehicleSummaryDTO ->
-                val now = Timestamp(System.currentTimeMillis())
+                val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+                    .toInstant()
+                    .let { Timestamp.from(it) }
                 println(now)
                 // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                 val threshold = Timestamp.from(
@@ -361,7 +362,9 @@ abstract class VehicleMapper {
                 )
             ),
             transform = { dto:VehicleLocalizationDTO ->
-                val now = Timestamp(System.currentTimeMillis())
+                val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+                    .toInstant()
+                    .let { Timestamp.from(it) }
                 println(now)
                 // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                 val threshold = Timestamp.from(

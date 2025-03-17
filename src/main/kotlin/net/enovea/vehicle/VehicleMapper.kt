@@ -19,6 +19,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 @Mapper(componentModel = "cdi" ,uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class, DeviceDataStateMapper::class])
 abstract class VehicleMapper {
@@ -237,13 +238,17 @@ abstract class VehicleMapper {
             transform = { dto ->
                 // Si la map des devices n'est pas nulle, on parcourt ses entrées
                 dto.devices?.forEach { (_, deviceDto) ->
-//                    val isClientPOI = spatialService.getNearestEntityWithinArea(deviceDto.deviceDataState!!.coordinate!!, PointOfInterestEntity::class)
-//                        ?.client_label?.equals("client", ignoreCase = true) ?: false
-//                    if (deviceDto.deviceDataState?.state == "PARKED" &&
-//                        isClientPOI &&
-//                        Timestamp(System.currentTimeMillis()).after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))) {
-//                        return@Range
-//                    }
+                    val now = Timestamp(System.currentTimeMillis())
+                    println(now)
+                    // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
+                    val threshold = Timestamp.from(
+                        latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
+                    )
+                    println(threshold)
+                    // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
+                    if (now.after(threshold)) {
+                        return@forEach
+                    }
                     // On anonymise le deviceDataState en mettant la coordinate à null et en modifiant l'adresse
                     deviceDto.deviceDataState?.apply {
                         coordinate = null
@@ -294,13 +299,17 @@ abstract class VehicleMapper {
                 )
             ),
             transform = { dto:VehicleSummaryDTO ->
-//                val isClientPOI = spatialService.getNearestEntityWithinArea(dto.device.coordinate!!, PointOfInterestEntity::class)
-//                    ?.client_label?.equals("client", ignoreCase = true) ?: false
-//                if (dto.device.state == "PARKED" &&
-//                    isClientPOI &&
-//                    Timestamp(System.currentTimeMillis()).after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))) {
-//                    return@Range
-//                }
+                val now = Timestamp(System.currentTimeMillis())
+                println(now)
+                // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
+                val threshold = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
+                )
+                println(threshold)
+                // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
+                if (now.after(threshold)) {
+                    return@Range
+                }
                 // On vérifie que le device summary possède un DeviceDataState et on l'anonymise
                 dto.device.apply {
                     coordinate = null
@@ -347,13 +356,17 @@ abstract class VehicleMapper {
                 )
             ),
             transform = { dto:VehicleLocalizationDTO ->
-//                val isClientPOI = spatialService.getNearestEntityWithinArea(dto.lastPosition!!, PointOfInterestEntity::class)
-//                    ?.client_label?.equals("client", ignoreCase = true) ?: false
-//                if (dto.state == "PARKED" &&
-//                    isClientPOI &&
-//                    Timestamp(System.currentTimeMillis()).after(Timestamp.from(latestEnd.atDate(todayInParis).atZone(parisZone).toInstant()))) {
-//                    return@Range
-//                }
+                val now = Timestamp(System.currentTimeMillis())
+                println(now)
+                // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
+                val threshold = Timestamp.from(
+                    latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
+                )
+                println(threshold)
+                // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
+                if (now.after(threshold)) {
+                    return@Range
+                }
                 dto.lastPosition = null
             }
         )

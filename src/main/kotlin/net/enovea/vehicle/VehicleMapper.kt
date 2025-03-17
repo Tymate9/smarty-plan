@@ -8,15 +8,16 @@ import net.enovea.driver.DriverDTO
 import net.enovea.driver.DriverEntity
 import net.enovea.driver.DriverMapper
 import net.enovea.driver.DriverService
+import net.enovea.spatial.SpatialService
 import net.enovea.team.*
 import net.enovea.vehicle.vehicle_category.VehicleCategoryMapper
 import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
+import net.enovea.workInProgress.RangedDTO
 import org.locationtech.jts.geom.Point
 import org.mapstruct.*
 import java.sql.Timestamp
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit

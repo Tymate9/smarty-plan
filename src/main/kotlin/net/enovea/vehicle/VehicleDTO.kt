@@ -4,7 +4,6 @@ import net.enovea.device.DeviceDTO
 import net.enovea.driver.DriverDTO
 import net.enovea.team.TeamDTO
 import net.enovea.vehicle.vehicle_category.VehicleCategoryDTO
-import net.enovea.domain.vehicle.TimestampRange
 import net.enovea.workInProgress.RangedDTO
 import java.sql.Timestamp
 

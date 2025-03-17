@@ -247,15 +247,13 @@ open class VehicleService(
         }
     }
 
-    // TODO seperate the data treatment method
-    fun getVehiclesTableData(
-        vehicles: List<VehicleEntity>? = null,
-        stopWatch: StopWatch? = null
-    ): List<TeamHierarchyNode> {
+    // TODO(Move trip Daily stats to mapper we need to keep DTO initialization logic in the mapstruct mapper)
+    fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
         stopWatch?.start("filter localized vehicles")
         val allVehicles = vehicles ?: VehicleEntity.listAll()
         stopWatch?.stopAndStart("compute daily stats")
         val tripStats = tripService.getTripDailyStats()
+
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         stopWatch?.stopAndStart("MapTo vehicle data DTO")
@@ -272,42 +270,6 @@ open class VehicleService(
                     }
                     vehicleDTO
                 }
-
-        // Find last position info (poi or address)
-        stopWatch?.stopAndStart("Get last position infos")
-        allVehicleDataDTO.forEach { vehicleDataDTO ->
-            try {
-                // Try to fetch POI using spatial service
-                val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity::class)
-                }
-                if (poi != null) {
-                    vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
-                    vehicleDataDTO.lastPositionAddressInfo = poi.category
-                } else {
-                    // Cannot find POI so Adress Type is "route"
-                    vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
-                        label = "route",
-                        color = "#000"
-                    )
-                    // Get adress from device DataState or geocoding
-                    if (vehicleDataDTO.device.deviceDataState?.address == null) {
-                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                            geoCodingService.reverseGeocode(it)
-                        }
-                        vehicleDataDTO.lastPositionAddress = address
-                    } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
-                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnue"
-                    } else {
-                        vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
-
-                    }
-                }
-            } catch (e: Exception) {
-                // Handle any errors during POI lookup or reverse geocoding
-                vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
-            }
-        }
         // Now we build the hierarchy of vehicles based on their teams
         stopWatch?.stopAndStart("Build team hierarchy")
         val vehiclesWithHierarchy = allVehicleDataDTO.map { vehicleDataDTO ->

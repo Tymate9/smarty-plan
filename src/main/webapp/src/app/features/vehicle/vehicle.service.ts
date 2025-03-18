@@ -451,8 +451,8 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
 
   update(entity: dto.VehicleForm): Observable<dto.VehicleDTO> {
     const vehicleId = entity.id;
-    if (!vehicleId) {
-      throw new Error("VehicleService.update() : l'id du véhicule est manquant.");
+    if (!vehicleId || vehicleId.trim() === '') {
+      throw new Error("VehicleService.update() : l'id du véhicule est manquant ou vide.");
     }
     return this.http.put<dto.VehicleDTO>(`${this.baseUrl}/${vehicleId}`, entity);  }
 

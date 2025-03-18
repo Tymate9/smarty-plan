@@ -5,15 +5,15 @@ import {map, Observable, of} from 'rxjs';
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
 import {IEntityService} from "../../commons/workInProgress/CRUD/ientity-service";
-import VehicleSummaryDTO = dto.VehicleSummaryDTO;
-import VehicleStatsDTO = dto.VehicleStatsDTO;
-import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
-import GenericNodeDTO = dto.GenericNodeDTO;
 import {
   EntityDeleteButtonComponent
 } from "../../commons/workInProgress/entity-delete-button-component/entity-delete-button.component";
 import {CompOpenerButtonComponent} from "../../commons/workInProgress/drawer/comp-opener-button.component";
 import {TeamFormComponent} from "../../commons/workInProgress/CRUD/team-form/team-form.component";
+import GenericNodeDTO = dto.GenericNodeDTO;
+import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
+import VehicleStatsDTO = dto.VehicleStatsDTO;
+import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -240,22 +240,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
 
   //Implémentation de l'interface IEntityService.
 
-  getById(id: number): Observable<dto.VehicleDTO> {
-    throw new Error("not Implemented")
-  }
-
-  create(entity: dto.VehicleForm): Observable<dto.VehicleDTO> {
-    throw new Error("not Implemented")
-  }
-
-  update(entity: dto.VehicleForm): Observable<dto.VehicleDTO> {
-    throw new Error("not Implemented")
-  }
-
-  delete(id: number): Observable<void> {
-    throw new Error("not Implemented")
-  }
-
   /**
    * Récupère la liste des véhicules autorisés.
    * Endpoint utilisé : GET /api/vehicles/list
@@ -451,6 +435,29 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     }
 
     return teamTreeNode;
+  }
+
+  create(entity: dto.VehicleForm): Observable<dto.VehicleDTO> {
+    return this.http.post<dto.VehicleDTO>(this.baseUrl, entity);
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  getById(id: string): Observable<dto.VehicleDTO> {
+    return this.http.get<dto.VehicleDTO>(`${this.baseUrl}/${id}`);
+  }
+
+  update(entity: dto.VehicleForm): Observable<dto.VehicleDTO> {
+    const vehicleId = entity.id;
+    if (!vehicleId) {
+      throw new Error("VehicleService.update() : l'id du véhicule est manquant.");
+    }
+    return this.http.put<dto.VehicleDTO>(`${this.baseUrl}/${vehicleId}`, entity);  }
+
+  getVehicleCategories(): Observable<dto.VehicleCategoryDTO[]> {
+    return this.http.get<dto.VehicleCategoryDTO[]>(`${this.baseUrl}/category`);
   }
 
 }

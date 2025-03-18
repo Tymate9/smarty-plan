@@ -181,4 +181,5 @@ export class TeamFormComponent implements OnInit {
       }
       this.errorInRequest.emit(response.error);
     }
-  }}
+  }
+}

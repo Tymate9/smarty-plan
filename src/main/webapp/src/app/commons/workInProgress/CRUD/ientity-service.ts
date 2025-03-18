@@ -5,10 +5,10 @@ import {TreeNode} from "primeng/api";
 
 export interface IEntityService<D, R> {
   getAuthorizedData(): Observable<D[]>;
-  getById(id: number): Observable<D>;
+  getById(id: any): Observable<D>;
   create(entity: R): Observable<D>;
   update(entity: R): Observable<D>;
-  delete(id: number): Observable<void>;
+  delete(id: any): Observable<void>;
   getCount(): Observable<number>;
   getStats(): Observable<dto.StatsDTO>;
   getTreeColumns():Observable<EntityColumn[]>;

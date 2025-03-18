@@ -13,6 +13,8 @@ import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.device.DeviceEntity
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.team.TeamService
+import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
+import net.enovea.vehicle.vehicle_category.VehicleCategoryMapper
 import net.enovea.workInProgress.common.ICRUDResource
 import net.enovea.workInProgress.vehicleCRUD.VehicleForm
 import org.jboss.logging.Logger
@@ -33,6 +35,7 @@ class VehicleResource(
     private val deviceDataStateSpatialService: SpatialService,
     private val teamService: TeamService,
     private val vehicleMapper: VehicleMapper,
+    private val vehicleCategoryMapper: VehicleCategoryMapper,
     private val validator: Validator
 ) : ICRUDResource<VehicleForm, VehicleDTO, String> {
     private val logger = Logger.getLogger(VehicleResource::class.java)
@@ -93,6 +96,14 @@ class VehicleResource(
     override fun delete(@PathParam("id") id: String): Response {
         val deletedVehicle = vehicleService.delete(id)
         return Response.ok(deletedVehicle).build()
+    }
+
+    @GET
+    @Path("/category")
+    @Transactional
+    fun getCategory():Response{
+        return Response.ok(
+            VehicleCategoryEntity.listAll().map { it -> vehicleCategoryMapper.toDto(it) }).build()
     }
 
     /// Other

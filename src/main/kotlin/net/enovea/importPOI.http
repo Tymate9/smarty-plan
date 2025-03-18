@@ -1,0 +1,171 @@
+### ----------------------------------------------------
+### Définition des variables
+### ----------------------------------------------------
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = admin
+@password_admin = root
+
+### 1) Obtenir le token d'accès
+### ----------------------------------------------------
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {% client.global.set("access_token_admin", response.body.access_token); %}
+
+### 2) IMPORT CSV POI - Cas valide avec coordonnées fournies
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+001,Client One,Client,"123 rue de Paris",75001,Paris,48.8566,2.3522,10
+002,Client Two,Agence NM,"456 rue de Lyon",69001,Lyon,45.7640,4.8357,15
+
+> {%
+    client.test("IMPORT CSV valid - coordinates provided", function() {
+        client.assert(response.status === 200, "Expected 200 OK for valid CSV import");
+        // On s'attend à ce que les lignes soient traitées avec succès
+        client.assert(response.body[0].status === "Ok", "Expected first line imported successfully");
+        client.assert(response.body[1].status === "Ok", "Expected second line imported successfully");
+    });
+%}
+
+### 3) IMPORT CSV POI - CSV avec header manquant (simulate error)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,address,zip_code,city,latitude,longitude,radius
+003,Client Three,"789 rue de Bordeaux",33000,Bordeaux,44.8378,-0.5792,5
+
+> {%
+    client.test("IMPORT CSV missing header => error", function() {
+        client.assert(response.status === 500, "Expected 500 error due to missing header (label_type)");
+    });
+%}
+
+### 4) IMPORT CSV POI - Label type invalide (non existant)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+004,Client Four,Office,"10 rue des Lilas",75010,Paris,48.8566,2.3522,7
+
+> {%
+    client.test("IMPORT CSV invalid labelType => error", function() {
+        // "Office" n'est pas dans la liste ["Agence NM", "Fournisseur", "Client", "Station Service", "Hotel/Restaurant", "Autre", "Domicile"]
+        client.assert(response.body[0].status === "Error", "Expected Error status for invalid labelType");
+    });
+%}
+
+### 5) IMPORT CSV POI - Coordonnées manquantes mais adresse complète (geocode)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+005,Client Five,Fournisseur,"15 avenue des Champs",75008,Paris,,,9
+
+> {%
+    client.test("IMPORT CSV missing coordinates but valid address", function() {
+        client.assert(response.status === 200, "Expected 200 OK when geocoding from address");
+        client.assert(response.body[0].status === "Ok", "Expected line to be imported successfully via geocoding");
+    });
+%}
+
+### 6) IMPORT CSV POI - Échec du géocodage (adresse invalide)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+006,Client Six,Client,"Adresse Invalide",00000,Inconnue,,,10
+
+> {%
+    client.test("IMPORT CSV geocoding failure => Error", function() {
+        client.assert(response.body[0].status === "Error", "Expected Error status due to geocoding failure");
+    });
+%}
+
+### 7) IMPORT CSV POI - Contrainte d'unicité (client_code dupliqué)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+001,Client Duplicate,Client,"123 rue de Paris",75001,Paris,48.8566,2.3522,10
+
+> {%
+    client.test("IMPORT CSV duplicate client_code => skipped", function() {
+        client.assert(response.body[0].status === "Skipped", "Expected Skipped status for duplicate client_code");
+    });
+%}
+
+### 8) IMPORT CSV POI - Données insuffisantes (coordonnées et adresse manquantes)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+007,Client Seven,Client,,,,,,
+
+> {%
+    client.test("IMPORT CSV insufficient data => error", function() {
+        client.assert(response.body[0].status === "Error", "Expected Error status for insufficient data");
+    });
+%}
+
+
+### 9) IMPORT CSV POI - Long CSV File (fichier CSV avec de nombreuses lignes)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/poi/importFromText
+Content-Type: text/plain
+Authorization: Bearer {{access_token_admin}}
+
+client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
+101,Long Client 1,Client,"1 rue Long",75001,Paris,48.8566,2.3522,10
+102,Long Client 2,Fournisseur,"2 rue Long",75002,Paris,48.8570,2.3525,12
+103,Long Client 3,Station Service,"3 rue Long",75003,Paris,48.8575,2.3530,8
+104,Long Client 4,Hotel/Restaurant,"4 rue Long",75004,Paris,48.8580,2.3535,15
+105,Long Client 5,Autre,"5 rue Long",75005,Paris,,,20
+106,Long Client 6,Domicile,"6 rue Long",75006,Paris,,,9
+107,Long Client 7,Client,"7 rue Long",75007,Paris,48.8585,2.3540,11
+108,Long Client 8,Agence NM,"8 rue Long",75008,Paris,48.8590,2.3545,7
+109,Long Client 9,Client,"9 rue Long",75009,Paris,48.8595,2.3550,10
+110,Long Client 10,Fournisseur,"10 rue Long",75010,Paris,48.8600,2.3555,6
+
+> {%
+    client.test("IMPORT CSV Long File", function() {
+        client.assert(response.status === 200, "Expected 200 OK for long CSV import");
+        client.assert(response.body.length === 10, "Expected 10 results for long CSV file");
+    });
+%}
+
+### 10) GET : Vérifier la création de tous les POI
+### ----------------------------------------------------
+GET http://{{api_host}}/api/poi
+Authorization: Bearer {{access_token_admin}}
+Accept: application/json
+
+> {%
+    client.test("GET All POI => 200 and count = 13", function() {
+        client.assert(response.status === 200, "Expected 200 OK on retrieving POI");
+        // Vérifier que le nombre total de POI correspond à 13
+        client.assert(response.body.length === 13, "Expected 13 POI created, got " + response.body.length);
+    });
+%}

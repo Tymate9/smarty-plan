@@ -14,6 +14,7 @@ import { CellHostDirective } from '../../cell-host.directive';
 import { forkJoin } from 'rxjs';
 import {TreeTableModule} from "primeng/treetable";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
+import {Button} from "primeng/button";
 
 export interface EntityColumn {
   field?: string;
@@ -59,12 +60,12 @@ interface DynamicComponentConfig {
           <tr class="dynamic-tt-header">
             <td [ttRow]="rowNode" *ngFor="let col of columns">
               <span>{{ col.header }}</span>
-              <button
+              <p-button
                 *ngIf="col.field && col.comparator"
                 (click)="onColumnHeaderClick(col)"
+                [icon]="col.ascending ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
               >
-                Trier
-              </button>
+              </p-button>
               <span *ngIf="col.field && col.comparator">
             ({{ col.ascending ? 'Asc' : 'Desc' }})
           </span>
@@ -98,7 +99,8 @@ interface DynamicComponentConfig {
     CellHostDirective,
     NgIf,
     NgForOf,
-    NgClass
+    NgClass,
+    Button
   ],
   styles: [`
 

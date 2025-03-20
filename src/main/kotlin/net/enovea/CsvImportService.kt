@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.common.geo.GeoCodingService
+import net.enovea.common.geo.SpatialService
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
@@ -12,9 +13,6 @@ import org.hibernate.exception.ConstraintViolationException
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
-import org.locationtech.jts.geom.Polygon
-import org.locationtech.jts.io.WKTReader
-import java.io.FileReader
 
 enum class ImportStatusEnum {
     Skipped,
@@ -31,89 +29,68 @@ data class ImportResult(
 @ApplicationScoped
 class CsvImportService(
     // Injection du service géospatial pour géocodage/reverse géocodage
-    private val geoSpatialService:  GeoCodingService
+    private val geoSpatialService: GeoCodingService
 ) {
 
-    /**
-     * Lit le fichier CSV, vérifie que tous les headers requis sont présents,
-     * récupère la liste des catégories disponibles (requête unique en base),
-     * puis traite chaque enregistrement via createPoi.
-     *
-     * @param filePath Le chemin du fichier CSV.
-     * @return La liste des ImportResult pour chaque ligne.
-     */
-    fun importPoiCsv(filePath: String): List<ImportResult> {
-        val results = mutableListOf<ImportResult>()
 
+    fun importPoiCsv(csvAsString: String): List<ImportResult> {
+        val results = mutableListOf<ImportResult>()
         // Requête unique pour obtenir la liste des catégories disponibles
         val availableCategories: List<PointOfInterestCategoryEntity> = PointOfInterestCategoryEntity.listAll()
 
-        FileReader(filePath).use { reader ->
-            val csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader()                // Utilise la première ligne comme header
-                .setSkipHeaderRecord(true)  // Ignore l'en-tête lors de l'itération
-                .setIgnoreHeaderCase(true)  // Ignore la casse des headers
-                .setTrim(true)              // Supprime les espaces superflus
-                .get()                      // Récupère l'instance CSVFormat
+        val csvFormat = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .setIgnoreHeaderCase(true)
+            .setTrim(true)
+            .get()
 
-            val csvParser = CSVParser.parse(reader, csvFormat)
+        val csvParser = CSVParser.parse(csvAsString, csvFormat)
 
-            // Liste des headers requis pour l'import des POI
-            val requiredHeaders = listOf(
-                "client_code",
-                "client_label",
-                "label_type",
-                "address",
-                "zip_code",
-                "city",
-                "latitude",
-                "longitude",
-                "radius"
-            )
+        // Liste des headers requis pour l'import des POI
+        val requiredHeaders = listOf(
+            "client_code",
+            "client_label",
+            "label_type",
+            "address",
+            "zip_code",
+            "city",
+            "latitude",
+            "longitude",
+            "radius"
+        )
 
-            // Vérification de la présence de tous les headers requis
-            val headerMap = csvParser.headerMap // Map<String, Int>
-            val missingHeaders = requiredHeaders.filter { !headerMap.containsKey(it) }
-            if (missingHeaders.isNotEmpty()) {
-                throw IllegalArgumentException("Les headers suivants sont manquants : ${missingHeaders.joinToString(", ")}")
-            }
+        // Vérification de la présence de tous les headers requis
+        val headerMap = csvParser.headerMap
+        val missingHeaders = requiredHeaders.filter { !headerMap.containsKey(it) }
+        if (missingHeaders.isNotEmpty()) {
+            throw IllegalArgumentException("Les headers suivants sont manquants : ${missingHeaders.joinToString(", ")}")
+        }
 
-            var lineNumber = 1L
-            for (record in csvParser) {
-                val result = createPoi(record, lineNumber, availableCategories)
-                results.add(result)
-                lineNumber++
-            }
+        for (record in csvParser) {
+            val result = createPoi(record, availableCategories)
+            results.add(result)
         }
         return results
     }
 
-    /**
-     * Traite un enregistrement CSV en appliquant les règles métiers :
-     *
-     * - Vérifie que le labelType (du CSV) correspond à l'un des labels existants en base (ignorant la casse).
-     *   Si aucun ne correspond, retourne un ImportResult en erreur.
-     *
-     * - Ensuite, selon que les coordonnées sont fournies ou non, utilise :
-     *   - reverseGeocode pour obtenir l'adresse à partir des coordonnées,
-     *   - ou geocode pour obtenir les coordonnées à partir de l'adresse complète.
-     *
-     * - Enfin, tente de créer le POI via attemptCreatePoi.
-     *   Si une contrainte d'unicité est levée (client code ou client label), retourne un ImportResult avec le statut Skipped.
-     */
     fun createPoi(
         record: CSVRecord,
-        lineNumber: Long,
         availableCategories: List<PointOfInterestCategoryEntity>
     ): ImportResult {
         return try {
             val clientCode = record.get("client_code")
             val clientLabel = record.get("client_label")
             val labelTypeCsv = record.get("label_type")
+
             // Vérification du labelType (comparaison insensible à la casse)
             val matchingCategory = availableCategories.find { it.label.equals(labelTypeCsv, ignoreCase = true) }
             if (matchingCategory == null) {
-                return ImportResult(lineNumber, ImportStatusEnum.Error, "Label type '$labelTypeCsv' inexistant pour la ligne $lineNumber")
+                return ImportResult(
+                    record.recordNumber,
+                    ImportStatusEnum.Error,
+                    "Label type '$labelTypeCsv' inexistant pour la ligne ${record.recordNumber}"
+                )
             }
 
             val address = record.get("address")
@@ -124,7 +101,7 @@ class CsvImportService(
             val radius = record.get("radius")
 
             val geometryFactory = GeometryFactory()
-            val point: org.locationtech.jts.geom.Point? = if (latitudeStr.isNotBlank() && longitudeStr.isNotBlank()) {
+            val point: Point? = if (latitudeStr.isNotBlank() && longitudeStr.isNotBlank()) {
                 val lat = latitudeStr.toDoubleOrNull()
                 val lon = longitudeStr.toDoubleOrNull()
                 if (lat != null && lon != null) geometryFactory.createPoint(Coordinate(lon, lat)) else null
@@ -135,10 +112,18 @@ class CsvImportService(
                 val resolvedAddress = try {
                     geoSpatialService.reverseGeocode(point)
                 } catch (ex: Exception) {
-                    return ImportResult(lineNumber, ImportStatusEnum.Skipped, "Skipped line $lineNumber: Error during reverse geocoding: ${ex.message}")
+                    return ImportResult(
+                        record.recordNumber,
+                        ImportStatusEnum.Skipped,
+                        "Skipped line ${record.recordNumber}: Error during reverse geocoding: ${ex.message}"
+                    )
                 }
                 if (resolvedAddress == null) {
-                    return ImportResult(lineNumber, ImportStatusEnum.Error, "Erreur de géocodage inverse pour la ligne $lineNumber")
+                    return ImportResult(
+                        record.recordNumber,
+                        ImportStatusEnum.Error,
+                        "Erreur de géocodage inverse pour la ligne ${record.recordNumber}"
+                    )
                 }
                 Pair(point, resolvedAddress)
             } else if (address.isNotBlank() && zipCode.isNotBlank() && city.isNotBlank()) {
@@ -146,27 +131,43 @@ class CsvImportService(
                 val geoResponse = try {
                     geoSpatialService.geocode(fullAddress)
                 } catch (ex: Exception) {
-                    return ImportResult(lineNumber, ImportStatusEnum.Skipped, "Skipped line $lineNumber: Error during geocoding: ${ex.message}")
+                    return ImportResult(
+                        record.recordNumber,
+                        ImportStatusEnum.Skipped,
+                        "Skipped line ${record.recordNumber}: Error during geocoding: ${ex.message}"
+                    )
                 }
                 if (geoResponse == null) {
-                    return ImportResult(lineNumber, ImportStatusEnum.Error, "Unable to geocode address for line $lineNumber")
+                    return ImportResult(
+                        record.recordNumber,
+                        ImportStatusEnum.Error,
+                        "Unable to geocode address for line ${record.recordNumber}"
+                    )
                 }
                 Pair(geoResponse.coordinate, geoResponse.adresse)
             } else {
-                return ImportResult(lineNumber, ImportStatusEnum.Error, "Insufficient data for line $lineNumber (missing coordinates and/or address details)")
+                return ImportResult(
+                    record.recordNumber,
+                    ImportStatusEnum.Error,
+                    "Insufficient data for line ${record.recordNumber} (missing coordinates and/or address details)"
+                )
             }
 
             // Tente de créer le POI et renvoie le résultat approprié.
             try {
-                val poiEntity = attemptCreatePoi(
+                attemptCreatePoi(
                     clientCode = clientCode,
                     clientLabel = clientLabel,
-                    categoryId = matchingCategory.id,
+                    category = matchingCategory,
                     address = finalAddress,
                     point = finalPoint,
-                    radius = radius
+                    radius = radius.toInt()
                 )
-                ImportResult(lineNumber, ImportStatusEnum.Ok, "Successfully imported line $lineNumber")
+                ImportResult(
+                    record.recordNumber,
+                    ImportStatusEnum.Ok,
+                    "Successfully imported line ${record.recordNumber}"
+                )
             } catch (ex: Exception) {
                 // Parcourir la chaîne des causes pour identifier une contrainte d'unicité
                 var cause: Throwable? = ex
@@ -177,8 +178,10 @@ class CsvImportService(
                         messageToReturn = when {
                             errorMsg.contains("unique_client_code", ignoreCase = true) ->
                                 "Le code client existe déjà."
+
                             errorMsg.contains("unique_client_label", ignoreCase = true) ->
                                 "Le libellé client existe déjà."
+
                             else -> "ConstraintViolationException survenu."
                         }
                         break
@@ -186,48 +189,43 @@ class CsvImportService(
                     cause = cause.cause
                 }
                 if (messageToReturn != null) {
-                    ImportResult(lineNumber, ImportStatusEnum.Skipped, "Skipped line $lineNumber: $messageToReturn")
+                    ImportResult(
+                        record.recordNumber,
+                        ImportStatusEnum.Skipped,
+                        "Skipped line ${record.recordNumber}: $messageToReturn"
+                    )
                 } else {
-                    ImportResult(lineNumber, ImportStatusEnum.Error, "Error creating POI on line $lineNumber: ${ex.message}")
+                    ImportResult(
+                        record.recordNumber,
+                        ImportStatusEnum.Error,
+                        "Internal Error creating POI on line ${record.recordNumber}: ${ex.message}"
+                    )
                 }
             }
         } catch (ex: Exception) {
-            ImportResult(lineNumber, ImportStatusEnum.Error, "Error importing line $lineNumber: ${ex.message}")
+            ImportResult(
+                record.recordNumber,
+                ImportStatusEnum.Error,
+                "Error importing line ${record.recordNumber}: ${ex.message}"
+            )
         }
     }
 
-    /**
-     * Tente de créer un POI en utilisant les données fournies.
-     * Cette fonction encapsule la logique de création, en s'appuyant sur le même code que votre méthode existante.
-     * En cas de succès, elle retourne l'entité POI créée.
-     *
-     * @param clientCode Le code client.
-     * @param clientLabel Le libellé client.
-     * @param categoryId L'ID de la catégorie à utiliser.
-     * @param address L'adresse résolue.
-     * @param point Le point (coordonnées) du POI.
-     * @param radius Le rayon (tel que fourni dans le CSV).
-     * @return L'entité PointOfInterestEntity créée.
-     * @throws Exception en cas d'erreur lors de la création.
-     */
+    // Exemple d'utilisation dans la fonction attemptCreatePoi
     @Transactional
     fun attemptCreatePoi(
         clientCode: String,
         clientLabel: String,
-        categoryId: Int,
+        category: PointOfInterestCategoryEntity,
         address: String,
         point: Point,
-        radius: String
+        radius: Int   // Rayon en mètres
     ): PointOfInterestEntity {
-        // Récupérer la catégorie par son ID
-        val category = PointOfInterestCategoryEntity.findById(categoryId)
-            ?: throw IllegalArgumentException("La catégorie spécifiée n'existe pas.")
+        val geometryFactory = point.factory
+        // Création du polygone circulaire autour du point
+        val polygonGeometry = SpatialService.createCirclePolygon(geometryFactory, point, radius.toDouble())
 
-        val wktReader = WKTReader()
-        // Conversion du point en WKT pour créer un polygon (ici, création d'un buffer autour du point)
-        val polygonGeometry = point.buffer(0.001) as? Polygon
-            ?: throw IllegalStateException("Le buffer n'a pas renvoyé un Polygon")
-        // Création du POI
+        // Création de l'entité POI avec le point et la zone (polygone)
         val poiEntity = PointOfInterestEntity(
             client_code = if (clientCode == "0000") null else clientCode,
             client_label = clientLabel,
@@ -236,10 +234,9 @@ class CsvImportService(
             area = polygonGeometry,
             address = address
         )
-
-        // Persister l'entité
         poiEntity.persistAndFlush()
-
         return poiEntity
     }
+
+
 }

@@ -1,10 +1,9 @@
 package net.enovea.api.poi
 
-import jakarta.persistence.EntityManager
+import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
-import jakarta.ws.rs.FormParam
 import jakarta.ws.rs.core.Response
 import net.dilivia.lang.StopWatch
 import net.enovea.CsvImportService
@@ -14,60 +13,37 @@ import org.jboss.logging.Logger
 
 import org.locationtech.jts.geom.*
 import org.locationtech.jts.io.WKTReader
-import java.io.InputStream
 import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import kotlin.time.DurationUnit
-import org.jboss.resteasy.annotations.providers.multipart.PartType
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm
-
-data class ImportPoiForm(
-    @FormParam("file")
-    @PartType(MediaType.APPLICATION_OCTET_STREAM)
-    var file: InputStream? = null,
-)
-
 
 @Path("/api/poi")
 class PointOfInterestResource (
     val pointOfInterestSpatialService: SpatialService,
-    val entityManager: EntityManager,
-    val csvImportService: CsvImportService
+    val csvImportService: CsvImportService,
 ){
     private val logger = Logger.getLogger(PointOfInterestResource::class.java)
 
-//    @POST
-//    @Path("/import")
-//    @Consumes(MediaType.MULTIPART_FORM_DATA)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Transactional
-//    fun importPoi(@MultipartForm form: ImportPoiForm): Response {
-//        try {
-//            // Vérifier que le fichier est fourni
-//            if (form.file == null) {
-//                return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity(mapOf("error" to "Le fichier CSV est requis"))
-//                    .build()
-//            }
-//
-//            // Créer un fichier temporaire pour stocker le CSV reçu
-//            val tempFile = Files.createTempFile("poi_import", ".csv")
-//            form.file?.let { Files.copy(it, tempFile, StandardCopyOption.REPLACE_EXISTING) }
-//
-//            // Appeler la fonction d'import des POI en passant le chemin du fichier temporaire
-//            csvImportService.importPoiCsv(tempFile.toString())
-//
-//            // Supprimer le fichier temporaire après l'import
-//            Files.delete(tempFile)
-//
-//            return Response.ok(mapOf("message" to "Import réussi")).build()
-//        } catch (e: Exception) {
-//            logger.warn("Erreur lors de l'import CSV : ${e.message}")
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-//                .entity(mapOf("error" to "Erreur lors de l'import: ${e.message}"))
-//                .build()
-//        }
-//    }
+    @POST
+    @Path("/import")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    @RolesAllowed("admin")
+    fun importPoi(csvBytes: ByteArray): Response {
+        try {
+            if (csvBytes.isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(mapOf("error" to "Le fichier CSV est requis"))
+                    .build()
+            }
+            return Response.ok(csvImportService.importPoiCsv(String(csvBytes))).build()
+        } catch (e: Exception) {
+            logger.warn("Erreur lors de l'import CSV : ${e.message}")
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Erreur lors de l'import: ${e.message}"))
+                .build()
+        }
+    }
 
     @POST
     @Path("/importFromText")

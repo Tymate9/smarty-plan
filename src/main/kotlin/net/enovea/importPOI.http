@@ -21,8 +21,8 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
 
 ### 2) IMPORT CSV POI - Cas valide avec coordonnées fournies
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
@@ -40,8 +40,8 @@ client_code,client_label,label_type,address,zip_code,city,latitude,longitude,rad
 
 ### 3) IMPORT CSV POI - CSV avec header manquant (simulate error)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,address,zip_code,city,latitude,longitude,radius
@@ -55,8 +55,8 @@ client_code,client_label,address,zip_code,city,latitude,longitude,radius
 
 ### 4) IMPORT CSV POI - Label type invalide (non existant)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
@@ -71,8 +71,8 @@ client_code,client_label,label_type,address,zip_code,city,latitude,longitude,rad
 
 ### 5) IMPORT CSV POI - Coordonnées manquantes mais adresse complète (geocode)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
@@ -87,8 +87,8 @@ client_code,client_label,label_type,address,zip_code,city,latitude,longitude,rad
 
 ### 6) IMPORT CSV POI - Échec du géocodage (adresse invalide)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
@@ -102,8 +102,8 @@ client_code,client_label,label_type,address,zip_code,city,latitude,longitude,rad
 
 ### 7) IMPORT CSV POI - Contrainte d'unicité (client_code dupliqué)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
@@ -117,8 +117,8 @@ client_code,client_label,label_type,address,zip_code,city,latitude,longitude,rad
 
 ### 8) IMPORT CSV POI - Données insuffisantes (coordonnées et adresse manquantes)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
@@ -133,8 +133,8 @@ client_code,client_label,label_type,address,zip_code,city,latitude,longitude,rad
 
 ### 9) IMPORT CSV POI - Long CSV File (fichier CSV avec de nombreuses lignes)
 ### ----------------------------------------------------
-POST http://{{api_host}}/api/poi/importFromText
-Content-Type: text/plain
+POST http://{{api_host}}/api/poi/import
+Content-Type: application/octet-stream
 Authorization: Bearer {{access_token_admin}}
 
 client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius

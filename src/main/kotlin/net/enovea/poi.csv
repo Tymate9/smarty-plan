@@ -1,3 +1,0 @@
-client_code,client_label,label_type,address,zip_code,city,latitude,longitude,radius
-001,Client One,Office,"123 rue de Paris",75001,Paris,48.8566,2.3522,10
-002,Client Two,Store,"456 rue de Lyon",69001,Lyon,45.7640,4.8357,15

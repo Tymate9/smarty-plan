@@ -2,10 +2,18 @@ package net.enovea.common.geo
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import mu.KotlinLogging
+import net.sf.geographiclib.Geodesic
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
+
 
 /**
  * SpatialService refactorisé pour utiliser IHasCoordinate / IHasArea
@@ -160,6 +168,67 @@ class SpatialService(
             )
 
         return repo
+    }
+
+    companion object {
+        fun createCirclePolygon(
+            geometryFactory: GeometryFactory,
+            center: Point,
+            radius: Double,
+            numPoints: Int = 64
+        ): Polygon {
+            val coordinates = mutableListOf<Coordinate>()
+            // GeographicLib : Geodesic WGS84 précis
+            val geod = Geodesic.WGS84
+            val lat = center.y
+            val lon = center.x
+            // Calcul des points autour du cercle géodésique
+            for (i in 0 until numPoints) {
+                val azi = i * (360.0 / numPoints)
+                val g = geod.Direct(lat, lon, azi, radius)
+                coordinates.add(Coordinate(g.lon2, g.lat2))
+            }
+            // Fermeture du polygone
+            coordinates.add(coordinates[0])
+            return geometryFactory.createPolygon(coordinates.toTypedArray())
+        }
+
+        // Fonction qui crée un polygone circulaire (approximation géodésique) autour d'un point
+        fun createCirclePolygonWithStrangeCalcMadeByAGuyWhoIsNotGoodAtMath(
+            geometryFactory: GeometryFactory,
+            center: Point,
+            radius: Double,
+            numPoints: Int = 64
+        ): Polygon {
+            // Conversion du centre en radians (attention : dans JTS, x correspond à la longitude et y à la latitude)
+            val centerLat = Math.toRadians(center.y)
+            val centerLon = Math.toRadians(center.x)
+            // Rayon moyen de la Terre en mètres (modèle sphérique simplifié)
+            val earthRadius = 6371000.0
+            // Distance angulaire en radians
+            val angularDistance = radius / earthRadius
+            val coordinates = mutableListOf<Coordinate>()
+
+            // Calcul des points autour du cercle pour des angles de 0 à 360°
+            for (i in 0 until numPoints) {
+                val angle = 2 * Math.PI * i / numPoints  // angle en radians
+                val destLat = asin(
+                    sin(centerLat) * cos(angularDistance) +
+                        cos(centerLat) * sin(angularDistance) * cos(angle)
+                )
+                val destLon = centerLon + atan2(
+                    sin(angle) * sin(angularDistance) * cos(centerLat),
+                    cos(angularDistance) - sin(centerLat) * sin(destLat)
+                )
+                // Conversion des coordonnées en degrés
+                val destLatDeg = Math.toDegrees(destLat)
+                val destLonDeg = Math.toDegrees(destLon)
+                coordinates.add(Coordinate(destLonDeg, destLatDeg))
+            }
+            // Fermer le polygone en répétant le premier point
+            coordinates.add(coordinates[0])
+            return geometryFactory.createPolygon(coordinates.toTypedArray())
+        }
     }
 }
 

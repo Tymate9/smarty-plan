@@ -1,5 +1,5 @@
 import {Observable} from "rxjs";
-import {dto} from "../../../../habarta/dto";
+import {dto} from "../../../habarta/dto";
 import {EntityColumn} from "../entityAdminModule/entity-tree/entity-tree.component";
 import {TreeNode} from "primeng/api";
 

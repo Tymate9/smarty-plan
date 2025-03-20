@@ -4,14 +4,14 @@ import {map, Observable, of} from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
-import {IEntityService} from "../../commons/workInProgress/CRUD/ientity-service";
+import {IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import {
   EntityDeleteButtonComponent
-} from "../../commons/workInProgress/entity-delete-button-component/entity-delete-button.component";
-import {CompOpenerButtonComponent} from "../../commons/workInProgress/drawer/comp-opener-button.component";
-import {TeamFormComponent} from "../../commons/workInProgress/CRUD/team-form/team-form.component";
+} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
+import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
+import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
 import GenericNodeDTO = dto.GenericNodeDTO;
-import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
+import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 

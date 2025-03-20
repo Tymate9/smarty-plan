@@ -2,14 +2,14 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable, of} from "rxjs";
 import {dto} from "../../../habarta/dto";
-import {IEntityService} from "../../commons/workInProgress/CRUD/ientity-service";
+import {IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import {MessageService, TreeNode} from "primeng/api";
-import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
+import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import {
   EntityDeleteButtonComponent
-} from "../../commons/workInProgress/entity-delete-button-component/entity-delete-button.component";
-import {TeamFormComponent} from "../../commons/workInProgress/CRUD/team-form/team-form.component";
-import {CompOpenerButtonComponent} from "../../commons/workInProgress/drawer/comp-opener-button.component";
+} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
+import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
+import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
 import DriverDTO = dto.DriverDTO;
 import DriverForm = dto.DriverForm;
 import GenericNodeDTO = dto.GenericNodeDTO;

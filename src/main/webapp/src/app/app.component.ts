@@ -4,7 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import {ConfirmationService, SharedModule} from 'primeng/api';
-import {DrawerComponent} from "./commons/workInProgress/drawer/drawer.component";
+import {DrawerComponent} from "./workInProgress/drawer/drawer.component";
 
 @Component({
   selector: 'app-root',

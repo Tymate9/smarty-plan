@@ -96,7 +96,7 @@ import {Select} from "primeng/select";
                 Équipe: {{ vehicle.team.label }} ({{ vehicle.team.category.label }})
               </div>
               <div>
-                Dernière communication: {{ vehicle.device.lastCommunicationDate | date:'short' }}
+                Dernière communication: {{ vehicle.device?.lastCommunicationDate | date:'short' }}
               </div>
             </div>
           </div>

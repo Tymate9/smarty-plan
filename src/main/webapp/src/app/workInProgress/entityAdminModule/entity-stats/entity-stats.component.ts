@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
-import {dto} from "../../../../../habarta/dto";
+import {dto} from "../../../../habarta/dto";
 import {DrawerComponent} from "../../drawer/drawer.component";
 import {DatePipe, NgForOf, NgIf} from "@angular/common";
 import {TeamFormComponent} from "../../CRUD/team-form/team-form.component";

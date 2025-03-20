@@ -1,11 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
-import {TeamService} from "../../../../features/vehicle/team.service";
+import {TeamService} from "../../../features/vehicle/team.service";
 import {EntityButtonTabContentComponent} from "../entity-button-tab-content/entity-button-tab-content.component";
 import {EntityAdminTabViewComponent} from "../entity-admin-tab-view/entity-admin-tab-view.component";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
-import {DriverService} from "../../../../features/vehicle/driver.service";
-import {VehicleService} from "../../../../features/vehicle/vehicle.service";
+import {DriverService} from "../../../features/vehicle/driver.service";
+import {VehicleService} from "../../../features/vehicle/vehicle.service";
 
 /**
  * On peut étendre cette interface selon les besoins

@@ -5,11 +5,11 @@ import {DashboardComponent} from "./features/dashboard/dashboard.component";
 import {CartographyComponent} from "./features/cartography/cartography.component";
 import {PoiMapComponent} from "./features/poi/poi-manager/poi-map/poi-map.component";
 import {TripsComponent} from "./features/trips/trips.component";
-import {EntityAdminComponent} from "./commons/workInProgress/entityAdminModule/entity-admin/entity-admin.component";
+import {EntityAdminComponent} from "./workInProgress/entityAdminModule/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
-import {DriverFormComponent} from "./commons/workInProgress/CRUD/driver-Form/driver-form.component";
-import {VehicleFormComponent} from "./commons/workInProgress/CRUD/vehicle-form/vehicle-form.component";
+import {DriverFormComponent} from "./workInProgress/CRUD/driver-Form/driver-form.component";
+import {VehicleFormComponent} from "./workInProgress/CRUD/vehicle-form/vehicle-form.component";
 
 export const routes: Routes = [
   {

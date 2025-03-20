@@ -3,16 +3,16 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {map, Observable, of} from 'rxjs';
 import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
-import {IEntityService} from "../../commons/workInProgress/CRUD/ientity-service";
+import {IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import TeamCategoryDTO = dto.TeamCategoryDTO;
 import TeamForm = dto.TeamForm;
-import {EntityColumn} from "../../commons/workInProgress/entityAdminModule/entity-tree/entity-tree.component";
+import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import {MessageService, TreeNode} from "primeng/api";
-import {TeamFormComponent} from "../../commons/workInProgress/CRUD/team-form/team-form.component";
-import {CompOpenerButtonComponent} from "../../commons/workInProgress/drawer/comp-opener-button.component";
+import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
+import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
 import {
   EntityDeleteButtonComponent
-} from "../../commons/workInProgress/entity-delete-button-component/entity-delete-button.component";
+} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
 
 @Injectable({
   providedIn: 'root'

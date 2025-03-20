@@ -2,14 +2,14 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { EntityFormComponent } from '../entity-form/entity-form.component';
 import { NgIf } from '@angular/common';
-import { DriverService } from '../../../../features/vehicle/driver.service';
-import { dto } from '../../../../../habarta/dto';
+import { DriverService } from '../../../features/vehicle/driver.service';
+import { dto } from '../../../../habarta/dto';
 import DriverDTO = dto.DriverDTO;
 import { IFormDescription } from '../iform-description';
 import { FormDescription } from '../form-description';
 import { FormInput } from '../iform-input';
-import { NotificationService } from '../../../notification/notification.service';
-import {DriverValidator} from "../driver-Form/driver-validator";
+import { NotificationService } from '../../../commons/notification/notification.service';
+import {DriverValidator} from "./driver-validator";
 
 @Component({
   selector: 'app-driver-form',

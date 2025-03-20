@@ -14,7 +14,7 @@ import {ProgressSpinner} from "primeng/progressspinner";
 @Component({
   selector: 'app-vehicle-popup',
   template: `
-    <img *ngIf="entity.device.plugged == false"
+    <img *ngIf="entity.device?.plugged == false"
          src="../../../../assets/icon/unplugged.svg"
          alt="unplugged"
          style="position: absolute; top: 10px; right: 10px; width: 40px; height: auto; padding: 0 5px;"
@@ -46,7 +46,7 @@ import {ProgressSpinner} from "primeng/progressspinner";
           </div>
           <div class="p-field">
             <label><strong>Dernière communication:</strong></label>
-            <span>{{ entity.device.lastCommunicationDate | date:'short' }}</span>
+            <span>{{ entity.device?.lastCommunicationDate | date:'short' }}</span>
           </div>
         </p-tabPanel>
 
@@ -239,8 +239,8 @@ export class VehiclePopupComponent implements OnInit {
 
   loadNearbyPOIs() {
     this.loadingNearbyPOIs = true;
-    const latitude = this.entity.device.coordinate?.coordinates[1] ?? 0.0;
-    const longitude = this.entity.device.coordinate?.coordinates[0] ?? 0.0;
+    const latitude = this.entity.device?.coordinate?.coordinates[1] ?? 0.0;
+    const longitude = this.entity.device?.coordinate?.coordinates[0] ?? 0.0;
     this.poiService.getNearestPOIsWithDistance(latitude, longitude, 3).subscribe({
       next: (response) => {
         this.nearbyPOIs = response.map((pair: any) => {
@@ -286,8 +286,8 @@ export class VehiclePopupComponent implements OnInit {
     this.layerEvent.emit({
       type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
       payload: {
-        lat: this.entity.device.coordinate?.coordinates[1] ?? 0.0,
-        lng: this.entity.device.coordinate?.coordinates[0] ?? 0.0,
+        lat: this.entity.device?.coordinate?.coordinates[1] ?? 0.0,
+        lng: this.entity.device?.coordinate?.coordinates[0] ?? 0.0,
       }
     });
   }

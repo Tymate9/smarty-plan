@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {AutocompleteFormInput, FormInput, IFormInput} from "../iform-input";
 import {TeamValidator} from "./team-validator";
-import {TeamService} from "../../../../features/vehicle/team.service";
-import {dto} from "../../../../../habarta/dto";
+import {TeamService} from "../../../features/vehicle/team.service";
+import {dto} from "../../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import {IFormDescription} from "../iform-description";
 import {FormGroup} from "@angular/forms";
@@ -10,7 +10,7 @@ import {FormDescription} from "../form-description";
 import {forkJoin} from "rxjs";
 import {EntityFormComponent} from "../entity-form/entity-form.component";
 import {NgIf} from "@angular/common";
-import {NotificationService} from "../../../notification/notification.service";
+import {NotificationService} from "../../../commons/notification/notification.service";
 
 @Component({
   selector: 'app-team-form',

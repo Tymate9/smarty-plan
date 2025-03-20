@@ -119,7 +119,7 @@ class VehicleResource(
     fun getNonGeolocVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<VehicleSummaryDTO> {
         val vehiclesList = vehicleService.getVehiclesList(agencyIds)
         val transformedList = vehiclesList.map { vehicle ->
-            vehicle.copy(device = vehicle.device.copy(coordinate = null))
+            vehicle.copy(device = vehicle.device?.copy(coordinate = null))
         }
         return transformedList
     }

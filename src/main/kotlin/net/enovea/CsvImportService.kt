@@ -211,7 +211,6 @@ class CsvImportService(
         }
     }
 
-    // Exemple d'utilisation dans la fonction attemptCreatePoi
     @Transactional
     fun attemptCreatePoi(
         clientCode: String,
@@ -237,6 +236,4 @@ class CsvImportService(
         poiEntity.persistAndFlush()
         return poiEntity
     }
-
-
 }

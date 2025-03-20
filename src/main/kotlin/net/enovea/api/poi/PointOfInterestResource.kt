@@ -27,7 +27,6 @@ class PointOfInterestResource (
     @Path("/import")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
     @RolesAllowed("admin")
     fun importPoi(csvBytes: ByteArray): Response {
         try {

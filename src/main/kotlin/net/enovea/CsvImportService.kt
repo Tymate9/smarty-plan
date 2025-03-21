@@ -89,7 +89,8 @@ class CsvImportService(
                 return ImportResult(
                     record.recordNumber,
                     ImportStatusEnum.Error,
-                    "Label type '$labelTypeCsv' inexistant pour la ligne ${record.recordNumber}"
+                    "Label type '$labelTypeCsv' inexistant pour la ligne ${record.recordNumber}. " +
+                            "[client_code: $clientCode, client_label: $clientLabel, address: ${if(record.get("address").isNullOrBlank()) "address est null" else record.get("address")}, zip_code: ${if(record.get("zip_code").isNullOrBlank()) "zip_code est null" else record.get("zip_code")}, city: ${if(record.get("city").isNullOrBlank()) "city est null" else record.get("city")}]"
                 )
             }
 
@@ -107,6 +108,11 @@ class CsvImportService(
                 if (lat != null && lon != null) geometryFactory.createPoint(Coordinate(lon, lat)) else null
             } else null
 
+            // Construction de la chaîne d'adresse complète à utiliser dans les messages
+            val completeAddress = "${if(address.isNullOrBlank()) "address est null" else address}, " +
+                    "${if(zipCode.isNullOrBlank()) "zip_code est null" else zipCode}, " +
+                    if(city.isNullOrBlank()) "city est null" else city
+
             // Détermination des coordonnées et de l'adresse finale
             val (finalPoint, finalAddress) = if (point != null) {
                 val resolvedAddress = try {
@@ -115,33 +121,39 @@ class CsvImportService(
                     return ImportResult(
                         record.recordNumber,
                         ImportStatusEnum.Skipped,
-                        "Skipped line ${record.recordNumber}: Error during reverse geocoding: ${ex.message}"
+                        "Skipped line ${record.recordNumber}: Error during reverse geocoding: ${ex.message}. " +
+                                "[client_code: $clientCode, client_label: $clientLabel, address: $completeAddress]"
                     )
                 }
                 if (resolvedAddress == null) {
                     return ImportResult(
                         record.recordNumber,
                         ImportStatusEnum.Error,
-                        "Erreur de géocodage inverse pour la ligne ${record.recordNumber}"
+                        "Erreur de géocodage inverse pour la ligne ${record.recordNumber}. " +
+                                "[client_code: $clientCode, client_label: $clientLabel, address: $completeAddress]"
                     )
                 }
                 Pair(point, resolvedAddress)
             } else if (address.isNotBlank() && zipCode.isNotBlank() && city.isNotBlank()) {
-                val fullAddress = "$address, $zipCode, $city"
+                val fullAddress = "${if(address.isNullOrBlank()) "address est null" else address}, " +
+                        "${if(zipCode.isNullOrBlank()) "zip_code est null" else zipCode}, " +
+                        if(city.isNullOrBlank()) "city est null" else city
                 val geoResponse = try {
                     geoSpatialService.geocode(fullAddress)
                 } catch (ex: Exception) {
                     return ImportResult(
                         record.recordNumber,
                         ImportStatusEnum.Skipped,
-                        "Skipped line ${record.recordNumber}: Error during geocoding: ${ex.message}"
+                        "Skipped line ${record.recordNumber}: Error during geocoding: ${ex.message}. " +
+                                "[client_code: $clientCode, client_label: $clientLabel, address: $fullAddress]"
                     )
                 }
                 if (geoResponse == null) {
                     return ImportResult(
                         record.recordNumber,
                         ImportStatusEnum.Error,
-                        "Unable to geocode address for line ${record.recordNumber}"
+                        "Unable to geocode address for line ${record.recordNumber}. " +
+                                "[client_code: $clientCode, client_label: $clientLabel, address: $fullAddress]"
                     )
                 }
                 Pair(geoResponse.coordinate, geoResponse.adresse)
@@ -149,7 +161,8 @@ class CsvImportService(
                 return ImportResult(
                     record.recordNumber,
                     ImportStatusEnum.Error,
-                    "Insufficient data for line ${record.recordNumber} (missing coordinates and/or address details)"
+                    "Insufficient data for line ${record.recordNumber} (missing coordinates and/or address details). " +
+                            "[client_code: $clientCode, client_label: $clientLabel, address: $completeAddress]"
                 )
             }
 
@@ -166,7 +179,8 @@ class CsvImportService(
                 ImportResult(
                     record.recordNumber,
                     ImportStatusEnum.Ok,
-                    "Successfully imported line ${record.recordNumber}"
+                    "Successfully imported line ${record.recordNumber}. " +
+                            "[client_code: $clientCode, client_label: $clientLabel, address: $finalAddress]"
                 )
             } catch (ex: Exception) {
                 // Parcourir la chaîne des causes pour identifier une contrainte d'unicité
@@ -178,10 +192,8 @@ class CsvImportService(
                         messageToReturn = when {
                             errorMsg.contains("unique_client_code", ignoreCase = true) ->
                                 "Le code client existe déjà."
-
                             errorMsg.contains("unique_client_label", ignoreCase = true) ->
                                 "Le libellé client existe déjà."
-
                             else -> "ConstraintViolationException survenu."
                         }
                         break
@@ -192,13 +204,15 @@ class CsvImportService(
                     ImportResult(
                         record.recordNumber,
                         ImportStatusEnum.Skipped,
-                        "Skipped line ${record.recordNumber}: $messageToReturn"
+                        "Skipped line ${record.recordNumber}: $messageToReturn " +
+                                "[client_code: $clientCode, client_label: $clientLabel, address: $finalAddress]"
                     )
                 } else {
                     ImportResult(
                         record.recordNumber,
                         ImportStatusEnum.Error,
-                        "Internal Error creating POI on line ${record.recordNumber}: ${ex.message}"
+                        "Internal Error creating POI on line ${record.recordNumber}: ${ex.message} " +
+                                "[client_code: $clientCode, client_label: $clientLabel, address: $finalAddress]"
                     )
                 }
             }

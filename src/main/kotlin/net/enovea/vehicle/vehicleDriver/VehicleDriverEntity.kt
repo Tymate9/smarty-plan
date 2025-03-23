@@ -44,6 +44,9 @@ data class VehicleDriverEntity (
         const val ENTITY_NAME = "VehicleDriverEntity"
         const val TABLE_NAME = "vehicle_driver"
 
+        override fun targetIdPath(): String = "vehicle.id"
+        override fun subjectIdPath(): String = "driver.id"
+
         override fun createFromForm(form: AffectationForm): VehicleDriverEntity {
             return VehicleDriverEntity(
                 id = createIdFromForm(form),

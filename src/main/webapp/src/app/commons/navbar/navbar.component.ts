@@ -377,7 +377,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       forkJoin({
         agencies: this.teamService.getAgencies(),
         vehicles: this.vehicleService.getVehiclesList(),
-        drivers: this.driverService.getDrivers()
+        drivers: this.driverService.getAffectedDrivers()
       }).subscribe(({agencies, vehicles, drivers}) => {
 
         // Traitement des agences
@@ -438,7 +438,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           .map(vehicle => vehicle.licenseplate || '');
       });
 
-      this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
+      this.driverService.getAffectedDrivers(this.agencySelected).subscribe((filteredDrivers) => {
         this.filteredDriverOptions = filteredDrivers
           .sort((a, b) => {
             const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
@@ -460,11 +460,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   }
 
+
+  //TODO(Travailler sur la nullité des team et des vehicle)
   removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
     // Obtenir tous les IDs d'agences à supprimer (y compris les enfants)
     let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
     const vehiclesToRemove = this.vehicleOptions
-      .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
+      .filter(vehicle => agenciesToRemove.includes(vehicle.team!!.label))
       .map(vehicle => vehicle.licenseplate);
 
     this.vehicleSelected = this.vehicleSelected.filter(
@@ -555,7 +557,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       });
 
       // Filtrer les conducteurs
-      this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
+      this.driverService.getAffectedDrivers(this.agencySelected).subscribe((filteredDrivers) => {
         this.filteredDriverOptions = filteredDrivers
           .sort((a, b) => {
             const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');

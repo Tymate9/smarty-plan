@@ -10,41 +10,74 @@ import { FormDescription } from '../form-description';
 import { FormInput } from '../iform-input';
 import { NotificationService } from '../../../commons/notification/notification.service';
 import {DriverValidator} from "./driver-validator";
+import {TabPanel, TabView} from "primeng/tabview";
+import {AffectationFormComponent} from "../../affectation-form/affectation-form.component";
+import {DriverTeamAffectationService} from "../../service/affectation.service";
+import {TeamService} from "../../../features/vehicle/team.service";
+import {teamOptionExtractor} from "../../../../../../kotlin/net/enovea/workInProgress/vehicleCRUD/OptionDTOExtractor";
+import DriverForm = dto.DriverForm;
 
 @Component({
   selector: 'app-driver-form',
   standalone: true,
   imports: [
     EntityFormComponent,
-    NgIf
+    NgIf,
+    TabPanel,
+    TabView,
+    AffectationFormComponent
   ],
   template: `
     <h2>Driver Form</h2>
-    <app-entity-form
-      *ngIf="formDescription"
-      [formDescription]="formDescription"
-      [entityService]="driverService"
-      [entity]="driverEntity"
-      [mode]="mode"
-      (receiveResponse)="handleResponse($event)"
-    ></app-entity-form>
+    <p-tabView>
+      <!-- Onglet 1 : Détails du driver -->
+      <p-tabPanel header="Détails du driver">
+        <app-entity-form
+          *ngIf="formDescription"
+          [formDescription]="formDescription"
+          [entityService]="driverService"
+          [entity]="driverEntity"
+          [mode]="mode"
+          (receiveResponse)="handleResponse($event)"
+        ></app-entity-form>
+      </p-tabPanel>
+
+      <!-- Onglet 2 : Affectation - Équipe affectée (uniquement en mode update) -->
+      <p-tabPanel header="Affectation - Équipe affectée" [disabled]="mode === 'create'">
+        <app-affectation-form
+          [title]="'Affectation - Équipe affectée'"
+          [subjectId]="driverEntity?.id"
+          [affectationService]="driverTeamAffectationService"
+          [optionService]="teamService"
+          [mainEntityRole]="'subject'"
+          [optionExtractor]="teamOptionExtractor"
+        ></app-affectation-form>
+      </p-tabPanel>
+
+      <!-- Onglet 3 : Période de non géolocalisation (uniquement en mode update) -->
+      <p-tabPanel header="Période de non géolocalisation" [disabled]="mode === 'create'">
+        <p>Contenu pour la période de non géolocalisation.</p>
+      </p-tabPanel>
+    </p-tabView>
   `
 })
 export class DriverFormComponent implements OnInit {
   @Input() manageNotifications: boolean = true;
+  @Input() driverId?: number;
 
   @Output() entityCreated = new EventEmitter<DriverDTO>();
   @Output() entityUpdated = new EventEmitter<DriverDTO>();
   @Output() errorInRequest = new EventEmitter<any>();
 
-  driverId?: number;
   public driverEntity?: DriverDTO;
   public formDescription!: IFormDescription;
   public mode: 'create' | 'update' = 'create';
 
   constructor(
     public driverService: DriverService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public driverTeamAffectationService: DriverTeamAffectationService,
+    public teamService: TeamService
   ) {}
 
   ngOnInit(): void {
@@ -65,10 +98,7 @@ export class DriverFormComponent implements OnInit {
       error: (err) => {
         console.error('Erreur chargement driver', err);
         if (this.manageNotifications) {
-          this.notificationService.error(
-            'Erreur de chargement',
-            'Impossible de charger le driver.'
-          );
+          this.notificationService.error('Erreur de chargement', 'Impossible de charger le driver.');
         }
       }
     });
@@ -88,7 +118,6 @@ export class DriverFormComponent implements OnInit {
   }
 
   private buildFormDescription(driverDto: DriverDTO): void {
-    // Construction des inputs pour le formulaire Driver
     const inputs = [
       new FormInput(
         'first_name',
@@ -119,21 +148,20 @@ export class DriverFormComponent implements OnInit {
       )
     ];
 
-    // Fonction de transformation pour préparer l'objet Driver avant envoi
     const transformFunction = (rawEntity: any) => {
       return {
         id: rawEntity.id,
-        first_name: rawEntity.first_name,
-        last_name: rawEntity.last_name,
-        phone_number: rawEntity.phone_number
-      };
+        firstName: rawEntity.first_name,
+        lastName: rawEntity.last_name,
+        phoneNumber: rawEntity.phone_number
+      } as DriverForm;
     };
 
     this.formDescription = new FormDescription(
       'Création / Mise à jour du Driver',
       inputs,
-      undefined,  // Aucun validateur global pour le formulaire n'est nécessaire ici
-      [],         // Pas de dépendances particulières pour ces champs
+      undefined, // Aucun validateur global nécessaire ici
+      [],        // Pas de dépendances particulières
       transformFunction
     );
   }
@@ -148,6 +176,7 @@ export class DriverFormComponent implements OnInit {
           );
         }
         this.entityCreated.emit(response);
+        // Passage en mode update après création
         this.mode = 'update';
         this.driverEntity = response;
         this.buildFormDescription(response);
@@ -170,4 +199,6 @@ export class DriverFormComponent implements OnInit {
       this.errorInRequest.emit(response.error);
     }
   }
+
+  protected readonly teamOptionExtractor = teamOptionExtractor;
 }

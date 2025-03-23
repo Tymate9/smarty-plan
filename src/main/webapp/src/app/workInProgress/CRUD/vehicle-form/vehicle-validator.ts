@@ -2,25 +2,6 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export class VehicleValidator {
   /**
-   * Valide que l'id, s'il est renseigné, correspond à un UUID valide.
-   * Contrôle uniquement si la valeur est non vide.
-   */
-  static validId(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value;
-      // Facultatif : null ou chaîne vide sont acceptés
-      if (!value || value.trim() === '') {
-        return null;
-      }
-      const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-      if (!uuidRegex.test(value)) {
-        return { invalidUUID: "L'identifiant doit être un UUID valide." };
-      }
-      return null;
-    };
-  }
-
-  /**
    * Valide que le champ 'energy' comporte entre 1 et 255 caractères.
    * Facultatif : null ou chaîne vide sont acceptés.
    */

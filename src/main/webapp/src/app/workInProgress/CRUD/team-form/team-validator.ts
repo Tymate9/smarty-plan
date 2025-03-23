@@ -1,11 +1,6 @@
 import {AbstractControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
 
 export class TeamValidator {
-  /**
-   * Vérifie les contraintes entre le champ "category" et "parent_id".
-   * Par exemple, si la catégorie est "Agence", parent_id doit être null,
-   * sinon parent_id doit être renseigné.
-   */
   static checkCategoryParentConstraint(): ValidatorFn {
     return (group: AbstractControl): ValidationErrors | null => {
       if (!(group instanceof FormGroup)) {
@@ -44,10 +39,6 @@ export class TeamValidator {
     };
   }
 
-  /**
-   * Valide qu'une valeur autocomplete n'est pas nulle et qu'elle figure dans la liste des options.
-   * @param options Liste des options valides pour le champ autocomplete.
-   */
   static requiredAutocomplete(options: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
@@ -64,27 +55,4 @@ export class TeamValidator {
     };
   }
 
-  /**
-   * Validator simple pour vérifier qu'une valeur autocomplete n'est pas nulle.
-   */
-  static requiredValue(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      return control.value ? null : { requiredValue: 'Ce champ est obligatoire.' };
-    };
-  }
-
-  /**
-   * Validator pour vérifier si la valeur figure dans une liste d'options.
-   * Nécessite la liste des options et une fonction de comparaison.
-   */
-  static valueInList(options: any[], compareFn?: (opt: any, value: any) => boolean): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value;
-      if (!value) {
-        return null;
-      }
-      const isValid = options.some(opt => compareFn ? compareFn(opt, value) : opt.id === value.id);
-      return isValid ? null : { invalidOption: 'La valeur sélectionnée n\'est pas dans la liste.' };
-    };
-  }
 }

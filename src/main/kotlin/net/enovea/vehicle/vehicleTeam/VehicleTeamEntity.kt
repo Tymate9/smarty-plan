@@ -54,6 +54,9 @@ data class VehicleTeamEntity (
         const val ENTITY_NAME = "VehicleTeamEntity"
         const val TABLE_NAME = "vehicle_team"
 
+        override fun subjectIdPath(): String = "vehicle.id"
+        override fun targetIdPath(): String = "team.id"
+
         @Inject
         lateinit var teamMapper: TeamMapper
 

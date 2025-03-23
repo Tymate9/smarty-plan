@@ -93,7 +93,7 @@ import {Select} from "primeng/select";
                 <strong>{{ vehicle.licenseplate }}</strong> - {{ vehicle.category.label }}
               </div>
               <div>
-                Équipe: {{ vehicle.team.label }} ({{ vehicle.team.category.label }})
+                Équipe: {{ vehicle.team?.label }} ({{ vehicle.team?.category?.label }})
               </div>
               <div>
                 Dernière communication: {{ vehicle.device?.lastCommunicationDate | date:'short' }}
@@ -144,7 +144,7 @@ import {Select} from "primeng/select";
                   </p-select>
                 </div>
                 <small
-                  *ngIf="!poiForm.form.controls['category']?.valid && poiForm.form.controls['category']?.touched"
+                  *ngIf="!poiForm.form.controls['category']?.valid && poiForm.form.controls['category']?.get('touched')"
                   class="error-message"
                 >
                   Veuillez sélectionner une catégorie.
@@ -183,7 +183,6 @@ import {Select} from "primeng/select";
   `,
   standalone: true,
   imports: [
-    ButtonDirective,
     NgIf,
     FormsModule,
     NgForOf,

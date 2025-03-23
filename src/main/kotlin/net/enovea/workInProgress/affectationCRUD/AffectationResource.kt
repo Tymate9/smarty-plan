@@ -3,6 +3,7 @@ package net.enovea.workInProgress.affectationCRUD
 import com.fasterxml.jackson.annotation.JsonValue
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.security.Authenticated
+import jakarta.enterprise.context.RequestScoped
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.ws.rs.*
@@ -110,18 +111,23 @@ sealed class AffectationType< E, ID : Any, S : PanacheEntityBase, T : PanacheEnt
 }
 
 
+
+// TODO(Vérifier la gestion de la portée de cette ressource.
+//  @RequestScoped devrait être l'implémentation par défaut, mais avant d'ajouter cette annotation,
+//  de nombreuses erreurs liées à l'écrasement de la variable 'type' ont été rencontrées.)
 @Path("/api/affectations/{type}")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Authenticated
+@RequestScoped
 class AffectationResource (
     private val affectationService: AffectationService,
     private val validator: Validator
 ) : ICRUDResource<AffectationForm, AffectationDTO<*,*>, String> {
 
-    // Injection du paramètre de chemin "type" comme attribut de classe
+
     @PathParam("type")
-    lateinit var type: String
+    private lateinit var type: String
 
     @GET
     @Path("/{id}")
@@ -287,6 +293,64 @@ class AffectationResource (
             convertedId         // ID
         )
         return Response.ok(deletedAffectation).build()
+    }
+
+    @GET
+    @Path("/list/subject")
+    fun listBySubject(@QueryParam("subjectId") subjectId: String?): Response {
+        println("le type de la requête : $type")
+        if (subjectId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Le paramètre subjectId est requis")
+                .build()
+        }
+
+        val rawType = AffectationType.fromString(type)
+            ?: run {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Type d'affectation inconnu : $type")
+                    .build()
+            }
+
+        @Suppress("UNCHECKED_CAST")
+        val typed = rawType as AffectationType<
+                IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, Any>,
+                Any,
+                PanacheEntityBase,
+                PanacheEntityBase
+                >
+
+        val affectations = affectationService.listBySubject(typed.entityClass, subjectId)
+        return Response.ok(affectations).build()
+    }
+
+    @GET
+    @Path("/list/target")
+    fun listByTarget(@QueryParam("targetId") targetId: String?): Response {
+        println("le type de la requête : $type")
+        if (targetId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Le paramètre targetId est requis")
+                .build()
+        }
+
+        val rawType = AffectationType.fromString(type)
+            ?: run {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Type d'affectation inconnu : $type")
+                    .build()
+            }
+
+        @Suppress("UNCHECKED_CAST")
+        val typed = rawType as AffectationType<
+                IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, Any>,
+                Any,
+                PanacheEntityBase,
+                PanacheEntityBase
+                >
+
+        val affectations = affectationService.listByTarget(typed.entityClass, targetId)
+        return Response.ok(affectations).build()
     }
 
     private fun convertId(id: String, idClass: KClass<*>): Any {

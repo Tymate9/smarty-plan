@@ -20,9 +20,15 @@ class DriverResource(
     private val teamService: TeamService,
     private val validator: Validator ) : ICRUDResource<DriverForm, DriverDTO, Int> {
 
+    @GET
+    fun getDrivers(): Response {
+        val drivers = driverService.getAllDrivers()
+        return Response.ok(drivers).build()
+    }
 
     @GET
-    fun getDrivers(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<DriverDTO> {
+    @Path("/affected")
+    fun getAffectedDrivers(@QueryParam("agencyIds") agencyIds: List<String>? = null): List<DriverDTO> {
         return driverService.getDrivers(agencyIds)
     }
 

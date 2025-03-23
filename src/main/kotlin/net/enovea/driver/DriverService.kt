@@ -64,6 +64,11 @@ class DriverService(
     }
 
     @Transactional
+    fun getAllDrivers(): List<DriverDTO> {
+        return DriverEntity.findAll().list().map { driverMapper.toDto(it) }
+    }
+
+    @Transactional
     fun getDrivers(agencyIds: List<String>?): List<DriverDTO> {
 
         val params = mutableMapOf<String, Any>()

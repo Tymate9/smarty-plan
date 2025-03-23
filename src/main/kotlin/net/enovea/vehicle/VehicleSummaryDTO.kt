@@ -15,7 +15,7 @@ data class VehicleSummaryDTO (
     val category: VehicleCategoryDTO,
     val driver: DriverDTO?,
     val device: DeviceSummaryDTO?,
-    val team: TeamSummaryDTO,
+    val team: TeamSummaryDTO?,
     override var ranges: List<Range<VehicleSummaryDTO>>? = null,
     override var lastPositionDate: Timestamp? = null
 ) : RangedDTO<VehicleSummaryDTO>

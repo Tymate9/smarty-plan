@@ -25,19 +25,12 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
   constructor(private http: HttpClient,
               private messageService: MessageService) {}
 
-  getDrivers(agencyIds: string[] | null = null ): Observable<DriverDTO[]> {
+  getAffectedDrivers(agencyIds: string[] | null = null): Observable<DriverDTO[]> {
     const params = {
       agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
     };
-    return this.http.get<DriverDTO[]>(`${this.baseUrl}`, { params });
+    return this.http.get<DriverDTO[]>(`${this.baseUrl}/affected`, { params });
   }
-
-  /**
-   * getAuthorizedData()
-   * Ici, on peut soit appeler un endpoint dédié (ex. GET /api/drivers/authorized-data),
-   * soit réutiliser la méthode getDrivers() qui prend des agencyIds en param.
-   * Tout dépend de ta logique d’autorisation ou de filtrage.
-   */
 
   getAuthorizedData(): Observable<dto.DriverDTO[]> {
     return this.http.get<dto.DriverDTO[]>(`${this.baseUrl}`)
@@ -49,26 +42,14 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
 
   //Implémentation des méthodes du composant IEntityService
 
-  /**
-   * getById
-   * Récupère un driver par son id.
-   */
   getById(id: number): Observable<DriverDTO> {
     return this.http.get<DriverDTO>(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * create
-   * Crée un nouveau driver à partir d’un DriverForm.
-   */
   create(entity: DriverForm): Observable<DriverDTO> {
     return this.http.post<DriverDTO>(this.baseUrl, entity);
   }
 
-  /**
-   * update
-   * Met à jour un driver existant (driverForm.id doit être défini).
-   */
   update(entity: DriverForm): Observable<DriverDTO> {
     if (entity.id == null) {
       this.messageService.add({
@@ -81,37 +62,18 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
     return this.http.put<DriverDTO>(`${this.baseUrl}/${entity.id}`, entity);
   }
 
-  /**
-   * delete
-   * Supprime un driver existant par son id.
-   */
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * getCount
-   * Récupère le nombre total de drivers (si tu as un endpoint GET /api/drivers/count).
-   * Sinon, tu peux retourner un Observable “stub” (of(0)) ou lever une erreur.
-   */
   getCount(): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/count`)
   }
 
-  /**
-   * getStats
-   * Récupère des stats sur les drivers (ex. /api/drivers/stats).
-   */
   getStats(): Observable<dto.StatsDTO> {
     return this.http.get<dto.StatsDTO>(`${this.baseUrl}/stats`)
   }
 
-  /**
-   * getTreeColumns
-   * Méthode pouvant renvoyer la configuration de colonnes
-   * si tu affiches tes Drivers dans un composant TreeTable ou similaire.
-   * Ici, on renvoie un "stub".
-   */
   getTreeColumns(): Observable<EntityColumn[]> {
     return of([
       {

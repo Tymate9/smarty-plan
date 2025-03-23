@@ -16,10 +16,10 @@ import VehicleDTO = dto.VehicleDTO;
 @Injectable({
   providedIn: 'root'
 })
-export class AffectationService<S, T> implements IEntityService<AffectationDTO<S, T>, AffectationForm> {
+export abstract class AffectationService<S, T> implements IEntityService<AffectationDTO<S, T>, AffectationForm> {
   protected baseUrl: string = '/api/affectations';
 
-  constructor(protected readonly http: HttpClient) {}
+  protected constructor(protected readonly http: HttpClient) {}
 
   getById(id: string): Observable<AffectationDTO<S, T>> {
     return this.http.get<AffectationDTO<S, T>>(`${this.baseUrl}/${id}`);
@@ -59,6 +59,16 @@ export class AffectationService<S, T> implements IEntityService<AffectationDTO<S
 
   getTreeNodes(): Observable<any[]> {
     return of([]);
+  }
+
+  // Nouvelle méthode pour récupérer les affectations filtrées par subject
+  listBySubject(subjectId: string): Observable<AffectationDTO<S, T>[]> {
+    return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list/subject`, { params: { subjectId } });
+  }
+
+  // Nouvelle méthode pour récupérer les affectations filtrées par target
+  listByTarget(targetId: string): Observable<AffectationDTO<S, T>[]> {
+    return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list/target`, { params: { targetId } });
   }
 }
 

@@ -67,8 +67,8 @@ import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-
       </div>
 
       <div *ngIf="entityForm.errors">
-        <span class="global-error" *ngIf="entityForm.errors['categoryParentConstraint']">
-            {{ entityForm?.errors?.['categoryParentConstraint'] || " " }}
+        <span class="global-error" *ngFor="let errorKey of getGroupErrorKeys()">
+            {{ entityForm.errors[errorKey] }}
         </span>
       </div>
 
@@ -194,6 +194,9 @@ export class EntityFormComponent implements OnInit, OnChanges {
         }
       }
 
+      // Ajout du log pour vérifier le payload
+      console.log('Payload envoyé:', finalEntity);
+
       if (this.entityService) {
         //console.log("finalEntity \n", finalEntity)
         const request = this.mode === 'update'
@@ -213,5 +216,11 @@ export class EntityFormComponent implements OnInit, OnChanges {
   }
 
   public onOptionSelected(event: any) {
+  }
+
+  public getGroupErrorKeys(): string[] {
+    return this.entityForm && this.entityForm.errors
+      ? Object.keys(this.entityForm.errors)
+      : [];
   }
 }

@@ -1,7 +1,6 @@
 package net.enovea.workInProgress.affectationCRUD
 
 
-import io.quarkus.hibernate.orm.panache.Panache
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import jakarta.transaction.Transactional
@@ -75,12 +74,45 @@ open class AffectationService(
         }
     }
 
+    fun <E, ID : Any> listBySubject(entityClass: KClass<E>, subjectId: Any): List<AffectationDTO<*, *>>
+            where E : IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, ID> {
+        println("listBySubject: entityClass=${entityClass.simpleName}, subjectId=$subjectId")
+        @Suppress("UNCHECKED_CAST")
+        val companion = extractPanacheCompanion(entityClass) as PanacheCompanionBase<E, ID>
+        val factory = extractAffectationFactoryCompanion(entityClass)
+        val subjectPath = factory.subjectIdPath()
+
+        println("Using subjectPath: $subjectPath")
+
+        println("listBySubject: entityClass=${entityClass.simpleName}, subjectPath=$subjectPath, subjectId=$subjectId")
+
+        val entities: List<E> = companion.find(subjectPath, subjectId).list()
+
+        println("listBySubject: found ${entities.size} entities")
+
+        return entities.map { affectationMapper.toDTO(it) }
+    }
+
+    fun <E, ID : Any> listByTarget(entityClass: KClass<E>, targetId: Any): List<AffectationDTO<*, *>>
+            where E : IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, ID> {
+        println("listByTarget: entityClass=${entityClass.simpleName}, targetId=$targetId")
+        @Suppress("UNCHECKED_CAST")
+        val companion = extractPanacheCompanion(entityClass) as PanacheCompanionBase<E, ID>
+        val factory = extractAffectationFactoryCompanion(entityClass)
+        val targetPath = factory.targetIdPath()
+        println("Using targetPath: $targetPath")
+        println("listByTarget: entityClass=${entityClass.simpleName}, targetPath=$targetPath, targetId=$targetId")
+
+        val entities: List<E> = companion.find(targetPath, targetId).list()
+
+        println("listByTarget: found ${entities.size} entities")
+
+        return entities.map { affectationMapper.toDTO(it) }
+    }
+
     // Fonction delete générique
     @Transactional
-    fun <E, ID : Any> delete(
-        entityClass: KClass<E>,
-        id: ID
-    ): AffectationDTO<*, *>
+    fun <E, ID : Any> delete( entityClass: KClass<E>, id: ID): AffectationDTO<*, *>
             where E : IAffectationPanacheEntity<PanacheEntityBase, PanacheEntityBase, ID>
     {
         // 1) Extraction du companion

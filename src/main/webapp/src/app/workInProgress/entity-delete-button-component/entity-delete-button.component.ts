@@ -12,8 +12,7 @@ import {Button} from "primeng/button";
   standalone: true,
   imports: [CommonModule, Button],
   template: `
-    <p-button type="button" (click)="onDelete()">
-      {{ label }}
+    <p-button [ariaLabel]="label" type="button" (click)="onDelete()" icon="pi pi-trash">
     </p-button>
   `
 })

@@ -8,4 +8,6 @@ interface IAffectationFactory<T, ID>
 {
     fun createFromForm(form: AffectationForm): T
     fun createIdFromForm(form : AffectationForm): ID
+    fun subjectIdPath(): String
+    fun targetIdPath(): String
 }

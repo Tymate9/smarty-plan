@@ -38,7 +38,7 @@ import {ProgressSpinner} from "primeng/progressspinner";
           </div>
           <div class="p-field">
             <label><strong>Équipe:</strong></label>
-            <span>{{ entity.team.label }}</span>
+            <span>{{ entity.team?.label }}</span>
           </div>
           <div class="p-field">
             <label><strong>Catégorie:</strong></label>

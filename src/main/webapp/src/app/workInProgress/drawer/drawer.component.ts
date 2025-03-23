@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { PrimeTemplate } from 'primeng/api';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { NgIf } from '@angular/common';
+import {NgClass, NgIf} from '@angular/common';
 import { Drawer } from 'primeng/drawer';
 import { DrawerService } from "../service/component/drawer.service";
 
@@ -39,7 +39,8 @@ export interface DrawerOptions {
   imports: [
     PrimeTemplate,
     NgIf,
-    Drawer
+    Drawer,
+    NgClass
   ],
   providers: [
     MessageService
@@ -55,7 +56,7 @@ export interface DrawerOptions {
       [closable]="false"
       (onShow)="onSidebarShow()"
       (onHide)="onTryClose()"
-      [styleClass]="styleClass"
+      styleClass="dynamic-size-drawer"
     >
     <!-- Header -->
     <ng-template pTemplate="header">
@@ -101,13 +102,9 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
 
   /** Propriétés de configuration du Drawer */
   @Input() headerTitle: string = 'Titre du Drawer';
-  @Input() styleClass: string = '';
+  @Input() styleClass: string = 'dynamic-drawer';
   @Input() position: 'left' | 'right' | 'top' | 'bottom' = 'right';
 
-  /**
-   * Si tu souhaites toujours afficher un bouton close en haut,
-   * tu pourrais le faire via un Input, ex. showCloseIcon: boolean.
-   */
   @Input() closeConfirmationMessage?: string;
 
   /**
@@ -201,7 +198,6 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
 
   /**
    * Ferme le Drawer (sans confirmation).
-   * Si tu veux un "forçage" de fermeture, tu peux l'appeler directement.
    */
   public closeDrawer(): void {
     this.visible = false;

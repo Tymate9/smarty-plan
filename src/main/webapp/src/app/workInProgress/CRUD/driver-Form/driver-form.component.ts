@@ -46,7 +46,7 @@ import DriverForm = dto.DriverForm;
       <p-tabPanel header="Affectation - Équipe affectée" [disabled]="mode === 'create'">
         <app-affectation-form
           [title]="'Affectation - Équipe affectée'"
-          [subjectId]="driverEntity?.id"
+          [subjectId]="driverId"
           [affectationService]="driverTeamAffectationService"
           [optionService]="teamService"
           [mainEntityRole]="'subject'"

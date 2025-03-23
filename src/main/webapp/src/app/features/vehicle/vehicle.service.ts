@@ -14,6 +14,7 @@ import GenericNodeDTO = dto.GenericNodeDTO;
 import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import {VehicleFormComponent} from "../../workInProgress/CRUD/vehicle-form/vehicle-form.component";
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -385,7 +386,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
                 headerTitle: 'Édition du véhicule',
                 closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
                 child: {
-                  compClass: TeamFormComponent,
+                  compClass: VehicleFormComponent,
                   inputs: { vehicleId: vehicle.id }
                 }
               }
@@ -396,7 +397,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
             inputs: {
               label: 'Supprimer ' + vehicle.licenseplate,
               entityId: vehicle.id,
-              entityService: this, // Adaptation pour vehicleService
+              entityService: this,
               confirmationMessage: 'Voulez-vous vraiment supprimer ce véhicule ?',
               onError: (err: any) => {
                 console.error("Erreur lors de la suppression pour le véhicule", vehicle.id, err);

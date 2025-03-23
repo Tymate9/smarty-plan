@@ -59,11 +59,4 @@ export class EntityAdminTabViewComponent implements OnInit {
     console.log('ngOnInit - service:', this.service);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['service']) {
-      console.log('ngOnChanges - service changed:', changes['service'].currentValue);
-      console.log(this.service)
-    }
-  }
-
 }

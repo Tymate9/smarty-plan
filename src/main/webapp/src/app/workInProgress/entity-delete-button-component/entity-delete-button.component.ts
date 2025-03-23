@@ -41,14 +41,9 @@ export class EntityDeleteButtonComponent {
 
   /**
    * Callback (facultatif) à appeler en cas d'erreur.
-   * On peut aussi imaginer un Output "deleteError" si on veut émettre un événement.
    */
   @Input() onError?: (error: any) => void;
 
-  /**
-   * On peut aussi imaginer un EventEmitter en cas de succès ou d'erreur si tu préfères
-   * un système d'événements Angular plutôt qu'une callback en Input.
-   */
   @Output() deleteSuccess = new EventEmitter<void>();
   @Output() deleteError = new EventEmitter<any>();
 

@@ -9,6 +9,7 @@ import net.enovea.workInProgress.common.Stat
 import net.enovea.workInProgress.common.StatsDTO
 import net.enovea.workInProgress.teamCRUD.TeamForm
 import net.enovea.driver.DriverDTO
+import net.enovea.driver.DriverEntity
 import net.enovea.driver.DriverMapper
 import net.enovea.driver.driverTeam.DriverTeamEntity
 import net.enovea.team.teamCategory.TeamCategoryDTO
@@ -16,14 +17,17 @@ import net.enovea.team.teamCategory.TeamCategoryEntity
 import java.time.LocalDateTime
 import net.enovea.team.teamCategory.TeamCategoryMapper
 import net.enovea.vehicle.VehicleDTO
+import net.enovea.vehicle.VehicleEntity
 import net.enovea.vehicle.VehicleMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import net.enovea.workInProgress.GenericNodeDTO
+import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
 import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
 import org.hibernate.Hibernate
 import java.sql.Timestamp
 import java.time.LocalDate
 import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObject
 
 class TeamService (
     private val teamMapper: TeamMapper,
@@ -31,29 +35,6 @@ class TeamService (
     private val driverMapper: DriverMapper,
     private val vehicleMapper: VehicleMapper
 ) : ICRUDService<TeamForm, TeamDTO, Int> {
-
-    @Transactional
-    fun getDriverTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<DriverDTO>> {
-        return this.buildNodeTreeAtDate(
-            affectationClass = DriverTeamEntity::class,
-            dateParam = dateParam,
-            subjectToDto = { driver, ts ->
-                driverMapper.toDto(driver, ts)
-            }
-        )
-    }
-
-    @Transactional
-    fun getVehicleTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<VehicleDTO>> {
-        return this.buildNodeTreeAtDate(
-            affectationClass = VehicleTeamEntity::class,
-            dateParam = dateParam,
-            subjectToDto = { vehicle, ts ->
-                Hibernate.initialize(vehicle)
-                vehicleMapper.toVehicleDTO(vehicle)
-            }
-        )
-    }
 
     fun getAllTeamCategory() : List<TeamCategoryDTO>{
         val teamCategories = TeamCategoryEntity.listAll()
@@ -64,7 +45,6 @@ class TeamService (
         val teams = TeamEntity.listAll()
         return teams.map { teamMapper.toDto(it) }
     }
-
 
     override fun getById(id: Int): TeamDTO {
         val existingEntity = TeamEntity.findById(id)
@@ -187,47 +167,138 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
     }
 
     @Transactional
+    fun getDriverTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<DriverDTO>> {
+        return this.buildNodeTreeAtDate(
+            affectationClass = DriverTeamEntity::class,
+            subjectEntityName = DriverEntity::class.simpleName!!,
+            dateParam = dateParam,
+            subjectToDto = { driver, ts ->
+                driverMapper.toDto(driver, ts)
+            }
+        )
+    }
+
+    @Transactional
+    fun getVehicleTreeAtDate(dateParam: Timestamp? = null): List<GenericNodeDTO<VehicleDTO>> {
+        return this.buildNodeTreeAtDate(
+            affectationClass = VehicleTeamEntity::class,
+            subjectEntityName = VehicleEntity::class.simpleName!!,
+            dateParam = dateParam,
+            subjectToDto = { vehicle, ts ->
+                Hibernate.initialize(vehicle)
+                vehicleMapper.toVehicleDTO(vehicle)
+            }
+        )
+    }
+
+    @Transactional
     fun <E, S, SDTO, ID: Any> buildNodeTreeAtDate(
-        affectationClass: KClass<E>, dateParam: Timestamp? = null, subjectToDto: (S, Timestamp?) -> SDTO
-    ): List<GenericNodeDTO<SDTO>> where E : IAffectationPanacheEntity<S, TeamEntity, ID> {
-        // 1) Valeur par défaut => date courante à minuit
+        affectationClass: KClass<E>,
+        subjectEntityName: String,
+        dateParam: Timestamp? = null,
+        subjectToDto: (S, Timestamp?) -> SDTO
+    ): List<GenericNodeDTO<SDTO>>
+            where E : IAffectationPanacheEntity<S, TeamEntity, ID> {
+
         val refTimestamp = dateParam ?: Timestamp.valueOf(LocalDate.now().atStartOfDay())
-
-        // 2) Charger tous les TeamEntity en une requête
-        val allTeams = TeamEntity.listAll().map { it as TeamEntity }
-
-        // 3) Charger les entités d’affectation (ex. DriverTeamEntity ou VehicleTeamEntity) actives
-        // Construire dynamiquement la requête JPQL à l'aide de l'EntityManager
         val em: EntityManager = Panache.getEntityManager()
-        // Récupérer le nom de l'entité, par exemple "DriverTeamEntity" ou "VehicleTeamEntity"
-        val entityName = affectationClass.simpleName
-            ?: throw IllegalArgumentException("La classe ${affectationClass} n'a pas de nom simple")
-        val jpql = """
-         SELECT a 
-         FROM $entityName a 
-         WHERE a.id.startDate <= :refDate 
-           AND (a.endDate IS NULL OR a.endDate >= :refDate)
-    """.trimIndent()
-        val query = em.createQuery(jpql, affectationClass.java)
-        query.setParameter("refDate", refTimestamp)
-        val activeAffectations = query.resultList as List<E>
 
-        // 4) Construire Map<teamId, List<SDTO>>
-        val teamIdToSubjects = HashMap<Int, MutableList<SDTO>>()
-        for (aff in activeAffectations) {
-            val teamId = aff.getTarget()?.id ?: continue
-            val subject = aff.getSubject() ?: continue
-            // Convertir le sujet (DriverEntity ou VehicleEntity) en SDTO via la fonction fournie
-            val dto = subjectToDto(subject, refTimestamp)
-            teamIdToSubjects.computeIfAbsent(teamId) { mutableListOf() }.add(dto)
+        // 1/ Récupérer le companion object et son subjectIdPath()
+        val companionObj = affectationClass.companionObject?.objectInstance
+            ?: throw IllegalArgumentException("Aucune companion object trouvée pour $affectationClass")
+
+        if (companionObj !is IAffectationFactory<*, *>) {
+            throw IllegalArgumentException("Le companion object de $affectationClass n'implémente pas IAffectationFactory")
         }
 
-        // 5) Indexer les teams par leur id et repérer les racines (teams sans parent)
+        // subjectIdPath() renvoie par ex. "driver.id", "vehicle.id", etc.
+        val subjectIdPath = companionObj.subjectIdPath()
+
+        // 2/ Récupérer toutes les équipes (TeamEntity)
+        val allTeams = TeamEntity.listAll().map { it as TeamEntity }
+
+        // 3/ Récupérer les affectations actives
+        val entityName = affectationClass.simpleName
+            ?: throw IllegalArgumentException("La classe $affectationClass n'a pas de nom simple")
+
+        val jpqlAffectations = """
+        SELECT a
+        FROM $entityName a
+        WHERE a.id.startDate <= :refDate
+          AND (a.endDate IS NULL OR a.endDate >= :refDate)
+    """.trimIndent()
+
+        val activeQuery = em.createQuery(jpqlAffectations, affectationClass.java)
+        activeQuery.setParameter("refDate", refTimestamp)
+        val activeAffectations = activeQuery.resultList as List<E>
+
+        // 4/ Construire Map<teamId, List<SDTO>> + liste orphelins (initialement vide)
+        val teamIdToSubjects = HashMap<Int, MutableList<SDTO>>()
+        val unassignedSubjects = mutableListOf<SDTO>()
+
+        // On parcourt toutes les affectations actives
+        for (aff in activeAffectations) {
+            val teamId = aff.getTarget()?.id
+            val subject = aff.getSubject() ?: continue
+            val dto = subjectToDto(subject, refTimestamp)
+
+            if (teamId == null) {
+                // => orphelin
+                unassignedSubjects.add(dto)
+            } else {
+                teamIdToSubjects.computeIfAbsent(teamId) { mutableListOf() }.add(dto)
+            }
+        }
+
+        // 5/ Requête pour obtenir les orphelins (sujets jamais affectés)
+        val orphanJpql = """
+        SELECT s
+        FROM $subjectEntityName s
+        WHERE s.id NOT IN (
+            SELECT ${"a.$subjectIdPath"}
+            FROM $entityName a
+            WHERE a.id.startDate <= :refDate
+              AND (a.endDate IS NULL OR a.endDate >= :refDate)
+        )
+    """.trimIndent()
+
+        val orphanQuery = em.createQuery(orphanJpql)
+        orphanQuery.setParameter("refDate", refTimestamp)
+        val orphanSubjects = orphanQuery.resultList as List<S>
+
+        // On convertit ces orphelins en DTO
+        val orphanSubjectsDTO = orphanSubjects.map { s -> subjectToDto(s, refTimestamp) }
+        unassignedSubjects.addAll(orphanSubjectsDTO)
+
+
+        // 6/ Construire l'arbre des équipes
         val idToTeam = allTeams.associateBy { it.id }
         val rootTeams = allTeams.filter { it.parentTeam == null }
 
-        // 6) Construire récursivement l'arbre via la méthode générique
-        return rootTeams.map { convertToGenericNodeDTO(it, idToTeam, teamIdToSubjects) }
+        val tree = rootTeams.map {
+            convertToGenericNodeDTO(it, idToTeam, teamIdToSubjects)
+        }.toMutableList()
+
+        // 7/ Ajouter le nœud "Orphan" s'il y a des sujets non affectés
+        if (unassignedSubjects.isNotEmpty()) {
+            val noTeamDTO = TeamDTO(
+                id = -1,
+                label = "Orphan",
+                category = TeamCategoryDTO(-1, "Orphan root"),
+                path = null,
+                parentTeam = null,
+                lunchBreakStart = null,
+                lunchBreakEnd = null,
+            )
+            val noTeamNode = GenericNodeDTO(
+                team = noTeamDTO,
+                subjects = unassignedSubjects,
+                children = emptyList()
+            )
+            tree.add(noTeamNode)
+        }
+
+        return tree
     }
 
     /**

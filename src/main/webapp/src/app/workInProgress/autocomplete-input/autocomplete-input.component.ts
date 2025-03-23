@@ -175,7 +175,6 @@ export class AutocompleteInputComponent implements ControlValueAccessor, OnInit,
   @ViewChild('inputRef', {static: true})
   private _inputRef!: ElementRef<HTMLInputElement>;
 
-  /** Subscriptions éventuelles (si tu en as) */
   private _subs = new Subscription();
 
   // Callbacks ControlValueAccessor

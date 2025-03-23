@@ -1,32 +1,21 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonDirective } from 'primeng/button';
+import {Button, ButtonDirective} from 'primeng/button';
 import {DrawerOptions} from "./drawer.component";
 import {DrawerService} from "../service/component/drawer.service";
 
 @Component({
   selector: 'app-comp-opener-button',
   standalone: true,
-  imports: [CommonModule, ButtonDirective],
+  imports: [CommonModule, Button],
   template: `
-    <button pButton type="button" (click)="openDrawer()" [label]="label">
-      <ng-container *ngIf="icon">
-        <ng-container *ngIf="isIconClass(icon); else imgIcon">
-          <i [ngClass]="icon" style="margin-right: 0.5em;"></i>
-        </ng-container>
-        <ng-template #imgIcon>
-          <img [src]="icon" alt="Icon" style="height: 1em; margin-right: 0.5em;">
-        </ng-template>
-      </ng-container>
-    </button>
+    <p-button [ariaLabel]="label" type="button" (click)="openDrawer()" icon="pi pi-pencil" >
+    </p-button>
   `
 })
 export class CompOpenerButtonComponent {
   /** Libellé affiché sur le bouton */
   @Input() label: string = 'Open Drawer';
-
-  /** Icône à afficher (peut être une classe CSS ou une URL) */
-  @Input() icon: string = '';
 
   /**
    * Options de configuration à transmettre lors de l'ouverture du Drawer.

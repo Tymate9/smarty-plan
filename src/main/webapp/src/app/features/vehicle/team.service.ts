@@ -65,11 +65,6 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
     });
   }
 
-  /**
-   * Récupère un Team particulier, si tu souhaites faire un "edit" côté front.
-   * Pour cela, il faut avoir un @GET("/api/teams/{id}") côté Quarkus.
-   * Si ce n'est pas encore créé, tu peux l'ajouter.
-   */
   getById(id: number): Observable<TeamDTO> {
     return this.http.get<TeamDTO>(`${this.baseUrl}/${id}`);
   }
@@ -181,14 +176,14 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
 
     // Premier bouton : "Modifier [team.label]"
     const editButton = {
-      compClass: CompOpenerButtonComponent,  // Nouveau composant déclencheur
+      compClass: CompOpenerButtonComponent,
       inputs: {
-        label: 'Modifier ' + team.label, // Libellé du bouton
-        drawerOptions: {                // Options à transmettre au Drawer via DrawerService
+        label: 'Modifier ' + team.label,
+        drawerOptions: {
           headerTitle: 'Édition de ' + team.label,
           closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
           child: {
-            compClass: TeamFormComponent, // Composant de formulaire d'édition
+            compClass: TeamFormComponent,
             inputs: {
               teamId: team.id
             }

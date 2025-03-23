@@ -175,8 +175,6 @@ export class EntityTreeComponent implements OnInit{
         this.loading = false;
       }
     });
-    console.log("Voici mon treeData du sang de tes morts !! ")
-    console.log(this.treeData)
   }
 
   handleExpand(event: any): void {

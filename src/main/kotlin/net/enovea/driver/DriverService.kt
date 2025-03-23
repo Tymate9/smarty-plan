@@ -5,9 +5,7 @@ import java.sql.Timestamp
 import java.time.LocalTime
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
-import net.enovea.driver.driverTeam.DriverTeamEntity
 import net.enovea.workInProgress.driverCRUD.DriverForm
-import net.enovea.workInProgress.DriverNodeDTO
 import net.enovea.workInProgress.common.Stat
 import net.enovea.workInProgress.common.StatsDTO
 import net.enovea.team.TeamEntity
@@ -15,8 +13,6 @@ import net.enovea.team.TeamMapper
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.VehicleEntity
 import net.enovea.workInProgress.common.ICRUDService
-import org.hibernate.Hibernate
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class DriverService(
@@ -167,63 +163,6 @@ class DriverService(
         val latestEnd     = timeRanges.maxByOrNull { it.second }?.second
 
         return Pair(earliestStart, latestEnd)
-    }
-
-    // TODO(Vérifier l'usage de cette méthode)
-    @Transactional
-    fun getAuthorizedNodeData() : List<DriverNodeDTO> {
-        return this.buildVehicleNodeTreeAtDate()
-    }
-
-    @Transactional
-    fun buildVehicleNodeTreeAtDate(dateParam: Timestamp? = null): List<DriverNodeDTO> {
-        // 1) Valeur par défaut => date courante à 00:00:00
-        val nowMidnight = Timestamp.valueOf(LocalDate.now().atStartOfDay())
-        val refTimestamp = dateParam ?: nowMidnight
-
-        // 2) Charger tous les teams
-        val allTeams = TeamEntity.listAll().map { it as TeamEntity }
-
-        // 3) Charger DriverTeamEntity actifs
-        val activeDriverTeams = DriverTeamEntity.list(
-            "id.startDate <= :refDate AND (endDate IS NULL OR endDate >= :refDate)",
-            mapOf("refDate" to refTimestamp)
-        )
-
-        // 4) Construire Map<teamId, List<DriverDTO>>...
-        val teamIdToDrivers = HashMap<Int, MutableList<DriverDTO>>()
-        for (dt in activeDriverTeams) {
-            val teamId = dt.team?.id
-            //TODO(Retirer cet appel à Hibernate.initialize car ici on réalise autant de requête que l'on a de conducteur actif à cette date)
-            Hibernate.initialize(dt.driver!!)
-            val driverDto = driverMapper.toDto(dt.driver!!, refTimestamp)
-            teamIdToDrivers.computeIfAbsent(teamId!!) { mutableListOf() }.add(driverDto)
-        }
-
-        // 5) Indexer teams + trouver racines
-        val idToTeam = allTeams.associateBy { it.id }
-        val rootTeams = allTeams.filter { it.parentTeam == null }
-
-        // 6) Recursion => convertToVehicleNodeDTO
-        return rootTeams.map { convertToVehicleNodeDTO(it, idToTeam, teamIdToDrivers) }
-    }
-
-    private fun convertToVehicleNodeDTO( team: TeamEntity, idToTeam: Map<Int, TeamEntity>, teamIdToDrivers: Map<Int, List<DriverDTO>> ): DriverNodeDTO {
-        // Liste de DriverDTO pour ce team
-        val drivers = teamIdToDrivers[team.id].orEmpty()
-
-        // Convertir le TeamEntity -> TeamDTO via teamMapper
-        val teamDTO = teamMapper.toDto(team)
-
-        // Repérer les enfants (ceux dont parentTeam == team)
-        val childEntities = idToTeam.values.filter { it.parentTeam?.id == team.id }
-        val children = childEntities.map { convertToVehicleNodeDTO(it, idToTeam, teamIdToDrivers) }
-
-        return DriverNodeDTO(
-            team = teamDTO,
-            drivers = drivers,
-            children = children
-        )
     }
 
     @Transactional

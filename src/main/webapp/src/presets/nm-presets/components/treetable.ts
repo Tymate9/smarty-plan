@@ -65,7 +65,6 @@ export const treeTableConfig = {
       }
     },
     dark: {
-      // Exemples si tu souhaites gérer un thème sombre
       root: {
         borderColor: nmColors.darkGray
       },

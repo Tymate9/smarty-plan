@@ -158,13 +158,17 @@ export class AffectationFormComponent implements OnInit {
   }
 
   loadAffectations(): void {
+    console.log("je suis dedans et je vais charger les affectations")
+    console.log(this.mainEntityRole)
     const entityIdStr = this.subjectId ? this.subjectId.toString().trim() : '';
+    console.log(this.subjectId)
     if (entityIdStr === '') {
       return;
     }
     if (this.mainEntityRole === 'subject') {
       this.affectationService.listBySubject(entityIdStr).subscribe(
         data => {
+          console.log(data)
           this.affectations = data.sort((a, b) =>
             new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
           );

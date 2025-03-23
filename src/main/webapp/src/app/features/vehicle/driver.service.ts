@@ -14,6 +14,7 @@ import DriverDTO = dto.DriverDTO;
 import DriverForm = dto.DriverForm;
 import GenericNodeDTO = dto.GenericNodeDTO;
 import TeamDTO = dto.TeamDTO;
+import {DriverFormComponent} from "../../workInProgress/CRUD/driver-Form/driver-form.component";
 
 @Injectable({
   providedIn: 'root'
@@ -149,7 +150,7 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
                 headerTitle: 'Édition du conducteur',
                 closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
                 child: {
-                  compClass: TeamFormComponent, // Assurez-vous d'utiliser le bon composant
+                  compClass: DriverFormComponent,
                   inputs: { driverId: driver.id }
                 }
               }

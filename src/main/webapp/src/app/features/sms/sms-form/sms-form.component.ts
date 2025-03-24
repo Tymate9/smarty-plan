@@ -322,7 +322,6 @@ export class SmsFormComponent implements OnInit {
     };
     this.smsApiService.buySmsPack(packForm).subscribe({
       next: (response) => {
-        console.log('Pack SMS acheté avec succès:', response);
         // On recharge les stats
         this.loadSmsStatistics();
         // On reset le form

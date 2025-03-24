@@ -121,8 +121,6 @@ export class MapComponent implements OnInit, OnDestroy {
       next: (message: string) => {
         // S'il est vide => on n'affiche pas le composant
         this.lunchPauseMessage = message.trim();
-        // On pourrait logger ou gérer autrement
-        console.log("Pause message: ", this.lunchPauseMessage);
       },
       error: (err) => {
         console.error("Erreur lors de la récupération du message de pause: ", err);
@@ -211,7 +209,6 @@ export class MapComponent implements OnInit, OnDestroy {
       // Call getFilteredVehicles each time filters change
       this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
-          console.log(filteredVehicles)
           // Handle the filtered vehicles here, for example by updating the map markers
           this.displayFilteredVehiclesOnMap(filteredVehicles);
           this.mapManager.handleLayerEvent(
@@ -289,8 +286,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
     const startHoursMinutes = startParisString.split(' ')[1].substring(0,5); // "HH:mm"
     const endHoursMinutes = endParisString.split(' ')[1].substring(0,5);     // "HH:mm"
-
-    console.log(`Now Paris: ${nowParisHoursMinutes}, Start: ${startHoursMinutes}, End: ${endHoursMinutes}`);
 
     // Comparaison uniquement basée sur les heures/minutes
     return (startHoursMinutes <= nowParisHoursMinutes && nowParisHoursMinutes <= endHoursMinutes);

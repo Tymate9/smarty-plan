@@ -177,25 +177,19 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   private subscribeToCrudEvents(): void {
     this.crudSubscription = this.entityService!.crudEvents$.subscribe(event => {
-      console.log('[EntityTreeComponent] CrudEvent reçu:', event);
       switch (event.type) {
         case CrudEventType.CREATE:
-          console.log('[EntityTreeComponent] Traitement d’un CREATE', event.newData);
           this.handleCreateEvent(event.newData);
           break;
         case CrudEventType.UPDATE:
-          console.log('[EntityTreeComponent] Traitement d’un UPDATE', { oldData: event.oldData, newData: event.newData });
           this.handleUpdateEvent(event.oldData, event.newData);
           break;
         case CrudEventType.DELETE:
-          console.log('[EntityTreeComponent] Traitement d’un DELETE', event.oldData);
           this.handleDeleteEvent(event.oldData);
           break;
         default:
           console.warn('[EntityTreeComponent] Événement CRUD inconnu:', event);
       }
-      // Log de l’arbre actuel après mise à jour
-      console.log('[EntityTreeComponent] Arbre mis à jour:', this.treeData);
       this.cdr.markForCheck();
     });
   }
@@ -239,8 +233,6 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
     // Construire le nouveau nœud à partir de updatedData
     const newLeaf = this.entityService.buildTreeLeaf(updatedData);
-    console.log('[handleUpdateEvent] Nouvelle feuille construite:', newLeaf);
-
     // Insérer le nouveau nœud dans le groupe approprié
     this.updateTreeWithNewLeaf(newLeaf);
   }

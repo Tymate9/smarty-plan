@@ -850,7 +850,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   //Cette méthode permet d'agrandir la table et vice versa
   toggleTree() {
-    console.log(this.vehiclesTree)
+    //console.log(this.vehiclesTree)
     if (this.vehiclesTree && this.vehiclesTree.length > 0) {
       this.isExpanded = !this.isExpanded;
       this.vehiclesTree = this.vehiclesTree.map(vehicle => ({
@@ -891,10 +891,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const startHoursMinutes = startDate.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false }).split(' ')[1].substring(0,5);
     const endHoursMinutes = endDate.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false }).split(' ')[1].substring(0,5);
-
-    console.log("Now Paris: " + nowHoursMinutes);
-    console.log("Start: " + startHoursMinutes);
-    console.log("End: " + endHoursMinutes);
 
     return (startHoursMinutes <= nowHoursMinutes && nowHoursMinutes <= endHoursMinutes);
   }

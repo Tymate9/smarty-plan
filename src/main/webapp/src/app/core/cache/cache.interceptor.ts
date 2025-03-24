@@ -26,9 +26,9 @@ export class CacheInterceptor implements HttpInterceptor {
 
     const cacheKey = this.createCacheKey(req.urlWithParams, req.body);
     const cachedResponse = this.cacheService.getCache(cacheKey);
-    console.log(this.cacheService.cache)
+    //console.log(this.cacheService.cache)
     if (cachedResponse) {
-      console.log("Réponse fournis par le cache" + cachedResponse)
+      //console.log("Réponse fournis par le cache" + cachedResponse)
       return of(cachedResponse);
     }
 

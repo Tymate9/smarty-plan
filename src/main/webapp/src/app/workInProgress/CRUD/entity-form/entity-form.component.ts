@@ -197,9 +197,6 @@ export class EntityFormComponent implements OnInit, OnChanges {
         }
       }
 
-      // Affichage de debug du payload
-      console.log('Payload envoyé:', finalEntity);
-
       if (this.entityService) {
         let request: Observable<any>;
         if (this.mode === 'update') {

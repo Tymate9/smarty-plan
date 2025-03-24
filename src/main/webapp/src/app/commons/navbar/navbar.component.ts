@@ -338,12 +338,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     try {
       // Vérification de l'instance Keycloak injectée
-      console.log('Keycloak instance:', this.keycloak);
+      //console.log('Keycloak instance:', this.keycloak);
 
       if (this.keycloak && this.keycloak.authenticated) {
         // Extraction du profil depuis le token décodé
         this.userProfile = this.keycloak.tokenParsed;
-        console.log('Token Parsed:', this.keycloak.tokenParsed);
+        //console.log('Token Parsed:', this.keycloak.tokenParsed);
         this.userName = `${this.userProfile.firstName || ''} ${this.userProfile.lastName || ''}`.trim();
       } else {
         console.warn('Keycloak non authentifié ou instance non disponible');
@@ -353,15 +353,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
       let roles: string[] = [];
       if (this.keycloak && this.keycloak.tokenParsed) {
         const tokenParsed = this.keycloak.tokenParsed;
-        console.log('Token Parsed for roles:', tokenParsed);
+        //console.log('Token Parsed for roles:', tokenParsed);
         if (tokenParsed["resourceAccess"]) {
-          console.log('resourceAccess:', tokenParsed["resourceAccess"]);
+          //console.log('resourceAccess:', tokenParsed["resourceAccess"]);
           const clientId = AppConfig.config.keycloakConfig.frontendClientId;
           if (tokenParsed["resourceAccess"][clientId]) {
             roles = tokenParsed["resourceAccess"][clientId].roles;
           }
         } else if (tokenParsed["realm_access"]) {
-          console.log('realm_access:', tokenParsed["realm_access"]);
+          //console.log('realm_access:', tokenParsed["realm_access"]);
           if(tokenParsed["realm_access"]!.roles)
             roles = tokenParsed["realm_access"]!.roles;
         } else {
@@ -370,7 +370,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       } else {
         console.warn('tokenParsed non disponible');
       }
-      console.log('Rôles extraits:', roles);
+      //console.log('Rôles extraits:', roles);
       this.userRole = roles && roles.length > 0 ? roles.join(' / ') : 'Aucun rôle trouvé';
 
       // Chargement parallèle des données (agences, véhicules, conducteurs)
@@ -407,7 +407,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
       // Abonnement à la configuration pour récupérer l'URL de déconnexion
       this.configSubscription = this.configService.getConfig().subscribe(config => {
-        console.log('Configuration Keycloak:', config);
+        //console.log('Configuration Keycloak:', config);
         if (config) {
           this.logoutURL = config.keycloakConfig.redirectUrl;
         }

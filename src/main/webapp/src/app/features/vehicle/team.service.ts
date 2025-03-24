@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {map, Observable, of} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {map, Observable, of, Subject} from 'rxjs';
 import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
-import {IEntityService} from "../../workInProgress/CRUD/ientity-service";
+import {CrudEvent, IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import TeamCategoryDTO = dto.TeamCategoryDTO;
 import TeamForm = dto.TeamForm;
 import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
@@ -13,6 +13,7 @@ import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener
 import {
   EntityDeleteButtonComponent
 } from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
+import {DrawerOptions} from "../../workInProgress/drawer/drawer.component";
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,39 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
     private messageService: MessageService
   ) {}
 
+  private _crudEvents: Subject<CrudEvent<TeamDTO>> = new Subject<CrudEvent<TeamDTO>>();
+  public crudEvents$: Observable<CrudEvent<TeamDTO>> = this._crudEvents.asObservable();
+  notifyCrudEvent(event: CrudEvent<TeamDTO>): void {
+    this._crudEvents.next(event);
+  }
+
+  getDrawerOptions(id: any | null): DrawerOptions {
+    if (!id) {
+      // Mode création
+      return {
+        headerTitle: 'Créer un groupe',
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: TeamFormComponent,
+          inputs: {
+            vehicleId: '',
+          }
+        }
+      };
+    } else {
+      return {
+        headerTitle: `Édition du groupe`,
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: TeamFormComponent,
+          inputs: {
+            vehicleId: id
+          }
+        }
+      };
+    }
+  }
+
   // Fetch agencies from the backend
   getAgencies(): Observable<TeamDTO[]> {
     return this.http.get<TeamDTO[]>(this.baseUrl);
@@ -34,28 +68,6 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
   // Fetch all teamCategory from the backend
   getTeamCategories(): Observable<TeamCategoryDTO[]> {
     return this.http.get<TeamCategoryDTO[]>(`${this.baseUrl}/category`)
-  }
-
-  getTeamTree(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl).pipe(
-      map(teams => this.buildTeamTree(teams))
-    );
-  }
-
-  private buildTeamTree(teams: any[]): any[] {
-    const teamMap = new Map<number, any>();
-    teams.forEach(team => teamMap.set(team.id, { ...team, children: [] }));
-
-    const teamTree: any[] = [];
-    teams.forEach(team => {
-      if (team.parent_id) {
-        const parent = teamMap.get(team.parent_id);
-        parent.children.push(teamMap.get(team.id));
-      } else {
-        teamTree.push(teamMap.get(team.id));
-      }
-    });
-    return teamTree;
   }
 
   getTeamsInPause(time: string): Observable<string> {
@@ -69,26 +81,17 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
     return this.http.get<TeamDTO>(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * Crée un nouveau Team en envoyant un TeamForm (appelle @POST /api/teams)
-   */
   create(teamForm: TeamForm): Observable<TeamDTO> {
     return this.http.post<TeamDTO>(this.baseUrl, teamForm);
   }
 
-  /**
-   * Met à jour un Team existant en envoyant un TeamForm (appelle @PUT /api/teams/{id})
-   */
   update(teamForm: TeamForm): Observable<TeamDTO> {
     // On s’attend à ce que teamForm.id soit déjà valorisé
     return this.http.put<TeamDTO>(`${this.baseUrl}/${teamForm.id}`, teamForm);
   }
 
-  /**
-   * Supprime un Team (appelle @DELETE /api/teams/{id})
-   */
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  delete(id: number): Observable<TeamDTO> {
+    return this.http.delete<TeamDTO>(`${this.baseUrl}/${id}`);
   }
 
   getCount(): Observable<number> {
@@ -134,44 +137,39 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
     ]);
   }
 
-  /** Récupère les TreeNodes */
   getTreeNodes(): Observable<TreeNode[]> {
     return this.getAuthorizedData().pipe(
       map((teams: TeamDTO[]) => {
-        // 1) Grouper par catégorie (ex. "Agence", "Service", etc.)
-        const catMap = new Map<string, TeamDTO[]>();
-
+        // Grouper par category.id
+        const catMap = new Map<number, { label: string; teams: TeamDTO[] }>();
         teams.forEach(team => {
+          const catId = team.category.id;
           const catLabel = team.category.label;
-          if (!catMap.has(catLabel)) {
-            catMap.set(catLabel, []);
+          if (!catMap.has(catId)) {
+            catMap.set(catId, { label: catLabel, teams: [] });
           }
-          catMap.get(catLabel)!.push(team);
+          catMap.get(catId)!.teams.push(team);
         });
 
-        // 2) Pour chaque catégorie, on crée un "root" TreeNode
+        // Créer un TreeNode groupe pour chaque catégorie
         const treeNodes: TreeNode[] = [];
-
-        for (const [catLabel, catTeams] of catMap.entries()) {
-          // chaque team = leaf
-          const childrenLeafs: TreeNode[] = catTeams.map(team => this.buildTeamLeaf(team));
-
+        for (const [catId, group] of catMap.entries()) {
+          const childrenLeafs: TreeNode[] = group.teams.map(team => this.buildTreeLeaf(team));
           treeNodes.push({
-            label: catLabel,
+            data: {
+              groupId : catId.toString()
+            },
+            label: group.label,
             expanded: false,
             children: childrenLeafs
           });
         }
-        console.log(treeNodes)
         return treeNodes;
       })
     );
   }
 
-  /**
-   * Construit un leaf TreeNode pour une équipe.
-   */
-  private buildTeamLeaf(team: TeamDTO): TreeNode {
+  buildTreeLeaf(team: TeamDTO): TreeNode {
     const parentLabel = team.parentTeam ? team.parentTeam.label : '';
 
     // Premier bouton : "Modifier [team.label]"
@@ -204,12 +202,13 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
         }
       }
     };
-
     // On place ces deux boutons dans le conteneur dynamique sous la clé "Actions"
     const dynamicComps = [editButton, deleteButton];
 
     return {
       data: {
+        id:team.id,
+        parentId: team.category.id,
         label: team.label,
         parentLabel: parentLabel,
         categoryLabel: team.category.label,
@@ -221,5 +220,4 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
       expanded: false
     };
   }
-
 }

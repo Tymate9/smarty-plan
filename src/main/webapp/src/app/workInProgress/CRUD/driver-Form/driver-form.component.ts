@@ -179,6 +179,7 @@ export class DriverFormComponent implements OnInit {
         // Passage en mode update après création
         this.mode = 'update';
         this.driverEntity = response;
+        this.driverId = response.id;
         this.buildFormDescription(response);
       } else {
         if (this.manageNotifications) {

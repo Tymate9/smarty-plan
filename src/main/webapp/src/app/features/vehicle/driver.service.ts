@@ -1,20 +1,21 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {map, Observable, of} from "rxjs";
+import {map, Observable, of, Subject} from "rxjs";
 import {dto} from "../../../habarta/dto";
-import {IEntityService} from "../../workInProgress/CRUD/ientity-service";
+import {CrudEvent, IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import {MessageService, TreeNode} from "primeng/api";
 import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import {
   EntityDeleteButtonComponent
 } from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
-import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
 import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
 import DriverDTO = dto.DriverDTO;
 import DriverForm = dto.DriverForm;
 import GenericNodeDTO = dto.GenericNodeDTO;
 import TeamDTO = dto.TeamDTO;
 import {DriverFormComponent} from "../../workInProgress/CRUD/driver-Form/driver-form.component";
+import {DrawerOptions} from "../../workInProgress/drawer/drawer.component";
+import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,38 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
 
   constructor(private http: HttpClient,
               private messageService: MessageService) {}
+
+  private _crudEvents: Subject<CrudEvent<DriverDTO>> = new Subject<CrudEvent<DriverDTO>>();
+  public crudEvents$: Observable<CrudEvent<DriverDTO>> = this._crudEvents.asObservable();
+  notifyCrudEvent(event: CrudEvent<DriverDTO>): void {
+    this._crudEvents.next(event);
+  }
+
+  getDrawerOptions(id: any | null): DrawerOptions {
+    if (!id) {
+      return {
+        headerTitle: 'Créer un conducteur',
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: DriverFormComponent,
+          inputs: {
+            vehicleId: '',
+          }
+        }
+      };
+    } else {
+      return {
+        headerTitle: `Édition du conducteur`,
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: DriverFormComponent,
+          inputs: {
+            vehicleId: id
+          }
+        }
+      };
+    }
+  }
 
   getAffectedDrivers(agencyIds: string[] | null = null): Observable<DriverDTO[]> {
     const params = {
@@ -63,8 +96,8 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
     return this.http.put<DriverDTO>(`${this.baseUrl}/${entity.id}`, entity);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  delete(id: number): Observable<DriverDTO> {
+    return this.http.delete<DriverDTO>(`${this.baseUrl}/${id}`);
   }
 
   getCount(): Observable<number> {
@@ -113,7 +146,7 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
   }
 
   private convertDriverGenericNodeToTreeNode(node: GenericNodeDTO<DriverDTO>): TreeNode | null {
-    // Vérifier que le nœud possède bien une équipe
+    // Vérifier que le nœud possède bien un objet 'team'
     if (!node.team) {
       console.error("Le nœud ne contient pas d'objet 'team' :", node);
       return null;
@@ -125,7 +158,8 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
     // Création du nœud pour l'équipe (groupe)
     const teamNodeData = {
       label: teamDTO.label,
-      parentLabel: parentLabel
+      parentLabel: parentLabel,
+      groupId:teamDTO.id
     };
     const teamTreeNode: TreeNode = {
       label: teamDTO.label,
@@ -134,52 +168,9 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
       expanded: false
     };
 
-    // Traitement des feuilles (drivers)
-    const driverLeaves: TreeNode[] = (node.subjects || []).map((driver: DriverDTO, index: number) => {
-      // On construit le label du driver
-      const driverLabel = `${driver.firstName} ${driver.lastName} (${driver.phoneNumber || '-'})`;
-
-      // Boutons d'action spécifiques pour les drivers
-      const dynamicComponents = {
-        Actions: [
-          {
-            compClass: CompOpenerButtonComponent,
-            inputs: {
-              label: 'Modifier ' + driver.firstName + ' ' + driver.lastName,
-              drawerOptions: {
-                headerTitle: 'Édition du conducteur',
-                closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
-                child: {
-                  compClass: DriverFormComponent,
-                  inputs: { driverId: driver.id }
-                }
-              }
-            }
-          },
-          {
-            compClass: EntityDeleteButtonComponent,
-            inputs: {
-              label: 'Supprimer ' + driver.firstName + ' ' + driver.lastName,
-              entityId: driver.id,
-              entityService: this, // Adapter pour driverService
-              confirmationMessage: 'Voulez-vous vraiment supprimer ce conducteur ?',
-              onError: (err: any) => { console.error("Erreur lors de la suppression pour le driver", driver.id, err); }
-            }
-          }
-        ]
-      };
-
-      return {
-        data: {
-          firstName: driver.firstName,
-          lastName: driver.lastName,
-          phoneNumber: driver.phoneNumber,
-          label: driverLabel,
-          dynamicComponents: dynamicComponents
-        },
-        leaf: true,
-        expanded: false
-      } as TreeNode;
+    // Traitement des feuilles : transformer chaque driver en feuille à l'aide de buildTreeLeaf
+    const driverLeaves: TreeNode[] = (node.subjects || []).map((driver: DriverDTO) => {
+      return this.buildTreeLeaf(driver);
     });
 
     // Traitement récursif des enfants (sous-groupes)
@@ -187,15 +178,66 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
       .map((child: GenericNodeDTO<DriverDTO>) => this.convertDriverGenericNodeToTreeNode(child))
       .filter(child => child !== null) as TreeNode[];
 
-    // Combiner les feuilles et les nœuds enfants dans le nœud parent
+    // Combiner les feuilles et les sous-groupes dans le nœud parent
     teamTreeNode.children = [...driverLeaves, ...childrenNodes];
 
-    // Si le nœud ne contient ni feuilles ni enfants (donc aucun driver), on retourne null pour l'éliminer
+    // Si aucun driver n'est présent dans ce groupe, on émet un avertissement et on retourne null
     if (teamTreeNode.children.length === 0) {
       console.warn(`Le groupe "${teamDTO.label}" ne contient aucun driver. Il sera éliminé.`);
       return null;
     }
 
     return teamTreeNode;
+  }
+
+  buildTreeLeaf(driver: DriverDTO): TreeNode {
+    // Construction du label du driver
+    const driverLabel = `${driver.firstName} ${driver.lastName} (${driver.phoneNumber || '-'})`;
+
+    // Configuration dynamique des boutons d'action pour le driver
+    const dynamicComponents = {
+      Actions: [
+        {
+          compClass: CompOpenerButtonComponent,
+          inputs: {
+            label: 'Modifier ' + driver.firstName + ' ' + driver.lastName,
+            drawerOptions: {
+              headerTitle: 'Édition du conducteur',
+              closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
+              child: {
+                compClass: DriverFormComponent,
+                inputs: { driverId: driver.id }
+              }
+            }
+          }
+        },
+        {
+          compClass: EntityDeleteButtonComponent,
+          inputs: {
+            label: 'Supprimer ' + driver.firstName + ' ' + driver.lastName,
+            entityId: driver.id,
+            entityService: this, // Ici, le service est le DriverService
+            confirmationMessage: 'Voulez-vous vraiment supprimer ce conducteur ?',
+            onError: (err: any) => {
+              console.error("Erreur lors de la suppression pour le driver", driver.id, err);
+            }
+          }
+        }
+      ]
+    };
+
+    return {
+      data: {
+        id: driver.id,
+        parentId: driver.team ? driver.team.id : null,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        phoneNumber: driver.phoneNumber,
+        label: driverLabel,
+        dynamicComponents: dynamicComponents
+      },
+      leaf: true,
+      expanded: false
+    } as TreeNode;
   }
 }

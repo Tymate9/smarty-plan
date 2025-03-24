@@ -6,15 +6,17 @@ import {
   AfterViewInit,
   ViewChildren,
   QueryList,
-  Type, SimpleChanges
+  Type, SimpleChanges, OnChanges, OnDestroy
 } from '@angular/core';
-import { IEntityService } from '../../CRUD/ientity-service';
+import {CrudEventType, IEntityService} from '../../CRUD/ientity-service';
 import { TreeNode } from 'primeng/api';
 import { CellHostDirective } from '../../cell-host.directive';
-import { forkJoin } from 'rxjs';
+import {forkJoin, Subscription} from 'rxjs';
 import {TreeTableModule} from "primeng/treetable";
-import {NgClass, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe, NgClass, NgForOf, NgIf} from "@angular/common";
 import {Button} from "primeng/button";
+import {LoadingService} from "../../service/loading.service";
+import {ProgressSpinner} from "primeng/progressspinner";
 
 export interface EntityColumn {
   field?: string;
@@ -32,6 +34,9 @@ interface DynamicComponentConfig {
 @Component({
   selector: 'app-entity-tree',
   template: `
+    <!-- Spinner local au composant -->
+    <p-progressSpinner *ngIf="(loadingService.loading$ | async)"></p-progressSpinner>
+
     <p-treeTable
       [value]="treeData"
       (onNodeExpand)="handleExpand($event)"
@@ -100,7 +105,9 @@ interface DynamicComponentConfig {
     NgIf,
     NgForOf,
     NgClass,
-    Button
+    Button,
+    ProgressSpinner,
+    AsyncPipe
   ],
   styles: [`
 
@@ -115,11 +122,14 @@ interface DynamicComponentConfig {
       color: red;
       font-weight: bold;
     }
-  `]
+  `],
+  providers: [LoadingService]
 })
-export class EntityTreeComponent implements OnInit{
+export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
   @Input() entityName: string = '';
   @Input() entityService?: IEntityService<any, any>;
+
+  private crudSubscription?: Subscription;
 
   items: any[] = [];
 
@@ -127,23 +137,200 @@ export class EntityTreeComponent implements OnInit{
 
   treeData: TreeNode[] = [];
 
-  loading: boolean = false;
-
   errorMsg: string | null = null;
 
   @ViewChildren(CellHostDirective) cellHosts!: QueryList<CellHostDirective>;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    public loadingService: LoadingService) {}
 
   ngOnInit(): void {
-    this.loadData();
+    setTimeout(() => {
+      this.loadData();
+    });
+    if (this.entityService) {
+      this.subscribeToCrudEvents();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['entityService'] && !changes['entityService'].firstChange) {
-      // Recharger les données si le service change
-      this.loadData();
+      this.treeData = [];
+      setTimeout(() => {
+        this.loadData();
+      });
+      if (this.crudSubscription) {
+        this.crudSubscription.unsubscribe();
+      }
+      if (this.entityService) {
+        this.subscribeToCrudEvents();
+      }
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.crudSubscription) {
+      this.crudSubscription.unsubscribe();
+    }
+  }
+
+  private subscribeToCrudEvents(): void {
+    this.crudSubscription = this.entityService!.crudEvents$.subscribe(event => {
+      console.log('[EntityTreeComponent] CrudEvent reçu:', event);
+      switch (event.type) {
+        case CrudEventType.CREATE:
+          console.log('[EntityTreeComponent] Traitement d’un CREATE', event.newData);
+          this.handleCreateEvent(event.newData);
+          break;
+        case CrudEventType.UPDATE:
+          console.log('[EntityTreeComponent] Traitement d’un UPDATE', { oldData: event.oldData, newData: event.newData });
+          this.handleUpdateEvent(event.oldData, event.newData);
+          break;
+        case CrudEventType.DELETE:
+          console.log('[EntityTreeComponent] Traitement d’un DELETE', event.oldData);
+          this.handleDeleteEvent(event.oldData);
+          break;
+        default:
+          console.warn('[EntityTreeComponent] Événement CRUD inconnu:', event);
+      }
+      // Log de l’arbre actuel après mise à jour
+      console.log('[EntityTreeComponent] Arbre mis à jour:', this.treeData);
+      this.cdr.markForCheck();
+    });
+  }
+
+  private handleCreateEvent(newData: any): void {
+    if (!newData || newData.id === undefined || newData.id === null) {
+      console.error("Création impossible : l'objet créé ne possède aucun id valide.", newData);
+      return;
+    }
+    if (!this.entityService) {
+      console.error("Aucun service défini pour effectuer la création.");
+      return;
+    }
+
+    // Construire la nouvelle feuille via le service
+    const newLeaf = this.entityService.buildTreeLeaf(newData);
+
+    // Utiliser la fonction utilitaire pour insérer le nouveau nœud dans le bon groupe
+    this.updateTreeWithNewLeaf(newLeaf);
+  }
+
+  private handleUpdateEvent(oldData: any, updatedData: any): void {
+    if (!updatedData || updatedData.id === undefined || updatedData.id === null) {
+      console.error("Mise à jour impossible : l'objet mis à jour ne possède aucun id valide.", updatedData);
+      return;
+    }
+    if (!this.entityService) {
+      console.error("Aucun service défini pour effectuer la mise à jour.");
+      return;
+    }
+
+    // Supprimer l'ancien nœud correspondant à oldData
+    if (oldData && oldData.id != null) {
+      const removed = this.removeNodeFromGroup(oldData.id);
+      if (!removed) {
+        console.warn("Impossible de trouver l'ancien nœud à supprimer pour la mise à jour (id=", oldData.id, ")");
+      } else {
+        console.log('[handleUpdateEvent] Ancien nœud supprimé pour id', oldData.id);
+      }
+    }
+
+    // Construire le nouveau nœud à partir de updatedData
+    const newLeaf = this.entityService.buildTreeLeaf(updatedData);
+    console.log('[handleUpdateEvent] Nouvelle feuille construite:', newLeaf);
+
+    // Insérer le nouveau nœud dans le groupe approprié
+    this.updateTreeWithNewLeaf(newLeaf);
+  }
+
+  private handleDeleteEvent(oldData: any): void {
+    // Vérifier que l'objet à supprimer possède un id
+    if (!oldData || oldData.id === undefined || oldData.id === null) {
+      console.error("Suppression impossible : l'objet supprimé ne possède aucun id valide.");
+      return;
+    }
+    if (!this.entityService) {
+      console.error("Aucun service défini pour effectuer la suppression.");
+      return;
+    }
+
+    let removed = this.removeNodeFromGroup(oldData.id);
+    if (!removed) {
+      console.warn("Nœud avec id", oldData.id, "non trouvé pour la suppression.");
+    }
+
+    this.treeData = [...this.treeData];
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.reInjectDynamicComponents();
+    }, 10);
+  }
+
+  private removeNodeFromGroup(nodeId: any): boolean {
+    for (let i = 0; i < this.treeData.length; i++) {
+      const group = this.treeData[i];
+      if (group.children && Array.isArray(group.children)) {
+        const idx = group.children.findIndex(leaf =>
+          leaf.data && leaf.data.id === nodeId
+        );
+        if (idx !== -1) {
+          group.children.splice(idx, 1);
+          // Si le groupe est vide après suppression, on le retire
+          if (group.children.length === 0) {
+            this.treeData.splice(i, 1);
+          }
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private updateTreeWithNewLeaf(newLeaf: TreeNode): void {
+    const groupId = newLeaf.data.parentId ? newLeaf.data.parentId.toString() : "-1";
+    // Chercher le groupe correspondant dans l'arbre
+    let group = this.findGroupInTree(this.treeData, groupId);
+
+    if (!group) {
+      group = {
+        label: (groupId === "-1") ? "Orphan" : `Groupe ${groupId}`,
+        data: {
+          groupeId: groupId
+        },
+        expanded: false,
+        children: []
+      };
+      this.treeData.unshift(group);
+    } else {
+    }
+
+    // Ajouter la nouvelle feuille dans le groupe trouvé/créé
+    group.children?.unshift(newLeaf);
+    // Forcer la réassignation pour que PrimeNG détecte le changement
+    this.treeData = [...this.treeData];
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.reInjectDynamicComponents();
+    }, 10);
+  }
+
+  private findGroupInTree(nodes: TreeNode[], groupId: string): TreeNode | undefined {
+    for (const node of nodes) {
+      if (node.data && node.data.groupId?.toString() === groupId.toString()) {
+        return node;
+      }
+      if (node.children && node.children.length > 0) {
+        const found = this.findGroupInTree(node.children, groupId);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return undefined;
   }
 
   private loadData(): void {
@@ -151,7 +338,9 @@ export class EntityTreeComponent implements OnInit{
       this.errorMsg = 'Aucun service fourni.';
       return;
     }
-    this.loading = true;
+
+    // Active le loader local + le spinner global
+    this.loadingService.setLoading(true);
 
     forkJoin({
       data: this.entityService.getAuthorizedData(),
@@ -162,8 +351,6 @@ export class EntityTreeComponent implements OnInit{
         this.items = results.data;
         this.columns = results.cols;
         this.treeData = this.sortTreeNodes(results.nodes);
-        this.loading = false;
-        this.cdr.markForCheck();
 
         setTimeout(() => {
           this.reInjectDynamicComponents();
@@ -172,7 +359,9 @@ export class EntityTreeComponent implements OnInit{
       error: (err) => {
         console.error('Erreur forkJoin', err);
         this.errorMsg = 'Erreur lors du chargement des données.';
-        this.loading = false;
+      },
+      complete: () => {
+        this.loadingService.setLoading(false);
       }
     });
   }
@@ -303,4 +492,5 @@ export class EntityTreeComponent implements OnInit{
       }, 10);
     }
   }
+
 }

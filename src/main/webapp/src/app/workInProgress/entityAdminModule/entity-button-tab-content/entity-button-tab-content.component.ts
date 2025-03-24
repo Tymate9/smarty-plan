@@ -1,18 +1,19 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgIf} from "@angular/common";
+import {NgIf, NgOptimizedImage} from "@angular/common";
 
 @Component({
   selector: 'app-entity-button-tab-content',
   template: `
     <button class="tab-button" (click)="onButtonClick()">
       {{ label }}
-      <img *ngIf="icon && iconType === 'url'" [src]="icon" class="icon-img" alt="TabIcon"/>
+      <img *ngIf="icon && iconType === 'url'" ngSrc="icon" class="icon-img" alt="TabIcon"/>
       <i *ngIf="icon && iconType === 'css'" [class]="icon"></i>
     </button>
   `,
   standalone: true,
   imports: [
-    NgIf
+    NgIf,
+    NgOptimizedImage
   ],
   styles: [`
     .tab-button {

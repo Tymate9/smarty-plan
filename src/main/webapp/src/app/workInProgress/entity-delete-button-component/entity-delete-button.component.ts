@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmationService } from 'primeng/api';
-import {IEntityService} from "../CRUD/ientity-service";
+import {CrudEventType, IEntityService} from "../CRUD/ientity-service";
 import {Button} from "primeng/button";
 
 /**
@@ -50,29 +50,27 @@ export class EntityDeleteButtonComponent {
   constructor(private confirmationService: ConfirmationService) {}
 
   public onDelete(): void {
-    // Affichage d'une boîte de confirmation
     this.confirmationService.confirm({
       message: this.confirmationMessage,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // L'utilisateur confirme => on supprime
         if (this.entityService && this.entityId != null) {
           this.entityService.delete(this.entityId).subscribe({
-            next: () => {
-              //console.log('Entité supprimée avec succès.');
-              // Emettre un événement Angular si besoin
+            next: (deletedEntity) => {
+              // Utiliser la réponse du delete comme oldData, newData = null
+              this.entityService?.notifyCrudEvent({
+                type: CrudEventType.DELETE,
+                oldData: deletedEntity,
+                newData: null
+              });
               this.deleteSuccess.emit();
             },
             error: (err: any) => {
               console.error('Erreur lors de la suppression', err);
-
-              // Si un callback est fourni => on l'appelle
               if (this.onError) {
                 this.onError(err);
               }
-
-              // Si on veut aussi émettre un événement Angular
               this.deleteError.emit(err);
             }
           });

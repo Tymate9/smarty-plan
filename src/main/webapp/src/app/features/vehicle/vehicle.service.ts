@@ -1,20 +1,20 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {map, Observable, of} from 'rxjs';
+import {map, Observable, of, Subject} from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
-import {IEntityService} from "../../workInProgress/CRUD/ientity-service";
+import {CrudEvent, IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import {
   EntityDeleteButtonComponent
 } from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
 import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
-import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
 import GenericNodeDTO = dto.GenericNodeDTO;
 import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {VehicleFormComponent} from "../../workInProgress/CRUD/vehicle-form/vehicle-form.component";
+import {DrawerOptions} from "../../workInProgress/drawer/drawer.component";
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -37,6 +37,40 @@ export type TeamHierarchyNodeStatsQSE = TeamHierarchyNode<dto.VehiclesStatsQseDT
   providedIn: 'root',
 })
 export class VehicleService implements IEntityService<dto.VehicleDTO, dto.VehicleForm>{
+
+  getDrawerOptions(id: any | null): DrawerOptions {
+    if (!id) {
+      return {
+        headerTitle: 'Créer un véhicule',
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: VehicleFormComponent,
+          inputs: {
+            vehicleId: '',
+          }
+        }
+      };
+    } else {
+      // Mode édition
+      return {
+        headerTitle: `Édition du véhicule`,
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: VehicleFormComponent,
+          inputs: {
+            vehicleId: id
+          }
+        }
+      };
+    }
+  }
+
+  private _crudEvents: Subject<CrudEvent<dto.VehicleDTO>> = new Subject<CrudEvent<dto.VehicleDTO>>();
+  public crudEvents$: Observable<CrudEvent<dto.VehicleDTO>> = this._crudEvents.asObservable();
+  notifyCrudEvent(event: CrudEvent<dto.VehicleDTO>): void {
+    this._crudEvents.next(event);
+  }
+
   private readonly baseUrl = '/api/vehicles';
 
   constructor(private readonly http: HttpClient) {}
@@ -241,41 +275,18 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
 
   //Implémentation de l'interface IEntityService.
 
-  /**
-   * Récupère la liste des véhicules autorisés.
-   * Endpoint utilisé : GET /api/vehicles/list
-   */
   getAuthorizedData(): Observable<dto.VehicleDTO[]> {
     return this.http.get<dto.VehicleDTO[]>(`${this.baseUrl}/list`);
   }
 
-  /**
-   * Récupère le nombre total de véhicules.
-   * Endpoint utilisé : GET /api/vehicles/count
-   */
   getCount(): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/count`);
   }
 
-  /**
-   * Récupère les statistiques des véhicules.
-   * Endpoint utilisé : GET /api/vehicles/stats
-   */
   getStats(): Observable<dto.StatsDTO> {
     return this.http.get<dto.StatsDTO>(`${this.baseUrl}/stats`);
   }
 
-  /**
-   * Retourne la configuration des colonnes pour l'affichage des véhicules dans un TreeTable.
-   * Les colonnes configurées sont dans l'ordre :
-   *  - Plaque d'immatriculation
-   *  - Identifiant externe
-   *  - Moteur
-   *  - Carburant
-   *  - Catégory de véhicule (via vehicle.category.label)
-   *  - Actif (champ booléen)
-   *  - Colonne dynamique pour les actions
-   */
   getTreeColumns(): Observable<EntityColumn[]> {
     return of([
       {
@@ -331,10 +342,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     return this.http.get<GenericNodeDTO<dto.VehicleDTO>[]>(`${this.baseUrl}/authorized-data`)
   }
 
-  /**
-   * Retourne l'arborescence des véhicules sous forme de TreeNode[]
-   * en convertissant les GenericNodeDTO<VehicleDTO> reçus du back.
-   */
   getTreeNodes(): Observable<TreeNode[]> {
     return this.getTreeNode().pipe(
       map((genericNodes: GenericNodeDTO<dto.VehicleDTO>[]) =>
@@ -345,13 +352,8 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     );
   }
 
-  /**
-   * Convertit récursivement un GenericNodeDTO<VehicleDTO> en un TreeNode.
-   * La conversion inclut la création d'un nœud parent pour le groupe (via team)
-   * et la transformation des véhicules (subjects) en feuilles, avec l'ajout d'actions.
-   */
   private convertVehicleGenericNodeToTreeNode(node: GenericNodeDTO<dto.VehicleDTO>): TreeNode | null {
-    // Vérifier que le nœud contient bien un objet 'team'
+    // Vérifier que le nœud possède un objet 'team'
     if (!node.team) {
       console.error("Le nœud ne contient pas d'objet 'team' :", node);
       return null;
@@ -360,10 +362,11 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     const teamDTO = node.team;
     const parentLabel = teamDTO.parentTeam ? teamDTO.parentTeam.label : '';
 
-    // Création du nœud pour le groupe (équipe ou agence)
+    // Création du nœud pour le groupe (l'équipe ou l'agence)
     const teamNodeData = {
       label: teamDTO.label,
-      parentLabel: parentLabel
+      parentLabel: parentLabel,
+      groupId: teamDTO.id
     };
 
     const teamTreeNode: TreeNode = {
@@ -373,63 +376,20 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       expanded: false
     };
 
-    // Transformation des véhicules (feuilles)
+    // Traitement des véhicules (feuilles) contenus dans node.subjects
     const vehicleLeaves: TreeNode[] = (node.subjects || []).map((vehicle: dto.VehicleDTO) => {
-      // Configuration des actions pour chaque véhicule
-      const dynamicComponents = {
-        Actions: [
-          {
-            compClass: CompOpenerButtonComponent,
-            inputs: {
-              label: 'Modifier ' + vehicle.licenseplate,
-              drawerOptions: {
-                headerTitle: 'Édition du véhicule',
-                closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
-                child: {
-                  compClass: VehicleFormComponent,
-                  inputs: { vehicleId: vehicle.id }
-                }
-              }
-            }
-          },
-          {
-            compClass: EntityDeleteButtonComponent,
-            inputs: {
-              label: 'Supprimer ' + vehicle.licenseplate,
-              entityId: vehicle.id,
-              entityService: this,
-              confirmationMessage: 'Voulez-vous vraiment supprimer ce véhicule ?',
-              onError: (err: any) => {
-                console.error("Erreur lors de la suppression pour le véhicule", vehicle.id, err);
-              }
-            }
-          }
-        ]
-      };
-      return {
-        data: {
-          licensePlate: vehicle.licenseplate,
-          externalID: vehicle.externalId,
-          engine: vehicle.engine,
-          energy: vehicle.energy,
-          category: vehicle.category.label,
-          validated: vehicle.validated? "Actif":"Inactif",
-          dynamicComponents: dynamicComponents
-        },
-        leaf: true,
-        expanded: false
-      } as TreeNode;
+      return this.buildTreeLeaf(vehicle);
     });
 
-    // Traitement récursif des sous-groupes (enfants)
+    // Traitement récursif des sous-groupes (children)
     const childrenNodes: TreeNode[] = (node.children || [])
       .map((child: GenericNodeDTO<dto.VehicleDTO>) => this.convertVehicleGenericNodeToTreeNode(child))
       .filter(child => child !== null) as TreeNode[];
 
-    // Combiner les feuilles et les nœuds enfants dans le nœud parent
+    // Combinaison des feuilles et des sous-groupes dans le nœud parent
     teamTreeNode.children = [...vehicleLeaves, ...childrenNodes];
 
-    // Si le nœud ne contient ni feuilles ni enfants, on le filtre (retourne null)
+    // Si le nœud ne contient aucune feuille ou enfant, on le retourne null pour l'éliminer de l'arbre
     if (teamTreeNode.children.length === 0) {
       console.warn(`Le groupe "${teamDTO.label}" ne contient aucun véhicule. Il sera éliminé.`);
       return null;
@@ -438,12 +398,87 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     return teamTreeNode;
   }
 
+  buildTreeLeaf(vehicle: dto.VehicleDTO): TreeNode {
+    // Construction du label pour le véhicule
+    const vehicleLabel = vehicle.licenseplate;
+
+    // Récupération de l'équipe actuelle (la première équipe dans vehicle.teams)
+    let currentTeamId: string | null = null;
+    if (vehicle.teams) {
+      const teamsEntries = Object.entries(vehicle.teams);
+      const today = new Date();
+      for (const [rangeKey, team] of teamsEntries) {
+        const match = rangeKey.match(/start=([^,]+),\s*end=([^)]+)/);
+        if (match) {
+          const startDate = new Date(match[1].trim());
+          const endDate = (match[2].trim() === 'null')
+            ? new Date(9999, 0, 1)
+            : new Date(match[2].trim());
+          if (today >= startDate && today <= endDate) {
+            currentTeamId = team.id ? team.id.toString() : null;
+            break;
+          }
+        } else {
+          console.warn("Impossible de parser la plage de temps à partir de :", rangeKey);
+        }
+      }
+    }
+
+    // Configuration dynamique des actions pour le véhicule
+    const dynamicComponents = {
+      Actions: [
+        {
+          compClass: CompOpenerButtonComponent,
+          inputs: {
+            label: 'Modifier ' + vehicle.licenseplate,
+            drawerOptions: {
+              headerTitle: 'Édition du véhicule',
+              closeConfirmationMessage: 'Voulez-vous vraiment fermer ce panneau ?',
+              child: {
+                compClass: VehicleFormComponent,
+                inputs: { vehicleId: vehicle.id }
+              }
+            }
+          }
+        },
+        {
+          compClass: EntityDeleteButtonComponent,
+          inputs: {
+            label: 'Supprimer ' + vehicle.licenseplate,
+            entityId: vehicle.id,
+            entityService: this, // référence à VehicleService
+            confirmationMessage: 'Voulez-vous vraiment supprimer ce véhicule ?',
+            onError: (err: any) => {
+              console.error("Erreur lors de la suppression pour le véhicule", vehicle.id, err);
+            }
+          }
+        }
+      ]
+    };
+
+    return {
+      data: {
+        id: vehicle.id,
+        licensePlate: vehicle.licenseplate,
+        externalID: vehicle.externalId,
+        engine: vehicle.engine,
+        energy: vehicle.energy,
+        category: vehicle.category ? vehicle.category.label : '',
+        validated: vehicle.validated ? "Actif" : "Inactif",
+        parentId: currentTeamId,
+        dynamicComponents: dynamicComponents
+      },
+      leaf: true,
+      expanded: false
+    } as TreeNode;
+  }
+
   create(entity: dto.VehicleForm): Observable<dto.VehicleDTO> {
     return this.http.post<dto.VehicleDTO>(this.baseUrl, entity);
   }
 
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  delete(id: string): Observable<dto.VehicleDTO> {
+    return this.http.delete<dto.VehicleDTO>(`${this.baseUrl}/${id}`);
   }
 
   getById(id: string): Observable<dto.VehicleDTO> {

@@ -98,9 +98,6 @@ export class VehicleFormComponent implements OnInit {
   public formDescription!: IFormDescription;
   public mode: 'create' | 'update' = 'create';
 
-  // Pour le formulaire d'affectation de conducteur (reste inchangé ici)
-  public driverAffectationFormDescription!: IFormDescription;
-
   constructor(
     public vehicleService: VehicleService,
     private notificationService: NotificationService,
@@ -111,11 +108,9 @@ export class VehicleFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.vehicleId != null) {
-      // Mode édition
+    if (this.vehicleId) {
       this.loadExistingVehicle(this.vehicleId);
     } else {
-      // Mode création
       this.initForCreate();
     }
   }

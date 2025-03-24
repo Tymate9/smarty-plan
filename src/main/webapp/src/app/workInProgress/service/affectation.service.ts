@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import {IEntityService} from "../CRUD/ientity-service";
+import {CrudEvent, IEntityService} from "../CRUD/ientity-service";
 import {dto} from "../../../habarta/dto";
-import {Observable, of} from "rxjs";
+import {Observable, of, Subject} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import AffectationDTO = dto.AffectationDTO;
 import AffectationForm = dto.AffectationForm;
 import DriverDTO = dto.DriverDTO;
 import TeamDTO = dto.TeamDTO;
 import VehicleDTO = dto.VehicleDTO;
+import {DrawerOptions} from "../drawer/drawer.component";
+import {TreeNode} from "primeng/api";
 
 /**
  * Service générique d'affectation.
@@ -21,8 +23,40 @@ export abstract class AffectationService<S, T> implements IEntityService<Affecta
 
   protected constructor(protected readonly http: HttpClient) {}
 
+  private _crudEvents: Subject<CrudEvent<AffectationDTO<S, T>>> = new Subject<CrudEvent<AffectationDTO<S, T>>>();
+  public crudEvents$: Observable<CrudEvent<AffectationDTO<S, T>>> = this._crudEvents.asObservable();
+  notifyCrudEvent(event: CrudEvent<AffectationDTO<S, T>>): void {
+    this._crudEvents.next(event);
+  }
+
   getById(id: string): Observable<AffectationDTO<S, T>> {
     return this.http.get<AffectationDTO<S, T>>(`${this.baseUrl}/${id}`);
+  }
+
+  getDrawerOptions(id: any | null): DrawerOptions {
+    if (!id) {
+      return {
+        headerTitle: 'Créer une affectation',
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: AffectationForm,
+          inputs: {
+            vehicleId: '',
+          }
+        }
+      };
+    } else {
+      return {
+        headerTitle: `Édition une affectation`,
+        closeConfirmationMessage: 'Voulez-vous fermer ce panneau ?',
+        child: {
+          compClass: AffectationForm,
+          inputs: {
+            vehicleId: id
+          }
+        }
+      };
+    }
   }
 
   create(entity: AffectationForm): Observable<AffectationDTO<S, T>> {
@@ -37,14 +71,25 @@ export abstract class AffectationService<S, T> implements IEntityService<Affecta
     return this.http.put<AffectationDTO<S, T>>(`${this.baseUrl}/${affectationId}`, entity);
   }
 
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  delete(id: string): Observable<AffectationDTO<S, T>> {
+    return this.http.delete<AffectationDTO<S, T>>(`${this.baseUrl}/${id}`);
   }
 
   getAuthorizedData(): Observable<AffectationDTO<S, T>[]> {
     return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list`);
   }
 
+  // Nouvelle méthode pour récupérer les affectations filtrées par subject
+  listBySubject(subjectId: string): Observable<AffectationDTO<S, T>[]> {
+    return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list/subject`, { params: { subjectId } });
+  }
+
+  // Nouvelle méthode pour récupérer les affectations filtrées par target
+  listByTarget(targetId: string): Observable<AffectationDTO<S, T>[]> {
+    return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list/target`, { params: { targetId } });
+  }
+
+  // TODO(Toute ces méthode sont vide il faut prendre le temps de les développer et de leur trouver une utilisation correct ou alors de modifier l'interface pour la séparer en plusieurs interfaces/factory)
   getCount(): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/count`);
   }
@@ -61,14 +106,8 @@ export abstract class AffectationService<S, T> implements IEntityService<Affecta
     return of([]);
   }
 
-  // Nouvelle méthode pour récupérer les affectations filtrées par subject
-  listBySubject(subjectId: string): Observable<AffectationDTO<S, T>[]> {
-    return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list/subject`, { params: { subjectId } });
-  }
-
-  // Nouvelle méthode pour récupérer les affectations filtrées par target
-  listByTarget(targetId: string): Observable<AffectationDTO<S, T>[]> {
-    return this.http.get<AffectationDTO<S, T>[]>(`${this.baseUrl}/list/target`, { params: { targetId } });
+  buildTreeLeaf(entity: dto.AffectationDTO<S, T>): TreeNode {
+    return {} as TreeNode;
   }
 }
 

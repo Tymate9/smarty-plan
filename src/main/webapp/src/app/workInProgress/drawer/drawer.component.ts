@@ -39,8 +39,7 @@ export interface DrawerOptions {
   imports: [
     PrimeTemplate,
     NgIf,
-    Drawer,
-    NgClass
+    Drawer
   ],
   providers: [
     MessageService

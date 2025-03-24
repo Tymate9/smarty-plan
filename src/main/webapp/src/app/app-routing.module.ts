@@ -9,7 +9,6 @@ import {EntityAdminComponent} from "./workInProgress/entityAdminModule/entity-ad
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
 import {DriverFormComponent} from "./workInProgress/CRUD/driver-Form/driver-form.component";
-import {VehicleFormComponent} from "./workInProgress/CRUD/vehicle-form/vehicle-form.component";
 
 export const routes: Routes = [
   {

@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {FormInputUtils, IFormInput} from "../iform-input";
-import { IEntityService } from "../ientity-service";
+import {CrudEventType, IEntityService} from "../ientity-service";
 import {IFormDescription} from "../iform-description";
-import {Subscription} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@angular/common";
 import {AutocompleteInputComponent} from "../../autocomplete-input/autocomplete-input.component";
 
@@ -179,6 +179,9 @@ export class EntityFormComponent implements OnInit, OnChanges {
 
   public onSubmit(): void {
     if (this.entityForm.valid) {
+      // En mode update, sauvegarder une copie de l'entité d'origine
+      const originalEntity = this.mode === 'update' ? { ...this.entity } : null;
+
       const updatedEntity: any = { ...(this.entity || {}) };
       for (const input of this.formDescription.formInputs) {
         updatedEntity[input.name] = this.entityForm.get(input.name)?.value;
@@ -189,29 +192,47 @@ export class EntityFormComponent implements OnInit, OnChanges {
       if (this.formDescription.transformToForm) {
         finalEntity = this.formDescription.transformToForm(updatedEntity);
         if (this.mode === 'create') {
-          // Si en mode création, forcer l'id à null
+          // En mode création, forcer l'id à null
           finalEntity.id = null;
         }
       }
 
-      // Ajout du log pour vérifier le payload
+      // Affichage de debug du payload
       console.log('Payload envoyé:', finalEntity);
 
       if (this.entityService) {
-        //console.log("finalEntity \n", finalEntity)
-        const request = this.mode === 'update'
-          ? this.entityService.update(finalEntity)
-          : this.entityService.create(finalEntity);
+        let request: Observable<any>;
+        if (this.mode === 'update') {
+          request = this.entityService.update(finalEntity);
+        } else {
+          request = this.entityService.create(finalEntity);
+        }
 
         request.subscribe({
-          next: response => this.receiveResponse.emit(response),
+          next: response => {
+            // Notification uniquement en cas de succès
+            if (this.mode === 'update') {
+              this.entityService?.notifyCrudEvent({
+                type: CrudEventType.UPDATE,
+                oldData: originalEntity,
+                newData: response
+              });
+            } else {
+              this.entityService?.notifyCrudEvent({
+                type: CrudEventType.CREATE,
+                oldData: null,
+                newData: response
+              });
+            }
+            this.receiveResponse.emit(response);
+          },
           error: err => this.receiveResponse.emit({ error: err })
         });
       } else {
         this.receiveResponse.emit(finalEntity);
       }
     } else {
-      //console.log('Formulaire invalide :', this.entityForm.errors);
+      console.error('Formulaire invalide :', this.entityForm.errors);
     }
   }
 

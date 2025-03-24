@@ -1,18 +1,12 @@
 package net.enovea.vehicle.vehicleTeam
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.inject.Inject
 import jakarta.persistence.*
-import net.enovea.driver.DriverEntity
-import net.enovea.workInProgress.affectationCRUD.IAffectationEntity
 import net.enovea.team.TeamEntity
 import net.enovea.team.TeamMapper
 import net.enovea.team.TeamDTO
 import net.enovea.vehicle.VehicleEntity
-import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
-import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity.Companion
-import net.enovea.vehicle.vehicleDriver.VehicleDriverId
 import net.enovea.workInProgress.affectationCRUD.AffectationForm
 import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
 import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity

@@ -1,24 +1,22 @@
-import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {IEntityService} from "../../CRUD/ientity-service";
 import {dto} from "../../../../habarta/dto";
 import {DrawerComponent} from "../../drawer/drawer.component";
-import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from "@angular/common";
 import {TeamFormComponent} from "../../CRUD/team-form/team-form.component";
+import {LoadingService} from "../../service/loading.service";
+import {ProgressSpinner} from "primeng/progressspinner";
 
 @Component({
   selector: 'app-entity-stats',
   template: `
+    <p-progressSpinner *ngIf="(loadingService.loading$ | async)"></p-progressSpinner>
     <div class="stats-container">
       <!-- Affichage du titre complet si pas en chargement/erreur -->
-      <h4 *ngIf="!loading && !errorMsg">
+      <h4 *ngIf="!errorMsg">
         Statistiques pour {{ entityName }}
         calculées à la date de {{ statsDate | date:'medium' }}
       </h4>
-
-      <!-- État : chargement -->
-      <div *ngIf="loading" class="loading">
-        Chargement des stats...
-      </div>
 
       <!-- État : erreur -->
       <div *ngIf="errorMsg" class="error">
@@ -26,7 +24,7 @@ import {TeamFormComponent} from "../../CRUD/team-form/team-form.component";
       </div>
 
       <!-- Affichage des "cards" si on a des stats -->
-      <div class="cards-grid" *ngIf="!loading && !errorMsg">
+      <div class="cards-grid" *ngIf="!errorMsg">
         <div class="stat-card" *ngFor="let s of stats">
           <!-- Icône par défaut -->
           <i class="pi pi-chart-line stat-icon"></i>
@@ -48,7 +46,9 @@ import {TeamFormComponent} from "../../CRUD/team-form/team-form.component";
   imports: [
     DatePipe,
     NgIf,
-    NgForOf
+    NgForOf,
+    ProgressSpinner,
+    AsyncPipe
   ],
   styles: [`
     .stats-container {
@@ -117,41 +117,48 @@ import {TeamFormComponent} from "../../CRUD/team-form/team-form.component";
       font-size: 0.95rem;
       color: #555;
     }
-  `]
+  `],
+  providers: [LoadingService]
 })
-export class EntityStatsComponent implements OnInit {
+export class EntityStatsComponent implements OnInit, OnChanges {
   @Input() entityName: string = '';
   @Input() entityService?: IEntityService<any, any>;
 
-  loading: boolean = false;
   errorMsg: string | null = null;
 
   // Date extraite du DTO (ex. "2023-12-31T23:59:59")
   statsDate: Date = new Date();
   stats: Array<{ label: string; value: number; description: string }> = [];
 
+  constructor(
+    public loadingService: LoadingService
+  ) {}
+
   ngOnInit(): void {
-    this.loadData();
+    setTimeout(() => {
+      this.loadData(); // => setLoading(true) dedans
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['entityService'] && !changes['entityService'].firstChange) {
-      this.loadData();
+      setTimeout(() => {
+        this.loadData(); // => setLoading(true) dedans
+      });
     }
   }
 
   loadData():void{
+
     if (!this.entityService) {
       this.errorMsg = 'Aucun service fourni pour charger les stats.';
       return;
     }
-
-    this.loading = true;
+    this.loadingService.setLoading(true);
 
     // 1) Récupérer les stats (contient date + tableau d’objets stats)
     this.entityService.getStats().subscribe({
       next: (dto: dto.StatsDTO) => {
-        this.loading = false;
         if (dto) {
           // On suppose que dto = { date: '2023-12-31T23:59:59', stats: [...] }
           this.statsDate = dto.date ? new Date(dto.date) : new Date();
@@ -160,8 +167,10 @@ export class EntityStatsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur getStats:', err);
-        this.loading = false;
         this.errorMsg = 'Erreur lors de la récupération des stats.';
+      },
+      complete: () => {
+        this.loadingService.setLoading(false);
       }
     });
   }

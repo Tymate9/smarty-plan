@@ -10,9 +10,7 @@ import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/e
 import {MessageService, TreeNode} from "primeng/api";
 import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
 import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
-import {
-  EntityDeleteButtonComponent
-} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
+import { EntityDeleteButtonComponent } from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
 import {DrawerOptions} from "../../workInProgress/drawer/drawer.component";
 
 @Injectable({
@@ -197,8 +195,35 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
         entityId: team.id,
         entityService: this,
         confirmationMessage: 'Voulez-vous vraiment supprimer l\'équipe ' + team.label + ' ?',
+        onSuccess: (response: any) => {
+          console.log(response)
+          this.messageService.add({
+            severity: 'success',
+            summary: "Suppression réussie",
+            detail: `Le conducteur ${response.firstName} ${response.lastName} a été supprimé avec succès.`
+          });
+        },
         onError: (err: any) => {
-          this.messageService.add({severity:'error', summary:'Erreur', detail: err?.message ?? 'Une erreur est survenue.'});
+          const status: number = err?.status ?? 500;
+          let summary: string;
+          let detail: string;
+
+          switch (status) {
+            case 404:
+              summary = 'Erreur 404 - Non trouvé';
+              detail = "Le groupe demandée n'existe pas.";
+              break;
+            case 409:
+              summary = 'Erreur 409 - Conflit';
+              detail = "Conflit de données : le groupe est liée à d'autres entités et ne peut être supprimée.";
+              break;
+            default:
+              summary = 'Erreur 500 - Erreur interne';
+              detail = "Une erreur interne est survenue, veuillez réessayer plus tard.";
+              break;
+          }
+
+          this.messageService.add({ severity: 'error', summary: summary, detail: detail });
         }
       }
     };

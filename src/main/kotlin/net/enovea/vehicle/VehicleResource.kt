@@ -94,8 +94,29 @@ class VehicleResource(
     @Path("/{id}")
     @Transactional
     override fun delete(@PathParam("id") id: String): Response {
-        val deletedVehicle = vehicleService.delete(id)
-        return Response.ok(deletedVehicle).build()
+        return try {
+            val deletedVehicle = vehicleService.delete(id)
+            Response.ok(deletedVehicle).build()
+        } catch (ex: NotFoundException) {
+            Response.status(Response.Status.NOT_FOUND)
+                .entity("Vehicle with id=$id not found")
+                .build()
+        } catch (ex: Exception) {
+            val conflict = when {
+                ex is org.hibernate.exception.ConstraintViolationException -> true
+                ex.cause is org.hibernate.exception.ConstraintViolationException -> true
+                else -> false
+            }
+            if (conflict) {
+                Response.status(Response.Status.CONFLICT)
+                    .entity("Foreign key conflict: Vehicle cannot be deleted")
+                    .build()
+            } else {
+                Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal server error: ${ex.message}")
+                    .build()
+            }
+        }
     }
 
     @GET

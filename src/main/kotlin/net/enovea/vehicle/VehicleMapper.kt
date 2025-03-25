@@ -1,6 +1,7 @@
 package net.enovea.vehicle
 
 import jakarta.inject.Inject
+import jakarta.transaction.Transactional
 import net.enovea.device.*
 import net.enovea.device.deviceData.DeviceDataStateMapper
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
@@ -22,8 +23,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import org.mapstruct.Context
-import org.mapstruct.factory.Mappers
-import java.time.Instant
 
 @Mapper(componentModel = "cdi" ,uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class, DeviceDataStateMapper::class])
 abstract class VehicleMapper {

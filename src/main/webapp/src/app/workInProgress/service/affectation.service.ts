@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
-import {CrudEvent, IEntityService} from "../CRUD/ientity-service";
+import {Injectable} from '@angular/core';
+import {CrudEvent, CrudEventType, IEntityService} from "../CRUD/ientity-service";
 import {dto} from "../../../habarta/dto";
 import {Observable, of, Subject} from "rxjs";
 import {HttpClient} from "@angular/common/http";
+import {DrawerOptions} from "../drawer/drawer.component";
+import {TreeNode} from "primeng/api";
+import {tap} from "rxjs/operators";
 import AffectationDTO = dto.AffectationDTO;
 import AffectationForm = dto.AffectationForm;
 import DriverDTO = dto.DriverDTO;
 import TeamDTO = dto.TeamDTO;
 import VehicleDTO = dto.VehicleDTO;
-import {DrawerOptions} from "../drawer/drawer.component";
-import {TreeNode} from "primeng/api";
 
 /**
  * Service générique d'affectation.
@@ -68,7 +69,7 @@ export abstract class AffectationService<S, T> implements IEntityService<Affecta
     if (!affectationId) {
       throw new Error("AffectationService.update() : l'id de l'affectation est manquant.");
     }
-    return this.http.put<AffectationDTO<S, T>>(`${this.baseUrl}/${affectationId}`, entity);
+    return this.http.put<AffectationDTO<S, T>>(`${this.baseUrl}/${affectationId}`, entity)
   }
 
   delete(id: string): Observable<AffectationDTO<S, T>> {

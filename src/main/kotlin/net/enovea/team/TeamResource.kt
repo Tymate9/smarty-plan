@@ -17,7 +17,9 @@ import net.enovea.team.teamCategory.TeamCategoryDTO
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Authenticated
-class TeamResource(private val teamService: TeamService, private val validator: Validator) :
+class TeamResource(
+    private val teamService: TeamService,
+    private val validator: Validator,) :
     ICRUDResource<TeamForm, TeamDTO, Int> {
 
     @GET
@@ -95,10 +97,29 @@ class TeamResource(private val teamService: TeamService, private val validator: 
     @Path("/{id}")
     @Transactional
     override fun delete(@PathParam("id") id: Int): Response {
-        // NotFoundException => 404 par défaut
-        val deletedTeam = teamService.delete(id)
-        // On renvoie le TeamDTO supprimé (ex. pour l'afficher dans le front, ou annuler l'action)
-        return Response.ok(deletedTeam).build()
+        return try {
+            val deletedTeam = teamService.delete(id)
+            Response.ok(deletedTeam).build()
+        } catch (ex: NotFoundException) {
+            Response.status(Response.Status.NOT_FOUND)
+                .entity("Team with id=$id not found")
+                .build()
+        } catch (ex: Exception) {
+            val conflict = when {
+                ex is org.hibernate.exception.ConstraintViolationException -> true
+                ex.cause is org.hibernate.exception.ConstraintViolationException -> true
+                else -> false
+            }
+            if (conflict) {
+                Response.status(Response.Status.CONFLICT)
+                    .entity("Foreign key conflict: Team cannot be deleted")
+                    .build()
+            } else {
+                Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal server error: ${ex.message}")
+                    .build()
+            }
+        }
     }
 
     @GET

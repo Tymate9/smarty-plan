@@ -143,7 +143,8 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   constructor(
     private cdr: ChangeDetectorRef,
-    public loadingService: LoadingService) {}
+    public loadingService: LoadingService
+  ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
@@ -177,6 +178,7 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   private subscribeToCrudEvents(): void {
     this.crudSubscription = this.entityService!.crudEvents$.subscribe(event => {
+      console.log("Event received in entityTree : ", event)
       switch (event.type) {
         case CrudEventType.CREATE:
           this.handleCreateEvent(event.newData);
@@ -212,6 +214,8 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
   }
 
   private handleUpdateEvent(oldData: any, updatedData: any): void {
+    console.log("oldData received in update event", oldData)
+    console.log("oldData received in update event", updatedData)
     if (!updatedData || updatedData.id === undefined || updatedData.id === null) {
       console.error("Mise à jour impossible : l'objet mis à jour ne possède aucun id valide.", updatedData);
       return;
@@ -227,7 +231,7 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
       if (!removed) {
         console.warn("Impossible de trouver l'ancien nœud à supprimer pour la mise à jour (id=", oldData.id, ")");
       } else {
-        console.log('[handleUpdateEvent] Ancien nœud supprimé pour id', oldData.id);
+        console.warn('[handleUpdateEvent] Ancien nœud supprimé pour id', oldData.id);
       }
     }
 
@@ -283,25 +287,25 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   private updateTreeWithNewLeaf(newLeaf: TreeNode): void {
     const groupId = newLeaf.data.parentId ? newLeaf.data.parentId.toString() : "-1";
-    // Chercher le groupe correspondant dans l'arbre
-    let group = this.findGroupInTree(this.treeData, groupId);
 
-    if (!group) {
+    // Recherche du groupe correspondant dans l'arbre
+    let group = this.findGroupInTree(this.treeData, groupId);
+    if (group) {
+    } else {
       group = {
         label: (groupId === "-1") ? "Orphan" : `Groupe ${groupId}`,
         data: {
-          groupeId: groupId
+          groupId: groupId
         },
         expanded: false,
         children: []
       };
       this.treeData.unshift(group);
-    } else {
     }
 
-    // Ajouter la nouvelle feuille dans le groupe trouvé/créé
+    // Ajout de la nouvelle feuille dans le groupe
     group.children?.unshift(newLeaf);
-    // Forcer la réassignation pour que PrimeNG détecte le changement
+    // Réassignation pour déclencher la détection des changements
     this.treeData = [...this.treeData];
     this.cdr.detectChanges();
 
@@ -312,6 +316,7 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   private findGroupInTree(nodes: TreeNode[], groupId: string): TreeNode | undefined {
     for (const node of nodes) {
+
       if (node.data && node.data.groupId?.toString() === groupId.toString()) {
         return node;
       }

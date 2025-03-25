@@ -44,22 +44,19 @@ data class VehicleEntity(
 
     @OneToMany(
         fetch = FetchType.LAZY,
-        mappedBy = "vehicle",
-        cascade = []
+        mappedBy = "vehicle"
         )
     val vehicleDevices: List<DeviceVehicleInstallEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
-        mappedBy = "vehicle",
-        cascade = []
+        mappedBy = "vehicle"
         )
     val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
-        mappedBy = "vehicle",
-        cascade = []
+        mappedBy = "vehicle"
         )
     val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
 
@@ -209,7 +206,6 @@ data class VehicleEntity(
 
             return panacheQuery.list()
         }
-
 
 
         private fun getFiltersRequest(

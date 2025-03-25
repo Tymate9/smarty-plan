@@ -5,9 +5,7 @@ import {dto} from "../../../habarta/dto";
 import {CrudEvent, IEntityService} from "../../workInProgress/CRUD/ientity-service";
 import {MessageService, TreeNode} from "primeng/api";
 import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
-import {
-  EntityDeleteButtonComponent
-} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
+import {EntityDeleteButtonComponent} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
 import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
 import DriverDTO = dto.DriverDTO;
 import DriverForm = dto.DriverForm;
@@ -15,7 +13,6 @@ import GenericNodeDTO = dto.GenericNodeDTO;
 import TeamDTO = dto.TeamDTO;
 import {DriverFormComponent} from "../../workInProgress/CRUD/driver-Form/driver-form.component";
 import {DrawerOptions} from "../../workInProgress/drawer/drawer.component";
-import {TeamFormComponent} from "../../workInProgress/CRUD/team-form/team-form.component";
 
 @Injectable({
   providedIn: 'root'
@@ -218,8 +215,35 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
             entityId: driver.id,
             entityService: this, // Ici, le service est le DriverService
             confirmationMessage: 'Voulez-vous vraiment supprimer ce conducteur ?',
+            onSuccess: (response: any) => {
+              console.log(response)
+              this.messageService.add({
+                severity: 'success',
+                summary: "Suppression réussie",
+                detail: `Le conducteur ${response.firstName} ${response.lastName} a été supprimé avec succès.`
+              });
+            },
             onError: (err: any) => {
-              console.error("Erreur lors de la suppression pour le driver", driver.id, err);
+              const status: number = err?.status ?? 500;
+              let summary: string;
+              let detail: string;
+
+              switch (status) {
+                case 404:
+                  summary = 'Erreur 404 - Non trouvé';
+                  detail = "Le conducteur demandée n'existe pas.";
+                  break;
+                case 409:
+                  summary = 'Erreur 409 - Conflit';
+                  detail = "Conflit de données : le conducteur est liée à d'autres entités et ne peut être supprimée.";
+                  break;
+                default:
+                  summary = 'Erreur 500 - Erreur interne';
+                  detail = "Une erreur interne est survenue, veuillez réessayer plus tard.";
+                  break;
+              }
+
+              this.messageService.add({ severity: 'error', summary: summary, detail: detail });
             }
           }
         }

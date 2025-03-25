@@ -33,8 +33,9 @@ class TeamService (
     private val teamMapper: TeamMapper,
     private val teamCategoryMapper: TeamCategoryMapper,
     private val driverMapper: DriverMapper,
-    private val vehicleMapper: VehicleMapper
-) : ICRUDService<TeamForm, TeamDTO, Int> {
+    private val vehicleMapper: VehicleMapper,
+    private val entityManager: EntityManager,
+    ) : ICRUDService<TeamForm, TeamDTO, Int> {
 
     fun getAllTeamCategory() : List<TeamCategoryDTO>{
         val teamCategories = TeamCategoryEntity.listAll()
@@ -93,16 +94,13 @@ class TeamService (
         return teamMapper.toDto(existingEntity)
     }
 
-    /**
-     * Supprime une Team via son ID, si elle existe.
-     */
     override fun delete(id: Int): TeamDTO {
-        val existingEntity = TeamEntity.findById(id)
+        val entity = TeamEntity.findById(id)
             ?: throw NotFoundException("Team with id=$id not found")
-
-        val dtoBeforeDelete = teamMapper.toDto(existingEntity)
-        existingEntity.delete()
-
+        val dtoBeforeDelete = teamMapper.toDto(entity)
+        val query = entityManager.createNativeQuery("DELETE FROM team WHERE id = ?")
+        query.setParameter(1, id)
+        query.executeUpdate()
         // On retourne le DTO de l'entité supprimée
         return dtoBeforeDelete
     }

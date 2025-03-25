@@ -3,11 +3,9 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {map, Observable, of, Subject} from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
-import {TreeNode} from "primeng/api";
+import {MessageService, TreeNode} from "primeng/api";
 import {CrudEvent, IEntityService} from "../../workInProgress/CRUD/ientity-service";
-import {
-  EntityDeleteButtonComponent
-} from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
+import { EntityDeleteButtonComponent } from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
 import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
 import GenericNodeDTO = dto.GenericNodeDTO;
 import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
@@ -73,7 +71,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
 
   private readonly baseUrl = '/api/vehicles';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient,private messageService: MessageService) {}
 
   // Méthode pour récupérer tous les véhicules
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
@@ -448,8 +446,36 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
             entityId: vehicle.id,
             entityService: this, // référence à VehicleService
             confirmationMessage: 'Voulez-vous vraiment supprimer ce véhicule ?',
+            onSuccess: (response: any) => {
+              console.log(response)
+              this.messageService.add({
+                severity: 'success',
+                summary: "Suppression réussie",
+                detail: `Le véhicule ${response.externalId} a été supprimé avec succès.`
+              });
+            },
             onError: (err: any) => {
-              console.error("Erreur lors de la suppression pour le véhicule", vehicle.id, err);
+              const status: number = err?.status ?? 500;
+              let summary: string;
+              let detail: string;
+              console.log(err)
+
+              switch (status) {
+                case 404:
+                  summary = 'Erreur 404 - Non trouvé';
+                  detail = "La véhicule demandés n'existe pas.";
+                  break;
+                case 409:
+                  summary = 'Erreur 409 - Conflit';
+                  detail = "Conflit de données : la véhicule est liée à d'autres entités et ne peut être supprimée.";
+                  break;
+                default:
+                  summary = 'Erreur 500 - Erreur interne';
+                  detail = "Une erreur interne est survenue, veuillez réessayer plus tard.";
+                  break;
+              }
+
+              this.messageService.add({ severity: 'error', summary: summary, detail: detail });
             }
           }
         }

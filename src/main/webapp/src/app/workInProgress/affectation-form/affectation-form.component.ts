@@ -6,7 +6,7 @@ import { DatePipe } from '@angular/common';
 import {EntityFormComponent} from "../CRUD/entity-form/entity-form.component";
 import {FormsModule} from "@angular/forms";
 import {AffectationService} from "../service/affectation.service";
-import {IEntityService} from "../CRUD/ientity-service";
+import {CrudEventType, IEntityService} from "../CRUD/ientity-service";
 import {dto} from "../../../habarta/dto";
 import AffectationDTO = dto.AffectationDTO;
 import AffectationForm = dto.AffectationForm;
@@ -69,7 +69,7 @@ import {AffectationValidator} from "./affectation-validator";
               [entityService]="affectationService"
               label="Supprimer"
               confirmationMessage="Voulez-vous vraiment supprimer cette affectation ?"
-              (deleteSuccess)="onDeleteSuccess()"
+              (deleteSuccess)="onDeleteSuccess($event)"
               (deleteError)="onDeleteError($event)"
             ></app-entity-delete-button>
           </td>
@@ -90,6 +90,7 @@ export class AffectationFormComponent implements OnInit {
   @Input() optionService!: IEntityService<any, any>;
   @Input() mainEntityRole: 'subject' | 'target' = 'subject';
   @Input() optionExtractor!: OptionExtractor<any>;
+  @Input() serviceToNotify: IEntityService<any,any>
   @Output() refreshAffectations = new EventEmitter<void>();
 
   // Liste des affectations affichées dans le tableau.
@@ -187,8 +188,11 @@ export class AffectationFormComponent implements OnInit {
       if (this.formMode === 'create') {
         this.notificationService.success('Affectation créée', 'La nouvelle affectation a été créée.');
       } else {
+        console.log("Voici la response reçu de la part de entityForm au sein d'affectationForm dans la partie update", response)
+        console.log("Voici donc newData", response.subject)
         this.notificationService.success('Affectation mise à jour', 'L\'affectation a été mise à jour.');
       }
+      this.sendNotification(response)
       this.onCreateNew();
       this.loadAffectations();
     } else if (response && response.error) {
@@ -298,13 +302,32 @@ export class AffectationFormComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  onDeleteSuccess(): void {
+  onDeleteSuccess(response : any): void {
     this.notificationService.success('Suppression réussie', 'L\'affectation a été supprimée.');
-    // Si l'affectation supprimée est celle en cours d'édition, on réinitialise le formulaire en mode création.
+    this.sendNotification(response)
     if (this.formMode === 'update' && this.selectedAffectation && this.selectedAffectation.id) {
       this.onCreateNew();
     }
     this.loadAffectations();
+  }
+
+  sendNotification(response:any){
+    this.serviceToNotify?.getById(
+      this.mainEntityRole === 'subject' ? response.subject.id : response.target.id
+    ).subscribe({
+      next: (result) => {
+        // La réponse du getById est utilisée comme newData dans le crudEvent
+        this.serviceToNotify?.notifyCrudEvent({
+          type: CrudEventType.UPDATE,
+          oldData: { id: this.subjectId },
+          newData: result
+        });
+      },
+      error: (err) => {
+        console.error('Erreur lors du getById:', err);
+        this.notificationService.error("Erreur serveur", "Impossible de mettre à jour l'arbre de données, veuillez mettre à jour la page manuellement.");
+      }
+    });
   }
 
   onDeleteError(error: any): void {

@@ -1,5 +1,6 @@
 package net.enovea.driver
 
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import java.sql.Timestamp
 import java.time.LocalTime
@@ -9,7 +10,6 @@ import net.enovea.workInProgress.driverCRUD.DriverForm
 import net.enovea.workInProgress.common.Stat
 import net.enovea.workInProgress.common.StatsDTO
 import net.enovea.team.TeamEntity
-import net.enovea.team.TeamMapper
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.VehicleEntity
 import net.enovea.workInProgress.common.ICRUDService
@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 
 class DriverService(
     private val driverMapper: DriverMapper,
-    private val teamMapper: TeamMapper,
+    private val entityManager: EntityManager,
 ) : ICRUDService<DriverForm, DriverDTO, Int> {
 
     // Méthodes CRUD implémentées via l'interface ICRUDService
@@ -55,7 +55,9 @@ class DriverService(
     override fun delete(id: Int): DriverDTO {
         val entity = DriverEntity.findById(id) ?: throw NotFoundException("Driver not found")
         val dto = driverMapper.toDto(entity)
-        entity.delete()
+        val query = entityManager.createNativeQuery("DELETE FROM driver WHERE id = ?")
+        query.setParameter(1, id)
+        query.executeUpdate()
         return dto
     }
 

@@ -81,12 +81,17 @@ open class VehicleService(
         return vehicleMapper.toVehicleDTO(entity)
     }
 
-    @Transactional
+
     override fun delete(id: String): VehicleDTO {
         val entity = VehicleEntity.findById(id)
             ?: throw NotFoundException("Vehicle with id=$id not found")
         val dto = vehicleMapper.toVehicleDTO(entity)
-        entity.delete()
+
+        // TODO(trouver un moyen ici pour supprimer l'entité sans être obliger de passer par l'entityManager)
+        val query = entityManager.createNativeQuery("DELETE FROM vehicle WHERE id = ?")
+        query.setParameter(1, id)
+        query.executeUpdate()
+
         return dto
     }
 

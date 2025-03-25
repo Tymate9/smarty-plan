@@ -30,13 +30,6 @@ class TeamEntity(
         name = "category_id", nullable = false
     ) var category: TeamCategoryEntity? = null,
 
-    @OneToMany(
-        fetch = FetchType.LAZY,
-        mappedBy = "team",
-        cascade = []
-    )
-    val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
-
     // Colonnes persistées sous forme de String (correspondant aux colonnes de la base)
     @Column(name = "lunch_break_start", nullable = true)
     var lunchBreakStartStr: String? = null,

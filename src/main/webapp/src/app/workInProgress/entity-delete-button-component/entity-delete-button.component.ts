@@ -4,9 +4,7 @@ import { ConfirmationService } from 'primeng/api';
 import {CrudEventType, IEntityService} from "../CRUD/ientity-service";
 import {Button} from "primeng/button";
 
-/**
- * Bouton dédié à la suppression d'une entité via l'IEntityService<T, R>.
- */
+
 @Component({
   selector: 'app-entity-delete-button',
   standalone: true,
@@ -39,10 +37,15 @@ export class EntityDeleteButtonComponent {
    */
   @Input() confirmationMessage: string = 'Voulez-vous vraiment supprimer cette entité ?';
 
+
+  /**
+   * Callback (facultatif) à appeler en cas de succès.
+   */
+  @Input() onSuccess?: (response: any) => void = (response: any) => { console.log("Suppression réussie"); };
   /**
    * Callback (facultatif) à appeler en cas d'erreur.
    */
-  @Input() onError?: (error: any) => void;
+  @Input() onError?: (error: any) => void = (response: any) =>{ console.log("Suppression échouée"); };
 
   @Output() deleteSuccess = new EventEmitter<void>();
   @Output() deleteError = new EventEmitter<any>();
@@ -58,13 +61,18 @@ export class EntityDeleteButtonComponent {
         if (this.entityService && this.entityId != null) {
           this.entityService.delete(this.entityId).subscribe({
             next: (deletedEntity) => {
+              console.log('[EntityDeleteButton] Réponse HTTP de la suppression:', deletedEntity);
               // Utiliser la réponse du delete comme oldData, newData = null
+              if (this.onSuccess)
+              {
+                this.onSuccess(deletedEntity)
+              }
               this.entityService?.notifyCrudEvent({
                 type: CrudEventType.DELETE,
                 oldData: deletedEntity,
                 newData: null
               });
-              this.deleteSuccess.emit();
+              this.deleteSuccess.emit(deletedEntity);
             },
             error: (err: any) => {
               console.error('Erreur lors de la suppression', err);

@@ -221,6 +221,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
                 newData: response
               });
             }
+            console.log("Je vais emettre la réponse : ", response)
             this.receiveResponse.emit(response);
           },
           error: err => this.receiveResponse.emit({ error: err })

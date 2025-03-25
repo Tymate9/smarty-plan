@@ -18,7 +18,8 @@ import jakarta.validation.Validator
 class DriverResource(
     private val driverService: DriverService,
     private val teamService: TeamService,
-    private val validator: Validator ) : ICRUDResource<DriverForm, DriverDTO, Int> {
+    private val validator: Validator
+) : ICRUDResource<DriverForm, DriverDTO, Int> {
 
     @GET
     fun getDrivers(): Response {
@@ -110,7 +111,28 @@ class DriverResource(
     @Path("/{id}")
     @Transactional
     override fun delete(@PathParam("id") id: Int): Response {
-        val deletedDriver = driverService.delete(id)
-        return Response.ok(deletedDriver).build()
+        return try {
+            val deletedDriver = driverService.delete(id)
+            Response.ok(deletedDriver).build()
+        } catch (ex: NotFoundException) {
+            Response.status(Response.Status.NOT_FOUND)
+                .entity("Driver with id=$id not found")
+                .build()
+        } catch (ex: Exception) {
+            val conflict = when {
+                ex is org.hibernate.exception.ConstraintViolationException -> true
+                ex.cause is org.hibernate.exception.ConstraintViolationException -> true
+                else -> false
+            }
+            if (conflict) {
+                Response.status(Response.Status.CONFLICT)
+                    .entity("Foreign key conflict: Driver cannot be deleted")
+                    .build()
+            } else {
+                Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal server error: ${ex.message}")
+                    .build()
+            }
+        }
     }
 }

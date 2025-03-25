@@ -51,6 +51,7 @@ import DriverForm = dto.DriverForm;
           [optionService]="teamService"
           [mainEntityRole]="'subject'"
           [optionExtractor]="teamOptionExtractor"
+          [serviceToNotify]="driverService"
         ></app-affectation-form>
       </p-tabPanel>
 
@@ -170,9 +171,10 @@ export class DriverFormComponent implements OnInit {
     if (response && !response.error) {
       if (this.mode === 'create') {
         if (this.manageNotifications) {
+          console.log(response)
           this.notificationService.success(
-            'Driver créé avec succès',
-            `Driver "${response.first_name} ${response.last_name}" a été créé.`
+            'Conducteur créé avec succès',
+            `Conducteur "${response.firstName} ${response.lastName}" a été créé.`
           );
         }
         this.entityCreated.emit(response);

@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {AutocompleteFormInput, FormInput, IFormInput} from "../iform-input";
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {AutocompleteFormInput, FormInput} from "../iform-input";
 import {TeamValidator} from "./team-validator";
 import {TeamService} from "../../../features/vehicle/team.service";
 import {dto} from "../../../../habarta/dto";
@@ -49,44 +49,56 @@ export class TeamFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('[TeamFormComponent] ngOnInit - teamId:', this.teamId);
     if (this.teamId != null) {
+      console.log('[TeamFormComponent] Initialisation en mode update');
       this.loadExistingTeam(this.teamId);
     } else {
+      console.log('[TeamFormComponent] Initialisation en mode create');
       this.initForCreate();
     }
   }
 
   private loadExistingTeam(id: number): void {
+    console.log('[TeamFormComponent] loadExistingTeam - id:', id);
     this.teamService.getById(id).subscribe({
       next: (teamDto) => {
+        console.log('[TeamFormComponent] loadExistingTeam - teamDto reçu:', teamDto);
         this.teamEntity = teamDto;
         this.mode = 'update';
+        console.log('[TeamFormComponent] loadExistingTeam - mode passé à update, teamEntity mis à jour');
         this.buildFormDescription(teamDto);
       },
-      error: (err) => console.error('Erreur chargement team', err)
+      error: (err) => console.error('[TeamFormComponent] Erreur lors du chargement de l\'équipe:', err)
     });
   }
 
   private initForCreate(): void {
+    console.log('[TeamFormComponent] initForCreate appelé');
     this.teamEntity = {
       id: 0,
       label: '',
       path: null,
       parentTeam: null,
       category: { id: 0, label: '' },
-      //TODO(Fix pour éviter de modifier ces heures !)
+      // TODO: Fix pour éviter de modifier ces heures !
       lunchBreakEnd: null,
       lunchBreakStart: null
     };
     this.mode = 'create';
+    console.log('[TeamFormComponent] initForCreate - teamEntity initialisé:', this.teamEntity);
     this.buildFormDescription(this.teamEntity);
   }
 
   private buildFormDescription(teamDto: TeamDTO): void {
+    console.log('[TeamFormComponent] buildFormDescription - teamDto:', teamDto);
     forkJoin({
       categories: this.teamService.getTeamCategories(),
       agencies: this.teamService.getAgencies()
     }).subscribe(({ categories, agencies }) => {
+      console.log('[TeamFormComponent] buildFormDescription - catégories récupérées:', categories);
+      console.log('[TeamFormComponent] buildFormDescription - agences récupérées:', agencies);
+
       const categoryOptions = categories.map(cat => ({ id: cat.id, label: cat.label }));
       const parentOptions = agencies.map(agency => ({ id: agency.id, label: agency.label }));
 
@@ -146,22 +158,25 @@ export class TeamFormComponent implements OnInit {
         ],
         transformFunction
       );
+      console.log('[TeamFormComponent] buildFormDescription - formDescription construit:', this.formDescription);
     });
   }
 
   public handleResponse(response: any): void {
+    console.log('[TeamFormComponent] handleResponse appelé avec response:', response);
     if (response && !response.error) {
       if (this.mode === 'create') {
         if (this.manageNotifications) {
-          // Ajout d'un détail fournissant le résumé de l'action et l'état actuel (ici, le label par exemple)
           this.notificationService.success(
             'Team créée avec succès',
             `Team "${response.label}" a été créée.`
           );
         }
         this.entityCreated.emit(response);
+        // Passage du mode create à update avec mise à jour de l'entité
         this.mode = 'update';
         this.teamEntity = response;
+        console.log('[TeamFormComponent] handleResponse - passage en mode update, teamEntity mis à jour:', this.teamEntity);
         this.buildFormDescription(response);
       } else {
         if (this.manageNotifications) {
@@ -183,3 +198,4 @@ export class TeamFormComponent implements OnInit {
     }
   }
 }
+

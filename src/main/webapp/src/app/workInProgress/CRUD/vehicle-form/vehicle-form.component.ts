@@ -57,6 +57,7 @@ import {
           [optionService]="teamService"
           [optionExtractor]="teamOptionExtractor"
           [mainEntityRole]="'subject'"
+          [serviceToNotify]="vehicleService"
         ></app-affectation-form>
       </p-tabPanel>
 
@@ -70,6 +71,7 @@ import {
           [optionService]="driverService"
           [optionExtractor]="driverOptionExtractor"
           [mainEntityRole]="'target'"
+          [serviceToNotify]="vehicleService"
         ></app-affectation-form>
       </p-tabPanel>
 

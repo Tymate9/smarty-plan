@@ -81,17 +81,14 @@ export class TeamFormComponent implements OnInit {
       path: null,
       parentTeam: null,
       category: { id: 0, label: '' },
-      // TODO: Fix pour éviter de modifier ces heures !
       lunchBreakEnd: null,
       lunchBreakStart: null
     };
     this.mode = 'create';
-    console.log('[TeamFormComponent] initForCreate - teamEntity initialisé:', this.teamEntity);
     this.buildFormDescription(this.teamEntity);
   }
 
   private buildFormDescription(teamDto: TeamDTO): void {
-    console.log('[TeamFormComponent] buildFormDescription - teamDto:', teamDto);
     forkJoin({
       categories: this.teamService.getTeamCategories(),
       agencies: this.teamService.getAgencies()
@@ -139,7 +136,9 @@ export class TeamFormComponent implements OnInit {
           label: rawEntity.label,
           path: rawEntity.path,
           parentTeam: rawEntity.parentTeam ? rawEntity.parentTeam.id : null,
-          category: rawEntity.category?.id ?? null
+          category: rawEntity.category?.id ?? null,
+          lunchBreakStartStr: "12:00:00",
+          lunchBreakEndStr: "13:30:00"
         };
       };
 

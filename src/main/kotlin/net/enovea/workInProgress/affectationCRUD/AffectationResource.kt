@@ -404,7 +404,7 @@ class AffectationResource (
     private fun parseVehicleTeamId(idStr: String): VehicleTeamId {
         val parts = idStr.split('_')
         require(parts.size == 3) {
-            "Format d'ID vehicleTeam incorrect. Attendu : vehicleId-teamId-epochTime"
+            "Format d'ID vehicleTeam incorrect. Attendu : vehicleId_teamId_epochTime"
         }
         val vehicleId = parts[0]
         val teamId    = parts[1].toInt()

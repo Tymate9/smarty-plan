@@ -34,8 +34,6 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
     client.global.set("access_token_admin", response.body.access_token);
 %}
 
-
-
 ### 2.1) CREATE : Affectation DRIVER_TEAM valide
 POST http://{{api_host}}/api/affectations/DRIVER_TEAM
 Authorization: Bearer {{access_token_admin}}

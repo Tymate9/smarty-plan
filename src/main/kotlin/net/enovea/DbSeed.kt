@@ -377,7 +377,7 @@ class DbSeed {
                     val driverKey = (lastName.uppercase() + "_" + firstName.uppercase())
                     val driver = driverMap[driverKey]
                     if (driver != null && geolocValue == "NON") {
-                        val id = DriverUntrackedPeriodId(driverId = driver.id, startDate = LocalDateTime.now())
+                        val id = DriverUntrackedPeriodId(driverId = driver.id, startDate = Timestamp(System.currentTimeMillis()))
                         val untracked = DriverUntrackedPeriodEntity(id = id, endDate = null)
                         untracked.persistAndFlush()
                     }

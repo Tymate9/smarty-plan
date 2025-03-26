@@ -16,6 +16,8 @@ import {DriverTeamAffectationService} from "../../service/affectation.service";
 import {TeamService} from "../../../features/vehicle/team.service";
 import {teamOptionExtractor} from "../../../../../../kotlin/net/enovea/workInProgress/vehicleCRUD/OptionDTOExtractor";
 import DriverForm = dto.DriverForm;
+import {PeriodFormComponent} from "../../period-form/period-form/period-form.component";
+import {DriverUpPeriodService} from "../../service/period.service";
 
 @Component({
   selector: 'app-driver-form',
@@ -25,7 +27,8 @@ import DriverForm = dto.DriverForm;
     NgIf,
     TabPanel,
     TabView,
-    AffectationFormComponent
+    AffectationFormComponent,
+    PeriodFormComponent
   ],
   template: `
     <h2>Driver Form</h2>
@@ -57,7 +60,13 @@ import DriverForm = dto.DriverForm;
 
       <!-- Onglet 3 : Période de non géolocalisation (uniquement en mode update) -->
       <p-tabPanel header="Période de non géolocalisation" [disabled]="mode === 'create'">
-        <p>Contenu pour la période de non géolocalisation.</p>
+        <app-period-form
+          *ngIf="driverEntity?.id"
+          [title]="'Période de non géolocalisation'"
+          [resourceId]="driverEntity?.id"
+          [periodService]="driverUpPeriodService"
+          [serviceToNotify]="driverService">
+        </app-period-form>
       </p-tabPanel>
     </p-tabView>
   `
@@ -78,7 +87,9 @@ export class DriverFormComponent implements OnInit {
     public driverService: DriverService,
     private notificationService: NotificationService,
     public driverTeamAffectationService: DriverTeamAffectationService,
-    public teamService: TeamService
+    public teamService: TeamService,
+    public driverUpPeriodService: DriverUpPeriodService
+
   ) {}
 
   ngOnInit(): void {

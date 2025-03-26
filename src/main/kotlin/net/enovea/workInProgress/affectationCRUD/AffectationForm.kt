@@ -14,7 +14,6 @@ import java.sql.Timestamp
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 
-
 @ValidAffectationForm
 data class AffectationForm(
 
@@ -28,7 +27,6 @@ data class AffectationForm(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     var startDate: Timestamp?,
 
-    // Optionnel : permet de clôturer une affectation
     var endDate: Timestamp? = null,
 
     @JsonIgnore

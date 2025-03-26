@@ -5,7 +5,6 @@ import {Observable, of, Subject} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {DrawerOptions} from "../drawer/drawer.component";
 import {TreeNode} from "primeng/api";
-import {tap} from "rxjs/operators";
 import AffectationDTO = dto.AffectationDTO;
 import AffectationForm = dto.AffectationForm;
 import DriverDTO = dto.DriverDTO;

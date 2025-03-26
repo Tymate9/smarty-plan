@@ -1,6 +1,6 @@
 import {AbstractControl, FormGroup, ValidationErrors, ValidatorFn} from "@angular/forms";
 
-export class AffectationValidator {
+export class PeriodValidator {
 
   /**
    * Vérifie que la date de début est renseignée et, si la date de fin est renseignée,

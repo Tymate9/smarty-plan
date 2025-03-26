@@ -16,7 +16,7 @@ import {AutocompleteFormInput, FormInput, IFormInput} from "../CRUD/iform-input"
 import {FormDescription} from "../CRUD/form-description";
 import {OptionExtractor} from "../../../../../kotlin/net/enovea/workInProgress/vehicleCRUD/OptionDTOExtractor";
 import {EntityDeleteButtonComponent} from "../entity-delete-button-component/entity-delete-button.component";
-import {AffectationValidator} from "./affectation-validator";
+import {PeriodValidator} from "./period-validator";
 
 @Component({
   selector: 'app-affectation-form',
@@ -121,13 +121,13 @@ export class AffectationFormComponent implements OnInit {
         new AutocompleteFormInput(
           'targetId',
           'Cible',
-          [AffectationValidator.requiredValue('targetId')],
+          [PeriodValidator.requiredValue('targetId')],
           targetOptions,
           (opt: any) => opt.label,
           null,
           'Sélectionnez la cible'
         ),
-        new FormInput('startDate', 'date', 'Date de début', [AffectationValidator.requiredValue("startDate")], null, 'Sélectionnez la date de début'),
+        new FormInput('startDate', 'date', 'Date de début', [PeriodValidator.requiredValue("startDate")], null, 'Sélectionnez la date de début'),
         new FormInput('endDate', 'date', 'Date de fin', [], null, 'Sélectionnez la date de fin (facultatif)')
       ];
 
@@ -147,7 +147,7 @@ export class AffectationFormComponent implements OnInit {
       this.affectationFormDescription = new FormDescription(
         this.title,
         inputs,
-        AffectationValidator.checkDatesConstraint(),
+        PeriodValidator.checkDatesConstraint(),
         undefined,
         transformFunction
       );
@@ -188,8 +188,6 @@ export class AffectationFormComponent implements OnInit {
       if (this.formMode === 'create') {
         this.notificationService.success('Affectation créée', 'La nouvelle affectation a été créée.');
       } else {
-        console.log("Voici la response reçu de la part de entityForm au sein d'affectationForm dans la partie update", response)
-        console.log("Voici donc newData", response.subject)
         this.notificationService.success('Affectation mise à jour', 'L\'affectation a été mise à jour.');
       }
       this.sendNotification(response)
@@ -256,13 +254,13 @@ export class AffectationFormComponent implements OnInit {
         new AutocompleteFormInput(
           'targetId',
           'Cible',
-          [AffectationValidator.requiredValue('targetId')],
+          [PeriodValidator.requiredValue('targetId')],
           targetOptions,
           (opt: any) => opt.label,
           initialTargetOption,
           'Sélectionnez la cible'
         ),
-        new FormInput('startDate', 'date', 'Date de début', [AffectationValidator.requiredValue("startDate")], initialStart, 'Sélectionnez la date de début'),
+        new FormInput('startDate', 'date', 'Date de début', [PeriodValidator.requiredValue("startDate")], initialStart, 'Sélectionnez la date de début'),
         new FormInput('endDate', 'date', 'Date de fin', [], initialEnd, 'Sélectionnez la date de fin (facultatif)')
       ];
 
@@ -286,7 +284,7 @@ export class AffectationFormComponent implements OnInit {
       this.affectationFormDescription = new FormDescription(
         this.title,
         inputs,
-        AffectationValidator.checkDatesConstraint(),
+        PeriodValidator.checkDatesConstraint(),
         undefined,
         transformFunction
       );

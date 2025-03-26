@@ -16,6 +16,7 @@ import net.enovea.spatial.GeoCodingService
 import net.enovea.spatial.SpatialService
 import net.enovea.team.TeamDTO
 import net.enovea.team.TeamEntity
+import net.enovea.team.TeamMapper
 import net.enovea.vehicle.vehicleStats.*
 import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
@@ -36,7 +37,8 @@ open class VehicleService(
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
-    private val vehicleStatsRepository: VehicleStatsRepository
+    private val vehicleStatsRepository: VehicleStatsRepository,
+    private val teamMapper: TeamMapper
 ) : ICRUDService<VehicleForm, VehicleDTO, String> {
 
     @Transactional
@@ -106,7 +108,7 @@ open class VehicleService(
         val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds ,dorisView )
 
         val totalVehiclesStatsMap = calculateTotalVehiclesStats(vehiclesStats)
-        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
+        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams().mapValues { teamMapper.toDto(it.value) }
 
         val vehiclesWithHierarchy = vehiclesStats?.map { stats ->
 
@@ -191,7 +193,7 @@ open class VehicleService(
         val vehiclesStatsQse = vehicleStatsRepository.findVehicleStatsQSEOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds , dorisView )
 
         val totalVehiclesStatsQSEMap = calculateTotalVehiclesStatsQSE(vehiclesStatsQse)
-        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
+        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams().mapValues { teamMapper.toDto(it.value) }
 
         val vehiclesWithHierarchy = vehiclesStatsQse?.map { stats ->
 

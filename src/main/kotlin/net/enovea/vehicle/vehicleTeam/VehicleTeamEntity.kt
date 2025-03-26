@@ -51,21 +51,17 @@ data class VehicleTeamEntity (
         override fun subjectIdPath(): String = "vehicle.id"
         override fun targetIdPath(): String = "team.id"
 
-        @Inject
-        lateinit var teamMapper: TeamMapper
-
         /**
          * Returns a map of vehicle IDs with their latest team (where endDate is null).
          */
-        fun getLatestTeams(): Map<String, TeamDTO> { // Get the mapper instance
+        fun getLatestTeams(): Map<String, TeamEntity> { // Get the mapper instance
 
             // Find all entities where endDate is null
             return find("endDate IS NULL")
                 .list() // No type argument needed
                 .associate { entity ->
                     // Map vehicleId to the corresponding TeamDTO
-                    entity.id.vehicleId to (entity.team?.let { teamMapper.toDto(it) }
-                        ?: throw IllegalStateException("Team cannot be null"))
+                    entity.id.vehicleId to (entity.team ?: throw IllegalStateException("Team cannot be null"))
                 }
         }
 

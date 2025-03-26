@@ -30,7 +30,6 @@ abstract class DriverMapper {
 
     /**
      * Méthode inverse si nécessaire.
-     * Si tu n'as pas besoin de la date pour "toEntity", tu n'ajoutes pas @Context.
      */
     abstract fun toEntity(driverDTO: DriverDTO): DriverEntity
 

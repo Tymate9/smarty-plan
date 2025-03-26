@@ -576,6 +576,7 @@ export class TripMapComponent {
   }
 
   get tripData(): TripEventsDTO | null {
+    console.log(this._tripData?.tripEvents)
     return this._tripData;
   }
 

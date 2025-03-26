@@ -1,7 +1,6 @@
 package net.enovea.vehicle
 
 import jakarta.inject.Inject
-import jakarta.transaction.Transactional
 import net.enovea.device.*
 import net.enovea.device.deviceData.DeviceDataStateMapper
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity

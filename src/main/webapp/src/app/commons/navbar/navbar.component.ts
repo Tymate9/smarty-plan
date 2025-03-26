@@ -82,7 +82,7 @@ export interface Option {
       </ng-template>
       <ng-template pTemplate="end">
         <div class="user-info compact">
-          <p-button icon="pi pi-cog" class="user-settings"></p-button>
+          <p-button icon="pi pi-cog" class="user-settings" (onClick)="navigateTo('admin')"></p-button>
           <p-button (onClick)="logout()" icon="pi pi-power-off"
                     [disabled]="!logoutURL"></p-button>
         </div>

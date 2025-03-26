@@ -5,12 +5,12 @@ import {dto} from "../../../habarta/dto";
 import {parse as WKTParse} from "wellknown";
 import {CustomMarkerImpl, MarkerFactory} from "../../core/cartography/marker/MarkerFactory";
 import {TilesService} from "../../services/tiles.service";
+import {GeoUtils} from "../../commons/geo/geo-utils";
+import {TimelineEventDto, TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
-import TripEventType = dto.TripEventType;
-import {GeoUtils} from "../../commons/geo/geo-utils";
-import {TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
 import TripEventDetailsType = dto.TripEventDetailsType;
+import TripEventType = dto.TripEventType;
 
 
 @Component({
@@ -134,7 +134,14 @@ import TripEventDetailsType = dto.TripEventDetailsType;
             <p-tabPanel header="Détaillé">
               <p-timeline [value]="tripData!.tripEvents" id="trips-timeline" *ngIf="showTimeline">
                 <ng-template pTemplate="marker" let-event>
-                  <span *ngIf="event.originalEvent.eventType === TripEventType.STOP"
+                  <span *ngIf="[
+                    TimelineEventType.STOP,
+                    TimelineEventType.STOP_LUNCH_BREAKING,
+                    TimelineEventType.LUNCH_STOP_BEFORE_START,
+                    TimelineEventType.LUNCH_STOP_AFTER_START,
+                    TimelineEventType.LUNCH_STOP_BEFORE_STOP,
+                    TimelineEventType.LUNCH_STOP_AFTER_STOP
+                  ].includes(event.type)"
                         class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
                         [style]="{ 'background-color': event.originalEvent.color }">
                           <i class="pi pi-map-marker"></i>
@@ -147,11 +154,17 @@ import TripEventDetailsType = dto.TripEventDetailsType;
               </span>
                 </ng-template>
                 <ng-template pTemplate="content" let-event>
+                  <div *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR || event.type === TimelineEventType.LUNCH_STOP_SEPARATOR" class="separator">
+                    <div *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR">
+                      PAUSE DEJEUNER
+                    </div>
+                  </div>
                   <div
-                    *ngIf="event.originalEvent.eventType === TripEventType.TRIP"
+                    *ngIf="event.originalEvent.eventType === TripEventType.TRIP && event.type !== TimelineEventType.LUNCH_START_SEPARATOR && event.type !== TimelineEventType.LUNCH_STOP_SEPARATOR"
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     style="margin: 10px 0;"
+                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP ? '2rem' : '0'}"
                   >
                     <div>
                       <div class="trip-dot" [style]="{ 'background-color': event.originalEvent.color }"></div>
@@ -166,7 +179,7 @@ import TripEventDetailsType = dto.TripEventDetailsType;
                     </div>
 
 
-                    <div class="time-oval">
+                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_AFTER_START && event.type !== TimelineEventType.LUNCH_TRIP_AFTER_STOP" class="time-oval">
                       {{
                         event.originalEvent.start?.toLocaleTimeString([], {
                           hour: '2-digit',
@@ -174,8 +187,11 @@ import TripEventDetailsType = dto.TripEventDetailsType;
                         })
                       }}
                     </div>
+                    <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_AFTER_STOP">
+                      ...
+                    </span>
                     <i class="pi pi-caret-right"></i>
-                    <div class="time-oval">
+                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP" class="time-oval">
                       {{
                         event.originalEvent.end?.toLocaleTimeString([], {
                           hour: '2-digit',
@@ -183,6 +199,9 @@ import TripEventDetailsType = dto.TripEventDetailsType;
                         })
                       }}
                     </div>
+                    <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_BEFORE_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP">
+                      ...
+                    </span>
 
                     <!--                {{ event.originalEvent.distance.toFixed(0) }} Km-->
                     <div class="distance-rectangle small-right">
@@ -191,18 +210,36 @@ import TripEventDetailsType = dto.TripEventDetailsType;
                   </div>
                   <div
                     class="p-3 bg-black-alpha-20 border-round cursor-pointer"
-                    *ngIf="event.originalEvent.eventType !== TripEventType.TRIP && event.originalEvent.eventType !== TripEventType.TRIP_EXPECTATION"
+                    *ngIf="event.originalEvent.eventType !== TripEventType.TRIP && event.originalEvent.eventType !== TripEventType.TRIP_EXPECTATION && event.type !== TimelineEventType.LUNCH_START_SEPARATOR && event.type !== TimelineEventType.LUNCH_STOP_SEPARATOR"
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                  > {{ event.originalEvent.poiLabel ? event.originalEvent.poiLabel + ' ' + event.originalEvent.address : event.originalEvent.address }}
-                    <br/> {{ event.originalEvent.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
-                    <i class="pi pi-caret-right"></i> {{
+                    [style]="{marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP ? '2rem' : '0'}"
+                  >
+                    <div *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP">
+                      {{ event.originalEvent.poiLabel ? event.originalEvent.poiLabel + ' ' + event.originalEvent.address : event.originalEvent.address }}
+                    </div>
+                    <div *ngIf="event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP">
+                      Pause déjeuner
+                    </div>
+                    <span *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_AFTER_STOP">
+                    {{ event.originalEvent.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
+                    </span>
+                    <span *ngIf="event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP">
+                      ...
+                    </span>
+                    <i class="pi pi-caret-right"></i>
+                    <span *ngIf="event.type !== TimelineEventType.LUNCH_STOP_BEFORE_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP">
+                      {{
                       event.originalEvent.end?.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
                       })
-                    }} <strong *ngIf="event.originalEvent.duration != null">{{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
+                    }}</span>
+                    <span *ngIf="event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP">
+                      ...
+                    </span>
+                    <strong *ngIf="event.originalEvent.duration != null"> {{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
                     <!-- Affichage des subTripEvent descriptions -->
                     <div *ngIf="event.originalEvent.subTripEvents?.length">
                       <div *ngFor="let subEvent of event.subTripEvents">
@@ -374,6 +411,18 @@ import TripEventDetailsType = dto.TripEventDetailsType;
         .p-timeline-event-separator {
           min-width: 32px;
         }
+
+        .p-timeline-event-content {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+      }
+
+      .separator {
+        border-top: 2px solid #000;
+        margin-left: calc(-1rem - 32px);
+        padding-left: calc(1rem + 32px);
       }
     }
   `]
@@ -558,53 +607,93 @@ export class TripMapComponent {
           sub => [TripEventDetailsType.LUNCH_BREAKING, TripEventDetailsType.START_LUNCH_BREAK, TripEventDetailsType.END_LUNCH_BREAK].includes(sub.type)
         )?.type;
       switch (lunchType) {
-        case TripEventDetailsType.START_LUNCH_BREAK :
-          if (event.start?.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-          }) !== '12:00') // todo : replace with comparison to detail timestamp
+        case TripEventDetailsType.START_LUNCH_BREAK:
+          if (event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) === '12:00') { // todo : replace with comparison to detail timestamp
             timelineEvents.tripEvents.push({
               originalEvent: event,
-              type: TimelineEventType.LUNCH_START_BEFORE
-            });
-          timelineEvents.tripEvents.push({
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_START_SEPARATOR
-          }, {
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_START_AFTER
-          });
-
-          break;
-        case TripEventDetailsType.END_LUNCH_BREAK :
-          timelineEvents.tripEvents.push({
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_STOP_BEFORE
-          }, {
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_STOP_SEPARATOR
-          });
-          if (event.end?.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-          }) !== '13:30') // todo : replace with comparison to detail timestamp
-            timelineEvents.tripEvents.push({
+              type: TimelineEventType.LUNCH_START_SEPARATOR
+            }, {
               originalEvent: event,
-              type: TimelineEventType.LUNCH_STOP_AFTER
-            });
-          break;
-        case TripEventDetailsType.LUNCH_BREAKING :
-          if (event.eventType === TripEventType.TRIP) {
-            timelineEvents.tripEvents.push({
-              originalEvent: event,
-              type: TimelineEventType.TRIP_LUNCH_BREAKING
-            });
-          } else if (event.eventType === TripEventType.STOP) {
-            timelineEvents.tripEvents.push({
-              originalEvent: event,
-              type: TimelineEventType.STOP_LUNCH_BREAKING
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.STOP_LUNCH_BREAKING :
+                TimelineEventType.TRIP_LUNCH_BREAKING
             });
           }
+          else if (event.end?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) === '12:00') {
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.STOP :
+                TimelineEventType.TRIP
+            }, {
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_START_SEPARATOR
+            });
+          }
+          else {
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.LUNCH_STOP_BEFORE_START :
+                TimelineEventType.LUNCH_TRIP_BEFORE_START
+            }, {
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_START_SEPARATOR
+            }, {
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.LUNCH_STOP_AFTER_START :
+                TimelineEventType.LUNCH_TRIP_AFTER_START
+            });
+          }
+          break;
+        case TripEventDetailsType.END_LUNCH_BREAK :
+          if (event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) === '13:30') { // todo : replace with comparison to detail timestamp
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_STOP_SEPARATOR
+            }, {
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.STOP :
+                TimelineEventType.TRIP
+            });
+          }
+          else if (event.end?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) === '13:30') {
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.STOP_LUNCH_BREAKING :
+                TimelineEventType.TRIP_LUNCH_BREAKING
+            }, {
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_STOP_SEPARATOR
+            });
+          }
+          else {
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.LUNCH_STOP_BEFORE_STOP :
+                TimelineEventType.LUNCH_TRIP_BEFORE_STOP
+            }, {
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_STOP_SEPARATOR
+            }, {
+              originalEvent: event,
+              type: event.eventType === TripEventType.STOP ?
+                TimelineEventType.LUNCH_STOP_AFTER_STOP :
+                TimelineEventType.LUNCH_TRIP_AFTER_STOP
+            });
+          }
+          break;
+        case TripEventDetailsType.LUNCH_BREAKING :
+          timelineEvents.tripEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.STOP_LUNCH_BREAKING :
+              TimelineEventType.TRIP_LUNCH_BREAKING
+          });
           break;
         default:
           timelineEvents.tripEvents.push({
@@ -750,4 +839,6 @@ export class TripMapComponent {
   }
 
   protected readonly TripEventType = TripEventType;
+  protected readonly TripEventDetailsType = TripEventDetailsType;
+  protected readonly TimelineEventType = TimelineEventType;
 }

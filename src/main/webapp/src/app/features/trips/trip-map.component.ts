@@ -9,6 +9,8 @@ import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
 import {GeoUtils} from "../../commons/geo/geo-utils";
+import {TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
+import TripEventDetailsType = dto.TripEventDetailsType;
 
 
 @Component({
@@ -132,32 +134,32 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
             <p-tabPanel header="Détaillé">
               <p-timeline [value]="tripData!.tripEvents" id="trips-timeline" *ngIf="showTimeline">
                 <ng-template pTemplate="marker" let-event>
-              <span *ngIf="event.eventType === TripEventType.STOP"
-                    class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
-                    [style]="{ 'background-color': event.color }">
-                      <i class="pi pi-map-marker"></i>
-              </span>
-                  <span *ngIf="event.eventType === TripEventType.VEHICLE_RUNNING">
-                <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
-              </span>
-                  <span *ngIf="event.eventType === TripEventType.VEHICLE_IDLE">
+                  <span *ngIf="event.originalEvent.eventType === TripEventType.STOP"
+                        class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+                        [style]="{ 'background-color': event.originalEvent.color }">
+                          <i class="pi pi-map-marker"></i>
+                  </span>
+                  <span *ngIf="event.originalEvent.eventType === TripEventType.VEHICLE_RUNNING">
+                    <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-vert.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
+                  </span>
+                  <span *ngIf="event.originalEvent.eventType === TripEventType.VEHICLE_IDLE">
                 <img src="../../../assets/icon/jd-{{tripData!.vehicleCategory.toLowerCase()}}-orange.svg" alt="{{ tripData!.driverName ?? 'Véhicule non attribué'}}" style="width: 50px;height: 50px"/>
               </span>
                 </ng-template>
                 <ng-template pTemplate="content" let-event>
                   <div
-                    *ngIf="event.eventType === TripEventType.TRIP"
+                    *ngIf="event.originalEvent.eventType === TripEventType.TRIP"
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     style="margin: 10px 0;"
                   >
                     <div>
-                      <div class="trip-dot" [style]="{ 'background-color': event.color }"></div>
+                      <div class="trip-dot" [style]="{ 'background-color': event.originalEvent.color }"></div>
 
-                      Trajet de <strong>{{ (tripsService.formatDuration(event.duration)) }}</strong><br/>
+                      Trajet de <strong>{{ (tripsService.formatDuration(event.originalEvent.duration)) }}</strong><br/>
                       <!-- Affichage des subTripEvent descriptions -->
-                      <div *ngIf="event.subTripEvents?.length">
-                        <div *ngFor="let subEvent of event.subTripEvents">
+                      <div *ngIf="event.originalEvent.subTripEvents?.length">
+                        <div *ngFor="let subEvent of event.originalEvent.subTripEvents">
                           {{ subEvent.description }}
                         </div>
                       </div>
@@ -166,7 +168,7 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
 
                     <div class="time-oval">
                       {{
-                        event.start?.toLocaleTimeString([], {
+                        event.originalEvent.start?.toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit'
                         })
@@ -175,34 +177,34 @@ import {GeoUtils} from "../../commons/geo/geo-utils";
                     <i class="pi pi-caret-right"></i>
                     <div class="time-oval">
                       {{
-                        event.end?.toLocaleTimeString([], {
+                        event.originalEvent.end?.toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit'
                         })
                       }}
                     </div>
 
-                    <!--                {{ event.distance.toFixed(0) }} Km-->
+                    <!--                {{ event.originalEvent.distance.toFixed(0) }} Km-->
                     <div class="distance-rectangle small-right">
-                      {{ event.distance.toFixed(0) }} Km
+                      {{ event.originalEvent.distance.toFixed(0) }} Km
                     </div>
                   </div>
                   <div
                     class="p-3 bg-black-alpha-20 border-round cursor-pointer"
-                    *ngIf="event.eventType !== TripEventType.TRIP && event.eventType !== TripEventType.TRIP_EXPECTATION"
+                    *ngIf="event.originalEvent.eventType !== TripEventType.TRIP && event.originalEvent.eventType !== TripEventType.TRIP_EXPECTATION"
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                  > {{ event.poiLabel ? event.poiLabel + ' ' + event.address : event.address }}
-                    <br/> {{ event.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
+                  > {{ event.originalEvent.poiLabel ? event.originalEvent.poiLabel + ' ' + event.originalEvent.address : event.originalEvent.address }}
+                    <br/> {{ event.originalEvent.start?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }}
                     <i class="pi pi-caret-right"></i> {{
-                      event.end?.toLocaleTimeString([], {
+                      event.originalEvent.end?.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
                       })
-                    }} <strong *ngIf="event.duration != null">{{ tripsService.formatDuration(event.duration) }}</strong>
+                    }} <strong *ngIf="event.originalEvent.duration != null">{{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
                     <!-- Affichage des subTripEvent descriptions -->
-                    <div *ngIf="event.subTripEvents?.length">
+                    <div *ngIf="event.originalEvent.subTripEvents?.length">
                       <div *ngFor="let subEvent of event.subTripEvents">
                         {{ subEvent.description }}
                       </div>
@@ -477,8 +479,8 @@ export class TripMapComponent {
     const allSubTripEvents: { timestamp: Date, lat: number, lng: number, type: string }[] = [];
 
     this._tripData?.tripEvents.forEach(event => {
-      if (event.subTripEvents && event.subTripEvents.length > 0) {
-        event.subTripEvents.forEach(sub => {
+      if (event.tripEventDetails && event.tripEventDetails.length > 0) {
+        event.tripEventDetails.forEach(sub => {
           // Assurez-vous que le timestamp est de type Date dans le front.
           // Par exemple, si sub.timestamp est au format string, convertissez-le via new Date(sub.timestamp)
           if (sub.timestamp && sub.lat != null && sub.lng != null) {
@@ -531,8 +533,89 @@ export class TripMapComponent {
     );
   }
 
-  get tripData(): TripEventsDTO | null {
-    return this._tripData;
+  get tripData(): TimelineEventsDTO | null {
+    if (this._tripData === null) return null;
+
+    const timelineEvents = new TimelineEventsDTO();
+    timelineEvents.vehicleId = this._tripData.vehicleId;
+    timelineEvents.licensePlate = this._tripData.licensePlate;
+    timelineEvents.driverName = this._tripData.driverName;
+    timelineEvents.vehicleCategory = this._tripData.vehicleCategory;
+    timelineEvents.range = this._tripData.range;
+    timelineEvents.stopDuration = this._tripData.stopDuration;
+    timelineEvents.drivingDuration = this._tripData.drivingDuration;
+    timelineEvents.tripAmount = this._tripData.tripAmount;
+    timelineEvents.idleDuration = this._tripData.idleDuration;
+    timelineEvents.drivingDistance = this._tripData.drivingDistance;
+    timelineEvents.poiAmount = this._tripData.poiAmount;
+    // todo : compactedTripEvents
+    timelineEvents.compactedTripEvents = this._tripData.compactedTripEvents;
+
+    timelineEvents.tripEvents = [];
+    this._tripData.tripEvents.forEach((event, index) => {
+      const lunchType =
+        event.tripEventDetails?.find(
+          sub => [TripEventDetailsType.LUNCH_BREAKING, TripEventDetailsType.START_LUNCH_BREAK, TripEventDetailsType.END_LUNCH_BREAK].includes(sub.type)
+        )?.type;
+      switch (lunchType) {
+        case TripEventDetailsType.START_LUNCH_BREAK :
+          if (event.start?.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) !== '12:00') // todo : replace with comparison to detail timestamp
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_START_BEFORE
+            });
+          timelineEvents.tripEvents.push({
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_START_SEPARATOR
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_START_AFTER
+          });
+
+          break;
+        case TripEventDetailsType.END_LUNCH_BREAK :
+          timelineEvents.tripEvents.push({
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_STOP_BEFORE
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_STOP_SEPARATOR
+          });
+          if (event.end?.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) !== '13:30') // todo : replace with comparison to detail timestamp
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: TimelineEventType.LUNCH_STOP_AFTER
+            });
+          break;
+        case TripEventDetailsType.LUNCH_BREAKING :
+          if (event.eventType === TripEventType.TRIP) {
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: TimelineEventType.TRIP_LUNCH_BREAKING
+            });
+          } else if (event.eventType === TripEventType.STOP) {
+            timelineEvents.tripEvents.push({
+              originalEvent: event,
+              type: TimelineEventType.STOP_LUNCH_BREAKING
+            });
+          }
+          break;
+        default:
+          timelineEvents.tripEvents.push({
+            originalEvent: event,
+            type: TimelineEventType.fromTripEventType(event.eventType)
+          });
+      }
+    })
+
+    console.log(timelineEvents);
+    return timelineEvents;
   }
 
   private applyEventsHiglightedStyle( indexes: number[], fillColor: string, weight: number, highlightMarker: boolean ): void {

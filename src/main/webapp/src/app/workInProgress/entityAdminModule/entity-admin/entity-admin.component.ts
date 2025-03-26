@@ -37,7 +37,7 @@ export interface EntityDefinition {
       <app-entity-admin-tab-view
         [entityName]="selectedEntity.name"
         [service]="selectedEntity.service"
-        [config]="{ showStats: true, showTree: true }"
+        [config]="{ showStats: false, showTree: true }"
       >
       </app-entity-admin-tab-view>
     </div>

@@ -64,6 +64,7 @@ abstract class VehicleMapper {
     abstract fun toVehicleDTOSummary(vehicleEntity: VehicleEntity, @Context dateParam: Timestamp? = null): VehicleSummaryDTO
 
     //Map VehicleDrivers to recent DriverDTO
+    //TODO(renvoyer des listes)
     fun mapDriverAtDate(vehicle: VehicleEntity, dateParam: Timestamp? = null): DriverDTO? {
         return if (dateParam == null) {
             // Cas 1 : pas de date => prendre la dernière affectation (endDate == null, max startDate)
@@ -242,7 +243,10 @@ abstract class VehicleMapper {
     }
 
     @Named("mapVehicleRangesVDTO")
+    //inline fun <reified T : IVehicle<T>> mapVehicleRangesVDTO(vehicleEntity: VehicleEntity): List<Range<T>>? {
+        //T::class
     fun mapVehicleRangesVDTO(vehicleEntity: VehicleEntity): List<Range<VehicleDTO>>? {
+
         // 1. Récupérer la liste de drivers éventuellement associés au même "vehicule"
         val drivers = vehicleEntity.vehicleDrivers.mapNotNull { it.driver }
 
@@ -266,6 +270,7 @@ abstract class VehicleMapper {
         // 7. Créer notre Range<VehicleDTO> unique
         val parisZone = ZoneId.of("Europe/Paris")
         val todayInParis = LocalDate.now(parisZone)
+        //val lunchBreakRange = Range<T>(
         val lunchBreakRange = Range<VehicleDTO>(
             label = "LUNCH_BREAK",
             description = description,
@@ -353,7 +358,7 @@ abstract class VehicleMapper {
                     return@Range
                 }
                 // On vérifie que le device summary possède un DeviceDataState et on l'anonymise
-                dto.device.apply {
+                dto.device?.apply {
                     coordinate = null
                 }
             }

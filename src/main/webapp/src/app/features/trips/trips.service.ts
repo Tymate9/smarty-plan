@@ -6,6 +6,8 @@ import TripDTO = dto.TripDTO;
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
+import {TimelineEventDTO, TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
+import TripEventDetailsType = dto.TripEventDetailsType;
 
 @Injectable({
   providedIn: 'root'
@@ -66,5 +68,160 @@ export class TripsService {
     const minutes = Math.floor((duration % 3600) / 60);
     const seconds = duration % 60;
     return `${hours > 0 ? `${hours}h ` : ``}${minutes}min${!withoutSeconds ? ` ${seconds}s` : ''}`;
+  }
+
+  formatDateToMinutes(date: Date | null): string | undefined {
+    return date?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+  }
+
+  tripEventToTimelineEvents(event: TripEventDTO): Array<TimelineEventDTO> {
+    const timelineEvents = [];
+    const lunchTypes = event.tripEventDetails?.map(sub => sub.type);
+    switch (true) {
+      case lunchTypes?.includes(TripEventDetailsType.START_LUNCH_BREAK) && lunchTypes?.includes(TripEventDetailsType.END_LUNCH_BREAK):
+        if (this.formatDateToMinutes(event.start) !== '12:00'){
+          timelineEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.LUNCH_STOP_BEFORE_START :
+              TimelineEventType.LUNCH_TRIP_BEFORE_START
+          })
+        }
+        timelineEvents.push({
+          originalEvent: event,
+          type: TimelineEventType.LUNCH_START_SEPARATOR
+        }, {
+          originalEvent: event,
+          type: event.eventType === TripEventType.STOP ?
+            TimelineEventType.STOP_LUNCH_BREAKING :
+            TimelineEventType.TRIP_LUNCH_BREAKING
+        }, {
+          originalEvent: event,
+          type: TimelineEventType.LUNCH_STOP_SEPARATOR
+        });
+        if (this.formatDateToMinutes(event.end) !== '13:30'){
+          timelineEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.LUNCH_STOP_AFTER_STOP :
+              TimelineEventType.LUNCH_TRIP_AFTER_STOP
+          })
+        }
+
+        break;
+      case lunchTypes?.includes(TripEventDetailsType.START_LUNCH_BREAK):
+        if (this.formatDateToMinutes(event.start) === '12:00') { // todo : replace with comparison to detail timestamp
+          timelineEvents.push({
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_START_SEPARATOR
+          }, {
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.STOP_LUNCH_BREAKING :
+              TimelineEventType.TRIP_LUNCH_BREAKING
+          });
+        }
+        else if (this.formatDateToMinutes(event.end) === '12:00') {
+          timelineEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.STOP :
+              TimelineEventType.TRIP
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_START_SEPARATOR
+          });
+        }
+        else {
+          timelineEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.LUNCH_STOP_BEFORE_START :
+              TimelineEventType.LUNCH_TRIP_BEFORE_START
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_START_SEPARATOR
+          }, {
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.LUNCH_STOP_AFTER_START :
+              TimelineEventType.LUNCH_TRIP_AFTER_START
+          });
+        }
+        break;
+      case lunchTypes?.includes(TripEventDetailsType.END_LUNCH_BREAK) :
+        if (this.formatDateToMinutes(event.start) === '13:30') { // todo : replace with comparison to detail timestamp
+          timelineEvents.push({
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_STOP_SEPARATOR
+          }, {
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.STOP :
+              TimelineEventType.TRIP
+          });
+        }
+        else if (this.formatDateToMinutes(event.end) === '13:30') {
+          timelineEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.STOP_LUNCH_BREAKING :
+              TimelineEventType.TRIP_LUNCH_BREAKING
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_STOP_SEPARATOR
+          });
+        }
+        else {
+          timelineEvents.push({
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.LUNCH_STOP_BEFORE_STOP :
+              TimelineEventType.LUNCH_TRIP_BEFORE_STOP
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_STOP_SEPARATOR
+          }, {
+            originalEvent: event,
+            type: event.eventType === TripEventType.STOP ?
+              TimelineEventType.LUNCH_STOP_AFTER_STOP :
+              TimelineEventType.LUNCH_TRIP_AFTER_STOP
+          });
+        }
+        break;
+      case lunchTypes?.some(it => it !== TripEventDetailsType.LUNCH_BREAKING) :
+        timelineEvents.push({
+          originalEvent: event,
+          type: event.eventType === TripEventType.STOP ?
+            TimelineEventType.STOP_LUNCH_BREAKING :
+            TimelineEventType.TRIP_LUNCH_BREAKING
+        });
+        break;
+      default:
+        timelineEvents.push({
+          originalEvent: event,
+          type: TimelineEventType.fromTripEventType(event.eventType)
+        });
+        break;
+    }
+    return timelineEvents;
+  }
+
+  tripEventsToTimelineEventsDTO(tripEvents: TripEventsDTO): TimelineEventsDTO {
+    const timelineEvents = new TimelineEventsDTO();
+    timelineEvents.vehicleId = tripEvents.vehicleId;
+    timelineEvents.licensePlate = tripEvents.licensePlate;
+    timelineEvents.driverName = tripEvents.driverName;
+    timelineEvents.vehicleCategory = tripEvents.vehicleCategory;
+    timelineEvents.range = tripEvents.range;
+    timelineEvents.stopDuration = tripEvents.stopDuration;
+    timelineEvents.drivingDuration = tripEvents.drivingDuration;
+    timelineEvents.tripAmount = tripEvents.tripAmount;
+    timelineEvents.idleDuration = tripEvents.idleDuration;
+    timelineEvents.drivingDistance = tripEvents.drivingDistance;
+    timelineEvents.poiAmount = tripEvents.poiAmount;
+    timelineEvents.compactedTripEvents = tripEvents.compactedTripEvents.flatMap(event => this.tripEventToTimelineEvents(event));
+    timelineEvents.tripEvents = tripEvents.tripEvents.flatMap(event => this.tripEventToTimelineEvents(event));
+    return timelineEvents
   }
 }

@@ -522,9 +522,10 @@ class TripService(
                     var j = i + 2
                     while (j < tripEvents.size) {
                         val nextStop = tripEvents[j]
-                        if (nextStop.eventType == TripEventType.STOP) {
+                        if (nextStop.eventType != TripEventType.TRIP) {
+                            // On break dans tout les cas si l'événement n'est pas un STOP (TRIP_EXPECTATION, VEHICLE_RUNNING, etc...)
                             // Un STOP avec durée >= 300 ou durée null est considéré comme un STOP long
-                            if (nextStop.duration?.let { it >= 300L } != false) {
+                            if (nextStop.eventType != TripEventType.STOP || nextStop.duration?.let { it >= 300L } != false) {
                                 break
                             }
                         }
@@ -566,9 +567,8 @@ class TripService(
         // Collecte des indices des événements fusionnés
         val mergedSourceIndexes = events.map { it.index }
 
-        // Fusionner les subTripEvents de tous les événements STOP
-        val mergedSubEvents = events.flatMap { it.tripEventDetails ?: emptyList() }
-
+        // Fusionner les subTripEvents de tous les événements TRIP
+        val mergedSubEvents = events.flatMap { it.tripEventDetails ?: emptyList() }.distinct()
 
         return TripEventDTO(
             index = firstTrip.index, // Index du premier trip
@@ -624,7 +624,10 @@ class TripService(
 
                 // Si au moins deux arrêts avec le même poiId sont trouvés, procéder à la fusion
                 if (eventsToMerge.size >= 3) { // STOP + TRIP + STOP
-                    val mergedStop = mergeStops(eventsToMerge)
+                    val mergedStop = mergeStops(
+                        eventsToMerge,
+                        j + 1 == tripEvents.size && eventsToMerge.last().start?.toLocalDate() == LocalDate.now()
+                    )
                     result.add(mergedStop)
                     i = j // Avancer l'index au prochain événement non fusionné
                     continue
@@ -639,7 +642,7 @@ class TripService(
         return result
     }
 
-    private fun mergeStops(events: List<TripEventDTO>): TripEventDTO {
+    private fun mergeStops(events: List<TripEventDTO>, isOngoing: Boolean = false): TripEventDTO {
         // Le premier événement doit être un STOP
         val firstStop = events.first { it.eventType == TripEventType.STOP }
         // Le dernier événement doit être un STOP
@@ -655,7 +658,7 @@ class TripService(
         val mergedSourceIndexes = events.map { it.index }
 
         // Fusionner les subTripEvents de tous les événements STOP
-        val mergedSubEvents = events.flatMap { it.tripEventDetails ?: emptyList() }
+        val mergedSubEvents = events.flatMap { it.tripEventDetails ?: emptyList() }.distinct()
 
         return TripEventDTO(
             index = firstStop.index, // Index du premier STOP
@@ -667,7 +670,7 @@ class TripService(
             address = firstStop.address, // Adresse du premier STOP
             start = firstStop.start, // Start du premier STOP
             end = lastStop.end, // End du dernier STOP
-            duration = mergedDuration, // Somme des durées
+            duration = if (isOngoing) null else mergedDuration, // Somme des durées (l'évènement n'a pas de durée s'il est en cours)
             lat = firstStop.lat, // Lat du premier STOP
             lng = firstStop.lng, // Lng du premier STOP
             trace = null, // Toujours null

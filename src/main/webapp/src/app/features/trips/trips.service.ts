@@ -2,12 +2,14 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {map, Observable} from 'rxjs';
 import {dto} from "../../../habarta/dto";
+import {TimelineEventDTO, TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
 import TripDTO = dto.TripDTO;
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventDTO = dto.TripEventDTO;
 import TripEventType = dto.TripEventType;
-import {TimelineEventDTO, TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
 import TripEventDetailsType = dto.TripEventDetailsType;
+
+// NE PAS AUTOFORMATTER
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +38,10 @@ export class TripsService {
       // Conversion des chaînes de caractères en objets Date, si elles existent
       tripEvent.start = tripEvent.start ? new Date(tripEvent.start) : null;
       tripEvent.end = tripEvent.end ? new Date(tripEvent.end) : null;
+      tripEvent.tripEventDetails = tripEvent.tripEventDetails?.map(sub => {
+        sub.timestamp = sub.timestamp ? new Date(sub.timestamp) : null;
+        return sub;
+      }) ?? null;
 
       // Définition de la couleur pour les événements de type TRIP ou TRIP_EXPECTATION
       if (
@@ -76,133 +82,179 @@ export class TripsService {
 
   tripEventToTimelineEvents(event: TripEventDTO): Array<TimelineEventDTO> {
     const timelineEvents = [];
+
+    // -----------------------
+    //   manage lunch breaks
+    // -----------------------
     const lunchTypes = event.tripEventDetails?.map(sub => sub.type);
-    switch (true) {
-      case lunchTypes?.includes(TripEventDetailsType.START_LUNCH_BREAK) && lunchTypes?.includes(TripEventDetailsType.END_LUNCH_BREAK):
-        if (this.formatDateToMinutes(event.start) !== '12:00'){
-          timelineEvents.push({
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.LUNCH_STOP_BEFORE_START :
-              TimelineEventType.LUNCH_TRIP_BEFORE_START
-          })
-        }
+    const lunchEventTimes = event.tripEventDetails?.map(sub => this.formatDateToMinutes(sub.timestamp));
+    const startMinutes = this.formatDateToMinutes(event.start);
+    const endMinutes = this.formatDateToMinutes(event.end);
+
+    // conditions
+    const isLunchBreakStart = lunchTypes?.includes(TripEventDetailsType.START_LUNCH_BREAK) ?? false;
+    const isLunchBreakEnd = lunchTypes?.includes(TripEventDetailsType.END_LUNCH_BREAK) ?? false;
+    const isInLunchBreak = ((lunchTypes?.length ?? 0) > 0 && lunchTypes?.every(it => it === TripEventDetailsType.LUNCH_BREAKING)) ?? false;
+
+    const isFullLunchBreak = isLunchBreakStart && isLunchBreakEnd;
+    const startsAtExactStart = isLunchBreakStart && startMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.START_LUNCH_BREAK)]
+    const endsAtExactStart = isLunchBreakStart && endMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.START_LUNCH_BREAK)]
+    const startsAtExactEnd = isLunchBreakEnd && startMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.END_LUNCH_BREAK)]
+    const endsAtExactEnd = isLunchBreakEnd && endMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.END_LUNCH_BREAK)]
+
+    const isStop = event.eventType === TripEventType.STOP;
+
+    if (isFullLunchBreak) {
+      if (!startsAtExactStart) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP_BEFORE_START :
+            TimelineEventType.LUNCH_TRIP_BEFORE_START
+        })
+      }
+      timelineEvents.push({
+        originalEvent: event,
+          type: TimelineEventType.LUNCH_START_SEPARATOR
+      });
+      if (startsAtExactStart && endsAtExactEnd) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.STOP_LUNCH_BREAKING :
+            TimelineEventType.TRIP_LUNCH_BREAKING
+        });
+      }
+      else if (startsAtExactStart) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP_BEFORE_STOP :
+            TimelineEventType.LUNCH_TRIP_BEFORE_STOP
+        });
+      }
+      else if (endsAtExactEnd) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP_AFTER_START :
+            TimelineEventType.LUNCH_TRIP_AFTER_START
+        });
+      }
+      else {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP :
+            TimelineEventType.LUNCH_TRIP
+        });
+      }
+      timelineEvents.push({
+        originalEvent: event,
+        type: TimelineEventType.LUNCH_STOP_SEPARATOR
+      });
+      if (!endsAtExactEnd) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP_AFTER_STOP :
+            TimelineEventType.LUNCH_TRIP_AFTER_STOP
+        })
+      }
+    }
+    else if (isLunchBreakStart) {
+      if (startsAtExactStart) {
         timelineEvents.push({
           originalEvent: event,
           type: TimelineEventType.LUNCH_START_SEPARATOR
         }, {
           originalEvent: event,
-          type: event.eventType === TripEventType.STOP ?
+          type: isStop ?
+            TimelineEventType.STOP_LUNCH_BREAKING :
+            TimelineEventType.TRIP_LUNCH_BREAKING
+        });
+      }
+      else if (endsAtExactStart) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.STOP :
+            TimelineEventType.TRIP
+        }, {
+          originalEvent: event,
+          type: TimelineEventType.LUNCH_START_SEPARATOR
+        });
+      }
+      else {
+          timelineEvents.push({
+            originalEvent: event,
+            type: isStop ?
+              TimelineEventType.LUNCH_STOP_BEFORE_START :
+              TimelineEventType.LUNCH_TRIP_BEFORE_START
+          }, {
+            originalEvent: event,
+            type: TimelineEventType.LUNCH_START_SEPARATOR
+          }, {
+            originalEvent: event,
+            type: isStop ?
+              TimelineEventType.LUNCH_STOP_AFTER_START :
+              TimelineEventType.LUNCH_TRIP_AFTER_START
+          });
+        }
+    }
+    else if (isLunchBreakEnd) {
+      if (startsAtExactEnd) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: TimelineEventType.LUNCH_STOP_SEPARATOR
+        }, {
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.STOP :
+            TimelineEventType.TRIP
+        });
+      }
+      else if (endsAtExactEnd) {
+        timelineEvents.push({
+          originalEvent: event,
+          type: isStop ?
             TimelineEventType.STOP_LUNCH_BREAKING :
             TimelineEventType.TRIP_LUNCH_BREAKING
         }, {
           originalEvent: event,
           type: TimelineEventType.LUNCH_STOP_SEPARATOR
         });
-        if (this.formatDateToMinutes(event.end) !== '13:30'){
-          timelineEvents.push({
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.LUNCH_STOP_AFTER_STOP :
-              TimelineEventType.LUNCH_TRIP_AFTER_STOP
-          })
-        }
-
-        break;
-      case lunchTypes?.includes(TripEventDetailsType.START_LUNCH_BREAK):
-        if (this.formatDateToMinutes(event.start) === '12:00') { // todo : replace with comparison to detail timestamp
-          timelineEvents.push({
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_START_SEPARATOR
-          }, {
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.STOP_LUNCH_BREAKING :
-              TimelineEventType.TRIP_LUNCH_BREAKING
-          });
-        }
-        else if (this.formatDateToMinutes(event.end) === '12:00') {
-          timelineEvents.push({
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.STOP :
-              TimelineEventType.TRIP
-          }, {
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_START_SEPARATOR
-          });
-        }
-        else {
-          timelineEvents.push({
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.LUNCH_STOP_BEFORE_START :
-              TimelineEventType.LUNCH_TRIP_BEFORE_START
-          }, {
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_START_SEPARATOR
-          }, {
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.LUNCH_STOP_AFTER_START :
-              TimelineEventType.LUNCH_TRIP_AFTER_START
-          });
-        }
-        break;
-      case lunchTypes?.includes(TripEventDetailsType.END_LUNCH_BREAK) :
-        if (this.formatDateToMinutes(event.start) === '13:30') { // todo : replace with comparison to detail timestamp
-          timelineEvents.push({
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_STOP_SEPARATOR
-          }, {
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.STOP :
-              TimelineEventType.TRIP
-          });
-        }
-        else if (this.formatDateToMinutes(event.end) === '13:30') {
-          timelineEvents.push({
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.STOP_LUNCH_BREAKING :
-              TimelineEventType.TRIP_LUNCH_BREAKING
-          }, {
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_STOP_SEPARATOR
-          });
-        }
-        else {
-          timelineEvents.push({
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.LUNCH_STOP_BEFORE_STOP :
-              TimelineEventType.LUNCH_TRIP_BEFORE_STOP
-          }, {
-            originalEvent: event,
-            type: TimelineEventType.LUNCH_STOP_SEPARATOR
-          }, {
-            originalEvent: event,
-            type: event.eventType === TripEventType.STOP ?
-              TimelineEventType.LUNCH_STOP_AFTER_STOP :
-              TimelineEventType.LUNCH_TRIP_AFTER_STOP
-          });
-        }
-        break;
-      case lunchTypes?.some(it => it !== TripEventDetailsType.LUNCH_BREAKING) :
+      }
+      else {
         timelineEvents.push({
           originalEvent: event,
-          type: event.eventType === TripEventType.STOP ?
-            TimelineEventType.STOP_LUNCH_BREAKING :
-            TimelineEventType.TRIP_LUNCH_BREAKING
-        });
-        break;
-      default:
-        timelineEvents.push({
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP_BEFORE_STOP :
+            TimelineEventType.LUNCH_TRIP_BEFORE_STOP
+        }, {
           originalEvent: event,
-          type: TimelineEventType.fromTripEventType(event.eventType)
+          type: TimelineEventType.LUNCH_STOP_SEPARATOR
+        }, {
+          originalEvent: event,
+          type: isStop ?
+            TimelineEventType.LUNCH_STOP_AFTER_STOP :
+            TimelineEventType.LUNCH_TRIP_AFTER_STOP
         });
-        break;
+      }
+    }
+    else if (isInLunchBreak) {
+      timelineEvents.push({
+        originalEvent: event,
+        type: isStop ?
+          TimelineEventType.STOP_LUNCH_BREAKING :
+          TimelineEventType.TRIP_LUNCH_BREAKING
+      });
+    }
+    else {
+      timelineEvents.push({
+        originalEvent: event,
+        type: TimelineEventType.fromTripEventType(event.eventType)
+      });
     }
     return timelineEvents;
   }

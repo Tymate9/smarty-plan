@@ -9,6 +9,7 @@ import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
 import net.enovea.spatial.GeoCodingService
 import net.enovea.spatial.SpatialService
 import net.enovea.device.deviceData.DeviceDataStateMapper
+import net.enovea.team.TeamMapper
 import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 
 
@@ -24,7 +25,8 @@ class VehicleServiceConfiguration {
         geoCodingService: GeoCodingService,
         entityManager: EntityManager,
         tripService: TripService,
-        vehicleStatsRepository: VehicleStatsRepository
+        vehicleStatsRepository: VehicleStatsRepository,
+        teamMapper: TeamMapper
     ): VehicleService {
         return VehicleService(
             vehicleMapper,
@@ -33,7 +35,8 @@ class VehicleServiceConfiguration {
             geoCodingService,
             entityManager,
             tripService,
-            vehicleStatsRepository
+            vehicleStatsRepository,
+            teamMapper
         )
     }
 }

@@ -21,6 +21,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import org.mapstruct.Context
 
 @Mapper(componentModel = "cdi" ,uses = [DriverMapper::class , DeviceMapper::class , TeamMapper::class , VehicleCategoryMapper::class, DeviceDataStateMapper::class])
 abstract class VehicleMapper {
@@ -55,39 +56,80 @@ abstract class VehicleMapper {
     //////////////////////////
     // Vehicle Summary Mapper
     //////////////////////////
-    @Mapping(source ="vehicleDrivers",target = "driver")
-    @Mapping(source ="vehicleDevices",target = "device")
-    @Mapping(source ="vehicleTeams",target = "team")
+    @Mapping(target = "driver", expression = "java(mapDriverAtDate(vehicleEntity, dateParam))")
+    @Mapping(target = "device", expression = "java(mapDeviceAtDate(vehicleEntity, dateParam))")
+    @Mapping(target = "team", expression = "java(mapTeamAtDate(vehicleEntity, dateParam))")
     @Mapping(source =".",target = "lastPositionDate", qualifiedByName = ["lastPositionDateMapper"])
     @Mapping(source = ".", target = "ranges", qualifiedByName = ["mapVehicleRangesVSDTO"])
-    abstract fun toVehicleDTOSummary(vehicleEntity: VehicleEntity): VehicleSummaryDTO
+    abstract fun toVehicleDTOSummary(vehicleEntity: VehicleEntity, @Context dateParam: Timestamp? = null): VehicleSummaryDTO
 
     //Map VehicleDrivers to recent DriverDTO
-    fun mapMostRecentDriver(vehicleDrivers: List<VehicleDriverEntity>): DriverDTO? {
-        val driverEntity = VehicleEntity.getCurrentDriver(vehicleDrivers)
-        return if (driverEntity == null) {
-            null
+    //TODO(renvoyer des listes)
+    fun mapDriverAtDate(vehicle: VehicleEntity, dateParam: Timestamp? = null): DriverDTO? {
+        return if (dateParam == null) {
+            // Cas 1 : pas de date => prendre la dernière affectation (endDate == null, max startDate)
+            vehicle.vehicleDrivers
+                .filter { it.endDate == null }
+                .maxByOrNull { it.id.startDate }
+                ?.let { driverMapper.toDto(it.driver!!) }
         } else {
-            driverMapper.toDto(driverEntity)
+            // Cas 2 : date fournie => prendre l’affectation active à dateParam
+            vehicle.vehicleDrivers
+                .filter {
+                    val startLd = it.id.startDate
+                    // startDate <= dateParam
+                    startLd <= dateParam &&
+                            // endDate == null ou endDate >= dateParam
+                            (it.endDate == null || it.endDate!! >= dateParam)
+                }
+                .maxByOrNull { it.id.startDate }
+                ?.let { driverMapper.toDto(it.driver!!) }
         }
     }
 
     //Map most recent Device to DeviceDTOsummary
-    fun mapMostRecentDevice(vehicleDevices: List<DeviceVehicleInstallEntity>): DeviceSummaryDTO? {
-        val deviceEntity = VehicleEntity.getCurrentDevice(vehicleDevices)
-        return if (deviceEntity == null) {
-            null
+    fun mapDeviceAtDate(vehicle: VehicleEntity, dateParam: Timestamp? = null): DeviceSummaryDTO? {
+        return if (dateParam == null) {
+            // Cas 1 : pas de date => prendre la dernière affectation (endDate == null, max startDate)
+            vehicle.vehicleDevices
+                .filter { it.endDate == null }
+                .maxByOrNull { it.id.startDate }
+                ?.let { deviceSummaryMapper.toDeviceDTOsummary(it.device!!) }
         } else {
-            deviceSummaryMapper.toDeviceDTOsummary(deviceEntity)
+            // Cas 2 : date fournie => prendre l’affectation active à dateParam
+            vehicle.vehicleDevices
+                .filter {
+                    val startLd = it.id.startDate
+                    // startDate <= dateParam
+                    startLd <= dateParam &&
+                            // endDate == null ou endDate >= dateParam
+                            (it.endDate == null || it.endDate!! >= dateParam)
+                }
+                .maxByOrNull { it.id.startDate }
+                ?.let { deviceSummaryMapper.toDeviceDTOsummary(it.device!!) }
         }
     }
 
-    //Map the most recent team to TeamDTO
-    fun mapMostRecentTeam(vehicleTeams: List<VehicleTeamEntity>): TeamSummaryDTO? {
-        return vehicleTeams
-            .filter { it.endDate == null }
-            .maxByOrNull { it.id.startDate }
-            ?.let { teamSummaryMapper.toDto(it.team!!) }
+    fun mapTeamAtDate(vehicle: VehicleEntity, dateParam: Timestamp? = null): TeamSummaryDTO? {
+        return if (dateParam == null) {
+            // Cas 1 : pas de date => prendre la dernière affectation (endDate == null, max startDate)
+            vehicle.vehicleTeams
+                .filter { it.endDate == null }
+                .maxByOrNull { it.id.startDate }
+                ?.let { teamSummaryMapper.toDto(it.team!!) }
+        } else {
+            // Cas 2 : date fournie => prendre l’affectation active à dateParam
+            vehicle.vehicleTeams
+                .filter {
+                    val startLd = it.id.startDate
+                    // startDate <= dateParam
+                    startLd <= dateParam &&
+                            // endDate == null ou endDate >= dateParam
+                            (it.endDate == null || it.endDate!! >= dateParam)
+                }
+                .maxByOrNull { it.id.startDate }
+                ?.let { teamSummaryMapper.toDto(it.team!!) }
+        }
     }
 
     //////////////////////////
@@ -96,7 +138,7 @@ abstract class VehicleMapper {
     @Mapping(source = "vehicleDrivers", target = "drivers")
     @Mapping(source = "vehicleDevices", target = "devices")
     @Mapping(source = "vehicleTeams", target = "teams")
-    @Mapping(source = "category",target = "category")
+    @Mapping(source = "category", target = "category")
     @Mapping(source =".",target = "lastPositionDate", qualifiedByName = ["lastPositionDateMapper"])
     @Mapping(source = ".", target = "ranges", qualifiedByName = ["mapVehicleRangesVDTO"])
     abstract fun toVehicleDTO(vehicle: VehicleEntity): VehicleDTO
@@ -110,7 +152,7 @@ abstract class VehicleMapper {
         }
 
     //Map DeviceVehicleInstallEntity to DeviceDTOs with start and end date
-    fun mapVehicleDevicesToDevicesDTO(vehicleDevices: List<DeviceVehicleInstallEntity>):Map<TimestampRange, DeviceDTO> =
+    fun mapVehicleDevicesToDevicesDTO(vehicleDevices: List<DeviceVehicleInstallEntity>): Map<TimestampRange, DeviceDTO> =
         vehicleDevices.associate {
             val startDate = it.id.startDate
             val endDate = it.endDate
@@ -118,7 +160,7 @@ abstract class VehicleMapper {
         }
 
     //Map VehicleTeamEntity to TeamDTOs with start and end date
-    fun mapVehicleTeamsToTeamsDTO(vehicleTeams: List<VehicleTeamEntity>):Map<TimestampRange, TeamDTO> =
+    fun mapVehicleTeamsToTeamsDTO(vehicleTeams: List<VehicleTeamEntity>): Map<TimestampRange, TeamDTO> =
         vehicleTeams.associate {
             val startDate = it.id.startDate
             val endDate = it.endDate
@@ -201,7 +243,10 @@ abstract class VehicleMapper {
     }
 
     @Named("mapVehicleRangesVDTO")
+    //inline fun <reified T : IVehicle<T>> mapVehicleRangesVDTO(vehicleEntity: VehicleEntity): List<Range<T>>? {
+        //T::class
     fun mapVehicleRangesVDTO(vehicleEntity: VehicleEntity): List<Range<VehicleDTO>>? {
+
         // 1. Récupérer la liste de drivers éventuellement associés au même "vehicule"
         val drivers = vehicleEntity.vehicleDrivers.mapNotNull { it.driver }
 
@@ -225,6 +270,7 @@ abstract class VehicleMapper {
         // 7. Créer notre Range<VehicleDTO> unique
         val parisZone = ZoneId.of("Europe/Paris")
         val todayInParis = LocalDate.now(parisZone)
+        //val lunchBreakRange = Range<T>(
         val lunchBreakRange = Range<VehicleDTO>(
             label = "LUNCH_BREAK",
             description = description,
@@ -312,7 +358,7 @@ abstract class VehicleMapper {
                     return@Range
                 }
                 // On vérifie que le device summary possède un DeviceDataState et on l'anonymise
-                dto.device.apply {
+                dto.device?.apply {
                     coordinate = null
                 }
             }

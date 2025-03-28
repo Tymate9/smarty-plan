@@ -1,9 +1,11 @@
 package net.enovea.vehicle.vehicleDriver
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import net.enovea.driver.DriverEntity
 import net.enovea.vehicle.VehicleEntity
+import net.enovea.workInProgress.affectationCRUD.AffectationForm
+import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
+import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -12,11 +14,10 @@ import java.sql.Timestamp
 data class VehicleDriverEntity (
 
     @EmbeddedId
-    val id: VehicleDriverId = VehicleDriverId(),
+    override var id: VehicleDriverId = VehicleDriverId(),
 
-    //TODO(Vérifier si la nullité est ok)
     @Column(name = "end_date", nullable = true)
-    val endDate: Timestamp? = null,
+    override var endDate: Timestamp? = null,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("vehicleId")
@@ -29,13 +30,39 @@ data class VehicleDriverEntity (
     val driver: DriverEntity? = null,
 
 
-    ): PanacheEntityBase {
+    ): IAffectationPanacheEntity<DriverEntity, VehicleEntity, VehicleDriverId> {
 
-    companion object : PanacheCompanionBase<VehicleDriverEntity, VehicleDriverId> {
+    override fun getStartDate(): Timestamp = id.startDate
+
+    override fun getSubject(): DriverEntity? = driver
+
+    override fun getBuildId(): String = "${id.driverId}_${id.vehicleId}_${id.startDate.time}"
+
+    override fun getTarget(): VehicleEntity? = vehicle
+
+    companion object : PanacheCompanionBase<VehicleDriverEntity, VehicleDriverId>, IAffectationFactory<VehicleDriverEntity, VehicleDriverId> {
         const val ENTITY_NAME = "VehicleDriverEntity"
         const val TABLE_NAME = "vehicle_driver"
 
+        override fun targetIdPath(): String = "vehicle.id"
+        override fun subjectIdPath(): String = "driver.id"
 
+        override fun createFromForm(form: AffectationForm): VehicleDriverEntity {
+            return VehicleDriverEntity(
+                id = createIdFromForm(form),
+                endDate = form.endDate,
+                vehicle = VehicleEntity.findById(form.targetId.toString()),
+                driver = DriverEntity.findById(form.subjectId.toString().toInt())
+            )
+        }
+
+        override fun createIdFromForm(form: AffectationForm): VehicleDriverId {
+            return VehicleDriverId(
+                vehicleId = form.targetId.toString(),
+                driverId = form.subjectId.toString().toInt(),
+                startDate = form.startDate ?: throw IllegalArgumentException("La date de début (startDate) est obligatoire.")
+            )
+        }
     }
 }
 

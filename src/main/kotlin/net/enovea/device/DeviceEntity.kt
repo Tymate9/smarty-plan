@@ -53,7 +53,7 @@ data class DeviceEntity (
     @OneToOne(
         fetch = FetchType.LAZY,
         mappedBy = "device",
-        cascade = [CascadeType.ALL],
+        cascade = [],
         orphanRemoval = true
     )
     var deviceDataState: DeviceDataStateEntity? = null

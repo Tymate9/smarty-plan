@@ -457,6 +457,7 @@ export class TripMapComponent {
     }
 
     this._tripData = tripEventsDTO;
+    // init map
     if (this.map) {
       this.featureGroup.clearLayers();
     } else {
@@ -575,6 +576,7 @@ export class TripMapComponent {
   }
 
   get tripData(): TripEventsDTO | null {
+    console.log(this._tripData?.tripEvents)
     return this._tripData;
   }
 

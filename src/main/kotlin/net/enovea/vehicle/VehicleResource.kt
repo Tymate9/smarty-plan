@@ -1,6 +1,9 @@
 package net.enovea.vehicle
 
 import io.quarkus.security.Authenticated
+import jakarta.transaction.Transactional
+import jakarta.validation.ConstraintViolation
+import jakarta.validation.Validator
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -9,6 +12,11 @@ import net.enovea.spatial.SpatialService
 import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.device.DeviceEntity
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
+import net.enovea.team.TeamService
+import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
+import net.enovea.vehicle.vehicle_category.VehicleCategoryMapper
+import net.enovea.workInProgress.common.ICRUDResource
+import net.enovea.workInProgress.vehicleCRUD.VehicleForm
 import org.jboss.logging.Logger
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -25,9 +33,101 @@ import kotlin.time.DurationUnit
 class VehicleResource(
     private val vehicleService: VehicleService,
     private val deviceDataStateSpatialService: SpatialService,
-    private val vehicleMapper: VehicleMapper
-) {
+    private val teamService: TeamService,
+    private val vehicleMapper: VehicleMapper,
+    private val vehicleCategoryMapper: VehicleCategoryMapper,
+    private val validator: Validator
+) : ICRUDResource<VehicleForm, VehicleDTO, String> {
     private val logger = Logger.getLogger(VehicleResource::class.java)
+
+    /**
+     * Récupérer un véhicule par son identifiant.
+     * Retourne 404 si l'entité n'existe pas.
+     */
+    @GET
+    @Path("/{id}")
+    override fun readOne(@PathParam("id") id: String): Response {
+        val vehicleDTO = vehicleService.getById(id)
+        return Response.ok(vehicleDTO).build()
+    }
+
+    /**
+     * Créer un nouveau véhicule.
+     * Retourne 400 si le formulaire est invalide.
+     */
+    @POST
+    @Transactional
+    override fun create(form: VehicleForm): Response {
+        val violations: Set<ConstraintViolation<VehicleForm>> = validator.validate(form)
+        if (violations.isNotEmpty()) {
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val createdVehicle = vehicleService.create(form)
+        return Response.ok(createdVehicle).build()
+    }
+
+    /**
+     * Mettre à jour un véhicule existant.
+     * Retourne 400 si le formulaire est invalide et 404 si l'entité n'existe pas.
+     */
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    override fun update(@PathParam("id") id: String, form: VehicleForm): Response {
+        form.id = id
+        val violations: Set<ConstraintViolation<VehicleForm>> = validator.validate(form)
+        if (violations.isNotEmpty()) {
+            val errors = violations.map { "${it.propertyPath}: ${it.message}" }
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors).build()
+        }
+        val updatedVehicle = vehicleService.update(form)
+        return Response.ok(updatedVehicle).build()
+    }
+
+    /**
+     * Supprimer un véhicule.
+     * Retourne 404 si l'entité n'existe pas.
+     * Retourne le DTO du véhicule supprimé.
+     */
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    override fun delete(@PathParam("id") id: String): Response {
+        return try {
+            val deletedVehicle = vehicleService.delete(id)
+            Response.ok(deletedVehicle).build()
+        } catch (ex: NotFoundException) {
+            Response.status(Response.Status.NOT_FOUND)
+                .entity("Vehicle with id=$id not found")
+                .build()
+        } catch (ex: Exception) {
+            val conflict = when {
+                ex is org.hibernate.exception.ConstraintViolationException -> true
+                ex.cause is org.hibernate.exception.ConstraintViolationException -> true
+                else -> false
+            }
+            if (conflict) {
+                Response.status(Response.Status.CONFLICT)
+                    .entity("Foreign key conflict: Vehicle cannot be deleted")
+                    .build()
+            } else {
+                Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal server error: ${ex.message}")
+                    .build()
+            }
+        }
+    }
+
+    @GET
+    @Path("/category")
+    @Transactional
+    fun getCategory():Response{
+        return Response.ok(
+            VehicleCategoryEntity.listAll().map { it -> vehicleCategoryMapper.toDto(it) }).build()
+    }
+
+    /// Other
 
     @GET
     @Path("/list")
@@ -40,7 +140,7 @@ class VehicleResource(
     fun getNonGeolocVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<VehicleSummaryDTO> {
         val vehiclesList = vehicleService.getVehiclesList(agencyIds)
         val transformedList = vehiclesList.map { vehicle ->
-            vehicle.copy(device = vehicle.device.copy(coordinate = null))
+            vehicle.copy(device = vehicle.device?.copy(coordinate = null))
         }
         return transformedList
     }
@@ -232,5 +332,30 @@ class VehicleResource(
         val vehicles = installEntities.mapNotNull { it.vehicle }
 
         return vehicles
+    }
+
+    @GET
+    @Path("/authorized-data")
+    fun getAuthorizedData(): Response {
+        val list = teamService.getVehicleTreeAtDate()
+        return Response.ok(list).build()
+    }
+
+    @GET
+    @Path("/count")
+    fun getCount(): Response {
+        // Récupération du nombre total de véhicules via le service
+        val count: Long = vehicleService.getCount()
+        // Retour d'une réponse HTTP 200 OK contenant le nombre
+        return Response.ok(count).build()
+    }
+
+    @GET
+    @Path("/stats")
+    fun getStats(): Response {
+        // Appel du service pour récupérer les statistiques des véhicules
+        val statsDTO = vehicleService.getStats()
+        // Retourne une réponse HTTP 200 OK avec l'objet StatsDTO
+        return Response.ok(statsDTO).build()
     }
 }

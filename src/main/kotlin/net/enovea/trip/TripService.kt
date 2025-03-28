@@ -734,8 +734,6 @@ class TripService(
      */
     private fun getInheritedLunchBreakFromTeams(teams: List<TeamEntity>): Pair<LocalTime?, LocalTime?> {
         // On peut chercher la première team qui a lunchBreakStart/end non null,
-        // sinon remonter au parent. Si tu as plusieurs teams actives,
-        // il faut décider laquelle on prend (ex. la plus “récente”).
         for (team in teams) {
             val (start, end) = findLunchBreakWithInheritance(team)
             if (start != null && end != null) {

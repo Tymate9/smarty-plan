@@ -382,7 +382,8 @@
                         <pattern>net.enovea.*.*.*Entity</pattern>
                         <pattern>net.enovea.*.*DTO</pattern>
                         <pattern>net.enovea.*.*.*DTO</pattern>
-                        <pattern>net.enovea.api.*.*Form</pattern>
+                        <pattern>net.enovea.*.*Form</pattern>
+                        <pattern>net.enovea.*.*.*Form</pattern>
                     </classPatterns>
                     <customTypeMappings>
                         <mapping>org.locationtech.jts.geom.Point:custom.GeoPoint</mapping>

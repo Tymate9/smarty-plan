@@ -1,0 +1,189 @@
+### ----------------------------------------------------
+### Définition des variables
+### ----------------------------------------------------
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = admin
+@password_admin = root
+
+### 1) Obtenir le token d'accès
+### ----------------------------------------------------
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {% client.global.set("access_token_admin", response.body.access_token); %}
+
+
+### 2) CREATE : Créer une nouvelle Team valide (non "Agence")
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Equipe Test Valide",
+  "path": "chemin/initial",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "12:00:00",
+  "lunchBreakEndStr": "13:00:00"
+}
+
+> {%
+    client.global.set("test_team_id", response.body.id);
+    client.test("CREATE Team valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid team creation");
+    });
+%}
+
+### 3) CREATE : Créer une Team avec un format d'heure invalide pour lunchBreakStartStr (Erreur 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Equipe Format Invalide",
+  "path": "chemin/invalide",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "25:00:00",
+  "lunchBreakEndStr": "13:00:00"
+}
+
+> {%
+    client.test("CREATE Team avec format invalide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for invalid lunchBreakStartStr");
+    });
+%}
+
+### 4) CREATE : Créer une Team avec des horaires incohérents (start >= end) (Erreur 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Equipe Horaires Incohérents",
+  "path": "chemin/incoherent",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "14:00:00",
+  "lunchBreakEndStr": "13:00:00"
+}
+
+> {%
+    client.test("CREATE Team avec horaires incohérents => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for inconsistent lunch break times");
+    });
+%}
+
+### 5) CREATE : Créer une Team de catégorie "Agence" valide (parentTeam null)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Agence Valide",
+  "path": "chemin/agence",
+  "category": 1,
+  "parentTeam": null,
+  "lunchBreakStartStr": "11:00:00",
+  "lunchBreakEndStr": "12:00:00"
+}
+
+> {%
+    client.global.set("agence_id", response.body.id);
+    client.test("CREATE Agence valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid Agence creation");
+    });
+%}
+
+### 6) CREATE : Tenter de créer une équipe "Agence" avec un parentTeam renseigné (Erreur 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/teams
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "label": "Agence avec Parent",
+  "path": "chemin/agence_parent",
+  "category": 1,
+  "parentTeam": {{agence_id}},
+  "lunchBreakStartStr": "11:00:00",
+  "lunchBreakEndStr": "12:00:00"
+}
+
+> {%
+    client.test("CREATE Agence avec parentTeam => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request when an Agence has a parentTeam");
+    });
+%}
+
+### 7) UPDATE : Mettre à jour l'équipe créée en étape 2 (UPDATE)
+### ----------------------------------------------------
+PUT http://{{api_host}}/api/teams/{{test_team_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": "{{test_team_id}}",
+  "label": "Equipe Modifiée",
+  "path": "chemin/modifie",
+  "category": 2,
+  "parentTeam": null,
+  "lunchBreakStartStr": "11:30:00",
+  "lunchBreakEndStr": "12:30:00"
+}
+
+> {%
+    client.test("UPDATE Team => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on team update");
+    });
+%}
+
+### 8) READ : Récupérer l'équipe mise à jour (READ)
+### ----------------------------------------------------
+GET http://{{api_host}}/api/teams/{{test_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ Team => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on reading updated team");
+        client.assert(response.body.label === "Equipe Modifiée", "Expected team label to be 'Equipe Modifiée'");
+    });
+%}
+
+### 9) DELETE : Supprimer l'équipe créée en étape 2 (DELETE)
+### ----------------------------------------------------
+DELETE http://{{api_host}}/api/teams/{{test_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("DELETE Team => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on team deletion");
+    });
+%}
+
+### 10) READ : Vérifier la suppression (READ)
+### ----------------------------------------------------
+GET http://{{api_host}}/api/teams/{{test_team_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ après DELETE Team => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after team deletion");
+    });
+%}

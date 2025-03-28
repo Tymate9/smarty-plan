@@ -1,0 +1,151 @@
+### ----------------------------------------------------
+### Définition des variables
+### ----------------------------------------------------
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = admin
+@password_admin = root
+
+
+### 1) Obtenir le token d'accès
+### ----------------------------------------------------
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {% client.global.set("access_token_admin", response.body.access_token); %}
+
+### 2) CREATE : Créer un conducteur valide (CREATE)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/drivers
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "firstName": "Jean",
+  "lastName": "Dupont",
+  "phoneNumber": "0612345678"
+}
+
+> {%
+    client.global.set("test_driver_id", response.body.id);
+    client.test("CREATE conducteur valide", function() {
+        client.assert(response.status === 200, "Expected 200 OK on valid driver creation");
+    });
+%}
+
+### 3) CREATE : Tenter de créer un conducteur avec un firstName vide (Erreur 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/drivers
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "firstName": "",
+  "lastName": "Dupont",
+  "phoneNumber": "0612345678"
+}
+
+> {%
+    client.test("CREATE conducteur avec firstName vide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for empty firstName");
+    });
+%}
+
+### 4) CREATE : Tenter de créer un conducteur avec un lastName vide (Erreur 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/drivers
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "firstName": "Jean",
+  "lastName": "",
+  "phoneNumber": "0612345678"
+}
+
+> {%
+    client.test("CREATE conducteur avec lastName vide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for empty lastName");
+    });
+%}
+
+### 5) CREATE : Tenter de créer un conducteur avec un numéro de téléphone invalide (Erreur 400)
+### ----------------------------------------------------
+POST http://{{api_host}}/api/drivers
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": null,
+  "firstName": "Jean",
+  "lastName": "Dupont",
+  "phoneNumber": "0512345678"
+}
+
+> {%
+    client.test("CREATE conducteur avec téléphone invalide => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for invalid phoneNumber");
+    });
+%}
+
+### 6) UPDATE : Mettre à jour le conducteur (UPDATE)
+### ----------------------------------------------------
+PUT http://{{api_host}}/api/drivers/{{test_driver_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token_admin}}
+
+{
+  "id": {{test_driver_id}},
+  "firstName": "Jean-Michel",
+  "lastName": "Dupont",
+  "phoneNumber": "0712345678"
+}
+
+> {%
+    client.test("UPDATE conducteur => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on driver update");
+    });
+%}
+
+### 7) READ : Récupérer le conducteur mis à jour (READ)
+### ----------------------------------------------------
+GET http://{{api_host}}/api/drivers/{{test_driver_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ conducteur => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on read after update");
+        client.assert(response.body.firstName === "Jean-Michel", "Expected firstName to be 'Jean-Michel'");
+    });
+%}
+
+### 8) DELETE : Supprimer le conducteur créé (DELETE)
+### ----------------------------------------------------
+DELETE http://{{api_host}}/api/drivers/{{test_driver_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("DELETE conducteur => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on driver deletion");
+    });
+%}
+
+### 9) READ : Vérifier la suppression du conducteur (READ)
+### ----------------------------------------------------
+GET http://{{api_host}}/api/drivers/{{test_driver_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ après DELETE conducteur => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after driver deletion");
+    });
+%}

@@ -12,7 +12,6 @@ import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 @Entity(name = DriverEntity.ENTITY_NAME)
 @Table(name = DriverEntity.TABLE_NAME)
 data class DriverEntity(
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = ID_SEQUENCE)
     @SequenceGenerator(name = ID_SEQUENCE, sequenceName = ID_SEQUENCE, allocationSize = 1)
@@ -30,20 +29,19 @@ data class DriverEntity(
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "driver",
-        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        cascade = []
     )
     val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "driver",
-        cascade = [CascadeType.ALL, CascadeType.REMOVE]
+        cascade = []
     )
     val driverTeams: List<DriverTeamEntity> = mutableListOf(),
 
 
     ) : PanacheEntityBase {
-
     companion object : PanacheCompanionBase<DriverEntity, Int> {
         const val ENTITY_NAME = "DriverEntity"
         const val TABLE_NAME = "driver"
@@ -52,5 +50,6 @@ data class DriverEntity(
         fun findByFullNames(fullNames: List<String>): List<DriverEntity> {
             return list("CONCAT(firstName, ' ', lastName) IN ?1", fullNames)
         }
+
     }
 }

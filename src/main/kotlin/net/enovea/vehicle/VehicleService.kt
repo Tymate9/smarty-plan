@@ -2,7 +2,11 @@ package net.enovea.vehicle
 
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import jakarta.ws.rs.BadRequestException
+import jakarta.ws.rs.NotFoundException
 import net.dilivia.lang.StopWatch
+import net.enovea.workInProgress.common.Stat
+import net.enovea.workInProgress.common.StatsDTO
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.driver.driverUntrackedPeriod.DriverUntrackedPeriodEntity
 import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
@@ -12,10 +16,14 @@ import net.enovea.spatial.GeoCodingService
 import net.enovea.spatial.SpatialService
 import net.enovea.team.TeamDTO
 import net.enovea.team.TeamEntity
+import net.enovea.team.TeamMapper
 import net.enovea.vehicle.vehicleStats.*
 import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import net.enovea.vehicle.vehicleUntrackedPeriod.VehicleUntrackedPeriodEntity
+import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
+import net.enovea.workInProgress.common.ICRUDService
+import net.enovea.workInProgress.vehicleCRUD.VehicleForm
 import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
@@ -29,9 +37,65 @@ open class VehicleService(
     private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
-    private val vehicleStatsRepository: VehicleStatsRepository
-) {
+    private val vehicleStatsRepository: VehicleStatsRepository,
+    private val teamMapper: TeamMapper
+) : ICRUDService<VehicleForm, VehicleDTO, String> {
 
+    @Transactional
+    override fun getById(id: String): VehicleDTO {
+        val entity = VehicleEntity.findById(id)
+            ?: throw NotFoundException("Vehicle with id=$id not found")
+        return vehicleMapper.toVehicleDTO(entity)
+    }
+
+    @Transactional
+    override fun create(form: VehicleForm): VehicleDTO {
+        val entity = VehicleEntity().apply {
+            energy = form.energy
+            engine = form.engine
+            externalId = form.externalid
+            licenseplate = form.licenseplate
+            // Récupérer la catégorie à partir de l'id fourni
+            category = VehicleCategoryEntity.findById(form.category!!)
+                ?: throw NotFoundException("Vehicle category with id=${form.category} not found")
+            validated = form.validated
+        }
+        entity.persistAndFlush()
+        return vehicleMapper.toVehicleDTO(entity)
+    }
+
+    @Transactional
+    override fun update(form: VehicleForm): VehicleDTO {
+        val id = form.id ?: throw BadRequestException("Id not provided")
+        val entity = VehicleEntity.findById(id)
+            ?: throw NotFoundException("Vehicle with id=$id not found")
+        // Mise à jour des champs
+        entity.energy = form.energy
+        entity.engine = form.engine
+        entity.externalId = form.externalid
+        entity.licenseplate = form.licenseplate
+        // Mise à jour de la catégorie via son id
+        val categoryEntity = VehicleCategoryEntity.findById(form.category!!)
+            ?: throw NotFoundException("Vehicle category with id=${form.category} not found")
+        entity.category = categoryEntity
+        entity.validated = form.validated
+        entity.persistAndFlush()
+        return vehicleMapper.toVehicleDTO(entity)
+    }
+
+
+    override fun delete(id: String): VehicleDTO {
+        val entity = VehicleEntity.findById(id)
+            ?: throw NotFoundException("Vehicle with id=$id not found")
+        val dto = vehicleMapper.toVehicleDTO(entity)
+
+        // TODO(trouver un moyen ici pour supprimer l'entité sans être obliger de passer par l'entityManager)
+        val query = entityManager.createNativeQuery("DELETE FROM vehicle WHERE id = ?")
+        query.setParameter(1, id)
+        query.executeUpdate()
+
+        return dto
+    }
 
     //function returns trips statistics displayed on the page ('suivi d'activité')
     fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>? , vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
@@ -44,7 +108,7 @@ open class VehicleService(
         val vehiclesStats = vehicleStatsRepository.findVehicleStatsOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds ,dorisView )
 
         val totalVehiclesStatsMap = calculateTotalVehiclesStats(vehiclesStats)
-        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
+        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams().mapValues { teamMapper.toDto(it.value) }
 
         val vehiclesWithHierarchy = vehiclesStats?.map { stats ->
 
@@ -129,7 +193,7 @@ open class VehicleService(
         val vehiclesStatsQse = vehicleStatsRepository.findVehicleStatsQSEOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds , dorisView )
 
         val totalVehiclesStatsQSEMap = calculateTotalVehiclesStatsQSE(vehiclesStatsQse)
-        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams()
+        val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams().mapValues { teamMapper.toDto(it.value) }
 
         val vehiclesWithHierarchy = vehiclesStatsQse?.map { stats ->
 
@@ -481,6 +545,80 @@ open class VehicleService(
         return Pair(earliestStart, latestEnd)
     }
 
+    fun getCount(): Long {
+        return VehicleEntity.count()
+    }
+
+    /**
+     * Retourne un objet StatsDTO contenant :
+     * - Le nombre de véhicules non liés à un driver actif.
+     * - Le nombre de véhicules non liés à un device actif.
+     * - Le nombre de véhicules non liés à une équipe active.
+     *
+     * Pour chaque statistique, nous utilisons une requête JPQL avec une sous-requête NOT EXISTS.
+     */
+    fun getStats(): StatsDTO {
+        // Récupération de l'EntityManager via Panache
+        val em = VehicleEntity.getEntityManager()
+
+        // Véhicules sans driver actif : aucun enregistrement dans VehicleDriverEntity avec endDate IS NULL
+        val countNoDriver: Long = em
+            .createQuery(
+                "select count(v) from VehicleEntity v " +
+                        "where not exists (" +
+                        "   select 1 from VehicleDriverEntity vd " +
+                        "   where vd.vehicle = v and vd.endDate is null" +
+                        ")",
+                Long::class.java
+            ).singleResult
+
+        // Véhicules sans device actif : aucun enregistrement dans DeviceVehicleInstallEntity avec endDate IS NULL
+        val countNoDevice: Long = em
+            .createQuery(
+                "select count(v) from VehicleEntity v " +
+                        "where not exists (" +
+                        "   select 1 from DeviceVehicleInstallEntity dvi " +
+                        "   where dvi.vehicle = v and dvi.endDate is null" +
+                        ")",
+                Long::class.java
+            ).singleResult
+
+        // Véhicules sans équipe active : aucun enregistrement dans VehicleTeamEntity avec endDate IS NULL
+        val countNoTeam: Long = em
+            .createQuery(
+                "select count(v) from VehicleEntity v " +
+                        "where not exists (" +
+                        "   select 1 from VehicleTeamEntity vt " +
+                        "   where vt.vehicle = v and vt.endDate is null" +
+                        ")",
+                Long::class.java
+            ).singleResult
+
+        // Construction de la liste de Stat
+        val stats = listOf(
+            Stat(
+                label = "Véhicules non liés à un driver",
+                value = countNoDriver.toDouble(),
+                description = "Nombre de véhicules sans driver actif"
+            ),
+            Stat(
+                label = "Véhicules non liés à un device",
+                value = countNoDevice.toDouble(),
+                description = "Nombre de véhicules sans device actif"
+            ),
+            Stat(
+                label = "Véhicules non liés à une équipe",
+                value = countNoTeam.toDouble(),
+                description = "Nombre de véhicules sans équipe active"
+            )
+        )
+
+        // Création et retour de l'objet StatsDTO avec la date du moment
+        return StatsDTO(
+            date = LocalDateTime.now(),
+            stats = stats
+        )
+    }
 }
 
 //To convert time from HH:MM format to second

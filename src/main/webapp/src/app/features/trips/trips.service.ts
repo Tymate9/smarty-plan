@@ -104,8 +104,6 @@ export class TripsService {
 
     const isStop = event.eventType === TripEventType.STOP || event.eventType === TripEventType.VEHICLE_IDLE || event.eventType === TripEventType.VEHICLE_RUNNING;
 
-    console.log(`tripEventToTimelineEvents: ${event.eventType} ${event.start} ${event.end} ${lunchTypes} ${lunchEventTimes} ${startMinutes} ${endMinutes}`);
-
     if (isFullLunchBreak) {
       if (!startsAtExactStart) {
         timelineEvents.push({

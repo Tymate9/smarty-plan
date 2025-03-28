@@ -144,7 +144,7 @@ import TripEventType = dto.TripEventType;
                     <span *ngIf="event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP">
                       ...
                     </span>
-                    <strong *ngIf="event.originalEvent.duration != null && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP"> {{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
+                    <strong *ngIf="event.originalEvent.duration != null && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP"> {{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
                     <!-- Affichage des subTripEvent descriptions -->
                     <div *ngIf="event.originalEvent.subTripEvents?.length">
                       <div *ngFor="let subEvent of event.originalEvent.subTripEvents">
@@ -250,7 +250,7 @@ import TripEventType = dto.TripEventType;
                     <span *ngIf="event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP">
                       ...
                     </span>
-                    <strong *ngIf="event.originalEvent.duration != null && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP"> {{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
+                    <strong *ngIf="event.originalEvent.duration != null && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP"> {{ tripsService.formatDuration(event.originalEvent.duration) }}</strong>
                     <!-- Affichage des subTripEvent descriptions -->
                     <div *ngIf="event.originalEvent.subTripEvents?.length">
                       <div *ngFor="let subEvent of event.originalEventsubTripEvents">

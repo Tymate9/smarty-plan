@@ -39,7 +39,7 @@ export class TripsService {
       tripEvent.start = tripEvent.start ? new Date(tripEvent.start) : null;
       tripEvent.end = tripEvent.end ? new Date(tripEvent.end) : null;
       tripEvent.tripEventDetails = tripEvent.tripEventDetails?.map(sub => {
-        sub.timestamp = sub.timestamp ? new Date(sub.timestamp) : null;
+        sub.timestamp = sub.timestamp ? new Date((new Date()).toISOString().split("T")[0] + "T" + sub.timestamp) : null;
         return sub;
       }) ?? null;
 
@@ -102,7 +102,9 @@ export class TripsService {
     const startsAtExactEnd = isLunchBreakEnd && startMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.END_LUNCH_BREAK)]
     const endsAtExactEnd = isLunchBreakEnd && endMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.END_LUNCH_BREAK)]
 
-    const isStop = event.eventType === TripEventType.STOP;
+    const isStop = event.eventType === TripEventType.STOP || event.eventType === TripEventType.VEHICLE_IDLE || event.eventType === TripEventType.VEHICLE_RUNNING;
+
+    console.log(`tripEventToTimelineEvents: ${event.eventType} ${event.start} ${event.end} ${lunchTypes} ${lunchEventTimes} ${startMinutes} ${endMinutes}`);
 
     if (isFullLunchBreak) {
       if (!startsAtExactStart) {

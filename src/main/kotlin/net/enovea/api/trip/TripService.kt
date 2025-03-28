@@ -89,27 +89,38 @@ class TripService(
                 "IDLE" -> TripStatus.IDLE
                 else -> throw NotImplementedError("Unknown device state ${lastDeviceState.state}")
             }
-            tripEvents.add(
-                TripEventDTO(
-                    index = tripEvents.size,
-                    eventType = TripEventType.TRIP_EXPECTATION,
-                    trace = listOf(
-                        geometryFactory.createLineString(
-                            arrayOf(
-                                Coordinate(lastTrip.endLng, lastTrip.endLat),
-                                lastPosition?.coordinate
-                            )
-                        ).toText()
+            if (lunchBreakStart === null ||
+                lunchBreakEnd === null ||
+                !(lunchBreakStart >= lastPositionTime.toLocalTime() && lunchBreakEnd <= lastPositionTime.toLocalTime())
+            ) {
+                tripEvents.add(
+                    TripEventDTO(
+                        index = tripEvents.size,
+                        eventType = TripEventType.TRIP_EXPECTATION,
+                        trace = listOf(
+                            geometryFactory.createLineString(
+                                arrayOf(
+                                    Coordinate(lastTrip.endLng, lastTrip.endLat),
+                                    lastPosition?.coordinate
+                                )
+                            ).toText()
+                        )
                     )
                 )
-            )
+            }
         }
+        var tripEventDetails: List<TripEventDetails>? = null
         val eventTime = lastPositionTime.toLocalTime()
         if (lunchBreakStart != null && lunchBreakEnd != null) {
             if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
                 addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
                 poiAtEnd = null
                 lastPosition = null
+                tripEventDetails = listOf(
+                    TripEventDetails(
+                        type= TripEventDetailsType.LUNCH_BREAKING
+                    )
+                )
             }
         }
         val finalLat: Double? =
@@ -141,6 +152,7 @@ class TripService(
                 lat = finalLat,
                 lng = finalLng,
                 start = lastPositionTime,
+                tripEventDetails = tripEventDetails,
             )
         )
 

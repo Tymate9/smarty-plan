@@ -12,12 +12,16 @@ import { NotificationService } from '../../../commons/notification/notification.
 import {DriverValidator} from "./driver-validator";
 import {TabPanel, TabView} from "primeng/tabview";
 import {AffectationFormComponent} from "../../affectation-form/affectation-form.component";
-import {DriverTeamAffectationService} from "../../service/affectation.service";
+import {DriverTeamAffectationService, DriverVehicleAffectationService} from "../../service/affectation.service";
 import {TeamService} from "../../../features/vehicle/team.service";
-import {teamOptionExtractor} from "../../../../../../kotlin/net/enovea/workInProgress/vehicleCRUD/OptionDTOExtractor";
+import {
+  driverOptionExtractor,
+  teamOptionExtractor, vehicleOptionExtractor
+} from "../../../../../../kotlin/net/enovea/workInProgress/vehicleCRUD/OptionDTOExtractor";
 import DriverForm = dto.DriverForm;
 import {PeriodFormComponent} from "../../period-form/period-form/period-form.component";
 import {DriverUpPeriodService} from "../../service/period.service";
+import {VehicleService} from "../../../features/vehicle/vehicle.service";
 
 @Component({
   selector: 'app-driver-form',
@@ -45,7 +49,21 @@ import {DriverUpPeriodService} from "../../service/period.service";
         ></app-entity-form>
       </p-tabPanel>
 
-      <!-- Onglet 2 : Affectation - Équipe affectée (uniquement en mode update) -->
+      <!-- Onglet 2 : Période de non géolocalisation (uniquement en mode update) -->
+      <p-tabPanel header="Véhicule affecté" [disabled]="mode === 'create'">
+        <app-affectation-form
+          *ngIf="driverEntity?.id"
+          [title]="'Affectation - Véhicule affecté'"
+          [subjectId]="driverEntity?.id"
+          [affectationService]="driverVehicleAffectationService"
+          [optionService]="vehicleService"
+          [optionExtractor]="vehicleOptionExtractor"
+          [mainEntityRole]="'subject'"
+          [serviceToNotify]="driverService"
+        ></app-affectation-form>
+      </p-tabPanel>
+
+      <!-- Onglet 3 : Affectation - Équipe affectée (uniquement en mode update) -->
       <p-tabPanel header="Affectation - Équipe affectée" [disabled]="mode === 'create'">
         <app-affectation-form
           [title]="'Affectation - Équipe affectée'"
@@ -58,7 +76,7 @@ import {DriverUpPeriodService} from "../../service/period.service";
         ></app-affectation-form>
       </p-tabPanel>
 
-      <!-- Onglet 3 : Période de non géolocalisation (uniquement en mode update) -->
+      <!-- Onglet 4 : Période de non géolocalisation (uniquement en mode update) -->
       <p-tabPanel header="Période de non géolocalisation" [disabled]="mode === 'create'">
         <app-period-form
           *ngIf="driverEntity?.id"
@@ -88,8 +106,9 @@ export class DriverFormComponent implements OnInit {
     private notificationService: NotificationService,
     public driverTeamAffectationService: DriverTeamAffectationService,
     public teamService: TeamService,
-    public driverUpPeriodService: DriverUpPeriodService
-
+    public driverUpPeriodService: DriverUpPeriodService,
+    public driverVehicleAffectationService: DriverVehicleAffectationService,
+    public vehicleService: VehicleService
   ) {}
 
   ngOnInit(): void {
@@ -215,4 +234,6 @@ export class DriverFormComponent implements OnInit {
   }
 
   protected readonly teamOptionExtractor = teamOptionExtractor;
+  protected readonly driverOptionExtractor = driverOptionExtractor;
+  protected readonly vehicleOptionExtractor = vehicleOptionExtractor;
 }

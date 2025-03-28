@@ -14,7 +14,7 @@ import {NotificationService} from "../../commons/notification/notification.servi
 import {TilesService} from "../../services/tiles.service";
 import {Button} from "primeng/button";
 import {NgClass, NgIf} from "@angular/common";
-import {TeamService} from "../vehicle/team.service";
+import {TeamService} from "../teams/team.service";
 import Range = dto.Range;
 import {
   ScrollingInfoBannerComponent

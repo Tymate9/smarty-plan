@@ -15,8 +15,7 @@ import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.team.TeamService
 import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
 import net.enovea.vehicle.vehicle_category.VehicleCategoryMapper
-import net.enovea.workInProgress.common.ICRUDResource
-import net.enovea.workInProgress.vehicleCRUD.VehicleForm
+import net.enovea.commons.ICRUDResource
 import org.jboss.logging.Logger
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory

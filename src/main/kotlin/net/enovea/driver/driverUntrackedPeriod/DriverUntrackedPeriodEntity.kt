@@ -4,9 +4,9 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.driver.DriverEntity
-import net.enovea.workInProgress.periodEntityCRUD.IPanachePeriodEntity
-import net.enovea.workInProgress.periodEntityCRUD.IPeriodFactory
-import net.enovea.workInProgress.periodEntityCRUD.PeriodForm
+import net.enovea.period.IPanachePeriodEntity
+import net.enovea.period.IPeriodFactory
+import net.enovea.period.PeriodForm
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -24,7 +24,8 @@ data class DriverUntrackedPeriodEntity(
          override fun getResource(): DriverEntity = DriverEntity.findById(id.driverId) ?: throw IllegalStateException("Driver avec l'id ${id.driverId} non trouvé")
          override fun getBuildId(): String = "${id.driverId}_${id.startDate.time}"
 
-         companion object : PanacheCompanionBase<DriverUntrackedPeriodEntity, DriverUntrackedPeriodId>, IPeriodFactory<DriverUntrackedPeriodEntity, DriverUntrackedPeriodId> {
+         companion object : PanacheCompanionBase<DriverUntrackedPeriodEntity, DriverUntrackedPeriodId>,
+             IPeriodFactory<DriverUntrackedPeriodEntity, DriverUntrackedPeriodId> {
              const val ENTITY_NAME = "DriverUntrackedPeriodEntity"
              const val TABLE_NAME = "driver_untracked_period"
 

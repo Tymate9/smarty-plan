@@ -6,9 +6,8 @@ import jakarta.validation.ConstraintViolation
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import net.enovea.workInProgress.driverCRUD.DriverForm
 import net.enovea.team.TeamService
-import net.enovea.workInProgress.common.ICRUDResource
+import net.enovea.commons.ICRUDResource
 import jakarta.validation.Validator
 
 @Path("/api/drivers")

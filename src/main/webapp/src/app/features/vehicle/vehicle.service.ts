@@ -4,15 +4,15 @@ import {map, Observable, of, Subject} from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
 import {MessageService, TreeNode} from "primeng/api";
-import {CrudEvent, IEntityService} from "../../workInProgress/CRUD/ientity-service";
-import { EntityDeleteButtonComponent } from "../../workInProgress/entity-delete-button-component/entity-delete-button.component";
-import {CompOpenerButtonComponent} from "../../workInProgress/drawer/comp-opener-button.component";
+import {CrudEvent, IEntityService} from "../../commons/crud/interface/ientity-service";
+import { EntityDeleteButtonComponent } from "../../commons/crud/inputs/entity-delete-button.component";
+import {CompOpenerButtonComponent} from "../../commons/drawer/comp-opener-button.component";
 import GenericNodeDTO = dto.GenericNodeDTO;
-import {EntityColumn} from "../../workInProgress/entityAdminModule/entity-tree/entity-tree.component";
+import {EntityColumn} from "../../commons/admin/entity-tree/entity-tree.component";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
-import {VehicleFormComponent} from "../../workInProgress/CRUD/vehicle-form/vehicle-form.component";
-import {DrawerOptions} from "../../workInProgress/drawer/drawer.component";
+import {VehicleFormComponent} from "./form/vehicle-form.component";
+import {DrawerOptions} from "../../commons/drawer/drawer.component";
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres

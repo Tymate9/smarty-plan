@@ -1,7 +1,6 @@
 package net.enovea.team
 
 
-import net.enovea.workInProgress.teamCRUD.TeamForm
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping

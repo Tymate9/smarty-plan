@@ -1,18 +1,14 @@
 package net.enovea.vehicle.vehicleUntrackedPeriod
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.vehicle.VehicleEntity
-import net.enovea.workInProgress.periodEntityCRUD.IPanachePeriodEntity
-import net.enovea.workInProgress.periodEntityCRUD.IPeriodEntity
-import net.enovea.workInProgress.periodEntityCRUD.IPeriodFactory
-import net.enovea.workInProgress.periodEntityCRUD.PeriodForm
+import net.enovea.period.IPanachePeriodEntity
+import net.enovea.period.IPeriodFactory
+import net.enovea.period.PeriodForm
 import java.io.Serializable
 import java.sql.Timestamp
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 @Entity(name = VehicleUntrackedPeriodEntity.ENTITY_NAME)
 @Table(name = VehicleUntrackedPeriodEntity.TABLE_NAME)

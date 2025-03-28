@@ -4,10 +4,9 @@ import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
-import net.enovea.workInProgress.common.ICRUDService
-import net.enovea.workInProgress.common.Stat
-import net.enovea.workInProgress.common.StatsDTO
-import net.enovea.workInProgress.teamCRUD.TeamForm
+import net.enovea.commons.ICRUDService
+import net.enovea.commons.Stat
+import net.enovea.commons.StatsDTO
 import net.enovea.driver.DriverDTO
 import net.enovea.driver.DriverEntity
 import net.enovea.driver.DriverMapper
@@ -20,9 +19,9 @@ import net.enovea.vehicle.VehicleDTO
 import net.enovea.vehicle.VehicleEntity
 import net.enovea.vehicle.VehicleMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
-import net.enovea.workInProgress.GenericNodeDTO
-import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
-import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
+import net.enovea.commons.GenericNodeDTO
+import net.enovea.affectation.IAffectationFactory
+import net.enovea.affectation.IAffectationPanacheEntity
 import org.hibernate.Hibernate
 import java.sql.Timestamp
 import java.time.LocalDate

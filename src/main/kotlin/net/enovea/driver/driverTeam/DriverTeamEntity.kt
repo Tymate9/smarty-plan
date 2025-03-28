@@ -4,9 +4,9 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import jakarta.persistence.*
 import net.enovea.driver.DriverEntity
 import net.enovea.team.TeamEntity
-import net.enovea.workInProgress.affectationCRUD.AffectationForm
-import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
-import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
+import net.enovea.affectation.AffectationForm
+import net.enovea.affectation.IAffectationFactory
+import net.enovea.affectation.IAffectationPanacheEntity
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -40,7 +40,8 @@ data class DriverTeamEntity (
 
     override fun getTarget(): TeamEntity? = team
 
-    companion object : PanacheCompanionBase<DriverTeamEntity, DriverTeamId>, IAffectationFactory<DriverTeamEntity, DriverTeamId> {
+    companion object : PanacheCompanionBase<DriverTeamEntity, DriverTeamId>,
+        IAffectationFactory<DriverTeamEntity, DriverTeamId> {
         const val ENTITY_NAME = "DriverTeamEntity"
         const val TABLE_NAME = "driver_team"
 

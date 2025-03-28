@@ -5,12 +5,10 @@ import jakarta.transaction.Transactional
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
 import net.dilivia.lang.StopWatch
-import net.enovea.workInProgress.common.Stat
-import net.enovea.workInProgress.common.StatsDTO
+import net.enovea.commons.Stat
+import net.enovea.commons.StatsDTO
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.driver.driverUntrackedPeriod.DriverUntrackedPeriodEntity
-import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
-import net.enovea.poi.PointOfInterestEntity
 import net.enovea.trip.TripService
 import net.enovea.spatial.GeoCodingService
 import net.enovea.spatial.SpatialService
@@ -22,8 +20,7 @@ import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import net.enovea.vehicle.vehicleUntrackedPeriod.VehicleUntrackedPeriodEntity
 import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
-import net.enovea.workInProgress.common.ICRUDService
-import net.enovea.workInProgress.vehicleCRUD.VehicleForm
+import net.enovea.commons.ICRUDService
 import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal

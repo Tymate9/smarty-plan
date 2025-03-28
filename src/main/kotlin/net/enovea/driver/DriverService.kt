@@ -6,13 +6,12 @@ import java.sql.Timestamp
 import java.time.LocalTime
 import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.NotFoundException
-import net.enovea.workInProgress.driverCRUD.DriverForm
-import net.enovea.workInProgress.common.Stat
-import net.enovea.workInProgress.common.StatsDTO
+import net.enovea.commons.Stat
+import net.enovea.commons.StatsDTO
 import net.enovea.team.TeamEntity
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.VehicleEntity
-import net.enovea.workInProgress.common.ICRUDService
+import net.enovea.commons.ICRUDService
 import java.time.LocalDateTime
 
 class DriverService(

@@ -1,15 +1,12 @@
 package net.enovea.vehicle.vehicleTeam
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import jakarta.inject.Inject
 import jakarta.persistence.*
 import net.enovea.team.TeamEntity
-import net.enovea.team.TeamMapper
-import net.enovea.team.TeamDTO
 import net.enovea.vehicle.VehicleEntity
-import net.enovea.workInProgress.affectationCRUD.AffectationForm
-import net.enovea.workInProgress.affectationCRUD.IAffectationFactory
-import net.enovea.workInProgress.affectationCRUD.IAffectationPanacheEntity
+import net.enovea.affectation.AffectationForm
+import net.enovea.affectation.IAffectationFactory
+import net.enovea.affectation.IAffectationPanacheEntity
 import java.io.Serializable
 import java.sql.Timestamp
 
@@ -44,7 +41,8 @@ data class VehicleTeamEntity (
 
     override fun getTarget(): TeamEntity? = team
 
-    companion object : PanacheCompanionBase<VehicleTeamEntity, VehicleTeamId>, IAffectationFactory<VehicleTeamEntity, VehicleTeamId> {
+    companion object : PanacheCompanionBase<VehicleTeamEntity, VehicleTeamId>,
+        IAffectationFactory<VehicleTeamEntity, VehicleTeamId> {
         const val ENTITY_NAME = "VehicleTeamEntity"
         const val TABLE_NAME = "vehicle_team"
 

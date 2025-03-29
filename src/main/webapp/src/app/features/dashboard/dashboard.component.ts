@@ -737,14 +737,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
+  //TODO(vérifier s'il est possible ou non de supprimer totalement le statut unplugged)
   calculateStatusCounts(teams: TeamHierarchyNode[]): { state: string; count: number }[] {
     const counts: Record<string, number> = {};
+    let unpluggedCount: number = 0;
 
     function traverseTeams(teamNodes: TeamHierarchyNode[]): void {
       teamNodes.forEach((team) => {
         // Count states from the vehicles at this team level
         team.vehicles.forEach((vehicle) => {
           const state = vehicle.device?.deviceDataState?.state;
+          if ( !vehicle.device?.deviceDataState?.plugged)
+          {
+            unpluggedCount += 1;
+          }
           if (state) {
             counts[state] = (counts[state] || 0) + 1;
           }
@@ -762,15 +768,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       {state: 'PARKED', count: counts['PARKED'] || 0},
       {state: 'IDLE', count: counts['IDLE'] || 0},
       {state: 'NO_COM', count: counts['NO_COM'] || 0},
-      {state: 'UNPLUGGED', count: counts['UNPLUGGED'] || 0},
+      {state: 'UNPLUGGED', count: counts['UNPLUGGED'] + unpluggedCount || 0},
     ];
   }
 
+  //TODO(fusionner ces deux fonction en une seul et faire en sorte que l'on puisse ajouter deux filtre simultanément)
   //Cette méthode permet de filtrer les véhicule en fonction du statut sélectionné
   filterByStatus(state: string) {
     if (!Array.isArray(this.teamHierarchy)) {
       console.error('teamHierarchy is not an array or is undefined:', this.teamHierarchy);
       return;
+    }
+    if (state == "UNPLUGGED"){
+      this.filterUnpluggedVehicle()
+      return
     }
     const filteredHierarchy: TeamHierarchyNode[] = this.teamHierarchy.map((team) => ({
       ...team,
@@ -784,9 +795,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
     // Transformer en TreeNode
     this.teamHierarchy = filteredHierarchy;
-    console.log(this.teamHierarchy);
     this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
+  }
 
+  private filterUnpluggedVehicle() {
+    const filteredHierarchy: TeamHierarchyNode[] = this.teamHierarchy.map((team) => ({
+      ...team,
+      children: team.children?.map((child) => ({
+        ...child,
+        vehicles: child.vehicles?.filter((vehicle) => !vehicle.device?.deviceDataState?.plugged) || [],
+      })).filter((child) => child.vehicles.length > 0) || [], // Remove child nodes without vehicles
+      vehicles: team.vehicles?.filter((vehicle) => !vehicle.device?.deviceDataState?.plugged) || [], // Filter vehicles at the team level
+    })).filter((team) =>
+      (team.children?.length || 0) > 0 || team.vehicles.length > 0 // Keep teams with vehicles or children
+    );
+    // Transformer en TreeNode
+    this.teamHierarchy = filteredHierarchy;
+    this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
   }
 
   //Cette méthode permet de donner les informations de chaque état
@@ -803,10 +828,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       displayName: 'UNKNOWN',
       icon: 'pi-exclamation-circle',
     };
-  }
-
-  resetTreeNode() {
-    this.vehiclesTree = this.transformToTreeNodes(this.teamHierarchy);
   }
 
   //Cette méthode permet d'exporter un fichier CSV
@@ -828,7 +849,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     link.click();
     document.body.removeChild(link);
   }
-
 
   convertToCSV(data: TeamHierarchyNode[]): string {
     const rows: string[] = [];
@@ -875,12 +895,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   //Cette méthode permet d'agrandir la table et vice versa
   toggleTree() {
-    console.log(this.vehiclesTree)
     if (this.vehiclesTree && this.vehiclesTree.length > 0) {
       this.isExpanded = !this.isExpanded;
       this.vehiclesTree = this.vehiclesTree.map(vehicle => ({
         ...vehicle,
-        expanded: !vehicle.expanded
+        expanded: this.isExpanded
       }));
     }
   }

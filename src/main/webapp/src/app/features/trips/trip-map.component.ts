@@ -8,8 +8,6 @@ import {TilesService} from "../../services/tiles.service";
 import {GeoUtils} from "../../commons/geo/geo-utils";
 import {TimelineEventDTO, TimelineEventsDTO, TimelineEventType} from "./timeline-events.dto";
 import TripEventsDTO = dto.TripEventsDTO;
-import TripEventDTO = dto.TripEventDTO;
-import TripEventDetailsType = dto.TripEventDetailsType;
 import TripEventType = dto.TripEventType;
 
 
@@ -86,7 +84,7 @@ import TripEventType = dto.TripEventType;
                   >
                     <div>
                       <div class="trip-dot" [style]="{ 'background-color': event.originalEvent.color }"></div>
-                      <span *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">Trajet de <strong>{{ (tripsService.formatDuration(event.originalEvent.duration)) }}</strong></span>
+                      <span *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_TRIP">Trajet de <strong>{{ (tripsService.formatDuration(event.originalEvent.duration)) }}</strong></span>
                       <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_BEFORE_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP">Trajet</span>
                       <!-- Affichage des subTripEvent descriptions -->
                       <div *ngIf="event.originalEvent.subTripEvents?.length">
@@ -97,14 +95,14 @@ import TripEventType = dto.TripEventType;
                     </div>
 
 
-                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_AFTER_START && event.type !== TimelineEventType.LUNCH_TRIP_AFTER_STOP && event.type !== TimelineEventType.LUNCH_STOP" class="time-oval">
+                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_AFTER_START && event.type !== TimelineEventType.LUNCH_TRIP_AFTER_STOP && event.type !== TimelineEventType.LUNCH_TRIP" class="time-oval">
                       {{ tripsService.formatDateToMinutes(event.originalEvent.start) }}
                     </div>
                     <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_AFTER_STOP || event.type === TimelineEventType.LUNCH_TRIP">
                       ...
                     </span>
                     <i class="pi pi-caret-right"></i>
-                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP" class="time-oval">
+                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_TRIP" class="time-oval">
                       {{ tripsService.formatDateToMinutes(event.originalEvent.end) }}
                     </div>
                     <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_BEFORE_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP">
@@ -193,7 +191,7 @@ import TripEventType = dto.TripEventType;
                   >
                     <div>
                       <div class="trip-dot" [style]="{ 'background-color': event.originalEvent.color }"></div>
-                      <span *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">Trajet de <strong>{{ (tripsService.formatDuration(event.originalEvent.duration)) }}</strong></span>
+                      <span *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_START && event.type !== TimelineEventType.LUNCH_TRIP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_TRIP">Trajet de <strong>{{ (tripsService.formatDuration(event.originalEvent.duration)) }}</strong></span>
                       <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_BEFORE_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP">Trajet</span>
                       <!-- Affichage des subTripEvent descriptions -->
                       <div *ngIf="event.originalEvent.subTripEvents?.length">
@@ -204,7 +202,7 @@ import TripEventType = dto.TripEventType;
                     </div>
 
 
-                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_AFTER_START && event.type !== TimelineEventType.LUNCH_TRIP_AFTER_STOP && event.type !== TimelineEventType.LUNCH_STOP" class="time-oval">
+                    <div *ngIf="event.type !== TimelineEventType.LUNCH_TRIP_AFTER_START && event.type !== TimelineEventType.LUNCH_TRIP_AFTER_STOP && event.type !== TimelineEventType.LUNCH_TRIP" class="time-oval">
                       {{ tripsService.formatDateToMinutes(event.originalEvent.start) }}
                     </div>
                     <span *ngIf="event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_AFTER_STOP || event.type === TimelineEventType.LUNCH_TRIP">

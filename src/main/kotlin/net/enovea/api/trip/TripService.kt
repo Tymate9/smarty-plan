@@ -461,7 +461,7 @@ class TripService(
             val stopEndLocal = originalTrip.startTime.toLocalTime()
 
             // Vérifier si lunchBreakStart est dans l'intervalle [stopStartLocal, stopEndLocal]
-            if (startLunchBreak in stopStartLocal..stopEndLocal) {
+            if (startLunchBreak in stopStartLocal..<stopEndLocal.plusMinutes(1)) {
                 subEvents.add(
                     TripEventDetails(
                         lat = eventLat,
@@ -473,7 +473,7 @@ class TripService(
                 )
             }
             // Vérifier si lunchBreakEnd est dans l'intervalle [stopStartLocal, stopEndLocal]
-            if (endLunchBreak in stopStartLocal..stopEndLocal) {
+            if (endLunchBreak in stopStartLocal..<stopEndLocal.plusMinutes(1)) {
                 subEvents.add(
                     TripEventDetails(
                         lat = eventLat,
@@ -485,7 +485,7 @@ class TripService(
                 )
             }
             // Si la période de STOP est entièrement incluse dans la pause déjeuner, anonymiser l'événement
-            if (stopStartLocal >= startLunchBreak && stopEndLocal <= endLunchBreak) {
+            if (stopStartLocal >= startLunchBreak && stopEndLocal < endLunchBreak.plusMinutes(1)) {
                 eventAddress = "Pause déjeuner"
                 eventPoiLabel = null
                 eventPoiId = null

@@ -63,7 +63,7 @@ export class TripsService {
 
     // Appliquer la transformation aux compactedTripEvents
     tripEventsDto.compactedTripEvents = tripEventsDto.compactedTripEvents.map(tripEvent =>
-      processTripEvent(tripEvent, tripEventsDto.compactedTripEvents)
+      processTripEvent(tripEvent, tripEventsDto.tripEvents)
     );
 
     return tripEventsDto;

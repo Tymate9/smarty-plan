@@ -80,7 +80,7 @@ data class TripEventDTO(
     val lng: Double? = null,
     val trace: List<String?>? = null,
     val sourceIndexes: List<Int>? = null,
-    val subTripEvents: List<SubTripEvent>? = null,
+    val tripEventDetails: List<TripEventDetails>? = null,
 )
 
 data class DatapointDTO(
@@ -91,15 +91,16 @@ data class DatapointDTO(
     val locationLng: Double
 )
 
-data class SubTripEvent(
+data class TripEventDetails(
     val lat: Double? = null,
     val lng: Double? = null,
     val timestamp: LocalTime? = null,
-    val type: SubTripEventType,
+    val type: TripEventDetailsType,
     val description : String? = null
 )
 
-enum class SubTripEventType {
+enum class TripEventDetailsType {
     START_LUNCH_BREAK,
     END_LUNCH_BREAK,
+    LUNCH_BREAKING,
 }

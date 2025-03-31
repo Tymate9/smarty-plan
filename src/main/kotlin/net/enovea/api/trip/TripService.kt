@@ -80,48 +80,63 @@ class TripService(
             lastPosition = lastDeviceState.coordinate
             addressAtEnd = lastDeviceState.address ?: lastPosition?.let { spatialService.getAddressFromEntity(it) }
             if (lastDeviceState.lastPositionTime != null) {
-                lastPositionTime = Instant.ofEpochMilli(lastDeviceState.lastPositionTime!!.time).atZone(ZoneId.of("Europe/Paris")).toLocalDateTime()
+                lastPositionTime =
+                    Instant.ofEpochMilli(lastDeviceState.lastPositionTime!!.time).atZone(ZoneId.of("Europe/Paris"))
+                        .toLocalDateTime()
             }
             lastTripStatus = when (lastDeviceState.state) {
                 "DRIVING" -> TripStatus.DRIVING
                 "IDLE" -> TripStatus.IDLE
                 else -> throw NotImplementedError("Unknown device state ${lastDeviceState.state}")
             }
-            tripEvents.add(
-                TripEventDTO(
-                    index = tripEvents.size,
-                    eventType = TripEventType.TRIP_EXPECTATION,
-                    trace = listOf(
+            if (lunchBreakStart === null ||
+                lunchBreakEnd === null ||
+                !(lunchBreakStart >= lastPositionTime.toLocalTime() && lunchBreakEnd <= lastPositionTime.toLocalTime())
+            ) {
+                tripEvents.add(
+                    TripEventDTO(
+                        index = tripEvents.size,
+                        eventType = TripEventType.TRIP_EXPECTATION,
+                        trace = listOf(
                             geometryFactory.createLineString(
-                            arrayOf(
-                                Coordinate(lastTrip.endLng, lastTrip.endLat),
-                                lastPosition?.coordinate
-                            )
-                        ).toText()
+                                arrayOf(
+                                    Coordinate(lastTrip.endLng, lastTrip.endLat),
+                                    lastPosition?.coordinate
+                                )
+                            ).toText()
+                        )
                     )
                 )
-            )
+            }
         }
+        var tripEventDetails: List<TripEventDetails>? = null
         val eventTime = lastPositionTime.toLocalTime()
         if (lunchBreakStart != null && lunchBreakEnd != null) {
             if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
                 addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
                 poiAtEnd = null
                 lastPosition = null
+                tripEventDetails = listOf(
+                    TripEventDetails(
+                        type= TripEventDetailsType.LUNCH_BREAKING
+                    )
+                )
             }
         }
-        val finalLat: Double? = if (lunchBreakStart != null && lunchBreakEnd != null && eventTime >= lunchBreakStart && eventTime <= lunchBreakEnd) {
-            // Pendant la pause, on annule la position
-            null
-        } else {
-            // En dehors de la pause, on utilise la dernière position si présente, sinon la valeur de repli
-            lastPosition?.y ?: lastTrip.endLat
-        }
-        val finalLng: Double? = if (lunchBreakStart != null && lunchBreakEnd != null && eventTime >= lunchBreakStart && eventTime <= lunchBreakEnd) {
-            null
-        } else {
-            lastPosition?.x ?: lastTrip.endLng
-        }
+        val finalLat: Double? =
+            if (lunchBreakStart != null && lunchBreakEnd != null && eventTime >= lunchBreakStart && eventTime <= lunchBreakEnd) {
+                // Pendant la pause, on annule la position
+                null
+            } else {
+                // En dehors de la pause, on utilise la dernière position si présente, sinon la valeur de repli
+                lastPosition?.y ?: lastTrip.endLat
+            }
+        val finalLng: Double? =
+            if (lunchBreakStart != null && lunchBreakEnd != null && eventTime >= lunchBreakStart && eventTime <= lunchBreakEnd) {
+                null
+            } else {
+                lastPosition?.x ?: lastTrip.endLng
+            }
         tripEvents.add(
             TripEventDTO(
                 index = tripEvents.size,
@@ -137,6 +152,7 @@ class TripService(
                 lat = finalLat,
                 lng = finalLng,
                 start = lastPositionTime,
+                tripEventDetails = tripEventDetails,
             )
         )
 
@@ -159,7 +175,12 @@ class TripService(
         return result
     }
 
-    private fun computeTrip( originalTrip: TripDTO, index: Int, lunchBreakStart: LocalTime?, lunchBreakEnd: LocalTime? ): TripEventDTO {
+    private fun computeTrip(
+        originalTrip: TripDTO,
+        index: Int,
+        lunchBreakStart: LocalTime?,
+        lunchBreakEnd: LocalTime?
+    ): TripEventDTO {
         val tripStartLocal = originalTrip.startTime.toLocalTime()
         val tripEndLocal = originalTrip.endTime.toLocalTime()
 
@@ -170,17 +191,23 @@ class TripService(
                 return TripEventDTO(
                     index = index * 2 + 1,
                     eventType = TripEventType.TRIP,
+                    address = "Pause déjeuner",
                     distance = originalTrip.distance?.div(1000),
                     duration = originalTrip.duration,
                     start = originalTrip.startTime,
                     end = originalTrip.endTime,
                     trace = null, // On renvoie null car le trip est entièrement dans la pause
-                    subTripEvents = emptyList()
+                    tripEventDetails = listOf(
+                        TripEventDetails(
+                            type = TripEventDetailsType.LUNCH_BREAKING
+                        )
+                    )
                 )
             }
             // Sinon, si le trip intersecte la pause (début ou fin inclus)
             if ((tripStartLocal <= lunchBreakStart && tripEndLocal >= lunchBreakStart) ||
-                (tripStartLocal <= lunchBreakEnd && tripEndLocal >= lunchBreakEnd)) {
+                (tripStartLocal <= lunchBreakEnd && tripEndLocal >= lunchBreakEnd)
+            ) {
                 return processEventForLunchBreak(originalTrip, index, lunchBreakStart, lunchBreakEnd)
             }
         }
@@ -193,11 +220,16 @@ class TripService(
             start = originalTrip.startTime,
             end = originalTrip.endTime,
             trace = listOf(originalTrip.trace),
-            subTripEvents = emptyList()
+            tripEventDetails = emptyList()
         )
     }
 
-    private fun processEventForLunchBreak( originalTrip: TripDTO, index: Int, lunchBreakStart: LocalTime?, lunchBreakEnd: LocalTime? ): TripEventDTO {
+    private fun processEventForLunchBreak(
+        originalTrip: TripDTO,
+        index: Int,
+        lunchBreakStart: LocalTime?,
+        lunchBreakEnd: LocalTime?
+    ): TripEventDTO {
         // Si l'un des horaires de pause est null, on retourne l'événement standard
         if (lunchBreakStart == null || lunchBreakEnd == null) {
             return TripEventDTO(
@@ -215,24 +247,34 @@ class TripService(
         // Cette méthode retourne un couple (Pair) où :
         // - Le premier élément est une List<SubTripEvent>
         // - Le second élément est une List<String> contenant tous les segments recalculés
-        val (subTripEventsList, traceList) = calcTraceAndSubEventsForLunchBreak(originalTrip, lunchBreakStart, lunchBreakEnd)
+        val (subTripEventsList, traceList) = calcTraceAndSubEventsForLunchBreak(
+            originalTrip,
+            lunchBreakStart,
+            lunchBreakEnd
+        )
         // Ici, nous renvoyons l'intégralité de la liste des segments recalculés dans le champ trace,
         // ce qui permettra de disposer de deux segments distincts si le trip couvre la période de pause.
         return TripEventDTO(
             index = index * 2 + 1,
             eventType = TripEventType.TRIP,
+            address = "Pause déjeuner",
             distance = originalTrip.distance?.div(1000),
             duration = originalTrip.duration,
             start = originalTrip.startTime,
             end = originalTrip.endTime,
             trace = traceList,             // Renvoie la liste complète des segments recalculés (ex. [segmentBefore, segmentAfter])
-            subTripEvents = subTripEventsList
+            tripEventDetails = subTripEventsList
         )
     }
 
-    private fun calcTraceAndSubEventsForLunchBreak( originalTrip: TripDTO, lunchBreakStart: LocalTime, lunchBreakEnd: LocalTime ): Pair<List<SubTripEvent>, List<String?>> {
+    private fun calcTraceAndSubEventsForLunchBreak(
+        originalTrip: TripDTO,
+        lunchBreakStart: LocalTime,
+        lunchBreakEnd: LocalTime
+    ): Pair<List<TripEventDetails>, List<String?>> {
         // Récupération du device actif (activeDeviceId pourra rester null si aucun device actif n'est trouvé)
-        val activeDevice = DeviceVehicleInstallEntity.getActiveDevice(originalTrip.vehicleId, originalTrip.startTime.toLocalDate())
+        val activeDevice =
+            DeviceVehicleInstallEntity.getActiveDevice(originalTrip.vehicleId, originalTrip.startTime.toLocalDate())
         val activeDeviceId = activeDevice?.id?.toString()
 
         // Récupérer la liste complète des datapoints pour ce trajet
@@ -280,32 +322,32 @@ class TripService(
                 else ""
 
                 // Création des SubTripEvent
-                val subTripEvents = mutableListOf<SubTripEvent>()
+                val tripEventDetails = mutableListOf<TripEventDetails>()
                 if (coordsBefore.isNotEmpty()) {
                     val lastCoordBefore = coordsBefore.last()
-                    subTripEvents.add(
-                        SubTripEvent(
+                    tripEventDetails.add(
+                        TripEventDetails(
                             lat = lastCoordBefore.y,
                             lng = lastCoordBefore.x,
                             timestamp = lunchBreakStart,
-                            type = SubTripEventType.START_LUNCH_BREAK,
+                            type = TripEventDetailsType.START_LUNCH_BREAK,
                             description = "Pause déjeuner commencée durant ce trajet à $lunchBreakStart"
                         )
                     )
                 }
                 if (coordsAfter.isNotEmpty()) {
                     val firstCoordAfter = coordsAfter.first()
-                    subTripEvents.add(
-                        SubTripEvent(
+                    tripEventDetails.add(
+                        TripEventDetails(
                             lat = firstCoordAfter.y,
                             lng = firstCoordAfter.x,
                             timestamp = lunchBreakEnd,
-                            type = SubTripEventType.END_LUNCH_BREAK,
+                            type = TripEventDetailsType.END_LUNCH_BREAK,
                             description = "Pause déjeuner terminée durant ce trajet à $lunchBreakEnd"
                         )
                     )
                 }
-                Pair(subTripEvents, listOf(traceBefore, traceAfter))
+                Pair(tripEventDetails, listOf(traceBefore, traceAfter))
             }
             // Cas 2 : p inclut lunchBreakStart seulement (début avant ou à lunchBreakStart, fin avant lunchBreakEnd)
             pStart <= lunchBreakStart && pEnd < lunchBreakEnd -> {
@@ -329,21 +371,21 @@ class TripService(
                 else ""
 
                 // Créer la liste des sous-événements avec un seul élément : START_LUNCH_BREAK
-                val subTripEvents = mutableListOf<SubTripEvent>()
+                val tripEventDetails = mutableListOf<TripEventDetails>()
                 if (coords.isNotEmpty()) {
                     val lastCoord = coords.last()
-                    subTripEvents.add(
-                        SubTripEvent(
+                    tripEventDetails.add(
+                        TripEventDetails(
                             lat = lastCoord.y,
                             lng = lastCoord.x,
                             timestamp = lunchBreakStart,
-                            type = SubTripEventType.START_LUNCH_BREAK,
+                            type = TripEventDetailsType.START_LUNCH_BREAK,
                             description = "Pause déjeuner commencée durant ce trajet à $lunchBreakStart"
                         )
                     )
                 }
 
-                Pair(subTripEvents, listOf(newTrace))
+                Pair(tripEventDetails, listOf(newTrace))
             }
             // Cas 3 : p inclut lunchBreakEnd seulement (début après lunchBreakStart et fin après ou à lunchBreakEnd)
             pStart > lunchBreakStart && pEnd >= lunchBreakEnd -> {
@@ -367,30 +409,36 @@ class TripService(
                 else ""
 
                 // Créer la liste des sous-événements avec un seul élément : END_LUNCH_BREAK
-                val subTripEvents = mutableListOf<SubTripEvent>()
+                val tripEventDetails = mutableListOf<TripEventDetails>()
                 if (coords.isNotEmpty()) {
                     val firstCoord = coords.first()  // on prend le premier point de la trace recalculée
-                    subTripEvents.add(
-                        SubTripEvent(
+                    tripEventDetails.add(
+                        TripEventDetails(
                             lat = firstCoord.y,
                             lng = firstCoord.x,
                             timestamp = lunchBreakEnd,
-                            type = SubTripEventType.END_LUNCH_BREAK,  // Assurez-vous que cet enum est défini dans votre projet
+                            type = TripEventDetailsType.END_LUNCH_BREAK,  // Assurez-vous que cet enum est défini dans votre projet
                             description = "Pause déjeuner terminée durant ce trajet à $lunchBreakEnd"
                         )
                     )
                 }
 
-                Pair(subTripEvents, listOf(newTrace))
+                Pair(tripEventDetails, listOf(newTrace))
             }
             // Cas 4 : p n'inclut ni lunchBreakStart ni lunchBreakEnd
             else -> {
-                Pair(emptyList<SubTripEvent>(), listOf(originalTrip.trace))
+                Pair(emptyList<TripEventDetails>(), listOf(originalTrip.trace))
             }
         }
     }
 
-    private fun computeStop( originalTrip: TripDTO, precedingTrip: TripDTO?, index: Int, startLunchBreak: LocalTime?, endLunchBreak: LocalTime? ): TripEventDTO {
+    private fun computeStop(
+        originalTrip: TripDTO,
+        precedingTrip: TripDTO?,
+        index: Int,
+        startLunchBreak: LocalTime?,
+        endLunchBreak: LocalTime?
+    ): TripEventDTO {
         val startPoint = geometryFactory.createPoint(Coordinate(originalTrip.startLng, originalTrip.startLat))
         val poiAtStart = spatialService.getNearestEntityWithinArea(startPoint, PointOfInterestEntity::class)
         val addressAtStart = if (poiAtStart == null) {
@@ -406,44 +454,49 @@ class TripService(
         var eventLng: Double? = poiAtStart?.coordinate?.x ?: originalTrip.startLng
 
         // Initialisation de la liste des sous-événements (SubTripEvent)
-        val subEvents = mutableListOf<SubTripEvent>()
+        val subEvents = mutableListOf<TripEventDetails>()
 
         if (precedingTrip != null && startLunchBreak != null && endLunchBreak != null) {
             val stopStartLocal = precedingTrip.endTime.toLocalTime()
             val stopEndLocal = originalTrip.startTime.toLocalTime()
 
             // Vérifier si lunchBreakStart est dans l'intervalle [stopStartLocal, stopEndLocal]
-            if (startLunchBreak in stopStartLocal..stopEndLocal) {
+            if (startLunchBreak in stopStartLocal..<stopEndLocal.plusMinutes(1)) {
                 subEvents.add(
-                    SubTripEvent(
+                    TripEventDetails(
                         lat = eventLat,
                         lng = eventLng,
                         timestamp = startLunchBreak,
-                        type = SubTripEventType.START_LUNCH_BREAK,
+                        type = TripEventDetailsType.START_LUNCH_BREAK,
                         description = "Pause déjeuner commencée durant cet arrêt à $startLunchBreak"
                     )
                 )
             }
             // Vérifier si lunchBreakEnd est dans l'intervalle [stopStartLocal, stopEndLocal]
-            if (endLunchBreak in stopStartLocal..stopEndLocal) {
+            if (endLunchBreak in stopStartLocal..<stopEndLocal.plusMinutes(1)) {
                 subEvents.add(
-                    SubTripEvent(
+                    TripEventDetails(
                         lat = eventLat,
                         lng = eventLng,
                         timestamp = endLunchBreak,
-                        type = SubTripEventType.END_LUNCH_BREAK,
+                        type = TripEventDetailsType.END_LUNCH_BREAK,
                         description = "Pause déjeuner terminée durant cet arrêt à $endLunchBreak"
                     )
                 )
             }
             // Si la période de STOP est entièrement incluse dans la pause déjeuner, anonymiser l'événement
-            if (stopStartLocal >= startLunchBreak && stopEndLocal <= endLunchBreak) {
+            if (stopStartLocal >= startLunchBreak && stopEndLocal < endLunchBreak.plusMinutes(1)) {
                 eventAddress = "Pause déjeuner"
                 eventPoiLabel = null
                 eventPoiId = null
                 eventColor = "black"
                 eventLat = null
                 eventLng = null
+                subEvents.add(
+                    TripEventDetails(
+                            type = TripEventDetailsType.LUNCH_BREAKING
+                    )
+                )
             }
         }
 
@@ -461,7 +514,7 @@ class TripService(
             },
             start = precedingTrip?.endTime,
             end = originalTrip.startTime,
-            subTripEvents = subEvents
+            tripEventDetails = subEvents
         )
     }
 
@@ -481,9 +534,10 @@ class TripService(
                     var j = i + 2
                     while (j < tripEvents.size) {
                         val nextStop = tripEvents[j]
-                        if (nextStop.eventType == TripEventType.STOP) {
+                        if (nextStop.eventType != TripEventType.TRIP) {
+                            // On break dans tout les cas si l'événement n'est pas un STOP (TRIP_EXPECTATION, VEHICLE_RUNNING, etc...)
                             // Un STOP avec durée >= 300 ou durée null est considéré comme un STOP long
-                            if (nextStop.duration?.let { it >= 300L } != false) {
+                            if (nextStop.eventType != TripEventType.STOP || nextStop.duration?.let { it >= 300L } != false) {
                                 break
                             }
                         }
@@ -525,9 +579,8 @@ class TripService(
         // Collecte des indices des événements fusionnés
         val mergedSourceIndexes = events.map { it.index }
 
-        // Fusionner les subTripEvents de tous les événements STOP
-        val mergedSubEvents = events.flatMap { it.subTripEvents ?: emptyList() }
-
+        // Fusionner les subTripEvents de tous les événements TRIP
+        val mergedSubEvents = events.flatMap { it.tripEventDetails ?: emptyList() }.distinct()
 
         return TripEventDTO(
             index = firstTrip.index, // Index du premier trip
@@ -543,7 +596,7 @@ class TripService(
             lat = firstTrip.lat, // Lat du premier trip
             lng = firstTrip.lng, // Lng du premier trip
             trace = null, // Toujours null
-            subTripEvents = mergedSubEvents,
+            tripEventDetails = mergedSubEvents,
             sourceIndexes = mergedSourceIndexes // Liste des indices fusionnés
         )
     }
@@ -583,7 +636,10 @@ class TripService(
 
                 // Si au moins deux arrêts avec le même poiId sont trouvés, procéder à la fusion
                 if (eventsToMerge.size >= 3) { // STOP + TRIP + STOP
-                    val mergedStop = mergeStops(eventsToMerge)
+                    val mergedStop = mergeStops(
+                        eventsToMerge,
+                        j + 1 == tripEvents.size && eventsToMerge.last().start?.toLocalDate() == LocalDate.now()
+                    )
                     result.add(mergedStop)
                     i = j // Avancer l'index au prochain événement non fusionné
                     continue
@@ -598,7 +654,7 @@ class TripService(
         return result
     }
 
-    private fun mergeStops(events: List<TripEventDTO>): TripEventDTO {
+    private fun mergeStops(events: List<TripEventDTO>, isOngoing: Boolean = false): TripEventDTO {
         // Le premier événement doit être un STOP
         val firstStop = events.first { it.eventType == TripEventType.STOP }
         // Le dernier événement doit être un STOP
@@ -614,7 +670,7 @@ class TripService(
         val mergedSourceIndexes = events.map { it.index }
 
         // Fusionner les subTripEvents de tous les événements STOP
-        val mergedSubEvents = events.flatMap { it.subTripEvents ?: emptyList() }
+        val mergedSubEvents = events.flatMap { it.tripEventDetails ?: emptyList() }.distinct()
 
         return TripEventDTO(
             index = firstStop.index, // Index du premier STOP
@@ -626,11 +682,11 @@ class TripService(
             address = firstStop.address, // Adresse du premier STOP
             start = firstStop.start, // Start du premier STOP
             end = lastStop.end, // End du dernier STOP
-            duration = mergedDuration, // Somme des durées
+            duration = if (isOngoing) null else mergedDuration, // Somme des durées (l'évènement n'a pas de durée s'il est en cours)
             lat = firstStop.lat, // Lat du premier STOP
             lng = firstStop.lng, // Lng du premier STOP
             trace = null, // Toujours null
-            subTripEvents = mergedSubEvents,
+            tripEventDetails = mergedSubEvents,
             sourceIndexes = mergedSourceIndexes // Liste des indices fusionnés
         )
     }

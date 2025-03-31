@@ -78,6 +78,7 @@ data class TripEventDTO(
     val duration: Long? = null,
     val lat: Double? = null,
     val lng: Double? = null,
+    val tripStatus: TripStatus? = null,
     val trace: List<String?>? = null,
     val sourceIndexes: List<Int>? = null,
     val tripEventDetails: List<TripEventDetails>? = null,

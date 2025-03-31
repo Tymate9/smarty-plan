@@ -97,6 +97,7 @@ class TripService(
                     TripEventDTO(
                         index = tripEvents.size,
                         eventType = TripEventType.TRIP_EXPECTATION,
+                        start = lastTrip.endTime,
                         trace = listOf(
                             geometryFactory.createLineString(
                                 arrayOf(
@@ -195,6 +196,7 @@ class TripService(
                     distance = originalTrip.distance?.div(1000),
                     duration = originalTrip.duration,
                     start = originalTrip.startTime,
+                    tripStatus = originalTrip.tripStatus,
                     end = originalTrip.endTime,
                     trace = null, // On renvoie null car le trip est entièrement dans la pause
                     tripEventDetails = listOf(
@@ -219,6 +221,7 @@ class TripService(
             duration = originalTrip.duration,
             start = originalTrip.startTime,
             end = originalTrip.endTime,
+            tripStatus = originalTrip.tripStatus,
             trace = listOf(originalTrip.trace),
             tripEventDetails = emptyList()
         )
@@ -237,6 +240,7 @@ class TripService(
                 eventType = TripEventType.TRIP,
                 distance = originalTrip.distance?.div(1000),
                 duration = originalTrip.duration,
+                tripStatus = originalTrip.tripStatus,
                 start = originalTrip.startTime,
                 end = originalTrip.endTime,
                 trace = listOf(originalTrip.trace)
@@ -261,6 +265,7 @@ class TripService(
             distance = originalTrip.distance?.div(1000),
             duration = originalTrip.duration,
             start = originalTrip.startTime,
+            tripStatus = originalTrip.tripStatus,
             end = originalTrip.endTime,
             trace = traceList,             // Renvoie la liste complète des segments recalculés (ex. [segmentBefore, segmentAfter])
             tripEventDetails = subTripEventsList
@@ -595,6 +600,7 @@ class TripService(
             duration = mergedDuration, // Somme des durées
             lat = firstTrip.lat, // Lat du premier trip
             lng = firstTrip.lng, // Lng du premier trip
+            tripStatus = lastTrip.tripStatus, // Statut du dernier trip
             trace = null, // Toujours null
             tripEventDetails = mergedSubEvents,
             sourceIndexes = mergedSourceIndexes // Liste des indices fusionnés

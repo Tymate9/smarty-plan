@@ -65,9 +65,10 @@ class TripService(
         var poiAtEnd: PointOfInterestEntity? = null
         var addressAtEnd: String? = null
         val lastDeviceState = if (parsedDate == LocalDate.now()) // don't get device state if date isn't today
-            vehicle.vehicle.vehicleDevices.firstOrNull {
-                !listOf("PARKED", "NO_COM", "UNPLUGGED", "UNKNOWN", null).contains(it.device!!.deviceDataState?.state)
-            }?.device?.deviceDataState
+//            vehicle.vehicle.vehicleDevices.firstOrNull {
+//                !listOf("NO_COM", "UNPLUGGED", "UNKNOWN", null).contains(it.device!!.deviceDataState?.state)
+//            }?.device?.deviceDataState // todo : do we manage them differently ?
+            vehicle.vehicle.vehicleDevices.first().device?.deviceDataState
         else null
         if (lastDeviceState == null) {
             // if no device state, compute end POI/address
@@ -87,11 +88,18 @@ class TripService(
             lastTripStatus = when (lastDeviceState.state) {
                 "DRIVING" -> TripStatus.DRIVING
                 "IDLE" -> TripStatus.IDLE
+                "PARKED" -> TripStatus.PARKED
+                "NO_COM" -> TripStatus.PARKED
+                "UNPLUGGED" -> TripStatus.PARKED
+                "UNKNOWN" -> TripStatus.PARKED
                 else -> throw NotImplementedError("Unknown device state ${lastDeviceState.state}")
             }
-            if (lunchBreakStart === null ||
-                lunchBreakEnd === null ||
-                !(lunchBreakStart >= lastPositionTime.toLocalTime() && lunchBreakEnd <= lastPositionTime.toLocalTime())
+            if (
+                lastTripStatus !== TripStatus.PARKED && (
+                    lunchBreakStart === null ||
+                    lunchBreakEnd === null ||
+                    !(lunchBreakStart >= lastPositionTime.toLocalTime() && lunchBreakEnd <= lastPositionTime.toLocalTime())
+                )
             ) {
                 tripEvents.add(
                     TripEventDTO(
@@ -122,6 +130,26 @@ class TripService(
                         type= TripEventDetailsType.LUNCH_BREAKING
                     )
                 )
+            } else if (lastTripStatus == TripStatus.PARKED && eventTime.isAfter(lunchBreakEnd)) {
+                if (lastTrip.endTime.toLocalTime().isBefore(lunchBreakStart)) {
+                    tripEventDetails = listOf(
+                        TripEventDetails(
+                            timestamp = lunchBreakStart,
+                            type = TripEventDetailsType.START_LUNCH_BREAK
+                        ),
+                        TripEventDetails(
+                            timestamp = lunchBreakEnd,
+                            type = TripEventDetailsType.END_LUNCH_BREAK
+                        )
+                    )
+                } else {
+                    tripEventDetails = listOf(
+                        TripEventDetails(
+                            timestamp = lunchBreakEnd,
+                            type = TripEventDetailsType.END_LUNCH_BREAK
+                        )
+                    )
+                }
             }
         }
         val finalLat: Double? =
@@ -145,6 +173,7 @@ class TripService(
                     TripStatus.COMPLETED -> TripEventType.STOP
                     TripStatus.DRIVING -> TripEventType.VEHICLE_RUNNING
                     TripStatus.IDLE -> TripEventType.VEHICLE_IDLE
+                    TripStatus.PARKED -> TripEventType.VEHICLE_PARKED
                 },
                 color = poiAtEnd?.category?.color ?: "black",
                 poiId = poiAtEnd?.id,
@@ -152,7 +181,8 @@ class TripService(
                 address = addressAtEnd ?: poiAtEnd?.address,
                 lat = finalLat,
                 lng = finalLng,
-                start = lastPositionTime,
+                start = if (lastTripStatus == TripStatus.PARKED) lastTrip.endTime else lastPositionTime,
+                end = lastPositionTime,
                 tripEventDetails = tripEventDetails,
             )
         )

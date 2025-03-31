@@ -27,7 +27,8 @@ enum class TripStatus(
 ) {
     DRIVING(0),
     COMPLETED(1),
-    IDLE(2)
+    IDLE(2),
+    PARKED(3),
 }
 
 data class TripDailyStatsDTO(
@@ -63,6 +64,7 @@ enum class TripEventType {
     STOP,
     VEHICLE_RUNNING,
     VEHICLE_IDLE,
+    VEHICLE_PARKED
 }
 
 data class TripEventDTO(

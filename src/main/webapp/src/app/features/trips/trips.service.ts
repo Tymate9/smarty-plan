@@ -102,7 +102,7 @@ export class TripsService {
     const startsAtExactEnd = isLunchBreakEnd && startMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.END_LUNCH_BREAK)]
     const endsAtExactEnd = isLunchBreakEnd && endMinutes === lunchEventTimes?.[lunchTypes!.indexOf(TripEventDetailsType.END_LUNCH_BREAK)]
 
-    const isStop = event.eventType === TripEventType.STOP || event.eventType === TripEventType.VEHICLE_IDLE || event.eventType === TripEventType.VEHICLE_RUNNING;
+    const isStop = event.eventType === TripEventType.STOP || event.eventType === TripEventType.VEHICLE_IDLE || event.eventType === TripEventType.VEHICLE_RUNNING || event.eventType === TripEventType.VEHICLE_PARKED;
 
     if (isFullLunchBreak) {
       if (!startsAtExactStart) {
@@ -178,7 +178,7 @@ export class TripsService {
         timelineEvents.push({
           originalEvent: event,
           type: isStop ?
-            TimelineEventType.STOP :
+            TimelineEventType.fromTripEventType(event.eventType) :
             TimelineEventType.TRIP
         }, {
           originalEvent: event,
@@ -210,7 +210,7 @@ export class TripsService {
         }, {
           originalEvent: event,
           type: isStop ?
-            TimelineEventType.STOP :
+            TimelineEventType.fromTripEventType(event.eventType):
             TimelineEventType.TRIP
         });
       }

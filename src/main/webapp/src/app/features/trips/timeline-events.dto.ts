@@ -31,6 +31,7 @@ export enum TimelineEventType {
   STOP = "STOP",
   VEHICLE_RUNNING = "VEHICLE_RUNNING",
   VEHICLE_IDLE = "VEHICLE_IDLE",
+  VEHICLE_PARKED = "VEHICLE_PARKED",
 
   LUNCH_START_SEPARATOR = "LUNCH_START_SEPARATOR", // separator at the start of the lunch break
   LUNCH_STOP_SEPARATOR = "LUNCH_STOP_SEPARATOR", // separator at the end of the lunch break
@@ -65,6 +66,8 @@ export namespace TimelineEventType {
         return TimelineEventType.VEHICLE_RUNNING;
       case TripEventType.VEHICLE_IDLE:
         return TimelineEventType.VEHICLE_IDLE;
+      case TripEventType.VEHICLE_PARKED:
+        return TimelineEventType.VEHICLE_PARKED;
       default:
         return TimelineEventType.TRIP; // should never happen
     }

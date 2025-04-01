@@ -121,17 +121,39 @@ class TripService(
         var tripEventDetails: List<TripEventDetails>? = null
         val eventTime = lastPositionTime.toLocalTime()
         if (lunchBreakStart != null && lunchBreakEnd != null) {
+            val lastTripPosTime = lastTrip.endTime.toLocalTime()
             if (!eventTime.isBefore(lunchBreakStart) && !eventTime.isAfter(lunchBreakEnd)) {
-                addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
-                poiAtEnd = null
-                lastPosition = null
-                tripEventDetails = listOf(
-                    TripEventDetails(
-                        type= TripEventDetailsType.LUNCH_BREAKING
-                    )
-                )
-            } else if (lastTripStatus == TripStatus.PARKED && eventTime.isAfter(lunchBreakEnd)) {
+                // si en cours de pause dej
+                if (!(lastTripStatus === TripStatus.PARKED && lastTripPosTime.isBefore(lunchBreakStart))) {
+                    // si pas arrêté et commencé avant la pause dej, on anonymise
+                    addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
+                    poiAtEnd = null
+                    lastPosition = null
+                }
                 if (lastTrip.endTime.toLocalTime().isBefore(lunchBreakStart)) {
+                    // si le dernier trip s'est terminé avant le début de la pause dej, on ajoute debut de pause dej
+                    tripEventDetails = listOf(
+                        TripEventDetails(
+                            timestamp = lunchBreakStart,
+                            type = TripEventDetailsType.START_LUNCH_BREAK
+                        ),
+                        TripEventDetails(
+                            timestamp = lunchBreakEnd,
+                            type = TripEventDetailsType.LUNCH_BREAKING
+                        )
+                    )
+                } else {
+                    tripEventDetails = listOf(
+                        TripEventDetails(
+                            timestamp = lunchBreakEnd,
+                            type = TripEventDetailsType.LUNCH_BREAKING
+                        )
+                    )
+                }
+            } else if (lastTripStatus == TripStatus.PARKED && lastTrip.endTime.toLocalTime().isBefore(lunchBreakEnd) && eventTime.isAfter(lunchBreakEnd)) {
+                // si on est parked et qu'on a fini la pause dej mais que le dernier trajt s'est fini avant la fin de la pause dej
+                if (lastTrip.endTime.toLocalTime().isBefore(lunchBreakStart)) {
+                    // si le parked a commencé avant pause dej : start et end
                     tripEventDetails = listOf(
                         TripEventDetails(
                             timestamp = lunchBreakStart,
@@ -143,6 +165,7 @@ class TripService(
                         )
                     )
                 } else {
+                    // si le parked a commencé pendant la pause dej : end
                     tripEventDetails = listOf(
                         TripEventDetails(
                             timestamp = lunchBreakEnd,
@@ -181,8 +204,10 @@ class TripService(
                 address = addressAtEnd ?: poiAtEnd?.address,
                 lat = finalLat,
                 lng = finalLng,
-                start = if (lastTripStatus == TripStatus.PARKED) lastTrip.endTime else lastPositionTime,
-                end = lastPositionTime,
+                start = if (lastTripStatus == TripStatus.PARKED) (
+                        if (lastTrip.tripStatus !== TripStatus.COMPLETED) null else lastTrip.endTime
+                ) else lastPositionTime,
+                end = if (lastTripStatus == TripStatus.PARKED) lastPositionTime else null,
                 tripEventDetails = tripEventDetails,
             )
         )
@@ -496,7 +521,7 @@ class TripService(
             val stopEndLocal = originalTrip.startTime.toLocalTime()
 
             // Vérifier si lunchBreakStart est dans l'intervalle [stopStartLocal, stopEndLocal]
-            if (startLunchBreak in stopStartLocal..<stopEndLocal.plusMinutes(1)) {
+            if (startLunchBreak in stopStartLocal..<stopEndLocal) {
                 subEvents.add(
                     TripEventDetails(
                         lat = eventLat,
@@ -508,7 +533,7 @@ class TripService(
                 )
             }
             // Vérifier si lunchBreakEnd est dans l'intervalle [stopStartLocal, stopEndLocal]
-            if (endLunchBreak in stopStartLocal..<stopEndLocal.plusMinutes(1)) {
+            if (endLunchBreak in stopStartLocal..<stopEndLocal) {
                 subEvents.add(
                     TripEventDetails(
                         lat = eventLat,

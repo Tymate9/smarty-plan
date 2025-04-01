@@ -77,7 +77,7 @@ export class TripsService {
   }
 
   formatDateToMinutes(date: Date | null): string | undefined {
-    return date?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    return date?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) ?? '...';
   }
 
   tripEventToTimelineEvents(event: TripEventDTO): Array<TimelineEventDTO> {

@@ -83,7 +83,7 @@ import TripEventType = dto.TripEventType;
                   </div>
                   <div
                     *ngIf="(timelineEvents!.compactedTripEvents.indexOf(event) == timelineEvents!.compactedTripEvents.length - 1) && event.originalEvent.eventType === TripEventType.VEHICLE_PARKED || event.originalEvent.eventType === TripEventType.VEHICLE_RUNNING || event.originalEvent.eventType === TripEventType.VEHICLE_IDLE"
-                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
+                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
                   >
                     Dernière position connue
                     à {{ tripsService.formatDateToMinutes(event.originalEvent.eventType === TripEventType.VEHICLE_PARKED ? event.originalEvent.end : event.originalEvent.start) }}
@@ -238,7 +238,7 @@ import TripEventType = dto.TripEventType;
                   </div>
                   <div
                     *ngIf="(timelineEvents!.tripEvents.indexOf(event) == timelineEvents!.tripEvents.length - 1) && event.originalEvent.eventType === TripEventType.VEHICLE_RUNNING || event.originalEvent.eventType === TripEventType.VEHICLE_IDLE"
-                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
+                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
                   >
                     Dernière position connue
                     à {{ tripsService.formatDateToMinutes(event.originalEvent.eventType === TripEventType.VEHICLE_PARKED ? event.originalEvent.end : event.originalEvent.start) }}

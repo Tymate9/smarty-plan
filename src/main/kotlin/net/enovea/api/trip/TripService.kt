@@ -43,7 +43,6 @@ class TripService(
 
         // compute events for each trip and stop between each trip
         val tripEvents = trips
-            .filter { it.trace !== null }
             .reversed()
             .windowed(2, partialWindows = true)
             .reversed()
@@ -94,26 +93,31 @@ class TripService(
                 "UNKNOWN" -> TripStatus.PARKED
                 else -> throw NotImplementedError("Unknown device state ${lastDeviceState.state}")
             }
-            if (
-                lastTripStatus !== TripStatus.PARKED && (
-                    lunchBreakStart === null ||
-                    lunchBreakEnd === null ||
-                    !(lunchBreakStart >= lastPositionTime.toLocalTime() && lunchBreakEnd <= lastPositionTime.toLocalTime())
-                )
-            ) {
+            val inLunchBreak =
+                lunchBreakStart !== null &&
+                lunchBreakEnd !== null &&
+                lunchBreakStart <= lastPositionTime.toLocalTime() && lunchBreakEnd > lastPositionTime.toLocalTime()
+            if (lastTripStatus !== TripStatus.PARKED) {
                 tripEvents.add(
                     TripEventDTO(
                         index = tripEvents.size,
                         eventType = TripEventType.TRIP_EXPECTATION,
                         start = lastTrip.endTime,
-                        trace = listOf(
+                        trace = if (inLunchBreak) null else listOf(
                             geometryFactory.createLineString(
                                 arrayOf(
                                     Coordinate(lastTrip.endLng, lastTrip.endLat),
                                     lastPosition?.coordinate
                                 )
                             ).toText()
-                        )
+                        ),
+                        tripEventDetails = if (inLunchBreak) {
+                            listOf(
+                                TripEventDetails(
+                                    type = TripEventDetailsType.LUNCH_BREAKING
+                                )
+                            )
+                        } else null
                     )
                 )
             }
@@ -126,11 +130,15 @@ class TripService(
                 // si en cours de pause dej
                 if (!(lastTripStatus === TripStatus.PARKED && lastTripPosTime.isBefore(lunchBreakStart))) {
                     // si pas arrêté et commencé avant la pause dej, on anonymise
-                    addressAtEnd = "Pause midi de $lunchBreakStart à $lunchBreakEnd"
+                    addressAtEnd = "Pause déjeuner de $lunchBreakStart à $lunchBreakEnd"
                     poiAtEnd = null
                     lastPosition = null
-                }
-                if (lastTrip.endTime.toLocalTime().isBefore(lunchBreakStart)) {
+                    tripEventDetails = listOf(
+                        TripEventDetails(
+                            type = TripEventDetailsType.LUNCH_BREAKING
+                        )
+                    )
+                } else if (lastTripPosTime.isBefore(lunchBreakStart)) {
                     // si le dernier trip s'est terminé avant le début de la pause dej, on ajoute debut de pause dej
                     tripEventDetails = listOf(
                         TripEventDetails(
@@ -138,14 +146,12 @@ class TripService(
                             type = TripEventDetailsType.START_LUNCH_BREAK
                         ),
                         TripEventDetails(
-                            timestamp = lunchBreakEnd,
                             type = TripEventDetailsType.LUNCH_BREAKING
                         )
                     )
                 } else {
                     tripEventDetails = listOf(
                         TripEventDetails(
-                            timestamp = lunchBreakEnd,
                             type = TripEventDetailsType.LUNCH_BREAKING
                         )
                     )

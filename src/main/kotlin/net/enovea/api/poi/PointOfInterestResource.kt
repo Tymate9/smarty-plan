@@ -1,5 +1,6 @@
 package net.enovea.api.poi
 
+import io.quarkus.security.Authenticated
 import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
@@ -17,6 +18,7 @@ import java.nio.file.Files
 import kotlin.time.DurationUnit
 
 @Path("/api/poi")
+@Authenticated
 class PointOfInterestResource (
     val pointOfInterestSpatialService: SpatialService,
     val csvImportService: CsvImportService,

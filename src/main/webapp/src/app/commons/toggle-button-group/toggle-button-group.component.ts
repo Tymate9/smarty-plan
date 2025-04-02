@@ -12,17 +12,21 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
                 'background-color': '#ffffff',
                 '--button-color': colorFn ? colorFn(item) : '#007bff',
                 'width': buttonWidth,
-                'height': buttonHeight
+                'height': buttonHeight,
+                'display': 'flex',
+                'flex-direction' : 'row'
               }"
               [class.active]="selectedItem && identifierFn(selectedItem) === identifierFn(item)">
           <!-- Nombre affiché en blanc -->
-          <span class="status-count">{{ item.count }}</span>
-          <!-- Texte affiché via displayFn -->
-          <span class="status-text">{{ displayFn(item) }}</span>
-          <!-- Icône affichée si iconFn est défini -->
-          <span class="icon" *ngIf="iconFn">
-            <i class="pi" [ngClass]="iconFn(item)"></i>
-          </span>
+        <div class="status-count" [ngStyle]="{
+        'background-color' : colorFn ? colorFn(item) : '#007bff'
+        }">{{ item.count }}</div>
+        <div class="status-text-container" [ngStyle]="{
+        'color' : colorFn ? colorFn(item) : '#007bff'
+        }">
+          <div class=>{{ displayFn(item) }}</div>
+          <i *ngIf="iconFn" class="pi" [ngClass]="iconFn(item)"></i>
+        </div>
       </button>
     </div>
   `,
@@ -46,8 +50,8 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 30px;
-      font-size: 22px;
+      padding: 0;
+      font-size: 1.3rem;
       font-weight: bold;
       border: none;
       width: 100%;
@@ -62,6 +66,7 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
       white-space: nowrap;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      flex-direction: row;
     }
 
     .toggle-buttons-group button:hover {
@@ -69,39 +74,23 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       transform: translateY(-2px);
     }
 
-    /* Bandeau coloré à gauche basé sur la variable CSS --button-color */
-    .toggle-buttons-group button::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 30%;
-      background: var(--button-color, #007bff);
-      border-top-left-radius: 20px;
-      border-bottom-left-radius: 20px;
-    }
-
-    .toggle-buttons-group button span {
-      position: relative;
-      z-index: 3;
+    .toggle-buttons-group .status-text-container {
+      flex-grow: 1;
       display: flex;
-      flex: 1;
-      justify-content: space-between;
-      margin-right: 21px !important;
-      margin-left: 3px !important;
+      justify-content: space-evenly;
+      align-items: center;
     }
 
     .toggle-buttons-group button .status-count {
       color: white !important;
       padding: 0 5px !important;
       font-weight: bold !important;
-      margin-right: 10px !important;
-    }
-
-    .toggle-buttons-group button .status-text {
-      color: var(--button-color, #007bff);
-      padding-left: 2vw;
+      font-size:1.5rem;
+      min-width: 30%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
     }
 
     .toggle-buttons-group button .icon i {

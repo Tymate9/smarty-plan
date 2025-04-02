@@ -147,7 +147,48 @@ interface StatusCount {
                        style="float: right; margin-left: 8px;">
                 </div>
               </span>
-              <!-- Autres switchCase (IDLE, PARKED, NO_COM, UNPLUGGED) inchangés -->
+              <span *ngSwitchCase="'IDLE'" class="status-icon">À l'arrêt
+                <div>
+                <i class="pi pi-step-forward"></i>
+                <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                     ngSrc="../../../assets/icon/unplugged.svg"
+                     alt="unplugged"
+                     height="16"
+                     width="16"
+                     style="float: right; margin-left: 8px;"
+                /></div>
+              </span>
+              <span *ngSwitchCase="'PARKED'" class="status-icon">Arrêté
+                <div><i class="pi pi-stop"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
+                  /></div>
+                </span>
+              <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal
+                <div>
+                  <i class="pi pi-times"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16" width="16"
+                       style="float: right;
+                       margin-left: 8px;"/>
+                </div></span>
+              <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté
+                <div>
+                  <i class="pi pi-ban"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16"
+                       width="16"
+                       style="float: right; margin-left: 8px;"
+                  /></div>
+                </span>
               <span *ngSwitchDefault class="status-icon">
                 Inconnu <div><i class="pi pi-question-circle"></i>
                   <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged === false"

@@ -25,7 +25,7 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
         'color' : colorFn ? colorFn(item) : '#007bff'
         }">
           <div class=>{{ displayFn(item) }}</div>
-          <i *ngIf="iconFn" class="pi" [ngClass]="iconFn(item)"></i>
+          <i *ngIf="iconFn" [ngClass]="iconFn(item)"></i>
         </div>
       </button>
     </div>
@@ -74,28 +74,30 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       transform: translateY(-2px);
     }
 
+
+
     .toggle-buttons-group .status-text-container {
       flex-grow: 1;
       display: flex;
       justify-content: space-evenly;
       align-items: center;
+      font-size:1.5rem;
+    }
+
+    .toggle-buttons-group .status-text-container i {
+      font-size:1.5rem;
     }
 
     .toggle-buttons-group button .status-count {
       color: white !important;
       padding: 0 5px !important;
       font-weight: bold !important;
-      font-size:1.5rem;
+      font-size:1.5rem !important;
       min-width: 30%;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100%;
-    }
-
-    .toggle-buttons-group button .icon i {
-      font-size: 30px;
-      color: var(--button-color, #007bff);
     }
 
     /* Style du bouton actif : ajout d'un ring via box-shadow supplémentaire */

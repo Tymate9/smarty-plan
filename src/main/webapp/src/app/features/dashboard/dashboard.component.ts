@@ -12,11 +12,11 @@ import VehicleLocalizationDTO = dto.VehicleLocalizationDTO;
 
 /** Définition d'une constante pour les détails de statuts (primaires + unplugged) */
 const STATUS_DETAILS: Record<string, { displayName: string, color: string, icon: string }> = {
-  DRIVING: { displayName: 'ROULANT(S)', color: '#21A179', icon: 'pi-play' },
-  PARKED: { displayName: 'ARRÊTÉ', color: '#C71400', icon: 'pi-stop' },
-  IDLE: { displayName: 'À L\'ARRÊT', color: '#FE8F2B', icon: 'pi-step-forward' },
-  NO_COM: { displayName: 'SANS SIGNAL', color: '#E0E0E0', icon: 'pi-times' },
-  UNPLUGGED: { displayName: 'DÉCONNECTÉ', color: '#BDBDBD', icon: 'pi-ban' }
+  DRIVING: { displayName: 'ROULANT(S)', color: '#21A179', icon: 'pi pi-play' },
+  PARKED: { displayName: 'ARRÊTÉ', color: '#C71400', icon: 'pi pi-stop' },
+  IDLE: { displayName: 'À L\'ARRÊT', color: '#FE8F2B', icon: 'pi pi-step-forward' },
+  NO_COM: { displayName: 'SANS SIGNAL', color: '#E0E0E0', icon: 'pi pi-times' },
+  UNPLUGGED: { displayName: 'DÉCONNECTÉ', color: '#BDBDBD', icon: 'pi pi-ban' }
 };
 
 /** Interface pour représenter un statut dans toggle-buttons-group */
@@ -42,7 +42,7 @@ interface StatusCount {
         [colorFn]="primaryColorFn"
         [iconFn]="primaryIconFn"
         (selectionChange)="onPrimaryStatusChange($event)"
-        buttonWidth="19vw">
+        buttonWidth="18.5vw">
       </app-toggle-buttons-group>
 
       <!-- Statut unplugged -->
@@ -54,11 +54,11 @@ interface StatusCount {
         [colorFn]="unpluggedColorFn"
         [iconFn]="unpluggedIconFn"
         (selectionChange)="onUnpluggedStatusChange($event)"
-        buttonWidth="19vw">
+        buttonWidth="18.5vw">
       </app-toggle-buttons-group>
     </div>
 
-    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+    <div style="display: flex; justify-content: flex-end; gap: 10px; width: 96vw; margin: 0 auto">
       <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()"
                 styleClass="custom-button"></p-button>
       <p-button [raised]="true" severity="info" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
@@ -74,7 +74,7 @@ interface StatusCount {
                  #treeTable
                  [value]="vehiclesTree"
                  [scrollable]="true"
-                 [tableStyle]="{'width': '95%', 'margin': '0 auto' , 'table-layout' :'auto'}"
+                 [tableStyle]="{'width': '96vw', 'margin': '0 auto' , 'table-layout' :'auto'}"
                  [resizableColumns]="true"
                  styleClass="p-treetable-gridlines custom-tree-table">
 
@@ -385,10 +385,10 @@ interface StatusCount {
     .status-buttons {
       display: flex;
       gap: 15px;
-      margin-bottom: 20px;
-      margin-top: 20px;
       justify-content: center;
       align-items: center;
+      width : 96vw;
+      margin : 0 auto;
     }
     .custom-status-button {
       display: flex;

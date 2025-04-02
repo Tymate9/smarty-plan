@@ -15,7 +15,6 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
                 'height': buttonHeight
               }"
               [class.active]="selectedItem && identifierFn(selectedItem) === identifierFn(item)">
-        <span>
           <!-- Nombre affiché en blanc -->
           <span class="status-count">{{ item.count }}</span>
           <!-- Texte affiché via displayFn -->
@@ -24,7 +23,6 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
           <span class="icon" *ngIf="iconFn">
             <i class="pi" [ngClass]="iconFn(item)"></i>
           </span>
-        </span>
       </button>
     </div>
   `,
@@ -90,7 +88,8 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       display: flex;
       flex: 1;
       justify-content: space-between;
-      padding-left: 13px;
+      margin-right: 21px !important;
+      margin-left: 3px !important;
     }
 
     .toggle-buttons-group button .status-count {
@@ -102,6 +101,7 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
 
     .toggle-buttons-group button .status-text {
       color: var(--button-color, #007bff);
+      padding-left: 2vw;
     }
 
     .toggle-buttons-group button .icon i {
@@ -151,12 +151,12 @@ export class ToggleButtonsGroupComponent {
   /**
    * Largeur du bouton (input permettant d'ajuster la taille). Par défaut : 350px.
    */
-  @Input() buttonWidth: string = '350px';
+  @Input() buttonWidth: string = '20vw';
 
   /**
    * Hauteur du bouton (input permettant d'ajuster la taille). Par défaut : 80px.
    */
-  @Input() buttonHeight: string = '80px';
+  @Input() buttonHeight: string = '90px';
 
   /**
    * Emet l'élément sélectionné ou null si désélectionné.

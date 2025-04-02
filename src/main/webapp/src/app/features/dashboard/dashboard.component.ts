@@ -41,7 +41,8 @@ interface StatusCount {
         [displayFn]="primaryDisplayFn"
         [colorFn]="primaryColorFn"
         [iconFn]="primaryIconFn"
-        (selectionChange)="onPrimaryStatusChange($event)">
+        (selectionChange)="onPrimaryStatusChange($event)"
+        buttonWidth="19vw">
       </app-toggle-buttons-group>
 
       <!-- Statut unplugged -->
@@ -52,7 +53,8 @@ interface StatusCount {
         [displayFn]="unpluggedDisplayFn"
         [colorFn]="unpluggedColorFn"
         [iconFn]="unpluggedIconFn"
-        (selectionChange)="onUnpluggedStatusChange($event)">
+        (selectionChange)="onUnpluggedStatusChange($event)"
+        buttonWidth="19vw">
       </app-toggle-buttons-group>
     </div>
 

@@ -651,7 +651,7 @@ class TripService(
         return TripEventDTO(
             index = firstTrip.index, // Index du premier trip
             eventType = TripEventType.TRIP, // Toujours TRIP
-            distance = if (mergedDistance > 0) mergedDistance else null, // Somme des distances
+            distance = mergedDistance, // Somme des distances
             color = firstTrip.color, // Couleur du premier trip
             poiId = firstTrip.poiId, // poiId du premier trip
             poiLabel = firstTrip.poiLabel, // poiLabel du premier trip

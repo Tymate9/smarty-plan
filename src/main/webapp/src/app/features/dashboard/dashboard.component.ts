@@ -217,16 +217,72 @@ interface StatusCount {
             </ng-template>
           </td>
 
-          <!-- 6. Adresse (exemple avec un composant app-mask-toggle) -->
+          <!-- 6. Adresse -->
           <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
             <app-mask-toggle
               [canMask]="isVehicleInLunchBreak(rowData.vehicle)"
-              [canToggle]="false">
+              [canToggle]="false"
+            >
+              <!-- Template MASQUÉ : icône lunch-break + texte range -->
               <ng-template #maskedTemplate>
-                <!-- ... -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img
+                    ngSrc="../../../assets/icon/lunch-break.svg"
+                    width="30"
+                    height="30"
+                    alt="Pause midi icon"
+                  />
+                  <span>{{ getLunchBreakRangeDescription(rowData.vehicle) }}</span>
+                </div>
               </ng-template>
+
+              <!-- Template NON MASQUÉ : la logique historique -->
               <ng-template #unmaskedTemplate>
-                <!-- ... -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <!-- Vérifie si l'adresse commence par 'pause midi' -->
+                  <ng-container
+                    *ngIf="rowData.vehicle.lastPositionAddress?.startsWith('pause déjeuner'); else defaultIcon">
+                    <img
+                      ngSrc="../../../assets/icon/lunch-break.svg"
+                      width="30"
+                      height="30"
+                      alt="Pause midi icon"
+                    />
+                  </ng-container>
+
+                  <!-- Sinon, on affiche le SVG existant -->
+                  <ng-template #defaultIcon>
+                    <span
+                      [ngStyle]="{ 'color': rowData.vehicle.lastPositionAddressInfo?.color || 'black' }"
+                      class="poi-icon"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="30"
+                        height="30"
+                        [ngStyle]="{ 'fill': rowData.vehicle.lastPositionAddressInfo?.color || 'black'}"
+                      >
+                        <path
+                          d="M12 2C8.13 2 5 5.13 5 9
+                            c0 5.25 7 13 7 13s7-7.75 7-13
+                            c0-3.87-3.13-7-7-7zm0
+                            9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62
+                            6.5 12 6.5s2.5 1.12 2.5 2.5S13.38
+                            11.5 12 11.5z"
+                        ></path>
+                      </svg>
+                    </span>
+                  </ng-template>
+                  <!-- L'adresse s'affiche (que ce soit 'pause midi...' ou non) -->
+                  <span
+                    [title]="rowData.vehicle.lastPositionDate
+                            ? ('Position calculée à ' + (rowData.vehicle.lastPositionDate | date:'dd/MM/yyyy HH:mm:ss':'Europe/Paris'))
+                            : 'Erreur lors de la récupération de l\\'heure de la position'"
+                  >
+                    {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
+                  </span>
+                </div>
               </ng-template>
             </app-mask-toggle>
           </td>

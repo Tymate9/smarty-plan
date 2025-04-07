@@ -40,7 +40,7 @@ import TripEventType = dto.TripEventType;
               <p>{{ tripsService.formatDuration(tripData!.idleDuration) }}</p>
             </p-card>
             <p-card header="Distance totale">
-              <p>{{ tripData!.drivingDistance.toFixed(0) }} Km</p>
+              <p>{{ Math.ceil(tripData!.drivingDistance) }} Km</p>
             </p-card>
             <p-card header="Nb de POI visités">
               <p>{{ tripData!.poiAmount }}</p>
@@ -135,10 +135,9 @@ import TripEventType = dto.TripEventType;
                       ...
                     </span>
 
-                    <!--                {{ event.originalEvent.distance.toFixed(0) }} Km-->
                     <div class="distance-rectangle small-right" style="position: relative">
                       <p
-                        style="position: absolute; top:-0.6rem; left:0.2rem;">{{ event.originalEvent.distance.toFixed(0) }}
+                        style="position: absolute; top:-0.6rem; left:0.2rem;">{{ Math.ceil(event.originalEvent.distance) }}
                         Km</p>
                       <i *ngIf="event.originalEvent.sourceIndexes?.length > 0" class="pi pi-star-fill"
                          style="bottom:0.4rem; right:0rem; position: absolute; color: darkred;"></i>
@@ -278,9 +277,8 @@ import TripEventType = dto.TripEventType;
                       ...
                     </span>
 
-                    <!--                {{ event.originalEvent.distance.toFixed(0) }} Km-->
                     <div class="distance-rectangle small-right">
-                      {{ event.originalEvent.distance.toFixed(0) }} Km
+                      {{ Math.ceil(event.originalEvent.distance) }} Km
                     </div>
                   </div>
                   <div
@@ -883,4 +881,5 @@ export class TripMapComponent {
   protected readonly TripEventType = TripEventType;
   protected readonly TimelineEventType = TimelineEventType;
   protected readonly TripStatus = TripStatus;
+  protected readonly Math = Math;
 }

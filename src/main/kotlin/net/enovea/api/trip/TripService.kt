@@ -76,9 +76,17 @@ class TripService(
             if (poiAtEnd == null)
                 addressAtEnd = spatialService.getAddressFromEntity(lastPosition)
         } else {
-            // if device state, add trip expectation
-            lastPosition = lastDeviceState.coordinate
-            addressAtEnd = lastDeviceState.address ?: lastPosition?.let { spatialService.getAddressFromEntity(it) }
+            // if device state, add trip expectation when not parked
+            lastPosition = lastDeviceState.coordinate // this shouldn't be null but apparently it can and causes blank address
+            poiAtEnd = if (lastDeviceState.state == "PARKED" && lastPosition != null) {
+                spatialService.getNearestEntityWithinArea(lastPosition, PointOfInterestEntity::class)
+            } else {
+                null
+            }
+            if (poiAtEnd == null)
+                addressAtEnd = if (!lastDeviceState.address.isNullOrBlank())
+                    lastDeviceState.address
+                else lastPosition?.let { spatialService.getAddressFromEntity(it) }
             if (lastDeviceState.lastPositionTime != null) {
                 lastPositionTime =
                     Instant.ofEpochMilli(lastDeviceState.lastPositionTime!!.time).atZone(ZoneId.of("Europe/Paris"))
@@ -207,7 +215,7 @@ class TripService(
                 color = poiAtEnd?.category?.color ?: "black",
                 poiId = poiAtEnd?.id,
                 poiLabel = poiAtEnd?.getDenomination(),
-                address = addressAtEnd ?: poiAtEnd?.address,
+                address = poiAtEnd?.address ?: addressAtEnd,
                 lat = finalLat,
                 lng = finalLng,
                 start = if (lastTripStatus == TripStatus.PARKED) (
@@ -512,7 +520,7 @@ class TripService(
         } else null
 
         // Valeurs par défaut issues de poiAtStart
-        var eventAddress = addressAtStart ?: poiAtStart?.address
+        var eventAddress = poiAtStart?.address ?: addressAtStart
         var eventPoiLabel = poiAtStart?.getDenomination()
         var eventPoiId = poiAtStart?.id
         var eventColor: String? = poiAtStart?.category?.color ?: "black"

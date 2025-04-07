@@ -243,12 +243,10 @@ abstract class VehicleMapper {
                     val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
                         .toInstant()
                         .let { Timestamp.from(it) }
-                    println(now)
                     // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                     val threshold = Timestamp.from(
                         latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
                     )
-                    println(threshold)
                     // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
                     if (now.after(threshold)) {
                         return@forEach
@@ -306,12 +304,10 @@ abstract class VehicleMapper {
                 val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
                     .toInstant()
                     .let { Timestamp.from(it) }
-                println(now)
                 // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                 val threshold = Timestamp.from(
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
                 )
-                println(threshold)
                 // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
                 if (now.after(threshold)) {
                     return@Range
@@ -365,12 +361,10 @@ abstract class VehicleMapper {
                 val now = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
                     .toInstant()
                     .let { Timestamp.from(it) }
-                println(now)
                 // Calcul de la limite : 5 minutes après la fin de la pause déjeuner
                 val threshold = Timestamp.from(
                     latestEnd.atDate(todayInParis).atZone(parisZone).toInstant().plus(5, ChronoUnit.MINUTES)
                 )
-                println(threshold)
                 // Si l'heure actuelle est après cette limite, on conserve le DTO tel quel (pas d'anonymisation)
                 if (now.after(threshold)) {
                     return@Range

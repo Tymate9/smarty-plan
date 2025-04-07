@@ -245,4 +245,24 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
       expanded: false
     };
   }
+
+  getCsvHeaders(): string[] {
+    return [
+      'ID',
+      'Nom de l\'équipe',
+      'Équipe parente',
+      'Catégorie'
+    ];
+  }
+
+
+  convertToCsv(item: TeamDTO): string {
+    const values = [
+      item.id,
+      item.label,
+      item.parentTeam ? item.parentTeam.label : '',
+      item.category ? item.category.label : ''
+    ];
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+  }
 }

@@ -31,4 +31,6 @@ export interface IEntityService<D, R> {
   crudEvents$: Observable<CrudEvent<D>>;
   notifyCrudEvent(event: CrudEvent<D>): void;
   buildTreeLeaf(entity: D): TreeNode;
+  getCsvHeaders(): string[];
+  convertToCsv(item: D): string;
 }

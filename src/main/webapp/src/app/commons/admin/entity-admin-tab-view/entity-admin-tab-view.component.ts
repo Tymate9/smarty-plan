@@ -7,6 +7,7 @@ import {LoadingService} from "../../../services/loading.service";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {CompOpenerButtonComponent} from "../../drawer/comp-opener-button.component";
 import {DrawerOptions} from "../../drawer/drawer.component";
+import {ExportCsvButtonComponent} from "../../export-csv-button/export-csv-button.component";
 
 export interface EntityAdminTabConfig {
   showStats?: boolean;
@@ -26,6 +27,12 @@ export interface EntityAdminTabConfig {
 
       <hr *ngIf="config.showStats && config.showTree"/>
 
+      <app-export-csv-button
+        *ngIf="service"
+        buttonText="Exporter les entités"
+        iconClass="pi pi-download"
+        [dataService]="service">
+      </app-export-csv-button>
       <app-comp-opener-button
         *ngIf="service"
         [showLabel]="true"
@@ -47,7 +54,8 @@ export interface EntityAdminTabConfig {
     EntityStatsComponent,
     NgIf,
     ProgressSpinnerModule,
-    CompOpenerButtonComponent
+    CompOpenerButtonComponent,
+    ExportCsvButtonComponent
   ],
   styles: [`
     .tab-view-container {

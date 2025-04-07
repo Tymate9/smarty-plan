@@ -109,6 +109,28 @@ export abstract class AffectationService<S, T> implements IEntityService<Affecta
   buildTreeLeaf(entity: dto.AffectationDTO<S, T>): TreeNode {
     return {} as TreeNode;
   }
+
+  getCsvHeaders(): string[] {
+    return [
+      'ID',
+      'Sujet',
+      'Cible',
+      'Date de début',
+      'Date de fin'
+    ];
+  }
+
+  //TODO(Implémentation non complète à compléter)
+  convertToCsv(item: AffectationDTO<S, T>): string {
+    const values = [
+      item.id,
+      item.subject ? item.subject.toString() : '',
+      item.target ? item.target.toString() : '',
+      (item as any).startDate ? (item as any).startDate : '',
+      (item as any).endDate ? (item as any).endDate : ''
+    ];
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+  }
 }
 
 /**

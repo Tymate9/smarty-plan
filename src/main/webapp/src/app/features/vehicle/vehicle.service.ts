@@ -522,4 +522,28 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     return this.http.get<dto.VehicleCategoryDTO[]>(`${this.baseUrl}/category`);
   }
 
+  getCsvHeaders(): string[] {
+    return [
+      'ID',
+      'Énergie',
+      'Moteur',
+      'Identifiant externe',
+      'Plaque d\'immatriculation',
+      'Catégorie'
+    ];
+  }
+
+  convertToCsv(item: dto.VehicleDTO): string {
+    const values = [
+      item.id,
+      item.energy,
+      item.engine,
+      item.externalId,
+      item.licenseplate,
+      item.category?.label
+    ];
+    // Chaque valeur est entourée de guillemets pour éviter les soucis avec les virgules présentes dans les données
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+  }
+
 }

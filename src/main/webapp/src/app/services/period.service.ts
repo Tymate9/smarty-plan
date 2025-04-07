@@ -99,6 +99,27 @@ export abstract class PeriodService<R> implements IEntityService<PeriodDTO<R>, P
   buildTreeLeaf(entity: PeriodDTO<R>): TreeNode {
     return {} as TreeNode;
   }
+
+  getCsvHeaders(): string[] {
+    return [
+      'ID',
+      'Date de début',
+      'Date de fin',
+      'Ressource'
+    ];
+  }
+
+  //TODO(Implémentation non complète à compléter)
+  convertToCsv(item: PeriodDTO<R>): string {
+    const values = [
+      item.id,
+      item.startDate ? item.startDate.toString() : '',
+      item.endDate ? item.endDate.toString() : '',
+      item.resource ? item.resource.toString() : ''
+    ];
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+  }
+
 }
 
 @Injectable({

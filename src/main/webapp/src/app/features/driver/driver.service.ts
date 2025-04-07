@@ -264,4 +264,31 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
       expanded: false
     } as TreeNode;
   }
+
+  getCsvHeaders(): string[] {
+    return [
+      'ID',
+      'Prénom',
+      'Nom',
+      'Téléphone'
+    ];
+  }
+
+  /**
+   * Convertit un objet DriverDTO en une chaîne CSV.
+   * Chaque valeur est encadrée de guillemets pour éviter les problèmes
+   * liés aux séparateurs dans les données.
+   *
+   * @param item - Le DriverDTO à convertir.
+   * @returns La représentation CSV d'une ligne.
+   */
+  convertToCsv(item: DriverDTO): string {
+    const values = [
+      item.id,
+      item.firstName,
+      item.lastName,
+      item.phoneNumber
+    ];
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+  }
 }

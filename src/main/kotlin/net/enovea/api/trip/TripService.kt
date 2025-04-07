@@ -77,7 +77,10 @@ class TripService(
                 addressAtEnd = spatialService.getAddressFromEntity(lastPosition)
         } else {
             // if device state, add trip expectation when not parked
-            lastPosition = lastDeviceState.coordinate // this shouldn't be null but apparently it can and causes blank address
+
+            // this shouldn't be null but apparently it can and causes blank address
+            // todo : find why and fix
+            lastPosition = lastDeviceState.coordinate
             poiAtEnd = if (lastDeviceState.state == "PARKED" && lastPosition != null) {
                 spatialService.getNearestEntityWithinArea(lastPosition, PointOfInterestEntity::class)
             } else {

@@ -522,8 +522,8 @@ class TripService(
         // Initialisation de la liste des sous-événements (SubTripEvent)
         val subEvents = mutableListOf<TripEventDetails>()
 
-        if (precedingTrip != null && startLunchBreak != null && endLunchBreak != null) {
-            val stopStartLocal = precedingTrip.endTime.toLocalTime()
+        if (startLunchBreak != null && endLunchBreak != null) {
+            val stopStartLocal = precedingTrip?.endTime?.toLocalTime() ?: LocalTime.MIN // Si pas de trip précédent, arrêt de début de journée : comparer à MIN
             val stopEndLocal = originalTrip.startTime.toLocalTime()
 
             // Vérifier si lunchBreakStart est dans l'intervalle [stopStartLocal, stopEndLocal]

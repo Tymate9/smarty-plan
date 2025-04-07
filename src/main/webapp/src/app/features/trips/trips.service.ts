@@ -76,7 +76,7 @@ export class TripsService {
     return `${hours > 0 ? `${hours}h ` : ``}${minutes}min${!withoutSeconds ? ` ${seconds}s` : ''}`;
   }
 
-  formatDateToMinutes(date: Date | null): string | undefined {
+  formatDateToMinutes(date: Date | null): string {
     return date?.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) ?? '...';
   }
 

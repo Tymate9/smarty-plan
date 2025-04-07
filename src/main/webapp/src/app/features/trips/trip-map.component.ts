@@ -76,19 +76,6 @@ import TripEventType = dto.TripEventType;
                 </ng-template>
                 <ng-template pTemplate="content" let-event>
                   <div
-                    *ngIf="event.originalEvent.eventType === TripEventType.TRIP_EXPECTATION"
-                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
-                  >
-                    Dernière position du trajet à {{ tripsService.formatDateToMinutes(event.originalEvent.start) }}
-                  </div>
-                  <div
-                    *ngIf="(timelineEvents!.compactedTripEvents.indexOf(event) == timelineEvents!.compactedTripEvents.length - 1) && event.originalEvent.eventType === TripEventType.VEHICLE_PARKED || event.originalEvent.eventType === TripEventType.VEHICLE_RUNNING || event.originalEvent.eventType === TripEventType.VEHICLE_IDLE"
-                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP || event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
-                  >
-                    Dernière position connue
-                    à {{ tripsService.formatDateToMinutes(event.originalEvent.eventType === TripEventType.VEHICLE_PARKED ? event.originalEvent.end : event.originalEvent.start) }}
-                  </div>
-                  <div
                     *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR || event.type === TimelineEventType.LUNCH_STOP_SEPARATOR"
                     [class]="event.type === TimelineEventType.LUNCH_START_SEPARATOR ? 'start-separator' : 'end-separator'">
                     <div *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR">
@@ -234,19 +221,6 @@ import TripEventType = dto.TripEventType;
                 </ng-template>
                 <ng-template pTemplate="content" let-event>
                   <div
-                    *ngIf="event.originalEvent.eventType === TripEventType.TRIP_EXPECTATION"
-                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
-                  >
-                    Dernière position du trajet à {{ tripsService.formatDateToMinutes(event.originalEvent.start) }}
-                  </div>
-                  <div
-                    *ngIf="(timelineEvents!.tripEvents.indexOf(event) == timelineEvents!.tripEvents.length - 1) && event.originalEvent.eventType === TripEventType.VEHICLE_RUNNING || event.originalEvent.eventType === TripEventType.VEHICLE_IDLE"
-                    [style]="{marginLeft: event.type === TimelineEventType.TRIP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_TRIP_AFTER_START || event.type === TimelineEventType.LUNCH_TRIP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP || event.type === TimelineEventType.LUNCH_TRIP ? '2rem' : '0'}"
-                  >
-                    Dernière position connue
-                    à {{ tripsService.formatDateToMinutes(event.originalEvent.eventType === TripEventType.VEHICLE_PARKED ? event.originalEvent.end : event.originalEvent.start) }}
-                  </div>
-                  <div
                     *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR || event.type === TimelineEventType.LUNCH_STOP_SEPARATOR"
                     [class]="event.type === TimelineEventType.LUNCH_START_SEPARATOR ? 'start-separator' : 'end-separator'">
                     <div *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR">
@@ -360,6 +334,14 @@ import TripEventType = dto.TripEventType;
               </p-timeline>
             </p-tabPanel>
           </p-tabView>
+          <div class="timeline-bottom-times">
+            <div *ngIf="lastTripPositionTime">
+              Actualisation de la fiche journalière à {{ lastTripPositionTime }}
+            </div>
+            <div *ngIf="lastPositionTime">
+              Dernière position connue à {{ lastPositionTime }}
+            </div>
+          </div>
           <div *ngIf="!showTimeline">
             <p>Chargement du détail des trajets...</p>
           </div>
@@ -477,7 +459,12 @@ import TripEventType = dto.TripEventType;
         text-align: center;
       }
 
-
+      .timeline-bottom-times {
+        float: right;
+        text-align: right;
+        font-style: italic;
+        padding: 1rem 0;
+      }
     }
 
     #trip-cards {
@@ -554,12 +541,11 @@ export class TripMapComponent {
   protected showSidePanel = true;
   protected showTimeline = false;
 
+  protected lastTripPositionTime: string | null = null;
+  protected lastPositionTime: string | null = null;
+
   private map: L.Map | null = null;
   private featureGroup: L.FeatureGroup = L.featureGroup();
-
-  public itemHasLunchBreakStartEvent = (item:any): boolean => item.type === 'START_LUNCH_BREAK';
-
-  public itemHasLunchBreakEndEvent = (item:any): boolean => item.type === 'END_LUNCH_BREAK';
 
 
   constructor(
@@ -575,6 +561,24 @@ export class TripMapComponent {
     this._tripData = tripEventsDTO;
     this.timelineEvents = this.tripsService.tripEventsToTimelineEventsDTO(tripEventsDTO);
     console.log(this.timelineEvents);
+
+    // Set last position times if they should be displayed
+    const beforeLastEvent = this.timelineEvents.tripEvents.at(-2);
+    if (beforeLastEvent?.originalEvent?.eventType === TripEventType.TRIP_EXPECTATION) {
+      this.lastTripPositionTime = this.tripsService.formatDateToMinutes(
+        beforeLastEvent!.originalEvent.start
+      );
+    } else {
+      this.lastTripPositionTime = null;
+    }
+    const lastEvent = this.timelineEvents.tripEvents.at(-1);
+    if (lastEvent && [TripEventType.VEHICLE_RUNNING, TripEventType.VEHICLE_IDLE, TripEventType.VEHICLE_PARKED].includes(lastEvent.originalEvent.eventType)) {
+      this.lastPositionTime = this.tripsService.formatDateToMinutes(
+        lastEvent.originalEvent.eventType === TripEventType.VEHICLE_PARKED ? lastEvent.originalEvent.end : lastEvent.originalEvent.start
+      );
+    } else {
+      this.lastPositionTime = null;
+    }
 
     // init map
     if (this.map) {

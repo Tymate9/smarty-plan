@@ -90,9 +90,12 @@ import TripEventType = dto.TripEventType;
                   </div>
                   <div
                     *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR || event.type === TimelineEventType.LUNCH_STOP_SEPARATOR"
-                    class="separator">
+                    [class]="event.type === TimelineEventType.LUNCH_START_SEPARATOR ? 'start-separator' : 'end-separator'">
                     <div *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR">
-                      PAUSE DEJEUNER
+                      PAUSE DEJEUNER A {{ event.time }}
+                    </div>
+                    <div *ngIf="event.type === TimelineEventType.LUNCH_STOP_SEPARATOR">
+                      {{ event.time }}
                     </div>
                   </div>
                   <div
@@ -245,9 +248,12 @@ import TripEventType = dto.TripEventType;
                   </div>
                   <div
                     *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR || event.type === TimelineEventType.LUNCH_STOP_SEPARATOR"
-                    class="separator">
+                    [class]="event.type === TimelineEventType.LUNCH_START_SEPARATOR ? 'start-separator' : 'end-separator'">
                     <div *ngIf="event.type === TimelineEventType.LUNCH_START_SEPARATOR">
-                      PAUSE DEJEUNER
+                      PAUSE DEJEUNER A {{ event.time }}
+                    </div>
+                    <div *ngIf="event.type === TimelineEventType.LUNCH_STOP_SEPARATOR">
+                      {{ event.time }}
                     </div>
                   </div>
                   <div
@@ -371,7 +377,7 @@ import TripEventType = dto.TripEventType;
     }
 
     #map {
-      height: 80vh;
+      height: calc(100vh - 75px);
 
       ::ng-deep {
         .leaflet-control-zoom {
@@ -527,8 +533,14 @@ import TripEventType = dto.TripEventType;
         }
       }
 
-      .separator {
+      .start-separator {
         border-top: 2px solid #000;
+        margin-left: calc(-1rem - 32px);
+        padding-left: calc(1rem + 32px);
+      }
+
+      .end-separator {
+        border-bottom: 2px solid #000;
         margin-left: calc(-1rem - 32px);
         padding-left: calc(1rem + 32px);
       }

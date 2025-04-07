@@ -21,9 +21,19 @@ export class TimelineEventsDTO {
 
 export class TimelineEventDTO {
   originalEvent: TripEventDTO;
-  type: TimelineEventType
+  type: TimelineEventType;
+  time: string;
 }
 
+export namespace TimelineEventDTO {
+  export function fromTripEvent(tripEvent: TripEventDTO, type: TimelineEventType, time: string = ""): TimelineEventDTO {
+    return {
+      originalEvent: tripEvent,
+      type: type,
+      time: time
+    };
+  }
+}
 
 export enum TimelineEventType {
   TRIP = "TRIP",

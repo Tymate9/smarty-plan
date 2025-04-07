@@ -62,7 +62,7 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         justify-content: center;
         align-items: center;
         top: 0;
-        height: 80vh;
+        height: calc(100vh - 75px);
         background-color: rgba(0, 0, 0, 60%);
         width: 100%;
         font-size: 1.5rem;
@@ -139,6 +139,9 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         .p-tabview-nav-container {
           z-index: 10000;
           padding: 5px;
+          height: 60px;
+          align-items: center;
+          display: flex;
         }
 
         .p-tabview-nav {

@@ -1,0 +1,5657 @@
+[
+  {
+    "line": 1,
+    "status": "Ok",
+    "reason": "Successfully imported line 1"
+  },
+  {
+    "line": 2,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 2"
+  },
+  {
+    "line": 3,
+    "status": "Ok",
+    "reason": "Successfully imported line 3"
+  },
+  {
+    "line": 4,
+    "status": "Ok",
+    "reason": "Successfully imported line 4"
+  },
+  {
+    "line": 5,
+    "status": "Ok",
+    "reason": "Successfully imported line 5"
+  },
+  {
+    "line": 6,
+    "status": "Ok",
+    "reason": "Successfully imported line 6"
+  },
+  {
+    "line": 7,
+    "status": "Ok",
+    "reason": "Successfully imported line 7"
+  },
+  {
+    "line": 8,
+    "status": "Ok",
+    "reason": "Successfully imported line 8"
+  },
+  {
+    "line": 9,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 9"
+  },
+  {
+    "line": 10,
+    "status": "Ok",
+    "reason": "Successfully imported line 10"
+  },
+  {
+    "line": 11,
+    "status": "Ok",
+    "reason": "Successfully imported line 11"
+  },
+  {
+    "line": 12,
+    "status": "Ok",
+    "reason": "Successfully imported line 12"
+  },
+  {
+    "line": 13,
+    "status": "Ok",
+    "reason": "Successfully imported line 13"
+  },
+  {
+    "line": 14,
+    "status": "Ok",
+    "reason": "Successfully imported line 14"
+  },
+  {
+    "line": 15,
+    "status": "Ok",
+    "reason": "Successfully imported line 15"
+  },
+  {
+    "line": 16,
+    "status": "Ok",
+    "reason": "Successfully imported line 16"
+  },
+  {
+    "line": 17,
+    "status": "Ok",
+    "reason": "Successfully imported line 17"
+  },
+  {
+    "line": 18,
+    "status": "Ok",
+    "reason": "Successfully imported line 18"
+  },
+  {
+    "line": 19,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 19"
+  },
+  {
+    "line": 20,
+    "status": "Ok",
+    "reason": "Successfully imported line 20"
+  },
+  {
+    "line": 21,
+    "status": "Ok",
+    "reason": "Successfully imported line 21"
+  },
+  {
+    "line": 22,
+    "status": "Ok",
+    "reason": "Successfully imported line 22"
+  },
+  {
+    "line": 23,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 23"
+  },
+  {
+    "line": 24,
+    "status": "Ok",
+    "reason": "Successfully imported line 24"
+  },
+  {
+    "line": 25,
+    "status": "Ok",
+    "reason": "Successfully imported line 25"
+  },
+  {
+    "line": 26,
+    "status": "Ok",
+    "reason": "Successfully imported line 26"
+  },
+  {
+    "line": 27,
+    "status": "Ok",
+    "reason": "Successfully imported line 27"
+  },
+  {
+    "line": 28,
+    "status": "Ok",
+    "reason": "Successfully imported line 28"
+  },
+  {
+    "line": 29,
+    "status": "Ok",
+    "reason": "Successfully imported line 29"
+  },
+  {
+    "line": 30,
+    "status": "Ok",
+    "reason": "Successfully imported line 30"
+  },
+  {
+    "line": 31,
+    "status": "Skipped",
+    "reason": "Skipped line 31: Le libellé client existe déjà."
+  },
+  {
+    "line": 32,
+    "status": "Ok",
+    "reason": "Successfully imported line 32"
+  },
+  {
+    "line": 33,
+    "status": "Ok",
+    "reason": "Successfully imported line 33"
+  },
+  {
+    "line": 34,
+    "status": "Ok",
+    "reason": "Successfully imported line 34"
+  },
+  {
+    "line": 35,
+    "status": "Ok",
+    "reason": "Successfully imported line 35"
+  },
+  {
+    "line": 36,
+    "status": "Ok",
+    "reason": "Successfully imported line 36"
+  },
+  {
+    "line": 37,
+    "status": "Skipped",
+    "reason": "Skipped line 37: Le libellé client existe déjà."
+  },
+  {
+    "line": 38,
+    "status": "Ok",
+    "reason": "Successfully imported line 38"
+  },
+  {
+    "line": 39,
+    "status": "Ok",
+    "reason": "Successfully imported line 39"
+  },
+  {
+    "line": 40,
+    "status": "Ok",
+    "reason": "Successfully imported line 40"
+  },
+  {
+    "line": 41,
+    "status": "Ok",
+    "reason": "Successfully imported line 41"
+  },
+  {
+    "line": 42,
+    "status": "Skipped",
+    "reason": "Skipped line 42: Le libellé client existe déjà."
+  },
+  {
+    "line": 43,
+    "status": "Ok",
+    "reason": "Successfully imported line 43"
+  },
+  {
+    "line": 44,
+    "status": "Ok",
+    "reason": "Successfully imported line 44"
+  },
+  {
+    "line": 45,
+    "status": "Ok",
+    "reason": "Successfully imported line 45"
+  },
+  {
+    "line": 46,
+    "status": "Ok",
+    "reason": "Successfully imported line 46"
+  },
+  {
+    "line": 47,
+    "status": "Ok",
+    "reason": "Successfully imported line 47"
+  },
+  {
+    "line": 48,
+    "status": "Ok",
+    "reason": "Successfully imported line 48"
+  },
+  {
+    "line": 49,
+    "status": "Ok",
+    "reason": "Successfully imported line 49"
+  },
+  {
+    "line": 50,
+    "status": "Skipped",
+    "reason": "Skipped line 50: Le libellé client existe déjà."
+  },
+  {
+    "line": 51,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 51"
+  },
+  {
+    "line": 52,
+    "status": "Ok",
+    "reason": "Successfully imported line 52"
+  },
+  {
+    "line": 53,
+    "status": "Ok",
+    "reason": "Successfully imported line 53"
+  },
+  {
+    "line": 54,
+    "status": "Ok",
+    "reason": "Successfully imported line 54"
+  },
+  {
+    "line": 55,
+    "status": "Ok",
+    "reason": "Successfully imported line 55"
+  },
+  {
+    "line": 56,
+    "status": "Skipped",
+    "reason": "Skipped line 56: Le libellé client existe déjà."
+  },
+  {
+    "line": 57,
+    "status": "Ok",
+    "reason": "Successfully imported line 57"
+  },
+  {
+    "line": 58,
+    "status": "Skipped",
+    "reason": "Skipped line 58: Le libellé client existe déjà."
+  },
+  {
+    "line": 59,
+    "status": "Ok",
+    "reason": "Successfully imported line 59"
+  },
+  {
+    "line": 60,
+    "status": "Ok",
+    "reason": "Successfully imported line 60"
+  },
+  {
+    "line": 61,
+    "status": "Ok",
+    "reason": "Successfully imported line 61"
+  },
+  {
+    "line": 62,
+    "status": "Ok",
+    "reason": "Successfully imported line 62"
+  },
+  {
+    "line": 63,
+    "status": "Ok",
+    "reason": "Successfully imported line 63"
+  },
+  {
+    "line": 64,
+    "status": "Ok",
+    "reason": "Successfully imported line 64"
+  },
+  {
+    "line": 65,
+    "status": "Ok",
+    "reason": "Successfully imported line 65"
+  },
+  {
+    "line": 66,
+    "status": "Ok",
+    "reason": "Successfully imported line 66"
+  },
+  {
+    "line": 67,
+    "status": "Skipped",
+    "reason": "Skipped line 67: Le libellé client existe déjà."
+  },
+  {
+    "line": 68,
+    "status": "Ok",
+    "reason": "Successfully imported line 68"
+  },
+  {
+    "line": 69,
+    "status": "Ok",
+    "reason": "Successfully imported line 69"
+  },
+  {
+    "line": 70,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 70"
+  },
+  {
+    "line": 71,
+    "status": "Ok",
+    "reason": "Successfully imported line 71"
+  },
+  {
+    "line": 72,
+    "status": "Ok",
+    "reason": "Successfully imported line 72"
+  },
+  {
+    "line": 73,
+    "status": "Skipped",
+    "reason": "Skipped line 73: Le libellé client existe déjà."
+  },
+  {
+    "line": 74,
+    "status": "Skipped",
+    "reason": "Skipped line 74: Le libellé client existe déjà."
+  },
+  {
+    "line": 75,
+    "status": "Ok",
+    "reason": "Successfully imported line 75"
+  },
+  {
+    "line": 76,
+    "status": "Skipped",
+    "reason": "Skipped line 76: Le libellé client existe déjà."
+  },
+  {
+    "line": 77,
+    "status": "Ok",
+    "reason": "Successfully imported line 77"
+  },
+  {
+    "line": 78,
+    "status": "Skipped",
+    "reason": "Skipped line 78: Le libellé client existe déjà."
+  },
+  {
+    "line": 79,
+    "status": "Ok",
+    "reason": "Successfully imported line 79"
+  },
+  {
+    "line": 80,
+    "status": "Skipped",
+    "reason": "Skipped line 80: Le libellé client existe déjà."
+  },
+  {
+    "line": 81,
+    "status": "Ok",
+    "reason": "Successfully imported line 81"
+  },
+  {
+    "line": 82,
+    "status": "Ok",
+    "reason": "Successfully imported line 82"
+  },
+  {
+    "line": 83,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 83"
+  },
+  {
+    "line": 84,
+    "status": "Ok",
+    "reason": "Successfully imported line 84"
+  },
+  {
+    "line": 85,
+    "status": "Ok",
+    "reason": "Successfully imported line 85"
+  },
+  {
+    "line": 86,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 86"
+  },
+  {
+    "line": 87,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 87"
+  },
+  {
+    "line": 88,
+    "status": "Ok",
+    "reason": "Successfully imported line 88"
+  },
+  {
+    "line": 89,
+    "status": "Ok",
+    "reason": "Successfully imported line 89"
+  },
+  {
+    "line": 90,
+    "status": "Skipped",
+    "reason": "Skipped line 90: Le libellé client existe déjà."
+  },
+  {
+    "line": 91,
+    "status": "Ok",
+    "reason": "Successfully imported line 91"
+  },
+  {
+    "line": 92,
+    "status": "Ok",
+    "reason": "Successfully imported line 92"
+  },
+  {
+    "line": 93,
+    "status": "Ok",
+    "reason": "Successfully imported line 93"
+  },
+  {
+    "line": 94,
+    "status": "Ok",
+    "reason": "Successfully imported line 94"
+  },
+  {
+    "line": 95,
+    "status": "Ok",
+    "reason": "Successfully imported line 95"
+  },
+  {
+    "line": 96,
+    "status": "Ok",
+    "reason": "Successfully imported line 96"
+  },
+  {
+    "line": 97,
+    "status": "Ok",
+    "reason": "Successfully imported line 97"
+  },
+  {
+    "line": 98,
+    "status": "Ok",
+    "reason": "Successfully imported line 98"
+  },
+  {
+    "line": 99,
+    "status": "Ok",
+    "reason": "Successfully imported line 99"
+  },
+  {
+    "line": 100,
+    "status": "Ok",
+    "reason": "Successfully imported line 100"
+  },
+  {
+    "line": 101,
+    "status": "Ok",
+    "reason": "Successfully imported line 101"
+  },
+  {
+    "line": 102,
+    "status": "Ok",
+    "reason": "Successfully imported line 102"
+  },
+  {
+    "line": 103,
+    "status": "Ok",
+    "reason": "Successfully imported line 103"
+  },
+  {
+    "line": 104,
+    "status": "Ok",
+    "reason": "Successfully imported line 104"
+  },
+  {
+    "line": 105,
+    "status": "Ok",
+    "reason": "Successfully imported line 105"
+  },
+  {
+    "line": 106,
+    "status": "Ok",
+    "reason": "Successfully imported line 106"
+  },
+  {
+    "line": 107,
+    "status": "Ok",
+    "reason": "Successfully imported line 107"
+  },
+  {
+    "line": 108,
+    "status": "Ok",
+    "reason": "Successfully imported line 108"
+  },
+  {
+    "line": 109,
+    "status": "Ok",
+    "reason": "Successfully imported line 109"
+  },
+  {
+    "line": 110,
+    "status": "Skipped",
+    "reason": "Skipped line 110: Le libellé client existe déjà."
+  },
+  {
+    "line": 111,
+    "status": "Ok",
+    "reason": "Successfully imported line 111"
+  },
+  {
+    "line": 112,
+    "status": "Ok",
+    "reason": "Successfully imported line 112"
+  },
+  {
+    "line": 113,
+    "status": "Ok",
+    "reason": "Successfully imported line 113"
+  },
+  {
+    "line": 114,
+    "status": "Ok",
+    "reason": "Successfully imported line 114"
+  },
+  {
+    "line": 115,
+    "status": "Skipped",
+    "reason": "Skipped line 115: Le libellé client existe déjà."
+  },
+  {
+    "line": 116,
+    "status": "Ok",
+    "reason": "Successfully imported line 116"
+  },
+  {
+    "line": 117,
+    "status": "Ok",
+    "reason": "Successfully imported line 117"
+  },
+  {
+    "line": 118,
+    "status": "Ok",
+    "reason": "Successfully imported line 118"
+  },
+  {
+    "line": 119,
+    "status": "Ok",
+    "reason": "Successfully imported line 119"
+  },
+  {
+    "line": 120,
+    "status": "Ok",
+    "reason": "Successfully imported line 120"
+  },
+  {
+    "line": 121,
+    "status": "Ok",
+    "reason": "Successfully imported line 121"
+  },
+  {
+    "line": 122,
+    "status": "Skipped",
+    "reason": "Skipped line 122: Le libellé client existe déjà."
+  },
+  {
+    "line": 123,
+    "status": "Skipped",
+    "reason": "Skipped line 123: Le libellé client existe déjà."
+  },
+  {
+    "line": 124,
+    "status": "Skipped",
+    "reason": "Skipped line 124: Le libellé client existe déjà."
+  },
+  {
+    "line": 125,
+    "status": "Ok",
+    "reason": "Successfully imported line 125"
+  },
+  {
+    "line": 126,
+    "status": "Ok",
+    "reason": "Successfully imported line 126"
+  },
+  {
+    "line": 127,
+    "status": "Ok",
+    "reason": "Successfully imported line 127"
+  },
+  {
+    "line": 128,
+    "status": "Ok",
+    "reason": "Successfully imported line 128"
+  },
+  {
+    "line": 129,
+    "status": "Skipped",
+    "reason": "Skipped line 129: Le libellé client existe déjà."
+  },
+  {
+    "line": 130,
+    "status": "Ok",
+    "reason": "Successfully imported line 130"
+  },
+  {
+    "line": 131,
+    "status": "Ok",
+    "reason": "Successfully imported line 131"
+  },
+  {
+    "line": 132,
+    "status": "Ok",
+    "reason": "Successfully imported line 132"
+  },
+  {
+    "line": 133,
+    "status": "Ok",
+    "reason": "Successfully imported line 133"
+  },
+  {
+    "line": 134,
+    "status": "Ok",
+    "reason": "Successfully imported line 134"
+  },
+  {
+    "line": 135,
+    "status": "Ok",
+    "reason": "Successfully imported line 135"
+  },
+  {
+    "line": 136,
+    "status": "Ok",
+    "reason": "Successfully imported line 136"
+  },
+  {
+    "line": 137,
+    "status": "Ok",
+    "reason": "Successfully imported line 137"
+  },
+  {
+    "line": 138,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 138"
+  },
+  {
+    "line": 139,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 139"
+  },
+  {
+    "line": 140,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 140"
+  },
+  {
+    "line": 141,
+    "status": "Skipped",
+    "reason": "Skipped line 141: Le libellé client existe déjà."
+  },
+  {
+    "line": 142,
+    "status": "Ok",
+    "reason": "Successfully imported line 142"
+  },
+  {
+    "line": 143,
+    "status": "Ok",
+    "reason": "Successfully imported line 143"
+  },
+  {
+    "line": 144,
+    "status": "Ok",
+    "reason": "Successfully imported line 144"
+  },
+  {
+    "line": 145,
+    "status": "Ok",
+    "reason": "Successfully imported line 145"
+  },
+  {
+    "line": 146,
+    "status": "Ok",
+    "reason": "Successfully imported line 146"
+  },
+  {
+    "line": 147,
+    "status": "Ok",
+    "reason": "Successfully imported line 147"
+  },
+  {
+    "line": 148,
+    "status": "Ok",
+    "reason": "Successfully imported line 148"
+  },
+  {
+    "line": 149,
+    "status": "Ok",
+    "reason": "Successfully imported line 149"
+  },
+  {
+    "line": 150,
+    "status": "Ok",
+    "reason": "Successfully imported line 150"
+  },
+  {
+    "line": 151,
+    "status": "Ok",
+    "reason": "Successfully imported line 151"
+  },
+  {
+    "line": 152,
+    "status": "Ok",
+    "reason": "Successfully imported line 152"
+  },
+  {
+    "line": 153,
+    "status": "Skipped",
+    "reason": "Skipped line 153: Le libellé client existe déjà."
+  },
+  {
+    "line": 154,
+    "status": "Ok",
+    "reason": "Successfully imported line 154"
+  },
+  {
+    "line": 155,
+    "status": "Ok",
+    "reason": "Successfully imported line 155"
+  },
+  {
+    "line": 156,
+    "status": "Skipped",
+    "reason": "Skipped line 156: Le libellé client existe déjà."
+  },
+  {
+    "line": 157,
+    "status": "Skipped",
+    "reason": "Skipped line 157: Le libellé client existe déjà."
+  },
+  {
+    "line": 158,
+    "status": "Ok",
+    "reason": "Successfully imported line 158"
+  },
+  {
+    "line": 159,
+    "status": "Ok",
+    "reason": "Successfully imported line 159"
+  },
+  {
+    "line": 160,
+    "status": "Ok",
+    "reason": "Successfully imported line 160"
+  },
+  {
+    "line": 161,
+    "status": "Ok",
+    "reason": "Successfully imported line 161"
+  },
+  {
+    "line": 162,
+    "status": "Ok",
+    "reason": "Successfully imported line 162"
+  },
+  {
+    "line": 163,
+    "status": "Ok",
+    "reason": "Successfully imported line 163"
+  },
+  {
+    "line": 164,
+    "status": "Ok",
+    "reason": "Successfully imported line 164"
+  },
+  {
+    "line": 165,
+    "status": "Ok",
+    "reason": "Successfully imported line 165"
+  },
+  {
+    "line": 166,
+    "status": "Ok",
+    "reason": "Successfully imported line 166"
+  },
+  {
+    "line": 167,
+    "status": "Ok",
+    "reason": "Successfully imported line 167"
+  },
+  {
+    "line": 168,
+    "status": "Ok",
+    "reason": "Successfully imported line 168"
+  },
+  {
+    "line": 169,
+    "status": "Ok",
+    "reason": "Successfully imported line 169"
+  },
+  {
+    "line": 170,
+    "status": "Ok",
+    "reason": "Successfully imported line 170"
+  },
+  {
+    "line": 171,
+    "status": "Ok",
+    "reason": "Successfully imported line 171"
+  },
+  {
+    "line": 172,
+    "status": "Ok",
+    "reason": "Successfully imported line 172"
+  },
+  {
+    "line": 173,
+    "status": "Ok",
+    "reason": "Successfully imported line 173"
+  },
+  {
+    "line": 174,
+    "status": "Ok",
+    "reason": "Successfully imported line 174"
+  },
+  {
+    "line": 175,
+    "status": "Skipped",
+    "reason": "Skipped line 175: Le libellé client existe déjà."
+  },
+  {
+    "line": 176,
+    "status": "Ok",
+    "reason": "Successfully imported line 176"
+  },
+  {
+    "line": 177,
+    "status": "Ok",
+    "reason": "Successfully imported line 177"
+  },
+  {
+    "line": 178,
+    "status": "Ok",
+    "reason": "Successfully imported line 178"
+  },
+  {
+    "line": 179,
+    "status": "Ok",
+    "reason": "Successfully imported line 179"
+  },
+  {
+    "line": 180,
+    "status": "Skipped",
+    "reason": "Skipped line 180: Le libellé client existe déjà."
+  },
+  {
+    "line": 181,
+    "status": "Ok",
+    "reason": "Successfully imported line 181"
+  },
+  {
+    "line": 182,
+    "status": "Ok",
+    "reason": "Successfully imported line 182"
+  },
+  {
+    "line": 183,
+    "status": "Skipped",
+    "reason": "Skipped line 183: Le libellé client existe déjà."
+  },
+  {
+    "line": 184,
+    "status": "Ok",
+    "reason": "Successfully imported line 184"
+  },
+  {
+    "line": 185,
+    "status": "Ok",
+    "reason": "Successfully imported line 185"
+  },
+  {
+    "line": 186,
+    "status": "Ok",
+    "reason": "Successfully imported line 186"
+  },
+  {
+    "line": 187,
+    "status": "Ok",
+    "reason": "Successfully imported line 187"
+  },
+  {
+    "line": 188,
+    "status": "Ok",
+    "reason": "Successfully imported line 188"
+  },
+  {
+    "line": 189,
+    "status": "Ok",
+    "reason": "Successfully imported line 189"
+  },
+  {
+    "line": 190,
+    "status": "Skipped",
+    "reason": "Skipped line 190: Le libellé client existe déjà."
+  },
+  {
+    "line": 191,
+    "status": "Ok",
+    "reason": "Successfully imported line 191"
+  },
+  {
+    "line": 192,
+    "status": "Ok",
+    "reason": "Successfully imported line 192"
+  },
+  {
+    "line": 193,
+    "status": "Ok",
+    "reason": "Successfully imported line 193"
+  },
+  {
+    "line": 194,
+    "status": "Ok",
+    "reason": "Successfully imported line 194"
+  },
+  {
+    "line": 195,
+    "status": "Ok",
+    "reason": "Successfully imported line 195"
+  },
+  {
+    "line": 196,
+    "status": "Ok",
+    "reason": "Successfully imported line 196"
+  },
+  {
+    "line": 197,
+    "status": "Ok",
+    "reason": "Successfully imported line 197"
+  },
+  {
+    "line": 198,
+    "status": "Ok",
+    "reason": "Successfully imported line 198"
+  },
+  {
+    "line": 199,
+    "status": "Ok",
+    "reason": "Successfully imported line 199"
+  },
+  {
+    "line": 200,
+    "status": "Ok",
+    "reason": "Successfully imported line 200"
+  },
+  {
+    "line": 201,
+    "status": "Ok",
+    "reason": "Successfully imported line 201"
+  },
+  {
+    "line": 202,
+    "status": "Ok",
+    "reason": "Successfully imported line 202"
+  },
+  {
+    "line": 203,
+    "status": "Ok",
+    "reason": "Successfully imported line 203"
+  },
+  {
+    "line": 204,
+    "status": "Ok",
+    "reason": "Successfully imported line 204"
+  },
+  {
+    "line": 205,
+    "status": "Ok",
+    "reason": "Successfully imported line 205"
+  },
+  {
+    "line": 206,
+    "status": "Skipped",
+    "reason": "Skipped line 206: Le libellé client existe déjà."
+  },
+  {
+    "line": 207,
+    "status": "Skipped",
+    "reason": "Skipped line 207: Le libellé client existe déjà."
+  },
+  {
+    "line": 208,
+    "status": "Ok",
+    "reason": "Successfully imported line 208"
+  },
+  {
+    "line": 209,
+    "status": "Ok",
+    "reason": "Successfully imported line 209"
+  },
+  {
+    "line": 210,
+    "status": "Ok",
+    "reason": "Successfully imported line 210"
+  },
+  {
+    "line": 211,
+    "status": "Ok",
+    "reason": "Successfully imported line 211"
+  },
+  {
+    "line": 212,
+    "status": "Ok",
+    "reason": "Successfully imported line 212"
+  },
+  {
+    "line": 213,
+    "status": "Ok",
+    "reason": "Successfully imported line 213"
+  },
+  {
+    "line": 214,
+    "status": "Ok",
+    "reason": "Successfully imported line 214"
+  },
+  {
+    "line": 215,
+    "status": "Ok",
+    "reason": "Successfully imported line 215"
+  },
+  {
+    "line": 216,
+    "status": "Ok",
+    "reason": "Successfully imported line 216"
+  },
+  {
+    "line": 217,
+    "status": "Ok",
+    "reason": "Successfully imported line 217"
+  },
+  {
+    "line": 218,
+    "status": "Ok",
+    "reason": "Successfully imported line 218"
+  },
+  {
+    "line": 219,
+    "status": "Ok",
+    "reason": "Successfully imported line 219"
+  },
+  {
+    "line": 220,
+    "status": "Ok",
+    "reason": "Successfully imported line 220"
+  },
+  {
+    "line": 221,
+    "status": "Ok",
+    "reason": "Successfully imported line 221"
+  },
+  {
+    "line": 222,
+    "status": "Ok",
+    "reason": "Successfully imported line 222"
+  },
+  {
+    "line": 223,
+    "status": "Ok",
+    "reason": "Successfully imported line 223"
+  },
+  {
+    "line": 224,
+    "status": "Ok",
+    "reason": "Successfully imported line 224"
+  },
+  {
+    "line": 225,
+    "status": "Ok",
+    "reason": "Successfully imported line 225"
+  },
+  {
+    "line": 226,
+    "status": "Ok",
+    "reason": "Successfully imported line 226"
+  },
+  {
+    "line": 227,
+    "status": "Ok",
+    "reason": "Successfully imported line 227"
+  },
+  {
+    "line": 228,
+    "status": "Skipped",
+    "reason": "Skipped line 228: Le libellé client existe déjà."
+  },
+  {
+    "line": 229,
+    "status": "Ok",
+    "reason": "Successfully imported line 229"
+  },
+  {
+    "line": 230,
+    "status": "Ok",
+    "reason": "Successfully imported line 230"
+  },
+  {
+    "line": 231,
+    "status": "Skipped",
+    "reason": "Skipped line 231: Le libellé client existe déjà."
+  },
+  {
+    "line": 232,
+    "status": "Ok",
+    "reason": "Successfully imported line 232"
+  },
+  {
+    "line": 233,
+    "status": "Ok",
+    "reason": "Successfully imported line 233"
+  },
+  {
+    "line": 234,
+    "status": "Ok",
+    "reason": "Successfully imported line 234"
+  },
+  {
+    "line": 235,
+    "status": "Ok",
+    "reason": "Successfully imported line 235"
+  },
+  {
+    "line": 236,
+    "status": "Ok",
+    "reason": "Successfully imported line 236"
+  },
+  {
+    "line": 237,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 237"
+  },
+  {
+    "line": 238,
+    "status": "Ok",
+    "reason": "Successfully imported line 238"
+  },
+  {
+    "line": 239,
+    "status": "Ok",
+    "reason": "Successfully imported line 239"
+  },
+  {
+    "line": 240,
+    "status": "Ok",
+    "reason": "Successfully imported line 240"
+  },
+  {
+    "line": 241,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 241"
+  },
+  {
+    "line": 242,
+    "status": "Ok",
+    "reason": "Successfully imported line 242"
+  },
+  {
+    "line": 243,
+    "status": "Ok",
+    "reason": "Successfully imported line 243"
+  },
+  {
+    "line": 244,
+    "status": "Ok",
+    "reason": "Successfully imported line 244"
+  },
+  {
+    "line": 245,
+    "status": "Ok",
+    "reason": "Successfully imported line 245"
+  },
+  {
+    "line": 246,
+    "status": "Ok",
+    "reason": "Successfully imported line 246"
+  },
+  {
+    "line": 247,
+    "status": "Ok",
+    "reason": "Successfully imported line 247"
+  },
+  {
+    "line": 248,
+    "status": "Ok",
+    "reason": "Successfully imported line 248"
+  },
+  {
+    "line": 249,
+    "status": "Skipped",
+    "reason": "Skipped line 249: Le libellé client existe déjà."
+  },
+  {
+    "line": 250,
+    "status": "Ok",
+    "reason": "Successfully imported line 250"
+  },
+  {
+    "line": 251,
+    "status": "Ok",
+    "reason": "Successfully imported line 251"
+  },
+  {
+    "line": 252,
+    "status": "Ok",
+    "reason": "Successfully imported line 252"
+  },
+  {
+    "line": 253,
+    "status": "Ok",
+    "reason": "Successfully imported line 253"
+  },
+  {
+    "line": 254,
+    "status": "Ok",
+    "reason": "Successfully imported line 254"
+  },
+  {
+    "line": 255,
+    "status": "Skipped",
+    "reason": "Skipped line 255: Le libellé client existe déjà."
+  },
+  {
+    "line": 256,
+    "status": "Ok",
+    "reason": "Successfully imported line 256"
+  },
+  {
+    "line": 257,
+    "status": "Ok",
+    "reason": "Successfully imported line 257"
+  },
+  {
+    "line": 258,
+    "status": "Ok",
+    "reason": "Successfully imported line 258"
+  },
+  {
+    "line": 259,
+    "status": "Ok",
+    "reason": "Successfully imported line 259"
+  },
+  {
+    "line": 260,
+    "status": "Ok",
+    "reason": "Successfully imported line 260"
+  },
+  {
+    "line": 261,
+    "status": "Ok",
+    "reason": "Successfully imported line 261"
+  },
+  {
+    "line": 262,
+    "status": "Ok",
+    "reason": "Successfully imported line 262"
+  },
+  {
+    "line": 263,
+    "status": "Ok",
+    "reason": "Successfully imported line 263"
+  },
+  {
+    "line": 264,
+    "status": "Skipped",
+    "reason": "Skipped line 264: Le libellé client existe déjà."
+  },
+  {
+    "line": 265,
+    "status": "Ok",
+    "reason": "Successfully imported line 265"
+  },
+  {
+    "line": 266,
+    "status": "Ok",
+    "reason": "Successfully imported line 266"
+  },
+  {
+    "line": 267,
+    "status": "Ok",
+    "reason": "Successfully imported line 267"
+  },
+  {
+    "line": 268,
+    "status": "Ok",
+    "reason": "Successfully imported line 268"
+  },
+  {
+    "line": 269,
+    "status": "Ok",
+    "reason": "Successfully imported line 269"
+  },
+  {
+    "line": 270,
+    "status": "Ok",
+    "reason": "Successfully imported line 270"
+  },
+  {
+    "line": 271,
+    "status": "Ok",
+    "reason": "Successfully imported line 271"
+  },
+  {
+    "line": 272,
+    "status": "Ok",
+    "reason": "Successfully imported line 272"
+  },
+  {
+    "line": 273,
+    "status": "Ok",
+    "reason": "Successfully imported line 273"
+  },
+  {
+    "line": 274,
+    "status": "Ok",
+    "reason": "Successfully imported line 274"
+  },
+  {
+    "line": 275,
+    "status": "Ok",
+    "reason": "Successfully imported line 275"
+  },
+  {
+    "line": 276,
+    "status": "Ok",
+    "reason": "Successfully imported line 276"
+  },
+  {
+    "line": 277,
+    "status": "Ok",
+    "reason": "Successfully imported line 277"
+  },
+  {
+    "line": 278,
+    "status": "Ok",
+    "reason": "Successfully imported line 278"
+  },
+  {
+    "line": 279,
+    "status": "Ok",
+    "reason": "Successfully imported line 279"
+  },
+  {
+    "line": 280,
+    "status": "Ok",
+    "reason": "Successfully imported line 280"
+  },
+  {
+    "line": 281,
+    "status": "Skipped",
+    "reason": "Skipped line 281: Le libellé client existe déjà."
+  },
+  {
+    "line": 282,
+    "status": "Skipped",
+    "reason": "Skipped line 282: Le libellé client existe déjà."
+  },
+  {
+    "line": 283,
+    "status": "Skipped",
+    "reason": "Skipped line 283: Le libellé client existe déjà."
+  },
+  {
+    "line": 284,
+    "status": "Ok",
+    "reason": "Successfully imported line 284"
+  },
+  {
+    "line": 285,
+    "status": "Ok",
+    "reason": "Successfully imported line 285"
+  },
+  {
+    "line": 286,
+    "status": "Skipped",
+    "reason": "Skipped line 286: Le libellé client existe déjà."
+  },
+  {
+    "line": 287,
+    "status": "Ok",
+    "reason": "Successfully imported line 287"
+  },
+  {
+    "line": 288,
+    "status": "Ok",
+    "reason": "Successfully imported line 288"
+  },
+  {
+    "line": 289,
+    "status": "Ok",
+    "reason": "Successfully imported line 289"
+  },
+  {
+    "line": 290,
+    "status": "Ok",
+    "reason": "Successfully imported line 290"
+  },
+  {
+    "line": 291,
+    "status": "Ok",
+    "reason": "Successfully imported line 291"
+  },
+  {
+    "line": 292,
+    "status": "Ok",
+    "reason": "Successfully imported line 292"
+  },
+  {
+    "line": 293,
+    "status": "Ok",
+    "reason": "Successfully imported line 293"
+  },
+  {
+    "line": 294,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 294"
+  },
+  {
+    "line": 295,
+    "status": "Ok",
+    "reason": "Successfully imported line 295"
+  },
+  {
+    "line": 296,
+    "status": "Skipped",
+    "reason": "Skipped line 296: Le libellé client existe déjà."
+  },
+  {
+    "line": 297,
+    "status": "Ok",
+    "reason": "Successfully imported line 297"
+  },
+  {
+    "line": 298,
+    "status": "Skipped",
+    "reason": "Skipped line 298: Le libellé client existe déjà."
+  },
+  {
+    "line": 299,
+    "status": "Ok",
+    "reason": "Successfully imported line 299"
+  },
+  {
+    "line": 300,
+    "status": "Skipped",
+    "reason": "Skipped line 300: Le libellé client existe déjà."
+  },
+  {
+    "line": 301,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 301"
+  },
+  {
+    "line": 302,
+    "status": "Ok",
+    "reason": "Successfully imported line 302"
+  },
+  {
+    "line": 303,
+    "status": "Ok",
+    "reason": "Successfully imported line 303"
+  },
+  {
+    "line": 304,
+    "status": "Ok",
+    "reason": "Successfully imported line 304"
+  },
+  {
+    "line": 305,
+    "status": "Ok",
+    "reason": "Successfully imported line 305"
+  },
+  {
+    "line": 306,
+    "status": "Ok",
+    "reason": "Successfully imported line 306"
+  },
+  {
+    "line": 307,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 307"
+  },
+  {
+    "line": 308,
+    "status": "Ok",
+    "reason": "Successfully imported line 308"
+  },
+  {
+    "line": 309,
+    "status": "Ok",
+    "reason": "Successfully imported line 309"
+  },
+  {
+    "line": 310,
+    "status": "Skipped",
+    "reason": "Skipped line 310: Le libellé client existe déjà."
+  },
+  {
+    "line": 311,
+    "status": "Ok",
+    "reason": "Successfully imported line 311"
+  },
+  {
+    "line": 312,
+    "status": "Ok",
+    "reason": "Successfully imported line 312"
+  },
+  {
+    "line": 313,
+    "status": "Ok",
+    "reason": "Successfully imported line 313"
+  },
+  {
+    "line": 314,
+    "status": "Ok",
+    "reason": "Successfully imported line 314"
+  },
+  {
+    "line": 315,
+    "status": "Ok",
+    "reason": "Successfully imported line 315"
+  },
+  {
+    "line": 316,
+    "status": "Ok",
+    "reason": "Successfully imported line 316"
+  },
+  {
+    "line": 317,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 317"
+  },
+  {
+    "line": 318,
+    "status": "Ok",
+    "reason": "Successfully imported line 318"
+  },
+  {
+    "line": 319,
+    "status": "Ok",
+    "reason": "Successfully imported line 319"
+  },
+  {
+    "line": 320,
+    "status": "Ok",
+    "reason": "Successfully imported line 320"
+  },
+  {
+    "line": 321,
+    "status": "Ok",
+    "reason": "Successfully imported line 321"
+  },
+  {
+    "line": 322,
+    "status": "Ok",
+    "reason": "Successfully imported line 322"
+  },
+  {
+    "line": 323,
+    "status": "Ok",
+    "reason": "Successfully imported line 323"
+  },
+  {
+    "line": 324,
+    "status": "Ok",
+    "reason": "Successfully imported line 324"
+  },
+  {
+    "line": 325,
+    "status": "Ok",
+    "reason": "Successfully imported line 325"
+  },
+  {
+    "line": 326,
+    "status": "Ok",
+    "reason": "Successfully imported line 326"
+  },
+  {
+    "line": 327,
+    "status": "Ok",
+    "reason": "Successfully imported line 327"
+  },
+  {
+    "line": 328,
+    "status": "Ok",
+    "reason": "Successfully imported line 328"
+  },
+  {
+    "line": 329,
+    "status": "Ok",
+    "reason": "Successfully imported line 329"
+  },
+  {
+    "line": 330,
+    "status": "Skipped",
+    "reason": "Skipped line 330: Le libellé client existe déjà."
+  },
+  {
+    "line": 331,
+    "status": "Ok",
+    "reason": "Successfully imported line 331"
+  },
+  {
+    "line": 332,
+    "status": "Skipped",
+    "reason": "Skipped line 332: Le libellé client existe déjà."
+  },
+  {
+    "line": 333,
+    "status": "Ok",
+    "reason": "Successfully imported line 333"
+  },
+  {
+    "line": 334,
+    "status": "Ok",
+    "reason": "Successfully imported line 334"
+  },
+  {
+    "line": 335,
+    "status": "Ok",
+    "reason": "Successfully imported line 335"
+  },
+  {
+    "line": 336,
+    "status": "Ok",
+    "reason": "Successfully imported line 336"
+  },
+  {
+    "line": 337,
+    "status": "Ok",
+    "reason": "Successfully imported line 337"
+  },
+  {
+    "line": 338,
+    "status": "Ok",
+    "reason": "Successfully imported line 338"
+  },
+  {
+    "line": 339,
+    "status": "Ok",
+    "reason": "Successfully imported line 339"
+  },
+  {
+    "line": 340,
+    "status": "Ok",
+    "reason": "Successfully imported line 340"
+  },
+  {
+    "line": 341,
+    "status": "Ok",
+    "reason": "Successfully imported line 341"
+  },
+  {
+    "line": 342,
+    "status": "Ok",
+    "reason": "Successfully imported line 342"
+  },
+  {
+    "line": 343,
+    "status": "Skipped",
+    "reason": "Skipped line 343: Le libellé client existe déjà."
+  },
+  {
+    "line": 344,
+    "status": "Ok",
+    "reason": "Successfully imported line 344"
+  },
+  {
+    "line": 345,
+    "status": "Ok",
+    "reason": "Successfully imported line 345"
+  },
+  {
+    "line": 346,
+    "status": "Skipped",
+    "reason": "Skipped line 346: Le libellé client existe déjà."
+  },
+  {
+    "line": 347,
+    "status": "Ok",
+    "reason": "Successfully imported line 347"
+  },
+  {
+    "line": 348,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 348"
+  },
+  {
+    "line": 349,
+    "status": "Ok",
+    "reason": "Successfully imported line 349"
+  },
+  {
+    "line": 350,
+    "status": "Skipped",
+    "reason": "Skipped line 350: Le libellé client existe déjà."
+  },
+  {
+    "line": 351,
+    "status": "Ok",
+    "reason": "Successfully imported line 351"
+  },
+  {
+    "line": 352,
+    "status": "Ok",
+    "reason": "Successfully imported line 352"
+  },
+  {
+    "line": 353,
+    "status": "Ok",
+    "reason": "Successfully imported line 353"
+  },
+  {
+    "line": 354,
+    "status": "Ok",
+    "reason": "Successfully imported line 354"
+  },
+  {
+    "line": 355,
+    "status": "Ok",
+    "reason": "Successfully imported line 355"
+  },
+  {
+    "line": 356,
+    "status": "Skipped",
+    "reason": "Skipped line 356: Le libellé client existe déjà."
+  },
+  {
+    "line": 357,
+    "status": "Ok",
+    "reason": "Successfully imported line 357"
+  },
+  {
+    "line": 358,
+    "status": "Ok",
+    "reason": "Successfully imported line 358"
+  },
+  {
+    "line": 359,
+    "status": "Ok",
+    "reason": "Successfully imported line 359"
+  },
+  {
+    "line": 360,
+    "status": "Ok",
+    "reason": "Successfully imported line 360"
+  },
+  {
+    "line": 361,
+    "status": "Ok",
+    "reason": "Successfully imported line 361"
+  },
+  {
+    "line": 362,
+    "status": "Ok",
+    "reason": "Successfully imported line 362"
+  },
+  {
+    "line": 363,
+    "status": "Skipped",
+    "reason": "Skipped line 363: Le libellé client existe déjà."
+  },
+  {
+    "line": 364,
+    "status": "Ok",
+    "reason": "Successfully imported line 364"
+  },
+  {
+    "line": 365,
+    "status": "Ok",
+    "reason": "Successfully imported line 365"
+  },
+  {
+    "line": 366,
+    "status": "Skipped",
+    "reason": "Skipped line 366: Le libellé client existe déjà."
+  },
+  {
+    "line": 367,
+    "status": "Ok",
+    "reason": "Successfully imported line 367"
+  },
+  {
+    "line": 368,
+    "status": "Ok",
+    "reason": "Successfully imported line 368"
+  },
+  {
+    "line": 369,
+    "status": "Ok",
+    "reason": "Successfully imported line 369"
+  },
+  {
+    "line": 370,
+    "status": "Ok",
+    "reason": "Successfully imported line 370"
+  },
+  {
+    "line": 371,
+    "status": "Ok",
+    "reason": "Successfully imported line 371"
+  },
+  {
+    "line": 372,
+    "status": "Ok",
+    "reason": "Successfully imported line 372"
+  },
+  {
+    "line": 373,
+    "status": "Ok",
+    "reason": "Successfully imported line 373"
+  },
+  {
+    "line": 374,
+    "status": "Ok",
+    "reason": "Successfully imported line 374"
+  },
+  {
+    "line": 375,
+    "status": "Ok",
+    "reason": "Successfully imported line 375"
+  },
+  {
+    "line": 376,
+    "status": "Ok",
+    "reason": "Successfully imported line 376"
+  },
+  {
+    "line": 377,
+    "status": "Ok",
+    "reason": "Successfully imported line 377"
+  },
+  {
+    "line": 378,
+    "status": "Ok",
+    "reason": "Successfully imported line 378"
+  },
+  {
+    "line": 379,
+    "status": "Skipped",
+    "reason": "Skipped line 379: Le libellé client existe déjà."
+  },
+  {
+    "line": 380,
+    "status": "Ok",
+    "reason": "Successfully imported line 380"
+  },
+  {
+    "line": 381,
+    "status": "Ok",
+    "reason": "Successfully imported line 381"
+  },
+  {
+    "line": 382,
+    "status": "Ok",
+    "reason": "Successfully imported line 382"
+  },
+  {
+    "line": 383,
+    "status": "Ok",
+    "reason": "Successfully imported line 383"
+  },
+  {
+    "line": 384,
+    "status": "Ok",
+    "reason": "Successfully imported line 384"
+  },
+  {
+    "line": 385,
+    "status": "Ok",
+    "reason": "Successfully imported line 385"
+  },
+  {
+    "line": 386,
+    "status": "Ok",
+    "reason": "Successfully imported line 386"
+  },
+  {
+    "line": 387,
+    "status": "Ok",
+    "reason": "Successfully imported line 387"
+  },
+  {
+    "line": 388,
+    "status": "Ok",
+    "reason": "Successfully imported line 388"
+  },
+  {
+    "line": 389,
+    "status": "Ok",
+    "reason": "Successfully imported line 389"
+  },
+  {
+    "line": 390,
+    "status": "Ok",
+    "reason": "Successfully imported line 390"
+  },
+  {
+    "line": 391,
+    "status": "Ok",
+    "reason": "Successfully imported line 391"
+  },
+  {
+    "line": 392,
+    "status": "Ok",
+    "reason": "Successfully imported line 392"
+  },
+  {
+    "line": 393,
+    "status": "Ok",
+    "reason": "Successfully imported line 393"
+  },
+  {
+    "line": 394,
+    "status": "Ok",
+    "reason": "Successfully imported line 394"
+  },
+  {
+    "line": 395,
+    "status": "Ok",
+    "reason": "Successfully imported line 395"
+  },
+  {
+    "line": 396,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 396"
+  },
+  {
+    "line": 397,
+    "status": "Ok",
+    "reason": "Successfully imported line 397"
+  },
+  {
+    "line": 398,
+    "status": "Ok",
+    "reason": "Successfully imported line 398"
+  },
+  {
+    "line": 399,
+    "status": "Ok",
+    "reason": "Successfully imported line 399"
+  },
+  {
+    "line": 400,
+    "status": "Ok",
+    "reason": "Successfully imported line 400"
+  },
+  {
+    "line": 401,
+    "status": "Ok",
+    "reason": "Successfully imported line 401"
+  },
+  {
+    "line": 402,
+    "status": "Ok",
+    "reason": "Successfully imported line 402"
+  },
+  {
+    "line": 403,
+    "status": "Ok",
+    "reason": "Successfully imported line 403"
+  },
+  {
+    "line": 404,
+    "status": "Ok",
+    "reason": "Successfully imported line 404"
+  },
+  {
+    "line": 405,
+    "status": "Ok",
+    "reason": "Successfully imported line 405"
+  },
+  {
+    "line": 406,
+    "status": "Ok",
+    "reason": "Successfully imported line 406"
+  },
+  {
+    "line": 407,
+    "status": "Ok",
+    "reason": "Successfully imported line 407"
+  },
+  {
+    "line": 408,
+    "status": "Ok",
+    "reason": "Successfully imported line 408"
+  },
+  {
+    "line": 409,
+    "status": "Ok",
+    "reason": "Successfully imported line 409"
+  },
+  {
+    "line": 410,
+    "status": "Ok",
+    "reason": "Successfully imported line 410"
+  },
+  {
+    "line": 411,
+    "status": "Ok",
+    "reason": "Successfully imported line 411"
+  },
+  {
+    "line": 412,
+    "status": "Ok",
+    "reason": "Successfully imported line 412"
+  },
+  {
+    "line": 413,
+    "status": "Skipped",
+    "reason": "Skipped line 413: Le libellé client existe déjà."
+  },
+  {
+    "line": 414,
+    "status": "Ok",
+    "reason": "Successfully imported line 414"
+  },
+  {
+    "line": 415,
+    "status": "Ok",
+    "reason": "Successfully imported line 415"
+  },
+  {
+    "line": 416,
+    "status": "Ok",
+    "reason": "Successfully imported line 416"
+  },
+  {
+    "line": 417,
+    "status": "Ok",
+    "reason": "Successfully imported line 417"
+  },
+  {
+    "line": 418,
+    "status": "Ok",
+    "reason": "Successfully imported line 418"
+  },
+  {
+    "line": 419,
+    "status": "Ok",
+    "reason": "Successfully imported line 419"
+  },
+  {
+    "line": 420,
+    "status": "Ok",
+    "reason": "Successfully imported line 420"
+  },
+  {
+    "line": 421,
+    "status": "Ok",
+    "reason": "Successfully imported line 421"
+  },
+  {
+    "line": 422,
+    "status": "Ok",
+    "reason": "Successfully imported line 422"
+  },
+  {
+    "line": 423,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 423"
+  },
+  {
+    "line": 424,
+    "status": "Ok",
+    "reason": "Successfully imported line 424"
+  },
+  {
+    "line": 425,
+    "status": "Ok",
+    "reason": "Successfully imported line 425"
+  },
+  {
+    "line": 426,
+    "status": "Skipped",
+    "reason": "Skipped line 426: Le libellé client existe déjà."
+  },
+  {
+    "line": 427,
+    "status": "Ok",
+    "reason": "Successfully imported line 427"
+  },
+  {
+    "line": 428,
+    "status": "Ok",
+    "reason": "Successfully imported line 428"
+  },
+  {
+    "line": 429,
+    "status": "Ok",
+    "reason": "Successfully imported line 429"
+  },
+  {
+    "line": 430,
+    "status": "Ok",
+    "reason": "Successfully imported line 430"
+  },
+  {
+    "line": 431,
+    "status": "Skipped",
+    "reason": "Skipped line 431: Le libellé client existe déjà."
+  },
+  {
+    "line": 432,
+    "status": "Ok",
+    "reason": "Successfully imported line 432"
+  },
+  {
+    "line": 433,
+    "status": "Ok",
+    "reason": "Successfully imported line 433"
+  },
+  {
+    "line": 434,
+    "status": "Ok",
+    "reason": "Successfully imported line 434"
+  },
+  {
+    "line": 435,
+    "status": "Ok",
+    "reason": "Successfully imported line 435"
+  },
+  {
+    "line": 436,
+    "status": "Ok",
+    "reason": "Successfully imported line 436"
+  },
+  {
+    "line": 437,
+    "status": "Ok",
+    "reason": "Successfully imported line 437"
+  },
+  {
+    "line": 438,
+    "status": "Ok",
+    "reason": "Successfully imported line 438"
+  },
+  {
+    "line": 439,
+    "status": "Ok",
+    "reason": "Successfully imported line 439"
+  },
+  {
+    "line": 440,
+    "status": "Ok",
+    "reason": "Successfully imported line 440"
+  },
+  {
+    "line": 441,
+    "status": "Ok",
+    "reason": "Successfully imported line 441"
+  },
+  {
+    "line": 442,
+    "status": "Ok",
+    "reason": "Successfully imported line 442"
+  },
+  {
+    "line": 443,
+    "status": "Ok",
+    "reason": "Successfully imported line 443"
+  },
+  {
+    "line": 444,
+    "status": "Ok",
+    "reason": "Successfully imported line 444"
+  },
+  {
+    "line": 445,
+    "status": "Ok",
+    "reason": "Successfully imported line 445"
+  },
+  {
+    "line": 446,
+    "status": "Ok",
+    "reason": "Successfully imported line 446"
+  },
+  {
+    "line": 447,
+    "status": "Skipped",
+    "reason": "Skipped line 447: Le libellé client existe déjà."
+  },
+  {
+    "line": 448,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 448"
+  },
+  {
+    "line": 449,
+    "status": "Ok",
+    "reason": "Successfully imported line 449"
+  },
+  {
+    "line": 450,
+    "status": "Ok",
+    "reason": "Successfully imported line 450"
+  },
+  {
+    "line": 451,
+    "status": "Ok",
+    "reason": "Successfully imported line 451"
+  },
+  {
+    "line": 452,
+    "status": "Ok",
+    "reason": "Successfully imported line 452"
+  },
+  {
+    "line": 453,
+    "status": "Ok",
+    "reason": "Successfully imported line 453"
+  },
+  {
+    "line": 454,
+    "status": "Ok",
+    "reason": "Successfully imported line 454"
+  },
+  {
+    "line": 455,
+    "status": "Ok",
+    "reason": "Successfully imported line 455"
+  },
+  {
+    "line": 456,
+    "status": "Ok",
+    "reason": "Successfully imported line 456"
+  },
+  {
+    "line": 457,
+    "status": "Ok",
+    "reason": "Successfully imported line 457"
+  },
+  {
+    "line": 458,
+    "status": "Ok",
+    "reason": "Successfully imported line 458"
+  },
+  {
+    "line": 459,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 459"
+  },
+  {
+    "line": 460,
+    "status": "Ok",
+    "reason": "Successfully imported line 460"
+  },
+  {
+    "line": 461,
+    "status": "Ok",
+    "reason": "Successfully imported line 461"
+  },
+  {
+    "line": 462,
+    "status": "Ok",
+    "reason": "Successfully imported line 462"
+  },
+  {
+    "line": 463,
+    "status": "Ok",
+    "reason": "Successfully imported line 463"
+  },
+  {
+    "line": 464,
+    "status": "Ok",
+    "reason": "Successfully imported line 464"
+  },
+  {
+    "line": 465,
+    "status": "Ok",
+    "reason": "Successfully imported line 465"
+  },
+  {
+    "line": 466,
+    "status": "Ok",
+    "reason": "Successfully imported line 466"
+  },
+  {
+    "line": 467,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 467"
+  },
+  {
+    "line": 468,
+    "status": "Ok",
+    "reason": "Successfully imported line 468"
+  },
+  {
+    "line": 469,
+    "status": "Ok",
+    "reason": "Successfully imported line 469"
+  },
+  {
+    "line": 470,
+    "status": "Ok",
+    "reason": "Successfully imported line 470"
+  },
+  {
+    "line": 471,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 471"
+  },
+  {
+    "line": 472,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 472"
+  },
+  {
+    "line": 473,
+    "status": "Ok",
+    "reason": "Successfully imported line 473"
+  },
+  {
+    "line": 474,
+    "status": "Ok",
+    "reason": "Successfully imported line 474"
+  },
+  {
+    "line": 475,
+    "status": "Skipped",
+    "reason": "Skipped line 475: Le libellé client existe déjà."
+  },
+  {
+    "line": 476,
+    "status": "Skipped",
+    "reason": "Skipped line 476: Le libellé client existe déjà."
+  },
+  {
+    "line": 477,
+    "status": "Ok",
+    "reason": "Successfully imported line 477"
+  },
+  {
+    "line": 478,
+    "status": "Ok",
+    "reason": "Successfully imported line 478"
+  },
+  {
+    "line": 479,
+    "status": "Skipped",
+    "reason": "Skipped line 479: Le libellé client existe déjà."
+  },
+  {
+    "line": 480,
+    "status": "Ok",
+    "reason": "Successfully imported line 480"
+  },
+  {
+    "line": 481,
+    "status": "Ok",
+    "reason": "Successfully imported line 481"
+  },
+  {
+    "line": 482,
+    "status": "Ok",
+    "reason": "Successfully imported line 482"
+  },
+  {
+    "line": 483,
+    "status": "Ok",
+    "reason": "Successfully imported line 483"
+  },
+  {
+    "line": 484,
+    "status": "Ok",
+    "reason": "Successfully imported line 484"
+  },
+  {
+    "line": 485,
+    "status": "Ok",
+    "reason": "Successfully imported line 485"
+  },
+  {
+    "line": 486,
+    "status": "Ok",
+    "reason": "Successfully imported line 486"
+  },
+  {
+    "line": 487,
+    "status": "Ok",
+    "reason": "Successfully imported line 487"
+  },
+  {
+    "line": 488,
+    "status": "Ok",
+    "reason": "Successfully imported line 488"
+  },
+  {
+    "line": 489,
+    "status": "Ok",
+    "reason": "Successfully imported line 489"
+  },
+  {
+    "line": 490,
+    "status": "Ok",
+    "reason": "Successfully imported line 490"
+  },
+  {
+    "line": 491,
+    "status": "Skipped",
+    "reason": "Skipped line 491: Le libellé client existe déjà."
+  },
+  {
+    "line": 492,
+    "status": "Ok",
+    "reason": "Successfully imported line 492"
+  },
+  {
+    "line": 493,
+    "status": "Ok",
+    "reason": "Successfully imported line 493"
+  },
+  {
+    "line": 494,
+    "status": "Ok",
+    "reason": "Successfully imported line 494"
+  },
+  {
+    "line": 495,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 495"
+  },
+  {
+    "line": 496,
+    "status": "Ok",
+    "reason": "Successfully imported line 496"
+  },
+  {
+    "line": 497,
+    "status": "Ok",
+    "reason": "Successfully imported line 497"
+  },
+  {
+    "line": 498,
+    "status": "Skipped",
+    "reason": "Skipped line 498: Le libellé client existe déjà."
+  },
+  {
+    "line": 499,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 499"
+  },
+  {
+    "line": 500,
+    "status": "Ok",
+    "reason": "Successfully imported line 500"
+  },
+  {
+    "line": 501,
+    "status": "Ok",
+    "reason": "Successfully imported line 501"
+  },
+  {
+    "line": 502,
+    "status": "Ok",
+    "reason": "Successfully imported line 502"
+  },
+  {
+    "line": 503,
+    "status": "Ok",
+    "reason": "Successfully imported line 503"
+  },
+  {
+    "line": 504,
+    "status": "Skipped",
+    "reason": "Skipped line 504: Error during geocoding: Erreur lors de la requête de géocodage : statut 504"
+  },
+  {
+    "line": 505,
+    "status": "Skipped",
+    "reason": "Skipped line 505: Le libellé client existe déjà."
+  },
+  {
+    "line": 506,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 506"
+  },
+  {
+    "line": 507,
+    "status": "Skipped",
+    "reason": "Skipped line 507: Le libellé client existe déjà."
+  },
+  {
+    "line": 508,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 508"
+  },
+  {
+    "line": 509,
+    "status": "Skipped",
+    "reason": "Skipped line 509: Le libellé client existe déjà."
+  },
+  {
+    "line": 510,
+    "status": "Skipped",
+    "reason": "Skipped line 510: Le libellé client existe déjà."
+  },
+  {
+    "line": 511,
+    "status": "Ok",
+    "reason": "Successfully imported line 511"
+  },
+  {
+    "line": 512,
+    "status": "Ok",
+    "reason": "Successfully imported line 512"
+  },
+  {
+    "line": 513,
+    "status": "Skipped",
+    "reason": "Skipped line 513: Le libellé client existe déjà."
+  },
+  {
+    "line": 514,
+    "status": "Ok",
+    "reason": "Successfully imported line 514"
+  },
+  {
+    "line": 515,
+    "status": "Skipped",
+    "reason": "Skipped line 515: Le libellé client existe déjà."
+  },
+  {
+    "line": 516,
+    "status": "Ok",
+    "reason": "Successfully imported line 516"
+  },
+  {
+    "line": 517,
+    "status": "Ok",
+    "reason": "Successfully imported line 517"
+  },
+  {
+    "line": 518,
+    "status": "Ok",
+    "reason": "Successfully imported line 518"
+  },
+  {
+    "line": 519,
+    "status": "Ok",
+    "reason": "Successfully imported line 519"
+  },
+  {
+    "line": 520,
+    "status": "Skipped",
+    "reason": "Skipped line 520: Le libellé client existe déjà."
+  },
+  {
+    "line": 521,
+    "status": "Ok",
+    "reason": "Successfully imported line 521"
+  },
+  {
+    "line": 522,
+    "status": "Ok",
+    "reason": "Successfully imported line 522"
+  },
+  {
+    "line": 523,
+    "status": "Skipped",
+    "reason": "Skipped line 523: Le libellé client existe déjà."
+  },
+  {
+    "line": 524,
+    "status": "Ok",
+    "reason": "Successfully imported line 524"
+  },
+  {
+    "line": 525,
+    "status": "Ok",
+    "reason": "Successfully imported line 525"
+  },
+  {
+    "line": 526,
+    "status": "Skipped",
+    "reason": "Skipped line 526: Le libellé client existe déjà."
+  },
+  {
+    "line": 527,
+    "status": "Skipped",
+    "reason": "Skipped line 527: Le libellé client existe déjà."
+  },
+  {
+    "line": 528,
+    "status": "Ok",
+    "reason": "Successfully imported line 528"
+  },
+  {
+    "line": 529,
+    "status": "Ok",
+    "reason": "Successfully imported line 529"
+  },
+  {
+    "line": 530,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 530"
+  },
+  {
+    "line": 531,
+    "status": "Ok",
+    "reason": "Successfully imported line 531"
+  },
+  {
+    "line": 532,
+    "status": "Ok",
+    "reason": "Successfully imported line 532"
+  },
+  {
+    "line": 533,
+    "status": "Ok",
+    "reason": "Successfully imported line 533"
+  },
+  {
+    "line": 534,
+    "status": "Ok",
+    "reason": "Successfully imported line 534"
+  },
+  {
+    "line": 535,
+    "status": "Ok",
+    "reason": "Successfully imported line 535"
+  },
+  {
+    "line": 536,
+    "status": "Ok",
+    "reason": "Successfully imported line 536"
+  },
+  {
+    "line": 537,
+    "status": "Ok",
+    "reason": "Successfully imported line 537"
+  },
+  {
+    "line": 538,
+    "status": "Ok",
+    "reason": "Successfully imported line 538"
+  },
+  {
+    "line": 539,
+    "status": "Ok",
+    "reason": "Successfully imported line 539"
+  },
+  {
+    "line": 540,
+    "status": "Ok",
+    "reason": "Successfully imported line 540"
+  },
+  {
+    "line": 541,
+    "status": "Ok",
+    "reason": "Successfully imported line 541"
+  },
+  {
+    "line": 542,
+    "status": "Ok",
+    "reason": "Successfully imported line 542"
+  },
+  {
+    "line": 543,
+    "status": "Skipped",
+    "reason": "Skipped line 543: Le libellé client existe déjà."
+  },
+  {
+    "line": 544,
+    "status": "Ok",
+    "reason": "Successfully imported line 544"
+  },
+  {
+    "line": 545,
+    "status": "Ok",
+    "reason": "Successfully imported line 545"
+  },
+  {
+    "line": 546,
+    "status": "Ok",
+    "reason": "Successfully imported line 546"
+  },
+  {
+    "line": 547,
+    "status": "Ok",
+    "reason": "Successfully imported line 547"
+  },
+  {
+    "line": 548,
+    "status": "Skipped",
+    "reason": "Skipped line 548: Le libellé client existe déjà."
+  },
+  {
+    "line": 549,
+    "status": "Ok",
+    "reason": "Successfully imported line 549"
+  },
+  {
+    "line": 550,
+    "status": "Ok",
+    "reason": "Successfully imported line 550"
+  },
+  {
+    "line": 551,
+    "status": "Ok",
+    "reason": "Successfully imported line 551"
+  },
+  {
+    "line": 552,
+    "status": "Ok",
+    "reason": "Successfully imported line 552"
+  },
+  {
+    "line": 553,
+    "status": "Ok",
+    "reason": "Successfully imported line 553"
+  },
+  {
+    "line": 554,
+    "status": "Ok",
+    "reason": "Successfully imported line 554"
+  },
+  {
+    "line": 555,
+    "status": "Ok",
+    "reason": "Successfully imported line 555"
+  },
+  {
+    "line": 556,
+    "status": "Ok",
+    "reason": "Successfully imported line 556"
+  },
+  {
+    "line": 557,
+    "status": "Skipped",
+    "reason": "Skipped line 557: Le libellé client existe déjà."
+  },
+  {
+    "line": 558,
+    "status": "Ok",
+    "reason": "Successfully imported line 558"
+  },
+  {
+    "line": 559,
+    "status": "Ok",
+    "reason": "Successfully imported line 559"
+  },
+  {
+    "line": 560,
+    "status": "Ok",
+    "reason": "Successfully imported line 560"
+  },
+  {
+    "line": 561,
+    "status": "Ok",
+    "reason": "Successfully imported line 561"
+  },
+  {
+    "line": 562,
+    "status": "Ok",
+    "reason": "Successfully imported line 562"
+  },
+  {
+    "line": 563,
+    "status": "Ok",
+    "reason": "Successfully imported line 563"
+  },
+  {
+    "line": 564,
+    "status": "Ok",
+    "reason": "Successfully imported line 564"
+  },
+  {
+    "line": 565,
+    "status": "Ok",
+    "reason": "Successfully imported line 565"
+  },
+  {
+    "line": 566,
+    "status": "Ok",
+    "reason": "Successfully imported line 566"
+  },
+  {
+    "line": 567,
+    "status": "Ok",
+    "reason": "Successfully imported line 567"
+  },
+  {
+    "line": 568,
+    "status": "Ok",
+    "reason": "Successfully imported line 568"
+  },
+  {
+    "line": 569,
+    "status": "Ok",
+    "reason": "Successfully imported line 569"
+  },
+  {
+    "line": 570,
+    "status": "Ok",
+    "reason": "Successfully imported line 570"
+  },
+  {
+    "line": 571,
+    "status": "Ok",
+    "reason": "Successfully imported line 571"
+  },
+  {
+    "line": 572,
+    "status": "Ok",
+    "reason": "Successfully imported line 572"
+  },
+  {
+    "line": 573,
+    "status": "Ok",
+    "reason": "Successfully imported line 573"
+  },
+  {
+    "line": 574,
+    "status": "Ok",
+    "reason": "Successfully imported line 574"
+  },
+  {
+    "line": 575,
+    "status": "Ok",
+    "reason": "Successfully imported line 575"
+  },
+  {
+    "line": 576,
+    "status": "Ok",
+    "reason": "Successfully imported line 576"
+  },
+  {
+    "line": 577,
+    "status": "Ok",
+    "reason": "Successfully imported line 577"
+  },
+  {
+    "line": 578,
+    "status": "Ok",
+    "reason": "Successfully imported line 578"
+  },
+  {
+    "line": 579,
+    "status": "Ok",
+    "reason": "Successfully imported line 579"
+  },
+  {
+    "line": 580,
+    "status": "Ok",
+    "reason": "Successfully imported line 580"
+  },
+  {
+    "line": 581,
+    "status": "Ok",
+    "reason": "Successfully imported line 581"
+  },
+  {
+    "line": 582,
+    "status": "Ok",
+    "reason": "Successfully imported line 582"
+  },
+  {
+    "line": 583,
+    "status": "Ok",
+    "reason": "Successfully imported line 583"
+  },
+  {
+    "line": 584,
+    "status": "Skipped",
+    "reason": "Skipped line 584: Le libellé client existe déjà."
+  },
+  {
+    "line": 585,
+    "status": "Ok",
+    "reason": "Successfully imported line 585"
+  },
+  {
+    "line": 586,
+    "status": "Ok",
+    "reason": "Successfully imported line 586"
+  },
+  {
+    "line": 587,
+    "status": "Ok",
+    "reason": "Successfully imported line 587"
+  },
+  {
+    "line": 588,
+    "status": "Ok",
+    "reason": "Successfully imported line 588"
+  },
+  {
+    "line": 589,
+    "status": "Ok",
+    "reason": "Successfully imported line 589"
+  },
+  {
+    "line": 590,
+    "status": "Skipped",
+    "reason": "Skipped line 590: Le libellé client existe déjà."
+  },
+  {
+    "line": 591,
+    "status": "Skipped",
+    "reason": "Skipped line 591: Le libellé client existe déjà."
+  },
+  {
+    "line": 592,
+    "status": "Ok",
+    "reason": "Successfully imported line 592"
+  },
+  {
+    "line": 593,
+    "status": "Skipped",
+    "reason": "Skipped line 593: Le libellé client existe déjà."
+  },
+  {
+    "line": 594,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 594"
+  },
+  {
+    "line": 595,
+    "status": "Ok",
+    "reason": "Successfully imported line 595"
+  },
+  {
+    "line": 596,
+    "status": "Ok",
+    "reason": "Successfully imported line 596"
+  },
+  {
+    "line": 597,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 597"
+  },
+  {
+    "line": 598,
+    "status": "Ok",
+    "reason": "Successfully imported line 598"
+  },
+  {
+    "line": 599,
+    "status": "Ok",
+    "reason": "Successfully imported line 599"
+  },
+  {
+    "line": 600,
+    "status": "Ok",
+    "reason": "Successfully imported line 600"
+  },
+  {
+    "line": 601,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 601"
+  },
+  {
+    "line": 602,
+    "status": "Ok",
+    "reason": "Successfully imported line 602"
+  },
+  {
+    "line": 603,
+    "status": "Ok",
+    "reason": "Successfully imported line 603"
+  },
+  {
+    "line": 604,
+    "status": "Ok",
+    "reason": "Successfully imported line 604"
+  },
+  {
+    "line": 605,
+    "status": "Ok",
+    "reason": "Successfully imported line 605"
+  },
+  {
+    "line": 606,
+    "status": "Ok",
+    "reason": "Successfully imported line 606"
+  },
+  {
+    "line": 607,
+    "status": "Ok",
+    "reason": "Successfully imported line 607"
+  },
+  {
+    "line": 608,
+    "status": "Ok",
+    "reason": "Successfully imported line 608"
+  },
+  {
+    "line": 609,
+    "status": "Skipped",
+    "reason": "Skipped line 609: Le libellé client existe déjà."
+  },
+  {
+    "line": 610,
+    "status": "Ok",
+    "reason": "Successfully imported line 610"
+  },
+  {
+    "line": 611,
+    "status": "Ok",
+    "reason": "Successfully imported line 611"
+  },
+  {
+    "line": 612,
+    "status": "Ok",
+    "reason": "Successfully imported line 612"
+  },
+  {
+    "line": 613,
+    "status": "Ok",
+    "reason": "Successfully imported line 613"
+  },
+  {
+    "line": 614,
+    "status": "Ok",
+    "reason": "Successfully imported line 614"
+  },
+  {
+    "line": 615,
+    "status": "Ok",
+    "reason": "Successfully imported line 615"
+  },
+  {
+    "line": 616,
+    "status": "Ok",
+    "reason": "Successfully imported line 616"
+  },
+  {
+    "line": 617,
+    "status": "Ok",
+    "reason": "Successfully imported line 617"
+  },
+  {
+    "line": 618,
+    "status": "Ok",
+    "reason": "Successfully imported line 618"
+  },
+  {
+    "line": 619,
+    "status": "Ok",
+    "reason": "Successfully imported line 619"
+  },
+  {
+    "line": 620,
+    "status": "Ok",
+    "reason": "Successfully imported line 620"
+  },
+  {
+    "line": 621,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 621"
+  },
+  {
+    "line": 622,
+    "status": "Ok",
+    "reason": "Successfully imported line 622"
+  },
+  {
+    "line": 623,
+    "status": "Skipped",
+    "reason": "Skipped line 623: Le libellé client existe déjà."
+  },
+  {
+    "line": 624,
+    "status": "Ok",
+    "reason": "Successfully imported line 624"
+  },
+  {
+    "line": 625,
+    "status": "Ok",
+    "reason": "Successfully imported line 625"
+  },
+  {
+    "line": 626,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 626"
+  },
+  {
+    "line": 627,
+    "status": "Ok",
+    "reason": "Successfully imported line 627"
+  },
+  {
+    "line": 628,
+    "status": "Ok",
+    "reason": "Successfully imported line 628"
+  },
+  {
+    "line": 629,
+    "status": "Skipped",
+    "reason": "Skipped line 629: Le libellé client existe déjà."
+  },
+  {
+    "line": 630,
+    "status": "Ok",
+    "reason": "Successfully imported line 630"
+  },
+  {
+    "line": 631,
+    "status": "Skipped",
+    "reason": "Skipped line 631: Le libellé client existe déjà."
+  },
+  {
+    "line": 632,
+    "status": "Ok",
+    "reason": "Successfully imported line 632"
+  },
+  {
+    "line": 633,
+    "status": "Ok",
+    "reason": "Successfully imported line 633"
+  },
+  {
+    "line": 634,
+    "status": "Ok",
+    "reason": "Successfully imported line 634"
+  },
+  {
+    "line": 635,
+    "status": "Skipped",
+    "reason": "Skipped line 635: Le libellé client existe déjà."
+  },
+  {
+    "line": 636,
+    "status": "Skipped",
+    "reason": "Skipped line 636: Le libellé client existe déjà."
+  },
+  {
+    "line": 637,
+    "status": "Ok",
+    "reason": "Successfully imported line 637"
+  },
+  {
+    "line": 638,
+    "status": "Ok",
+    "reason": "Successfully imported line 638"
+  },
+  {
+    "line": 639,
+    "status": "Ok",
+    "reason": "Successfully imported line 639"
+  },
+  {
+    "line": 640,
+    "status": "Ok",
+    "reason": "Successfully imported line 640"
+  },
+  {
+    "line": 641,
+    "status": "Ok",
+    "reason": "Successfully imported line 641"
+  },
+  {
+    "line": 642,
+    "status": "Ok",
+    "reason": "Successfully imported line 642"
+  },
+  {
+    "line": 643,
+    "status": "Ok",
+    "reason": "Successfully imported line 643"
+  },
+  {
+    "line": 644,
+    "status": "Ok",
+    "reason": "Successfully imported line 644"
+  },
+  {
+    "line": 645,
+    "status": "Ok",
+    "reason": "Successfully imported line 645"
+  },
+  {
+    "line": 646,
+    "status": "Ok",
+    "reason": "Successfully imported line 646"
+  },
+  {
+    "line": 647,
+    "status": "Ok",
+    "reason": "Successfully imported line 647"
+  },
+  {
+    "line": 648,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 648"
+  },
+  {
+    "line": 649,
+    "status": "Ok",
+    "reason": "Successfully imported line 649"
+  },
+  {
+    "line": 650,
+    "status": "Ok",
+    "reason": "Successfully imported line 650"
+  },
+  {
+    "line": 651,
+    "status": "Ok",
+    "reason": "Successfully imported line 651"
+  },
+  {
+    "line": 652,
+    "status": "Ok",
+    "reason": "Successfully imported line 652"
+  },
+  {
+    "line": 653,
+    "status": "Ok",
+    "reason": "Successfully imported line 653"
+  },
+  {
+    "line": 654,
+    "status": "Skipped",
+    "reason": "Skipped line 654: Le libellé client existe déjà."
+  },
+  {
+    "line": 655,
+    "status": "Ok",
+    "reason": "Successfully imported line 655"
+  },
+  {
+    "line": 656,
+    "status": "Skipped",
+    "reason": "Skipped line 656: Le libellé client existe déjà."
+  },
+  {
+    "line": 657,
+    "status": "Ok",
+    "reason": "Successfully imported line 657"
+  },
+  {
+    "line": 658,
+    "status": "Ok",
+    "reason": "Successfully imported line 658"
+  },
+  {
+    "line": 659,
+    "status": "Ok",
+    "reason": "Successfully imported line 659"
+  },
+  {
+    "line": 660,
+    "status": "Skipped",
+    "reason": "Skipped line 660: Le libellé client existe déjà."
+  },
+  {
+    "line": 661,
+    "status": "Ok",
+    "reason": "Successfully imported line 661"
+  },
+  {
+    "line": 662,
+    "status": "Ok",
+    "reason": "Successfully imported line 662"
+  },
+  {
+    "line": 663,
+    "status": "Skipped",
+    "reason": "Skipped line 663: Le libellé client existe déjà."
+  },
+  {
+    "line": 664,
+    "status": "Ok",
+    "reason": "Successfully imported line 664"
+  },
+  {
+    "line": 665,
+    "status": "Ok",
+    "reason": "Successfully imported line 665"
+  },
+  {
+    "line": 666,
+    "status": "Ok",
+    "reason": "Successfully imported line 666"
+  },
+  {
+    "line": 667,
+    "status": "Ok",
+    "reason": "Successfully imported line 667"
+  },
+  {
+    "line": 668,
+    "status": "Ok",
+    "reason": "Successfully imported line 668"
+  },
+  {
+    "line": 669,
+    "status": "Ok",
+    "reason": "Successfully imported line 669"
+  },
+  {
+    "line": 670,
+    "status": "Ok",
+    "reason": "Successfully imported line 670"
+  },
+  {
+    "line": 671,
+    "status": "Ok",
+    "reason": "Successfully imported line 671"
+  },
+  {
+    "line": 672,
+    "status": "Ok",
+    "reason": "Successfully imported line 672"
+  },
+  {
+    "line": 673,
+    "status": "Ok",
+    "reason": "Successfully imported line 673"
+  },
+  {
+    "line": 674,
+    "status": "Ok",
+    "reason": "Successfully imported line 674"
+  },
+  {
+    "line": 675,
+    "status": "Skipped",
+    "reason": "Skipped line 675: Le libellé client existe déjà."
+  },
+  {
+    "line": 676,
+    "status": "Ok",
+    "reason": "Successfully imported line 676"
+  },
+  {
+    "line": 677,
+    "status": "Ok",
+    "reason": "Successfully imported line 677"
+  },
+  {
+    "line": 678,
+    "status": "Ok",
+    "reason": "Successfully imported line 678"
+  },
+  {
+    "line": 679,
+    "status": "Skipped",
+    "reason": "Skipped line 679: Le libellé client existe déjà."
+  },
+  {
+    "line": 680,
+    "status": "Ok",
+    "reason": "Successfully imported line 680"
+  },
+  {
+    "line": 681,
+    "status": "Ok",
+    "reason": "Successfully imported line 681"
+  },
+  {
+    "line": 682,
+    "status": "Skipped",
+    "reason": "Skipped line 682: Le libellé client existe déjà."
+  },
+  {
+    "line": 683,
+    "status": "Ok",
+    "reason": "Successfully imported line 683"
+  },
+  {
+    "line": 684,
+    "status": "Skipped",
+    "reason": "Skipped line 684: Error during geocoding: Erreur lors de la requête de géocodage : statut 504"
+  },
+  {
+    "line": 685,
+    "status": "Ok",
+    "reason": "Successfully imported line 685"
+  },
+  {
+    "line": 686,
+    "status": "Ok",
+    "reason": "Successfully imported line 686"
+  },
+  {
+    "line": 687,
+    "status": "Ok",
+    "reason": "Successfully imported line 687"
+  },
+  {
+    "line": 688,
+    "status": "Ok",
+    "reason": "Successfully imported line 688"
+  },
+  {
+    "line": 689,
+    "status": "Ok",
+    "reason": "Successfully imported line 689"
+  },
+  {
+    "line": 690,
+    "status": "Ok",
+    "reason": "Successfully imported line 690"
+  },
+  {
+    "line": 691,
+    "status": "Skipped",
+    "reason": "Skipped line 691: Le libellé client existe déjà."
+  },
+  {
+    "line": 692,
+    "status": "Ok",
+    "reason": "Successfully imported line 692"
+  },
+  {
+    "line": 693,
+    "status": "Ok",
+    "reason": "Successfully imported line 693"
+  },
+  {
+    "line": 694,
+    "status": "Ok",
+    "reason": "Successfully imported line 694"
+  },
+  {
+    "line": 695,
+    "status": "Ok",
+    "reason": "Successfully imported line 695"
+  },
+  {
+    "line": 696,
+    "status": "Ok",
+    "reason": "Successfully imported line 696"
+  },
+  {
+    "line": 697,
+    "status": "Ok",
+    "reason": "Successfully imported line 697"
+  },
+  {
+    "line": 698,
+    "status": "Ok",
+    "reason": "Successfully imported line 698"
+  },
+  {
+    "line": 699,
+    "status": "Ok",
+    "reason": "Successfully imported line 699"
+  },
+  {
+    "line": 700,
+    "status": "Ok",
+    "reason": "Successfully imported line 700"
+  },
+  {
+    "line": 701,
+    "status": "Ok",
+    "reason": "Successfully imported line 701"
+  },
+  {
+    "line": 702,
+    "status": "Ok",
+    "reason": "Successfully imported line 702"
+  },
+  {
+    "line": 703,
+    "status": "Ok",
+    "reason": "Successfully imported line 703"
+  },
+  {
+    "line": 704,
+    "status": "Ok",
+    "reason": "Successfully imported line 704"
+  },
+  {
+    "line": 705,
+    "status": "Ok",
+    "reason": "Successfully imported line 705"
+  },
+  {
+    "line": 706,
+    "status": "Ok",
+    "reason": "Successfully imported line 706"
+  },
+  {
+    "line": 707,
+    "status": "Ok",
+    "reason": "Successfully imported line 707"
+  },
+  {
+    "line": 708,
+    "status": "Ok",
+    "reason": "Successfully imported line 708"
+  },
+  {
+    "line": 709,
+    "status": "Ok",
+    "reason": "Successfully imported line 709"
+  },
+  {
+    "line": 710,
+    "status": "Skipped",
+    "reason": "Skipped line 710: Le libellé client existe déjà."
+  },
+  {
+    "line": 711,
+    "status": "Ok",
+    "reason": "Successfully imported line 711"
+  },
+  {
+    "line": 712,
+    "status": "Ok",
+    "reason": "Successfully imported line 712"
+  },
+  {
+    "line": 713,
+    "status": "Ok",
+    "reason": "Successfully imported line 713"
+  },
+  {
+    "line": 714,
+    "status": "Ok",
+    "reason": "Successfully imported line 714"
+  },
+  {
+    "line": 715,
+    "status": "Ok",
+    "reason": "Successfully imported line 715"
+  },
+  {
+    "line": 716,
+    "status": "Ok",
+    "reason": "Successfully imported line 716"
+  },
+  {
+    "line": 717,
+    "status": "Ok",
+    "reason": "Successfully imported line 717"
+  },
+  {
+    "line": 718,
+    "status": "Skipped",
+    "reason": "Skipped line 718: Le libellé client existe déjà."
+  },
+  {
+    "line": 719,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 719"
+  },
+  {
+    "line": 720,
+    "status": "Ok",
+    "reason": "Successfully imported line 720"
+  },
+  {
+    "line": 721,
+    "status": "Ok",
+    "reason": "Successfully imported line 721"
+  },
+  {
+    "line": 722,
+    "status": "Ok",
+    "reason": "Successfully imported line 722"
+  },
+  {
+    "line": 723,
+    "status": "Ok",
+    "reason": "Successfully imported line 723"
+  },
+  {
+    "line": 724,
+    "status": "Ok",
+    "reason": "Successfully imported line 724"
+  },
+  {
+    "line": 725,
+    "status": "Ok",
+    "reason": "Successfully imported line 725"
+  },
+  {
+    "line": 726,
+    "status": "Ok",
+    "reason": "Successfully imported line 726"
+  },
+  {
+    "line": 727,
+    "status": "Ok",
+    "reason": "Successfully imported line 727"
+  },
+  {
+    "line": 728,
+    "status": "Ok",
+    "reason": "Successfully imported line 728"
+  },
+  {
+    "line": 729,
+    "status": "Skipped",
+    "reason": "Skipped line 729: Le libellé client existe déjà."
+  },
+  {
+    "line": 730,
+    "status": "Ok",
+    "reason": "Successfully imported line 730"
+  },
+  {
+    "line": 731,
+    "status": "Ok",
+    "reason": "Successfully imported line 731"
+  },
+  {
+    "line": 732,
+    "status": "Skipped",
+    "reason": "Skipped line 732: Le libellé client existe déjà."
+  },
+  {
+    "line": 733,
+    "status": "Ok",
+    "reason": "Successfully imported line 733"
+  },
+  {
+    "line": 734,
+    "status": "Skipped",
+    "reason": "Skipped line 734: Le libellé client existe déjà."
+  },
+  {
+    "line": 735,
+    "status": "Ok",
+    "reason": "Successfully imported line 735"
+  },
+  {
+    "line": 736,
+    "status": "Ok",
+    "reason": "Successfully imported line 736"
+  },
+  {
+    "line": 737,
+    "status": "Ok",
+    "reason": "Successfully imported line 737"
+  },
+  {
+    "line": 738,
+    "status": "Ok",
+    "reason": "Successfully imported line 738"
+  },
+  {
+    "line": 739,
+    "status": "Skipped",
+    "reason": "Skipped line 739: Le libellé client existe déjà."
+  },
+  {
+    "line": 740,
+    "status": "Ok",
+    "reason": "Successfully imported line 740"
+  },
+  {
+    "line": 741,
+    "status": "Ok",
+    "reason": "Successfully imported line 741"
+  },
+  {
+    "line": 742,
+    "status": "Skipped",
+    "reason": "Skipped line 742: Le libellé client existe déjà."
+  },
+  {
+    "line": 743,
+    "status": "Ok",
+    "reason": "Successfully imported line 743"
+  },
+  {
+    "line": 744,
+    "status": "Ok",
+    "reason": "Successfully imported line 744"
+  },
+  {
+    "line": 745,
+    "status": "Ok",
+    "reason": "Successfully imported line 745"
+  },
+  {
+    "line": 746,
+    "status": "Skipped",
+    "reason": "Skipped line 746: Le libellé client existe déjà."
+  },
+  {
+    "line": 747,
+    "status": "Ok",
+    "reason": "Successfully imported line 747"
+  },
+  {
+    "line": 748,
+    "status": "Ok",
+    "reason": "Successfully imported line 748"
+  },
+  {
+    "line": 749,
+    "status": "Ok",
+    "reason": "Successfully imported line 749"
+  },
+  {
+    "line": 750,
+    "status": "Ok",
+    "reason": "Successfully imported line 750"
+  },
+  {
+    "line": 751,
+    "status": "Ok",
+    "reason": "Successfully imported line 751"
+  },
+  {
+    "line": 752,
+    "status": "Ok",
+    "reason": "Successfully imported line 752"
+  },
+  {
+    "line": 753,
+    "status": "Ok",
+    "reason": "Successfully imported line 753"
+  },
+  {
+    "line": 754,
+    "status": "Ok",
+    "reason": "Successfully imported line 754"
+  },
+  {
+    "line": 755,
+    "status": "Skipped",
+    "reason": "Skipped line 755: Le libellé client existe déjà."
+  },
+  {
+    "line": 756,
+    "status": "Ok",
+    "reason": "Successfully imported line 756"
+  },
+  {
+    "line": 757,
+    "status": "Skipped",
+    "reason": "Skipped line 757: Le libellé client existe déjà."
+  },
+  {
+    "line": 758,
+    "status": "Ok",
+    "reason": "Successfully imported line 758"
+  },
+  {
+    "line": 759,
+    "status": "Ok",
+    "reason": "Successfully imported line 759"
+  },
+  {
+    "line": 760,
+    "status": "Ok",
+    "reason": "Successfully imported line 760"
+  },
+  {
+    "line": 761,
+    "status": "Ok",
+    "reason": "Successfully imported line 761"
+  },
+  {
+    "line": 762,
+    "status": "Ok",
+    "reason": "Successfully imported line 762"
+  },
+  {
+    "line": 763,
+    "status": "Ok",
+    "reason": "Successfully imported line 763"
+  },
+  {
+    "line": 764,
+    "status": "Ok",
+    "reason": "Successfully imported line 764"
+  },
+  {
+    "line": 765,
+    "status": "Ok",
+    "reason": "Successfully imported line 765"
+  },
+  {
+    "line": 766,
+    "status": "Ok",
+    "reason": "Successfully imported line 766"
+  },
+  {
+    "line": 767,
+    "status": "Ok",
+    "reason": "Successfully imported line 767"
+  },
+  {
+    "line": 768,
+    "status": "Ok",
+    "reason": "Successfully imported line 768"
+  },
+  {
+    "line": 769,
+    "status": "Ok",
+    "reason": "Successfully imported line 769"
+  },
+  {
+    "line": 770,
+    "status": "Ok",
+    "reason": "Successfully imported line 770"
+  },
+  {
+    "line": 771,
+    "status": "Ok",
+    "reason": "Successfully imported line 771"
+  },
+  {
+    "line": 772,
+    "status": "Skipped",
+    "reason": "Skipped line 772: Le libellé client existe déjà."
+  },
+  {
+    "line": 773,
+    "status": "Skipped",
+    "reason": "Skipped line 773: Le libellé client existe déjà."
+  },
+  {
+    "line": 774,
+    "status": "Ok",
+    "reason": "Successfully imported line 774"
+  },
+  {
+    "line": 775,
+    "status": "Ok",
+    "reason": "Successfully imported line 775"
+  },
+  {
+    "line": 776,
+    "status": "Ok",
+    "reason": "Successfully imported line 776"
+  },
+  {
+    "line": 777,
+    "status": "Ok",
+    "reason": "Successfully imported line 777"
+  },
+  {
+    "line": 778,
+    "status": "Skipped",
+    "reason": "Skipped line 778: Le libellé client existe déjà."
+  },
+  {
+    "line": 779,
+    "status": "Ok",
+    "reason": "Successfully imported line 779"
+  },
+  {
+    "line": 780,
+    "status": "Ok",
+    "reason": "Successfully imported line 780"
+  },
+  {
+    "line": 781,
+    "status": "Ok",
+    "reason": "Successfully imported line 781"
+  },
+  {
+    "line": 782,
+    "status": "Ok",
+    "reason": "Successfully imported line 782"
+  },
+  {
+    "line": 783,
+    "status": "Ok",
+    "reason": "Successfully imported line 783"
+  },
+  {
+    "line": 784,
+    "status": "Ok",
+    "reason": "Successfully imported line 784"
+  },
+  {
+    "line": 785,
+    "status": "Ok",
+    "reason": "Successfully imported line 785"
+  },
+  {
+    "line": 786,
+    "status": "Ok",
+    "reason": "Successfully imported line 786"
+  },
+  {
+    "line": 787,
+    "status": "Ok",
+    "reason": "Successfully imported line 787"
+  },
+  {
+    "line": 788,
+    "status": "Ok",
+    "reason": "Successfully imported line 788"
+  },
+  {
+    "line": 789,
+    "status": "Ok",
+    "reason": "Successfully imported line 789"
+  },
+  {
+    "line": 790,
+    "status": "Ok",
+    "reason": "Successfully imported line 790"
+  },
+  {
+    "line": 791,
+    "status": "Skipped",
+    "reason": "Skipped line 791: Le libellé client existe déjà."
+  },
+  {
+    "line": 792,
+    "status": "Ok",
+    "reason": "Successfully imported line 792"
+  },
+  {
+    "line": 793,
+    "status": "Ok",
+    "reason": "Successfully imported line 793"
+  },
+  {
+    "line": 794,
+    "status": "Ok",
+    "reason": "Successfully imported line 794"
+  },
+  {
+    "line": 795,
+    "status": "Ok",
+    "reason": "Successfully imported line 795"
+  },
+  {
+    "line": 796,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 796"
+  },
+  {
+    "line": 797,
+    "status": "Ok",
+    "reason": "Successfully imported line 797"
+  },
+  {
+    "line": 798,
+    "status": "Ok",
+    "reason": "Successfully imported line 798"
+  },
+  {
+    "line": 799,
+    "status": "Ok",
+    "reason": "Successfully imported line 799"
+  },
+  {
+    "line": 800,
+    "status": "Skipped",
+    "reason": "Skipped line 800: Le libellé client existe déjà."
+  },
+  {
+    "line": 801,
+    "status": "Skipped",
+    "reason": "Skipped line 801: Le libellé client existe déjà."
+  },
+  {
+    "line": 802,
+    "status": "Ok",
+    "reason": "Successfully imported line 802"
+  },
+  {
+    "line": 803,
+    "status": "Ok",
+    "reason": "Successfully imported line 803"
+  },
+  {
+    "line": 804,
+    "status": "Ok",
+    "reason": "Successfully imported line 804"
+  },
+  {
+    "line": 805,
+    "status": "Ok",
+    "reason": "Successfully imported line 805"
+  },
+  {
+    "line": 806,
+    "status": "Ok",
+    "reason": "Successfully imported line 806"
+  },
+  {
+    "line": 807,
+    "status": "Ok",
+    "reason": "Successfully imported line 807"
+  },
+  {
+    "line": 808,
+    "status": "Skipped",
+    "reason": "Skipped line 808: Le libellé client existe déjà."
+  },
+  {
+    "line": 809,
+    "status": "Ok",
+    "reason": "Successfully imported line 809"
+  },
+  {
+    "line": 810,
+    "status": "Ok",
+    "reason": "Successfully imported line 810"
+  },
+  {
+    "line": 811,
+    "status": "Ok",
+    "reason": "Successfully imported line 811"
+  },
+  {
+    "line": 812,
+    "status": "Ok",
+    "reason": "Successfully imported line 812"
+  },
+  {
+    "line": 813,
+    "status": "Ok",
+    "reason": "Successfully imported line 813"
+  },
+  {
+    "line": 814,
+    "status": "Ok",
+    "reason": "Successfully imported line 814"
+  },
+  {
+    "line": 815,
+    "status": "Ok",
+    "reason": "Successfully imported line 815"
+  },
+  {
+    "line": 816,
+    "status": "Ok",
+    "reason": "Successfully imported line 816"
+  },
+  {
+    "line": 817,
+    "status": "Skipped",
+    "reason": "Skipped line 817: Le libellé client existe déjà."
+  },
+  {
+    "line": 818,
+    "status": "Ok",
+    "reason": "Successfully imported line 818"
+  },
+  {
+    "line": 819,
+    "status": "Ok",
+    "reason": "Successfully imported line 819"
+  },
+  {
+    "line": 820,
+    "status": "Ok",
+    "reason": "Successfully imported line 820"
+  },
+  {
+    "line": 821,
+    "status": "Ok",
+    "reason": "Successfully imported line 821"
+  },
+  {
+    "line": 822,
+    "status": "Ok",
+    "reason": "Successfully imported line 822"
+  },
+  {
+    "line": 823,
+    "status": "Ok",
+    "reason": "Successfully imported line 823"
+  },
+  {
+    "line": 824,
+    "status": "Ok",
+    "reason": "Successfully imported line 824"
+  },
+  {
+    "line": 825,
+    "status": "Ok",
+    "reason": "Successfully imported line 825"
+  },
+  {
+    "line": 826,
+    "status": "Ok",
+    "reason": "Successfully imported line 826"
+  },
+  {
+    "line": 827,
+    "status": "Skipped",
+    "reason": "Skipped line 827: Le libellé client existe déjà."
+  },
+  {
+    "line": 828,
+    "status": "Ok",
+    "reason": "Successfully imported line 828"
+  },
+  {
+    "line": 829,
+    "status": "Skipped",
+    "reason": "Skipped line 829: Le libellé client existe déjà."
+  },
+  {
+    "line": 830,
+    "status": "Ok",
+    "reason": "Successfully imported line 830"
+  },
+  {
+    "line": 831,
+    "status": "Ok",
+    "reason": "Successfully imported line 831"
+  },
+  {
+    "line": 832,
+    "status": "Ok",
+    "reason": "Successfully imported line 832"
+  },
+  {
+    "line": 833,
+    "status": "Ok",
+    "reason": "Successfully imported line 833"
+  },
+  {
+    "line": 834,
+    "status": "Ok",
+    "reason": "Successfully imported line 834"
+  },
+  {
+    "line": 835,
+    "status": "Ok",
+    "reason": "Successfully imported line 835"
+  },
+  {
+    "line": 836,
+    "status": "Ok",
+    "reason": "Successfully imported line 836"
+  },
+  {
+    "line": 837,
+    "status": "Ok",
+    "reason": "Successfully imported line 837"
+  },
+  {
+    "line": 838,
+    "status": "Ok",
+    "reason": "Successfully imported line 838"
+  },
+  {
+    "line": 839,
+    "status": "Ok",
+    "reason": "Successfully imported line 839"
+  },
+  {
+    "line": 840,
+    "status": "Ok",
+    "reason": "Successfully imported line 840"
+  },
+  {
+    "line": 841,
+    "status": "Ok",
+    "reason": "Successfully imported line 841"
+  },
+  {
+    "line": 842,
+    "status": "Ok",
+    "reason": "Successfully imported line 842"
+  },
+  {
+    "line": 843,
+    "status": "Ok",
+    "reason": "Successfully imported line 843"
+  },
+  {
+    "line": 844,
+    "status": "Ok",
+    "reason": "Successfully imported line 844"
+  },
+  {
+    "line": 845,
+    "status": "Skipped",
+    "reason": "Skipped line 845: Le libellé client existe déjà."
+  },
+  {
+    "line": 846,
+    "status": "Ok",
+    "reason": "Successfully imported line 846"
+  },
+  {
+    "line": 847,
+    "status": "Ok",
+    "reason": "Successfully imported line 847"
+  },
+  {
+    "line": 848,
+    "status": "Skipped",
+    "reason": "Skipped line 848: Le libellé client existe déjà."
+  },
+  {
+    "line": 849,
+    "status": "Skipped",
+    "reason": "Skipped line 849: Le libellé client existe déjà."
+  },
+  {
+    "line": 850,
+    "status": "Skipped",
+    "reason": "Skipped line 850: Le libellé client existe déjà."
+  },
+  {
+    "line": 851,
+    "status": "Ok",
+    "reason": "Successfully imported line 851"
+  },
+  {
+    "line": 852,
+    "status": "Ok",
+    "reason": "Successfully imported line 852"
+  },
+  {
+    "line": 853,
+    "status": "Ok",
+    "reason": "Successfully imported line 853"
+  },
+  {
+    "line": 854,
+    "status": "Ok",
+    "reason": "Successfully imported line 854"
+  },
+  {
+    "line": 855,
+    "status": "Ok",
+    "reason": "Successfully imported line 855"
+  },
+  {
+    "line": 856,
+    "status": "Ok",
+    "reason": "Successfully imported line 856"
+  },
+  {
+    "line": 857,
+    "status": "Ok",
+    "reason": "Successfully imported line 857"
+  },
+  {
+    "line": 858,
+    "status": "Ok",
+    "reason": "Successfully imported line 858"
+  },
+  {
+    "line": 859,
+    "status": "Ok",
+    "reason": "Successfully imported line 859"
+  },
+  {
+    "line": 860,
+    "status": "Ok",
+    "reason": "Successfully imported line 860"
+  },
+  {
+    "line": 861,
+    "status": "Ok",
+    "reason": "Successfully imported line 861"
+  },
+  {
+    "line": 862,
+    "status": "Ok",
+    "reason": "Successfully imported line 862"
+  },
+  {
+    "line": 863,
+    "status": "Ok",
+    "reason": "Successfully imported line 863"
+  },
+  {
+    "line": 864,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 864"
+  },
+  {
+    "line": 865,
+    "status": "Skipped",
+    "reason": "Skipped line 865: Le libellé client existe déjà."
+  },
+  {
+    "line": 866,
+    "status": "Skipped",
+    "reason": "Skipped line 866: Le libellé client existe déjà."
+  },
+  {
+    "line": 867,
+    "status": "Ok",
+    "reason": "Successfully imported line 867"
+  },
+  {
+    "line": 868,
+    "status": "Skipped",
+    "reason": "Skipped line 868: Le libellé client existe déjà."
+  },
+  {
+    "line": 869,
+    "status": "Ok",
+    "reason": "Successfully imported line 869"
+  },
+  {
+    "line": 870,
+    "status": "Ok",
+    "reason": "Successfully imported line 870"
+  },
+  {
+    "line": 871,
+    "status": "Ok",
+    "reason": "Successfully imported line 871"
+  },
+  {
+    "line": 872,
+    "status": "Ok",
+    "reason": "Successfully imported line 872"
+  },
+  {
+    "line": 873,
+    "status": "Ok",
+    "reason": "Successfully imported line 873"
+  },
+  {
+    "line": 874,
+    "status": "Skipped",
+    "reason": "Skipped line 874: Le libellé client existe déjà."
+  },
+  {
+    "line": 875,
+    "status": "Ok",
+    "reason": "Successfully imported line 875"
+  },
+  {
+    "line": 876,
+    "status": "Ok",
+    "reason": "Successfully imported line 876"
+  },
+  {
+    "line": 877,
+    "status": "Ok",
+    "reason": "Successfully imported line 877"
+  },
+  {
+    "line": 878,
+    "status": "Ok",
+    "reason": "Successfully imported line 878"
+  },
+  {
+    "line": 879,
+    "status": "Ok",
+    "reason": "Successfully imported line 879"
+  },
+  {
+    "line": 880,
+    "status": "Ok",
+    "reason": "Successfully imported line 880"
+  },
+  {
+    "line": 881,
+    "status": "Ok",
+    "reason": "Successfully imported line 881"
+  },
+  {
+    "line": 882,
+    "status": "Ok",
+    "reason": "Successfully imported line 882"
+  },
+  {
+    "line": 883,
+    "status": "Ok",
+    "reason": "Successfully imported line 883"
+  },
+  {
+    "line": 884,
+    "status": "Ok",
+    "reason": "Successfully imported line 884"
+  },
+  {
+    "line": 885,
+    "status": "Ok",
+    "reason": "Successfully imported line 885"
+  },
+  {
+    "line": 886,
+    "status": "Skipped",
+    "reason": "Skipped line 886: Le libellé client existe déjà."
+  },
+  {
+    "line": 887,
+    "status": "Ok",
+    "reason": "Successfully imported line 887"
+  },
+  {
+    "line": 888,
+    "status": "Ok",
+    "reason": "Successfully imported line 888"
+  },
+  {
+    "line": 889,
+    "status": "Ok",
+    "reason": "Successfully imported line 889"
+  },
+  {
+    "line": 890,
+    "status": "Ok",
+    "reason": "Successfully imported line 890"
+  },
+  {
+    "line": 891,
+    "status": "Ok",
+    "reason": "Successfully imported line 891"
+  },
+  {
+    "line": 892,
+    "status": "Ok",
+    "reason": "Successfully imported line 892"
+  },
+  {
+    "line": 893,
+    "status": "Ok",
+    "reason": "Successfully imported line 893"
+  },
+  {
+    "line": 894,
+    "status": "Skipped",
+    "reason": "Skipped line 894: Le libellé client existe déjà."
+  },
+  {
+    "line": 895,
+    "status": "Skipped",
+    "reason": "Skipped line 895: Le libellé client existe déjà."
+  },
+  {
+    "line": 896,
+    "status": "Ok",
+    "reason": "Successfully imported line 896"
+  },
+  {
+    "line": 897,
+    "status": "Ok",
+    "reason": "Successfully imported line 897"
+  },
+  {
+    "line": 898,
+    "status": "Ok",
+    "reason": "Successfully imported line 898"
+  },
+  {
+    "line": 899,
+    "status": "Ok",
+    "reason": "Successfully imported line 899"
+  },
+  {
+    "line": 900,
+    "status": "Skipped",
+    "reason": "Skipped line 900: Le libellé client existe déjà."
+  },
+  {
+    "line": 901,
+    "status": "Ok",
+    "reason": "Successfully imported line 901"
+  },
+  {
+    "line": 902,
+    "status": "Skipped",
+    "reason": "Skipped line 902: Le libellé client existe déjà."
+  },
+  {
+    "line": 903,
+    "status": "Ok",
+    "reason": "Successfully imported line 903"
+  },
+  {
+    "line": 904,
+    "status": "Ok",
+    "reason": "Successfully imported line 904"
+  },
+  {
+    "line": 905,
+    "status": "Ok",
+    "reason": "Successfully imported line 905"
+  },
+  {
+    "line": 906,
+    "status": "Ok",
+    "reason": "Successfully imported line 906"
+  },
+  {
+    "line": 907,
+    "status": "Ok",
+    "reason": "Successfully imported line 907"
+  },
+  {
+    "line": 908,
+    "status": "Ok",
+    "reason": "Successfully imported line 908"
+  },
+  {
+    "line": 909,
+    "status": "Ok",
+    "reason": "Successfully imported line 909"
+  },
+  {
+    "line": 910,
+    "status": "Ok",
+    "reason": "Successfully imported line 910"
+  },
+  {
+    "line": 911,
+    "status": "Skipped",
+    "reason": "Skipped line 911: Le libellé client existe déjà."
+  },
+  {
+    "line": 912,
+    "status": "Skipped",
+    "reason": "Skipped line 912: Le libellé client existe déjà."
+  },
+  {
+    "line": 913,
+    "status": "Ok",
+    "reason": "Successfully imported line 913"
+  },
+  {
+    "line": 914,
+    "status": "Skipped",
+    "reason": "Skipped line 914: Le libellé client existe déjà."
+  },
+  {
+    "line": 915,
+    "status": "Skipped",
+    "reason": "Skipped line 915: Le libellé client existe déjà."
+  },
+  {
+    "line": 916,
+    "status": "Ok",
+    "reason": "Successfully imported line 916"
+  },
+  {
+    "line": 917,
+    "status": "Skipped",
+    "reason": "Skipped line 917: Le libellé client existe déjà."
+  },
+  {
+    "line": 918,
+    "status": "Ok",
+    "reason": "Successfully imported line 918"
+  },
+  {
+    "line": 919,
+    "status": "Ok",
+    "reason": "Successfully imported line 919"
+  },
+  {
+    "line": 920,
+    "status": "Ok",
+    "reason": "Successfully imported line 920"
+  },
+  {
+    "line": 921,
+    "status": "Ok",
+    "reason": "Successfully imported line 921"
+  },
+  {
+    "line": 922,
+    "status": "Skipped",
+    "reason": "Skipped line 922: Le libellé client existe déjà."
+  },
+  {
+    "line": 923,
+    "status": "Skipped",
+    "reason": "Skipped line 923: Le libellé client existe déjà."
+  },
+  {
+    "line": 924,
+    "status": "Ok",
+    "reason": "Successfully imported line 924"
+  },
+  {
+    "line": 925,
+    "status": "Ok",
+    "reason": "Successfully imported line 925"
+  },
+  {
+    "line": 926,
+    "status": "Ok",
+    "reason": "Successfully imported line 926"
+  },
+  {
+    "line": 927,
+    "status": "Ok",
+    "reason": "Successfully imported line 927"
+  },
+  {
+    "line": 928,
+    "status": "Skipped",
+    "reason": "Skipped line 928: Le libellé client existe déjà."
+  },
+  {
+    "line": 929,
+    "status": "Ok",
+    "reason": "Successfully imported line 929"
+  },
+  {
+    "line": 930,
+    "status": "Skipped",
+    "reason": "Skipped line 930: Le libellé client existe déjà."
+  },
+  {
+    "line": 931,
+    "status": "Ok",
+    "reason": "Successfully imported line 931"
+  },
+  {
+    "line": 932,
+    "status": "Ok",
+    "reason": "Successfully imported line 932"
+  },
+  {
+    "line": 933,
+    "status": "Ok",
+    "reason": "Successfully imported line 933"
+  },
+  {
+    "line": 934,
+    "status": "Skipped",
+    "reason": "Skipped line 934: Le libellé client existe déjà."
+  },
+  {
+    "line": 935,
+    "status": "Skipped",
+    "reason": "Skipped line 935: Le libellé client existe déjà."
+  },
+  {
+    "line": 936,
+    "status": "Ok",
+    "reason": "Successfully imported line 936"
+  },
+  {
+    "line": 937,
+    "status": "Ok",
+    "reason": "Successfully imported line 937"
+  },
+  {
+    "line": 938,
+    "status": "Ok",
+    "reason": "Successfully imported line 938"
+  },
+  {
+    "line": 939,
+    "status": "Ok",
+    "reason": "Successfully imported line 939"
+  },
+  {
+    "line": 940,
+    "status": "Ok",
+    "reason": "Successfully imported line 940"
+  },
+  {
+    "line": 941,
+    "status": "Ok",
+    "reason": "Successfully imported line 941"
+  },
+  {
+    "line": 942,
+    "status": "Ok",
+    "reason": "Successfully imported line 942"
+  },
+  {
+    "line": 943,
+    "status": "Ok",
+    "reason": "Successfully imported line 943"
+  },
+  {
+    "line": 944,
+    "status": "Ok",
+    "reason": "Successfully imported line 944"
+  },
+  {
+    "line": 945,
+    "status": "Ok",
+    "reason": "Successfully imported line 945"
+  },
+  {
+    "line": 946,
+    "status": "Ok",
+    "reason": "Successfully imported line 946"
+  },
+  {
+    "line": 947,
+    "status": "Skipped",
+    "reason": "Skipped line 947: Le libellé client existe déjà."
+  },
+  {
+    "line": 948,
+    "status": "Ok",
+    "reason": "Successfully imported line 948"
+  },
+  {
+    "line": 949,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 949"
+  },
+  {
+    "line": 950,
+    "status": "Ok",
+    "reason": "Successfully imported line 950"
+  },
+  {
+    "line": 951,
+    "status": "Ok",
+    "reason": "Successfully imported line 951"
+  },
+  {
+    "line": 952,
+    "status": "Ok",
+    "reason": "Successfully imported line 952"
+  },
+  {
+    "line": 953,
+    "status": "Ok",
+    "reason": "Successfully imported line 953"
+  },
+  {
+    "line": 954,
+    "status": "Skipped",
+    "reason": "Skipped line 954: Le libellé client existe déjà."
+  },
+  {
+    "line": 955,
+    "status": "Ok",
+    "reason": "Successfully imported line 955"
+  },
+  {
+    "line": 956,
+    "status": "Ok",
+    "reason": "Successfully imported line 956"
+  },
+  {
+    "line": 957,
+    "status": "Ok",
+    "reason": "Successfully imported line 957"
+  },
+  {
+    "line": 958,
+    "status": "Ok",
+    "reason": "Successfully imported line 958"
+  },
+  {
+    "line": 959,
+    "status": "Ok",
+    "reason": "Successfully imported line 959"
+  },
+  {
+    "line": 960,
+    "status": "Ok",
+    "reason": "Successfully imported line 960"
+  },
+  {
+    "line": 961,
+    "status": "Ok",
+    "reason": "Successfully imported line 961"
+  },
+  {
+    "line": 962,
+    "status": "Ok",
+    "reason": "Successfully imported line 962"
+  },
+  {
+    "line": 963,
+    "status": "Ok",
+    "reason": "Successfully imported line 963"
+  },
+  {
+    "line": 964,
+    "status": "Ok",
+    "reason": "Successfully imported line 964"
+  },
+  {
+    "line": 965,
+    "status": "Ok",
+    "reason": "Successfully imported line 965"
+  },
+  {
+    "line": 966,
+    "status": "Ok",
+    "reason": "Successfully imported line 966"
+  },
+  {
+    "line": 967,
+    "status": "Ok",
+    "reason": "Successfully imported line 967"
+  },
+  {
+    "line": 968,
+    "status": "Ok",
+    "reason": "Successfully imported line 968"
+  },
+  {
+    "line": 969,
+    "status": "Ok",
+    "reason": "Successfully imported line 969"
+  },
+  {
+    "line": 970,
+    "status": "Skipped",
+    "reason": "Skipped line 970: Le libellé client existe déjà."
+  },
+  {
+    "line": 971,
+    "status": "Ok",
+    "reason": "Successfully imported line 971"
+  },
+  {
+    "line": 972,
+    "status": "Ok",
+    "reason": "Successfully imported line 972"
+  },
+  {
+    "line": 973,
+    "status": "Skipped",
+    "reason": "Skipped line 973: Le libellé client existe déjà."
+  },
+  {
+    "line": 974,
+    "status": "Ok",
+    "reason": "Successfully imported line 974"
+  },
+  {
+    "line": 975,
+    "status": "Skipped",
+    "reason": "Skipped line 975: Le libellé client existe déjà."
+  },
+  {
+    "line": 976,
+    "status": "Ok",
+    "reason": "Successfully imported line 976"
+  },
+  {
+    "line": 977,
+    "status": "Skipped",
+    "reason": "Skipped line 977: Le libellé client existe déjà."
+  },
+  {
+    "line": 978,
+    "status": "Ok",
+    "reason": "Successfully imported line 978"
+  },
+  {
+    "line": 979,
+    "status": "Ok",
+    "reason": "Successfully imported line 979"
+  },
+  {
+    "line": 980,
+    "status": "Ok",
+    "reason": "Successfully imported line 980"
+  },
+  {
+    "line": 981,
+    "status": "Ok",
+    "reason": "Successfully imported line 981"
+  },
+  {
+    "line": 982,
+    "status": "Ok",
+    "reason": "Successfully imported line 982"
+  },
+  {
+    "line": 983,
+    "status": "Ok",
+    "reason": "Successfully imported line 983"
+  },
+  {
+    "line": 984,
+    "status": "Skipped",
+    "reason": "Skipped line 984: Le libellé client existe déjà."
+  },
+  {
+    "line": 985,
+    "status": "Ok",
+    "reason": "Successfully imported line 985"
+  },
+  {
+    "line": 986,
+    "status": "Skipped",
+    "reason": "Skipped line 986: Le libellé client existe déjà."
+  },
+  {
+    "line": 987,
+    "status": "Ok",
+    "reason": "Successfully imported line 987"
+  },
+  {
+    "line": 988,
+    "status": "Ok",
+    "reason": "Successfully imported line 988"
+  },
+  {
+    "line": 989,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 989"
+  },
+  {
+    "line": 990,
+    "status": "Ok",
+    "reason": "Successfully imported line 990"
+  },
+  {
+    "line": 991,
+    "status": "Ok",
+    "reason": "Successfully imported line 991"
+  },
+  {
+    "line": 992,
+    "status": "Skipped",
+    "reason": "Skipped line 992: Le libellé client existe déjà."
+  },
+  {
+    "line": 993,
+    "status": "Ok",
+    "reason": "Successfully imported line 993"
+  },
+  {
+    "line": 994,
+    "status": "Ok",
+    "reason": "Successfully imported line 994"
+  },
+  {
+    "line": 995,
+    "status": "Ok",
+    "reason": "Successfully imported line 995"
+  },
+  {
+    "line": 996,
+    "status": "Ok",
+    "reason": "Successfully imported line 996"
+  },
+  {
+    "line": 997,
+    "status": "Ok",
+    "reason": "Successfully imported line 997"
+  },
+  {
+    "line": 998,
+    "status": "Ok",
+    "reason": "Successfully imported line 998"
+  },
+  {
+    "line": 999,
+    "status": "Ok",
+    "reason": "Successfully imported line 999"
+  },
+  {
+    "line": 1000,
+    "status": "Ok",
+    "reason": "Successfully imported line 1000"
+  },
+  {
+    "line": 1001,
+    "status": "Ok",
+    "reason": "Successfully imported line 1001"
+  },
+  {
+    "line": 1002,
+    "status": "Skipped",
+    "reason": "Skipped line 1002: Le libellé client existe déjà."
+  },
+  {
+    "line": 1003,
+    "status": "Skipped",
+    "reason": "Skipped line 1003: Le libellé client existe déjà."
+  },
+  {
+    "line": 1004,
+    "status": "Ok",
+    "reason": "Successfully imported line 1004"
+  },
+  {
+    "line": 1005,
+    "status": "Ok",
+    "reason": "Successfully imported line 1005"
+  },
+  {
+    "line": 1006,
+    "status": "Skipped",
+    "reason": "Skipped line 1006: Le libellé client existe déjà."
+  },
+  {
+    "line": 1007,
+    "status": "Ok",
+    "reason": "Successfully imported line 1007"
+  },
+  {
+    "line": 1008,
+    "status": "Ok",
+    "reason": "Successfully imported line 1008"
+  },
+  {
+    "line": 1009,
+    "status": "Skipped",
+    "reason": "Skipped line 1009: Le libellé client existe déjà."
+  },
+  {
+    "line": 1010,
+    "status": "Ok",
+    "reason": "Successfully imported line 1010"
+  },
+  {
+    "line": 1011,
+    "status": "Ok",
+    "reason": "Successfully imported line 1011"
+  },
+  {
+    "line": 1012,
+    "status": "Skipped",
+    "reason": "Skipped line 1012: Le libellé client existe déjà."
+  },
+  {
+    "line": 1013,
+    "status": "Skipped",
+    "reason": "Skipped line 1013: Le libellé client existe déjà."
+  },
+  {
+    "line": 1014,
+    "status": "Ok",
+    "reason": "Successfully imported line 1014"
+  },
+  {
+    "line": 1015,
+    "status": "Ok",
+    "reason": "Successfully imported line 1015"
+  },
+  {
+    "line": 1016,
+    "status": "Ok",
+    "reason": "Successfully imported line 1016"
+  },
+  {
+    "line": 1017,
+    "status": "Skipped",
+    "reason": "Skipped line 1017: Le libellé client existe déjà."
+  },
+  {
+    "line": 1018,
+    "status": "Ok",
+    "reason": "Successfully imported line 1018"
+  },
+  {
+    "line": 1019,
+    "status": "Ok",
+    "reason": "Successfully imported line 1019"
+  },
+  {
+    "line": 1020,
+    "status": "Ok",
+    "reason": "Successfully imported line 1020"
+  },
+  {
+    "line": 1021,
+    "status": "Ok",
+    "reason": "Successfully imported line 1021"
+  },
+  {
+    "line": 1022,
+    "status": "Ok",
+    "reason": "Successfully imported line 1022"
+  },
+  {
+    "line": 1023,
+    "status": "Ok",
+    "reason": "Successfully imported line 1023"
+  },
+  {
+    "line": 1024,
+    "status": "Ok",
+    "reason": "Successfully imported line 1024"
+  },
+  {
+    "line": 1025,
+    "status": "Ok",
+    "reason": "Successfully imported line 1025"
+  },
+  {
+    "line": 1026,
+    "status": "Ok",
+    "reason": "Successfully imported line 1026"
+  },
+  {
+    "line": 1027,
+    "status": "Skipped",
+    "reason": "Skipped line 1027: Le libellé client existe déjà."
+  },
+  {
+    "line": 1028,
+    "status": "Skipped",
+    "reason": "Skipped line 1028: Le libellé client existe déjà."
+  },
+  {
+    "line": 1029,
+    "status": "Ok",
+    "reason": "Successfully imported line 1029"
+  },
+  {
+    "line": 1030,
+    "status": "Ok",
+    "reason": "Successfully imported line 1030"
+  },
+  {
+    "line": 1031,
+    "status": "Ok",
+    "reason": "Successfully imported line 1031"
+  },
+  {
+    "line": 1032,
+    "status": "Ok",
+    "reason": "Successfully imported line 1032"
+  },
+  {
+    "line": 1033,
+    "status": "Skipped",
+    "reason": "Skipped line 1033: Le libellé client existe déjà."
+  },
+  {
+    "line": 1034,
+    "status": "Ok",
+    "reason": "Successfully imported line 1034"
+  },
+  {
+    "line": 1035,
+    "status": "Ok",
+    "reason": "Successfully imported line 1035"
+  },
+  {
+    "line": 1036,
+    "status": "Ok",
+    "reason": "Successfully imported line 1036"
+  },
+  {
+    "line": 1037,
+    "status": "Skipped",
+    "reason": "Skipped line 1037: Le libellé client existe déjà."
+  },
+  {
+    "line": 1038,
+    "status": "Ok",
+    "reason": "Successfully imported line 1038"
+  },
+  {
+    "line": 1039,
+    "status": "Ok",
+    "reason": "Successfully imported line 1039"
+  },
+  {
+    "line": 1040,
+    "status": "Ok",
+    "reason": "Successfully imported line 1040"
+  },
+  {
+    "line": 1041,
+    "status": "Ok",
+    "reason": "Successfully imported line 1041"
+  },
+  {
+    "line": 1042,
+    "status": "Ok",
+    "reason": "Successfully imported line 1042"
+  },
+  {
+    "line": 1043,
+    "status": "Ok",
+    "reason": "Successfully imported line 1043"
+  },
+  {
+    "line": 1044,
+    "status": "Skipped",
+    "reason": "Skipped line 1044: Le libellé client existe déjà."
+  },
+  {
+    "line": 1045,
+    "status": "Ok",
+    "reason": "Successfully imported line 1045"
+  },
+  {
+    "line": 1046,
+    "status": "Skipped",
+    "reason": "Skipped line 1046: Le libellé client existe déjà."
+  },
+  {
+    "line": 1047,
+    "status": "Ok",
+    "reason": "Successfully imported line 1047"
+  },
+  {
+    "line": 1048,
+    "status": "Ok",
+    "reason": "Successfully imported line 1048"
+  },
+  {
+    "line": 1049,
+    "status": "Skipped",
+    "reason": "Skipped line 1049: Le libellé client existe déjà."
+  },
+  {
+    "line": 1050,
+    "status": "Ok",
+    "reason": "Successfully imported line 1050"
+  },
+  {
+    "line": 1051,
+    "status": "Ok",
+    "reason": "Successfully imported line 1051"
+  },
+  {
+    "line": 1052,
+    "status": "Ok",
+    "reason": "Successfully imported line 1052"
+  },
+  {
+    "line": 1053,
+    "status": "Ok",
+    "reason": "Successfully imported line 1053"
+  },
+  {
+    "line": 1054,
+    "status": "Ok",
+    "reason": "Successfully imported line 1054"
+  },
+  {
+    "line": 1055,
+    "status": "Ok",
+    "reason": "Successfully imported line 1055"
+  },
+  {
+    "line": 1056,
+    "status": "Ok",
+    "reason": "Successfully imported line 1056"
+  },
+  {
+    "line": 1057,
+    "status": "Ok",
+    "reason": "Successfully imported line 1057"
+  },
+  {
+    "line": 1058,
+    "status": "Ok",
+    "reason": "Successfully imported line 1058"
+  },
+  {
+    "line": 1059,
+    "status": "Ok",
+    "reason": "Successfully imported line 1059"
+  },
+  {
+    "line": 1060,
+    "status": "Ok",
+    "reason": "Successfully imported line 1060"
+  },
+  {
+    "line": 1061,
+    "status": "Skipped",
+    "reason": "Skipped line 1061: Le libellé client existe déjà."
+  },
+  {
+    "line": 1062,
+    "status": "Ok",
+    "reason": "Successfully imported line 1062"
+  },
+  {
+    "line": 1063,
+    "status": "Ok",
+    "reason": "Successfully imported line 1063"
+  },
+  {
+    "line": 1064,
+    "status": "Ok",
+    "reason": "Successfully imported line 1064"
+  },
+  {
+    "line": 1065,
+    "status": "Ok",
+    "reason": "Successfully imported line 1065"
+  },
+  {
+    "line": 1066,
+    "status": "Ok",
+    "reason": "Successfully imported line 1066"
+  },
+  {
+    "line": 1067,
+    "status": "Ok",
+    "reason": "Successfully imported line 1067"
+  },
+  {
+    "line": 1068,
+    "status": "Ok",
+    "reason": "Successfully imported line 1068"
+  },
+  {
+    "line": 1069,
+    "status": "Ok",
+    "reason": "Successfully imported line 1069"
+  },
+  {
+    "line": 1070,
+    "status": "Ok",
+    "reason": "Successfully imported line 1070"
+  },
+  {
+    "line": 1071,
+    "status": "Ok",
+    "reason": "Successfully imported line 1071"
+  },
+  {
+    "line": 1072,
+    "status": "Skipped",
+    "reason": "Skipped line 1072: Le libellé client existe déjà."
+  },
+  {
+    "line": 1073,
+    "status": "Ok",
+    "reason": "Successfully imported line 1073"
+  },
+  {
+    "line": 1074,
+    "status": "Ok",
+    "reason": "Successfully imported line 1074"
+  },
+  {
+    "line": 1075,
+    "status": "Skipped",
+    "reason": "Skipped line 1075: Le libellé client existe déjà."
+  },
+  {
+    "line": 1076,
+    "status": "Error",
+    "reason": "Unable to geocode address for line 1076"
+  },
+  {
+    "line": 1077,
+    "status": "Skipped",
+    "reason": "Skipped line 1077: Le libellé client existe déjà."
+  },
+  {
+    "line": 1078,
+    "status": "Ok",
+    "reason": "Successfully imported line 1078"
+  },
+  {
+    "line": 1079,
+    "status": "Ok",
+    "reason": "Successfully imported line 1079"
+  },
+  {
+    "line": 1080,
+    "status": "Ok",
+    "reason": "Successfully imported line 1080"
+  },
+  {
+    "line": 1081,
+    "status": "Ok",
+    "reason": "Successfully imported line 1081"
+  },
+  {
+    "line": 1082,
+    "status": "Ok",
+    "reason": "Successfully imported line 1082"
+  },
+  {
+    "line": 1083,
+    "status": "Ok",
+    "reason": "Successfully imported line 1083"
+  },
+  {
+    "line": 1084,
+    "status": "Ok",
+    "reason": "Successfully imported line 1084"
+  },
+  {
+    "line": 1085,
+    "status": "Ok",
+    "reason": "Successfully imported line 1085"
+  },
+  {
+    "line": 1086,
+    "status": "Skipped",
+    "reason": "Skipped line 1086: Le libellé client existe déjà."
+  },
+  {
+    "line": 1087,
+    "status": "Ok",
+    "reason": "Successfully imported line 1087"
+  },
+  {
+    "line": 1088,
+    "status": "Skipped",
+    "reason": "Skipped line 1088: Error during geocoding: Erreur lors de la requête de géocodage : statut 400"
+  },
+  {
+    "line": 1089,
+    "status": "Ok",
+    "reason": "Successfully imported line 1089"
+  },
+  {
+    "line": 1090,
+    "status": "Skipped",
+    "reason": "Skipped line 1090: Le libellé client existe déjà."
+  },
+  {
+    "line": 1091,
+    "status": "Ok",
+    "reason": "Successfully imported line 1091"
+  },
+  {
+    "line": 1092,
+    "status": "Ok",
+    "reason": "Successfully imported line 1092"
+  },
+  {
+    "line": 1093,
+    "status": "Ok",
+    "reason": "Successfully imported line 1093"
+  },
+  {
+    "line": 1094,
+    "status": "Ok",
+    "reason": "Successfully imported line 1094"
+  },
+  {
+    "line": 1095,
+    "status": "Ok",
+    "reason": "Successfully imported line 1095"
+  },
+  {
+    "line": 1096,
+    "status": "Skipped",
+    "reason": "Skipped line 1096: Le libellé client existe déjà."
+  },
+  {
+    "line": 1097,
+    "status": "Ok",
+    "reason": "Successfully imported line 1097"
+  },
+  {
+    "line": 1098,
+    "status": "Skipped",
+    "reason": "Skipped line 1098: Error during geocoding: Erreur lors de la requête de géocodage : statut 400"
+  },
+  {
+    "line": 1099,
+    "status": "Skipped",
+    "reason": "Skipped line 1099: Le libellé client existe déjà."
+  },
+  {
+    "line": 1100,
+    "status": "Ok",
+    "reason": "Successfully imported line 1100"
+  },
+  {
+    "line": 1101,
+    "status": "Ok",
+    "reason": "Successfully imported line 1101"
+  },
+  {
+    "line": 1102,
+    "status": "Ok",
+    "reason": "Successfully imported line 1102"
+  },
+  {
+    "line": 1103,
+    "status": "Ok",
+    "reason": "Successfully imported line 1103"
+  },
+  {
+    "line": 1104,
+    "status": "Ok",
+    "reason": "Successfully imported line 1104"
+  },
+  {
+    "line": 1105,
+    "status": "Ok",
+    "reason": "Successfully imported line 1105"
+  },
+  {
+    "line": 1106,
+    "status": "Ok",
+    "reason": "Successfully imported line 1106"
+  },
+  {
+    "line": 1107,
+    "status": "Ok",
+    "reason": "Successfully imported line 1107"
+  },
+  {
+    "line": 1108,
+    "status": "Ok",
+    "reason": "Successfully imported line 1108"
+  },
+  {
+    "line": 1109,
+    "status": "Ok",
+    "reason": "Successfully imported line 1109"
+  },
+  {
+    "line": 1110,
+    "status": "Ok",
+    "reason": "Successfully imported line 1110"
+  },
+  {
+    "line": 1111,
+    "status": "Skipped",
+    "reason": "Skipped line 1111: Le libellé client existe déjà."
+  },
+  {
+    "line": 1112,
+    "status": "Ok",
+    "reason": "Successfully imported line 1112"
+  },
+  {
+    "line": 1113,
+    "status": "Skipped",
+    "reason": "Skipped line 1113: Le libellé client existe déjà."
+  },
+  {
+    "line": 1114,
+    "status": "Skipped",
+    "reason": "Skipped line 1114: Le libellé client existe déjà."
+  },
+  {
+    "line": 1115,
+    "status": "Skipped",
+    "reason": "Skipped line 1115: Le libellé client existe déjà."
+  },
+  {
+    "line": 1116,
+    "status": "Skipped",
+    "reason": "Skipped line 1116: Le libellé client existe déjà."
+  },
+  {
+    "line": 1117,
+    "status": "Skipped",
+    "reason": "Skipped line 1117: Le libellé client existe déjà."
+  },
+  {
+    "line": 1118,
+    "status": "Ok",
+    "reason": "Successfully imported line 1118"
+  },
+  {
+    "line": 1119,
+    "status": "Ok",
+    "reason": "Successfully imported line 1119"
+  },
+  {
+    "line": 1120,
+    "status": "Skipped",
+    "reason": "Skipped line 1120: Le libellé client existe déjà."
+  },
+  {
+    "line": 1121,
+    "status": "Ok",
+    "reason": "Successfully imported line 1121"
+  },
+  {
+    "line": 1122,
+    "status": "Ok",
+    "reason": "Successfully imported line 1122"
+  },
+  {
+    "line": 1123,
+    "status": "Ok",
+    "reason": "Successfully imported line 1123"
+  },
+  {
+    "line": 1124,
+    "status": "Ok",
+    "reason": "Successfully imported line 1124"
+  },
+  {
+    "line": 1125,
+    "status": "Ok",
+    "reason": "Successfully imported line 1125"
+  },
+  {
+    "line": 1126,
+    "status": "Ok",
+    "reason": "Successfully imported line 1126"
+  },
+  {
+    "line": 1127,
+    "status": "Ok",
+    "reason": "Successfully imported line 1127"
+  },
+  {
+    "line": 1128,
+    "status": "Ok",
+    "reason": "Successfully imported line 1128"
+  },
+  {
+    "line": 1129,
+    "status": "Ok",
+    "reason": "Successfully imported line 1129"
+  },
+  {
+    "line": 1130,
+    "status": "Ok",
+    "reason": "Successfully imported line 1130"
+  },
+  {
+    "line": 1131,
+    "status": "Ok",
+    "reason": "Successfully imported line 1131"
+  }
+]

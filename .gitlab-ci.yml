@@ -46,8 +46,6 @@ build:
   tags:
     - smarty-road-runner
   rules:
-    - if: $CI_COMMIT_TAG
-      when: never
     - when: always
   artifacts:
     when: always
@@ -59,15 +57,3 @@ build:
       junit:
         - '**/target/surefire-reports/*.xml'
         - '**/target/failsafe-reports/*.xml'
-
-retag:
-  stage: release
-  image: docker:27.3.1
-  before_script:
-    - docker login -u ${CI_REGISTRY_USER} -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-  script:
-    - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
-    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
-  rules:
-    - if: $CI_COMMIT_TAG

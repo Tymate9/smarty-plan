@@ -30,10 +30,9 @@ import kotlin.time.DurationUnit
 class VehicleResource(
     private val vehicleService: VehicleService,
     private val deviceDataStateSpatialService: SpatialService,
+    private val vehicleMapper: VehicleMapper
 ) {
     private val logger = Logger.getLogger(VehicleResource::class.java)
-
-    private val vehicleMapper: VehicleMapper = VehicleMapper.INSTANCE
 
     @GET
     @Path("/list")

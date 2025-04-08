@@ -57,6 +57,8 @@ import {DialogModule} from "primeng/dialog";
 import { SmsFormComponent } from './features/sms/sms-form/sms-form.component';
 import {NgOptimizedImage} from "@angular/common";
 import { ScrollingInfoBannerComponent } from './commons/app-scrolling-info-banner/app-scrolling-info-banner.component';
+import { MaskToggleComponent } from './commons/mask-toggle/mask-toggle.component';
+import {ToggleButtonsGroupComponent} from "./commons/toggle-button-group/toggle-button-group.component";
 
 @NgModule({
   declarations: [
@@ -83,35 +85,37 @@ import { ScrollingInfoBannerComponent } from './commons/app-scrolling-info-banne
     LogoComponent,
     TestBannerComponent,
     SmsFormComponent,
-    ScrollingInfoBannerComponent
+    ScrollingInfoBannerComponent,
+    MaskToggleComponent
   ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    AppRoutingModule,
-    KeycloakAngularModule,
-    HttpClientModule,
-    ButtonModule,
-    TableModule,
-    TreeTableModule,
-    DropdownModule,
-    TabViewModule,
-    ProgressSpinnerModule,
-    ReactiveFormsModule,
-    ToastModule,
-    MenubarModule,
-    CardModule,
-    ToggleButtonModule,
-    TimelineModule,
-    CalendarModule,
-    PanelModule,
-    InputTextModule,
-    AutoCompleteModule,
-    InputNumberModule,
-    SelectButtonModule,
-    DialogModule,
-    NgOptimizedImage,
-  ],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        AppRoutingModule,
+        KeycloakAngularModule,
+        HttpClientModule,
+        ButtonModule,
+        TableModule,
+        TreeTableModule,
+        DropdownModule,
+        TabViewModule,
+        ProgressSpinnerModule,
+        ReactiveFormsModule,
+        ToastModule,
+        MenubarModule,
+        CardModule,
+        ToggleButtonModule,
+        TimelineModule,
+        CalendarModule,
+        PanelModule,
+        InputTextModule,
+        AutoCompleteModule,
+        InputNumberModule,
+        SelectButtonModule,
+        DialogModule,
+        NgOptimizedImage,
+        ToggleButtonsGroupComponent,
+    ],
   providers: [
     MessageService,
     ConfigService,

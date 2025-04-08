@@ -7,8 +7,6 @@ import jakarta.persistence.EntityManager
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
-import net.enovea.domain.device.DeviceDataStateMapper
-import net.enovea.domain.driver.DriverMapper
 import net.enovea.domain.vehicle.VehicleMapper
 import net.enovea.domain.vehicle.VehicleTableMapper
 import net.enovea.service.VehicleService
@@ -36,12 +34,4 @@ class VehicleServiceConfiguration {
             tripService
         )
     }
-
-    @Produces
-    @ApplicationScoped
-    fun vehicleMapper(): VehicleMapper = VehicleMapper.INSTANCE
-
-    @Produces
-    @ApplicationScoped
-    fun deviceDataStateMapper(): DeviceDataStateMapper = DeviceDataStateMapper.INSTANCE
 }

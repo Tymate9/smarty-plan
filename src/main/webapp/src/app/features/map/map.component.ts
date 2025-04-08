@@ -13,6 +13,7 @@ import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.eve
 import {NotificationService} from "../../commons/notification/notification.service";
 import {TilesService} from "../../services/tiles.service";
 import {TeamService} from "../vehicle/team.service";
+import Range = dto.Range;
 
 
 @Component({
@@ -201,7 +202,7 @@ export class MapComponent implements OnInit, OnDestroy {
       // Call getFilteredVehicles each time filters change
       this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
-
+          console.log(filteredVehicles)
           // Handle the filtered vehicles here, for example by updating the map markers
           this.displayFilteredVehiclesOnMap(filteredVehicles);
           this.mapManager.handleLayerEvent(
@@ -218,7 +219,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private displayFilteredVehiclesOnMap(vehicles: dto.VehicleSummaryDTO[]): void {
 
-    // this.mapManager.deleteMarkers();
     const event: LayerEvent = {
       type: LayerEventType.DeleteAllMarkers,
       payload: {
@@ -230,8 +230,13 @@ export class MapComponent implements OnInit, OnDestroy {
     // Reset unTrackedVehicle list for each filter change
     this.noComVehicle = "Liste des véhicules non-communicant ou sans statut : ";
 
+    const filteredVehicles = vehicles.filter(vehicle => {
+      // Garde seulement ceux qui NE SONT PAS en pause
+      return !this.isVehicleInLunchBreak(vehicle.ranges);
+    });
+
     // Display new markers on the map based on the filtered vehicles
-    vehicles.forEach(vehicle => {
+    filteredVehicles.forEach(vehicle => {
 
       if (vehicle.device && vehicle.device.coordinate) {
 
@@ -247,6 +252,41 @@ export class MapComponent implements OnInit, OnDestroy {
 
   }
 
+  private isVehicleInLunchBreak(ranges: Range<any>[] | undefined | null): boolean {
+    if (!ranges || ranges.length === 0) {
+      return false;
+    }
+
+    const lunchBreakRange = ranges.find(range => range.label === "LUNCH_BREAK");
+    if (!lunchBreakRange) {
+      return false;
+    }
+
+    // Conversion du timestamp (en secondes ou millisecondes) en objet Date UTC
+    const startDateUTC = new Date(lunchBreakRange.range.start);
+    const endDateUTC = lunchBreakRange.range.end ? new Date(lunchBreakRange.range.end) : null;
+
+    if (!endDateUTC) {
+      return false;
+    }
+
+    // Récupérer uniquement les heures/minutes côté Paris
+    const nowParisString = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+    const nowParisHoursMinutes = nowParisString.split(' ')[1].substring(0,5); // "HH:mm"
+
+    // Extraire uniquement HH:mm pour start et end
+    const startParisString = startDateUTC.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+    const endParisString = endDateUTC.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
+
+    const startHoursMinutes = startParisString.split(' ')[1].substring(0,5); // "HH:mm"
+    const endHoursMinutes = endParisString.split(' ')[1].substring(0,5);     // "HH:mm"
+
+    console.log(`Now Paris: ${nowParisHoursMinutes}, Start: ${startHoursMinutes}, End: ${endHoursMinutes}`);
+
+    // Comparaison uniquement basée sur les heures/minutes
+    return (startHoursMinutes <= nowParisHoursMinutes && nowParisHoursMinutes <= endHoursMinutes);
+  }
+
   private startVehiclePositionUpdater(): Subscription {
     // Créer un intervalle qui émet toutes les 5 minutes (300000 ms)
     return interval(300000).subscribe(() => {
@@ -257,7 +297,12 @@ export class MapComponent implements OnInit, OnDestroy {
   private updateVehiclePositions(): void {
     this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers, "LOCALIZATION").subscribe({
       next: (filteredLocalizations: dto.VehicleLocalizationDTO[]) => {
-        filteredLocalizations.forEach((result: dto.VehicleLocalizationDTO) => {
+        const filteredVehiclesLocalization = filteredLocalizations.filter(vehicle => {
+          // Garde seulement ceux qui NE SONT PAS en pause
+          return !this.isVehicleInLunchBreak(vehicle.ranges);
+        });
+        //TODO a double vérfier
+        filteredVehiclesLocalization.forEach((result: dto.VehicleLocalizationDTO) => {
           const markerId = `vehicle-${result.id}`;
           const event: LayerEvent = {
             type: LayerEventType.UpdateMarkerPosition,

@@ -1,17 +1,16 @@
 package net.enovea.domain.device
 
 
+import jakarta.enterprise.inject.spi.CDI
 import net.enovea.dto.DeviceDataStateDTO
 import net.enovea.dto.DeviceSummaryDTO
 import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
-import org.mapstruct.factory.Mappers
 import java.sql.Timestamp
-import java.time.Instant
 
-@Mapper
+@Mapper(componentModel = "cdi")
 interface DeviceSummaryMapper {
 
     @Mapping(target = "id", source = "id")
@@ -62,11 +61,6 @@ interface DeviceSummaryMapper {
 
     private fun mapDeviceDataStateToDto(entity: DeviceDataStateEntity?): DeviceDataStateDTO? {
         if (entity == null) return null
-        return DeviceDataStateMapper.INSTANCE.toDto(entity)
+        return CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(entity)
     }
-
-    companion object {
-        val INSTANCE: DeviceSummaryMapper = Mappers.getMapper(DeviceSummaryMapper::class.java)
-    }
-
 }

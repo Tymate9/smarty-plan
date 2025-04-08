@@ -50,6 +50,9 @@ import {TripsService} from "./trips.service";
     th {
       background-color: #f2f2f2;
     }
+    p-table ::ng-deep .p-datatable>.p-datatable-wrapper {
+      height: calc(100vh - 135px);
+    }
   `]
 })
 export class TripListComponent {

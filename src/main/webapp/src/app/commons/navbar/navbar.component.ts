@@ -67,7 +67,6 @@ import {NotificationService} from "../notification/notification.service";
       .nav-buttons-row {
         display: flex;
         align-items: center;
-        margin-bottom: 5px;
       }
       .nav-button-center {
         display: flex;
@@ -111,11 +110,16 @@ import {NotificationService} from "../notification/notification.service";
         background:transparent !important;
         z-index:1000;
         position:relative;
+        display: flex;
+        align-items: center;
+        min-height: 75px;
+        max-height: 75px;
       }
 
       ::ng-deep .p-menubar.p-component
       {
-        background:transparent !important;
+        background: transparent !important;
+        align-items: center;
       }
 
 

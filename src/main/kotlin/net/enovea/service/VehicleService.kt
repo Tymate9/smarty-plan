@@ -8,12 +8,14 @@ import net.enovea.api.poi.PointOfInterestEntity
 import net.enovea.api.trip.TripService
 import net.enovea.common.geo.GeoCodingService
 import net.enovea.common.geo.SpatialService
+import net.enovea.domain.team.TeamEntity
 import net.enovea.domain.vehicle.*
 import net.enovea.dto.TeamDTO
 import net.enovea.dto.VehicleDTO
 import net.enovea.dto.VehicleSummaryDTO
 import net.enovea.dto.VehicleTableDTO
 import net.enovea.workInProgress.LogExecutionTime
+import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
 
@@ -71,7 +73,7 @@ open class VehicleService(
         }
     }
 
-    // TODO seperate the data treatment method
+    // TODO(Move trip Daily stats to mapper we need to keep DTO initialization logic in the mapstruct mapper)
     fun getVehiclesTableData(vehicles: List<VehicleEntity>? = null, stopWatch: StopWatch? = null): List<TeamHierarchyNode> {
         stopWatch?.start("filter localized vehicles")
         val allVehicles = vehicles ?: VehicleEntity.listAll()
@@ -81,54 +83,15 @@ open class VehicleService(
 
         // Map VehicleEntities to VehicleDTOs and enrich with trip statistics
         stopWatch?.stopAndStart("MapTo vehicle data DTO")
-        val allVehicleDataDTO =
-            allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
-                .map { vehicle ->
-                    // Convert to VehicleTableDTO
-                    val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
-
-                    // Enrich the DTO with trip statistics if available
-                    tripStats[vehicle.id]?.let { stats ->
-                        vehicleDTO.distance = (stats.distance) / 1000
-                        vehicleDTO.firstTripStart = stats.firstTripStart
-                    }
-                    vehicleDTO
-                }
-
-        // Find last position info (poi or address)
-        stopWatch?.stopAndStart("Get last position infos")
-        allVehicleDataDTO.forEach { vehicleDataDTO ->
-            try {
-                // Try to fetch POI using spatial service
-                val poi = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                    spatialService.getNearestEntityWithinArea(it, PointOfInterestEntity :: class)
-                }
-                if (poi != null) {
-                    vehicleDataDTO.lastPositionAddress = (poi.client_code ?: "0000") + " - " + poi.client_label
-                    vehicleDataDTO.lastPositionAddressInfo = poi.category
-                } else {
-                    // Cannot find POI so Adress Type is "route"
-                    vehicleDataDTO.lastPositionAddressInfo = PointOfInterestCategoryEntity(
-                        label = "route",
-                        color = "#000"
-                    )
-                    // Get adress from device DataState or geocoding
-                    if (vehicleDataDTO.device.deviceDataState?.address == null) {
-                        val address = vehicleDataDTO.device.deviceDataState?.coordinate?.let {
-                            geoCodingService.reverseGeocode(it)
-                        }
-                        vehicleDataDTO.lastPositionAddress = address
-                    } else if (vehicleDataDTO.device.deviceDataState?.address!!.isEmpty()) {
-                        vehicleDataDTO.lastPositionAddress = "Adresse Inconnue"
-                    } else {
-                        vehicleDataDTO.lastPositionAddress = vehicleDataDTO.device.deviceDataState?.address
-
-                    }
-                }
-            } catch (e: Exception) {
-                // Handle any errors during POI lookup or reverse geocoding
-                vehicleDataDTO.lastPositionAddress = "Error retrieving location data"
+        val allVehicleDataDTO = allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}.map { vehicle ->
+            // Convert to VehicleTableDTO
+            val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+            // Enrich the DTO with trip statistics if available
+            tripStats[vehicle.id]?.let { stats ->
+                vehicleDTO.distance = (stats.distance) / 1000
+                vehicleDTO.firstTripStart = stats.firstTripStart
             }
+            vehicleDTO
         }
         // Now we build the hierarchy of vehicles based on their teams
         stopWatch?.stopAndStart("Build team hierarchy")
@@ -138,7 +101,6 @@ open class VehicleService(
             vehicleDataDTO.copy(teamHierarchy = teamHierarchy)
         }
         val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy)
-
         stopWatch?.stop()
         return teamHierarchy
     }
@@ -198,7 +160,6 @@ open class VehicleService(
         return allVehicleDTOs
     }
 
-
     @Transactional
     fun getVehiclesList(agencyIds: List<String>?): List<VehicleSummaryDTO> {
 
@@ -246,8 +207,58 @@ open class VehicleService(
             .filter { DeviceVehicleInstallEntity.getActiveDevice(it.id!!, LocalDate.now()) != null && it.vehicleTeams.isNotEmpty() }
             .map { vehicleMapper.toVehicleDTOSummary(it) }
     }
-}
 
+    // ====================================================
+    // Méthodes pour récupérer la fenêtre de pause d’un Conducteur
+    // ====================================================
+
+    /**
+     * findActiveVehicleTeams : Retourne la liste des teams actives pour un véhicule, à la date [refDate].
+     * => endDate IS NULL ou endDate >= refDate
+     */
+    @Transactional
+    fun findActiveVehicleTeams(vehicle: VehicleEntity, refDate: Timestamp): List<TeamEntity> {
+        return vehicle.vehicleTeams
+            .filter { it.endDate == null || it.endDate!! >= refDate }
+            .mapNotNull { it.team }
+            .distinct()
+    }
+
+    /**
+     * Si besoin, on peut reprendre la logique d’héritage
+     * dans le VehicleService si vous souhaitez qu'elle soit spécifique au véhicule.
+     * Mais si c’est identique, on peut la laisser aussi dans le DriverService,
+     * ou la dupliquer ici pour séparer strictement les responsabilités.
+     */
+    fun findInheritedStart(team: TeamEntity?): LocalTime? {
+        if (team == null) return null
+        return team.lunchBreakStart ?: findInheritedStart(team.parentTeam)
+    }
+
+    fun findInheritedEnd(team: TeamEntity?): LocalTime? {
+        if (team == null) return null
+        return team.lunchBreakEnd ?: findInheritedEnd(team.parentTeam)
+    }
+
+    /**
+     * Calcule la fenêtre de pause pour UN véhicule (pas forcément “globale”).
+     */
+    fun getVehiclePauseWindow(vehicle: VehicleEntity, refDate: Timestamp): Pair<LocalTime?, LocalTime?> {
+        val activeTeams = findActiveVehicleTeams(vehicle, refDate)
+
+        val timeRanges = activeTeams.mapNotNull { team ->
+            val finalStart = findInheritedStart(team)
+            val finalEnd   = findInheritedEnd(team)
+            if (finalStart != null && finalEnd != null) Pair(finalStart, finalEnd) else null
+        }
+
+        val earliestStart = timeRanges.minByOrNull { it.first }?.first
+        val latestEnd     = timeRanges.maxByOrNull { it.second }?.second
+
+        return Pair(earliestStart, latestEnd)
+    }
+
+}
 
 // Tree node data class
 data class TeamHierarchyNode(

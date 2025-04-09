@@ -35,7 +35,6 @@ import {NgIf, NgTemplateOutlet} from "@angular/common";
     :host {
       display: inline-block;
     }
-
     div {
       cursor: pointer;
     }

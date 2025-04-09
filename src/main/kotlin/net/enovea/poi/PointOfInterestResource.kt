@@ -1,27 +1,78 @@
 package net.enovea.poi
 
 import io.quarkus.security.Authenticated
+import jakarta.annotation.security.RolesAllowed
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import net.dilivia.lang.StopWatch
+import net.enovea.CsvImportService
 import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
 import net.enovea.spatial.SpatialService
 import org.jboss.logging.Logger
 import org.locationtech.jts.geom.*
 import org.locationtech.jts.io.WKTReader
+import java.nio.file.Files
 import kotlin.time.DurationUnit
 
 @Authenticated
 @Path("/api/poi")
 class PointOfInterestResource (
     val pointOfInterestSpatialService: SpatialService,
+    val csvImportService: CsvImportService,
     val entityManager: EntityManager
 ){
     private val logger = Logger.getLogger(PointOfInterestResource::class.java)
 
+    @POST
+    @Path("/import")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("admin")
+    fun importPoi(csvBytes: ByteArray): Response {
+        try {
+            if (csvBytes.isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(mapOf("error" to "Le fichier CSV est requis"))
+                    .build()
+            }
+            return Response.ok(csvImportService.importPoiCsv(String(csvBytes))).build()
+        } catch (e: Exception) {
+            logger.warn("Erreur lors de l'import CSV : ${e.message}")
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Erreur lors de l'import: ${e.message}"))
+                .build()
+        }
+    }
+
+    @POST
+    @Path("/importFromText")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    fun importPoiFromText(csvContent: String): Response {
+        try {
+            // Affichage pour vérification du contenu reçu
+            println("Contenu du CSV reçu dans le body :\n$csvContent")
+
+            // Écriture du contenu dans un fichier temporaire
+            val tempFile = Files.createTempFile("poi_import", ".csv")
+            Files.write(tempFile, csvContent.toByteArray())
+
+            // Appel de la fonction d'import qui prend le chemin du fichier temporaire
+            val result = csvImportService.importPoiCsv(tempFile.toString())
+
+            // Suppression du fichier temporaire après traitement
+            Files.delete(tempFile)
+
+            return Response.ok(result).build()
+        } catch (e: Exception) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Erreur lors de l'import: ${e.message}"))
+                .build()
+        }
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -247,7 +298,6 @@ class PointOfInterestResource (
             }
         }
     }
-
 
     /**
      * Méthode PUT pour mettre à jour un POI existant avec une zone polygonale et une coordonnée définies par WKT.

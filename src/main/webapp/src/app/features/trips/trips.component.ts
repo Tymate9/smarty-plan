@@ -67,7 +67,6 @@ import {NgIf} from "@angular/common";
   standalone: true,
   imports: [
     ProgressSpinner,
-    Calendar,
     TripListComponent,
     Button,
     TabPanel,
@@ -89,7 +88,7 @@ import {NgIf} from "@angular/common";
         justify-content: center;
         align-items: center;
         top: 0;
-        height: 80vh;
+        height: calc(100vh - 75px);
         background-color: rgba(0, 0, 0, 60%);
         width: 100%;
         font-size: 1.5rem;
@@ -134,6 +133,14 @@ import {NgIf} from "@angular/common";
         }
       }
     }
+    ::ng-deep .p-tablist-content {
+      z-index: 10000;
+      padding: 5px;
+      height: 60px;
+      align-items: center;
+      display: flex;
+    }
+
     :host ::ng-deep .p-tablist-tab-list
     {
       z-index: 999 !important;
@@ -142,7 +149,7 @@ import {NgIf} from "@angular/common";
     }
     :host ::ng-deep .p-tabpanels
     {
-      padding: 10px 0px 10px 0px !important;
+      padding: 0 !important;
     }
   `]
 })
@@ -154,8 +161,6 @@ export class TripsComponent implements OnInit {
   protected now = new Date();
   @ViewChild('calendar')
   calendar!: Calendar;
-
-
 
   get calendarDate(): string {
     return this.date;

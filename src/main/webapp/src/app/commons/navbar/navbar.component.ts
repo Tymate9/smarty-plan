@@ -108,7 +108,6 @@ export interface Option {
     .nav-buttons-row {
       display: flex;
       align-items: center;
-      margin-bottom: 5px;
     }
 
     /* Applique un margin-right et retire fond/bordures sur les p-button internes */
@@ -166,6 +165,18 @@ export interface Option {
       font-size: 0.75rem !important;
     }
 
+    ::ng-deep .p-menubar{
+      display: flex;
+      align-items: center;
+      min-height: 75px;
+      max-height: 75px;
+    }
+
+    ::ng-deep .p-menubar.p-component
+    {
+      background: transparent !important;
+      align-items: center;
+    }
   `],
   imports: [
     Button,

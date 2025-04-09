@@ -60,6 +60,9 @@ import {TableModule} from "primeng/table";
     th {
       background-color: #f2f2f2;
     }
+    p-table ::ng-deep .p-datatable>.p-datatable-table-container {
+      height: calc(100vh - 135px);
+    }
   `]
 })
 export class TripListComponent {

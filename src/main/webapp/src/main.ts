@@ -74,7 +74,8 @@ fetch('/api/config')
   .then((config) => {
     // Stocke la configuration dans la classe statique pour un accès global
     AppConfig.config = config;
-
+    console.log("Preset de base : ", Nora)
+    console.log("Preset de nous : ", NmPreset)
     // Démarrage de l'application Angular avec bootstrapApplication et configuration des providers
     bootstrapApplication(AppComponent, {
       providers: [

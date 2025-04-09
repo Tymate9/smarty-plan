@@ -4,7 +4,6 @@ import jakarta.enterprise.inject.spi.CDI
 import net.enovea.device.deviceData.DeviceDataStateMapper
 import net.enovea.device.deviceData.DeviceDataStateEntity
 import net.enovea.device.deviceData.DeviceDataStateDTO
-import net.enovea.device.deviceData.until
 import org.locationtech.jts.geom.Point
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
@@ -60,6 +59,7 @@ interface DeviceSummaryMapper {
         return dto.state
     }
 
+    // TODO(remplacer par une injection de dépendance)
     private fun mapDeviceDataStateToDto(entity: DeviceDataStateEntity?): DeviceDataStateDTO? {
         if (entity == null) return null
         return CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(entity)

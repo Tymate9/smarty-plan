@@ -15,7 +15,7 @@ interface DeviceDataMapper {
 
     fun toEntity(deviceDataDTO: DeviceDataDTO): DeviceEntity
 
+    //TODO(Injecter le mapper au lieux d'utiliser CDI)
     @Named("deviceDataStateMapper")
     fun toDeviceDataDTO(deviceDataState: DeviceDataStateEntity?): DeviceDataStateDTO? = deviceDataState?.let { CDI.current().select(DeviceDataStateMapper::class.java).get().toDto(deviceDataState) }
 }
-

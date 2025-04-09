@@ -52,6 +52,7 @@ data class DeviceVehicleInstallEntity (
         const val ENTITY_NAME = "DeviceVehicleInstallEntity"
         const val TABLE_NAME = "device_vehicle_install"
 
+        // A déplacer dans VehicleEntity
         fun getActiveDevice(vehicleId: String, date: LocalDate): DeviceEntity? {
             // On convertit la date en Timestamp (début de journée)
             val startTimestamp = Timestamp.valueOf(date.atStartOfDay())

@@ -215,12 +215,12 @@ interface StatusCount {
           </td>
 
           <!-- 4. Dernière communication -->
-          <td class="custom-cell">
+          <td>
             {{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
 
           <!-- 5. Heure de départ -->
-          <td class="custom-cell">
+          <td>
             <span *ngIf="rowData.vehicle.firstTripStart; else notStarted">
               {{ rowData.vehicle.firstTripStart }}
             </span>
@@ -300,12 +300,12 @@ interface StatusCount {
           </td>
 
           <!-- 7. Distance totale -->
-          <td class="custom-cell">
+          <td>
             {{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km
           </td>
 
           <!-- 8. Bouton d'action -->
-          <td class="custom-cell">
+          <td>
             <p-button (onClick)="router.navigate(['trip'+(non_geoloc?'-non-geoloc':''), rowData.vehicle.id, today])"
                       icon="pi pi-calendar"
                       [style]="{ 'margin-right': '5px' }">
@@ -431,27 +431,27 @@ interface StatusCount {
       border-width: 0px;
       font-weight: 700 !important;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .DRIVING {
+    .DRIVING {
       background-color: #21A179;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .IDLE {
+    .IDLE {
       background-color: #FE8F2B;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .PARKED {
+    .PARKED {
       background-color: #C71400;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .NO_COM {
-      background-color: var(--gray-400);
+    .NO_COM {
+      background-color: #E0E0E0;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .UNPLUGGED {
-      background-color: var(--gray-400);
+    .UNPLUGGED {
+      background-color: #BDBDBD;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .DEFAULT {
+    .DEFAULT {
       background-color: #E5E5E5;
       color: white;
     }
@@ -607,11 +607,6 @@ interface StatusCount {
     }
     .dialog-footer button:hover {
       background-color: #8e001b;
-    }
-
-    .custom-cell {
-      display: flex;
-      gap: 5px;
     }
   `]}
 )
@@ -932,8 +927,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     document.body.removeChild(link);
   }
 
-
-
   convertToCSV(data: TeamHierarchyNode<dto.VehicleTableDTO>[]): string {
     const rows: string[] = [];
     const headers = [
@@ -981,6 +974,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   toggleTree(): void {
+    console.log('le vehicleTree',this.vehiclesTree)
     if (this.vehiclesTree && this.vehiclesTree.length > 0) {
       this.isExpanded = !this.isExpanded;
       this.vehiclesTree = this.vehiclesTree.map(vehicle => ({

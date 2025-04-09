@@ -151,15 +151,6 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                       <i *ngIf="event.originalEvent.sourceIndexes?.length > 0" class="pi pi-star-fill"
                          style="bottom:0.4rem; right:0rem; position: absolute; color: darkred;"></i>
                     </div>
-                    <!-- todo : a faire marcher -->
-                    <!-- Ajout du bouton pour les événements STOP sans POI existant -->
-                    <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 0.1vh; transform: scale(0.8);">
-                      <app-poi-navigation-button
-                        *ngIf="!non_geoloc"
-                        [buttonLabel]="'Créer POI'"
-                        [coords]="[event.lat + ',' + event.lng]">
-                      </app-poi-navigation-button>
-                    </div>
                   </div>
                   <div
                     class="p-3 bg-black-alpha-20 border-round cursor-pointer"
@@ -167,7 +158,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                    [style]="{marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
+                    [style]="{position: 'relative', marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
                   >
                     <div
                       *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">
@@ -205,13 +196,13 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                         {{ subEvent.description }}
                       </div>
                     </div>
-                    <!-- todo : refaire-->
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
-                    <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 0.1vh; transform: scale(0.8);">
+                    <div *ngIf="!event.originalEvent.poiLabel && !non_geoloc && (event.type === TimelineEventType.STOP || event.type === TimelineEventType.VEHICLE_PARKED || event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP)"
+                         style="position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
+                    >
                       <app-poi-navigation-button
-                        *ngIf="!non_geoloc"
                         [buttonLabel]="'Créer POI'"
-                        [coords]="[event.lat + ',' + event.lng]">
+                        [coords]="[event.originalEvent.lat + ',' + event.originalEvent.lng]">
                       </app-poi-navigation-button>
                     </div>
                   </div>
@@ -314,7 +305,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                    [style]="{marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
+                    [style]="{position: 'relative', marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
                   >
                     <div
                       *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">
@@ -355,12 +346,12 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                       </div>
                     </div>
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
-                    <!-- todo : a refaire -->
-                    <div *ngIf="event.eventType === TripEventType.STOP && !event.poiLabel" style="position: absolute; top: 0.3vh; right: 1vh; transform: scale(0.8);">
+                    <div *ngIf="!event.originalEvent.poiLabel && !non_geoloc && (event.type === TimelineEventType.STOP || event.type === TimelineEventType.VEHICLE_PARKED || event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP)"
+                         style="position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
+                    >
                       <app-poi-navigation-button
-                        *ngIf="!non_geoloc"
                         [buttonLabel]="'Créer POI'"
-                        [coords]="[event.lat + ',' + event.lng]">
+                        [coords]="[event.originalEvent.lat + ',' + event.originalEvent.lng]">
                       </app-poi-navigation-button>
                     </div>
                   </div>
@@ -394,8 +385,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
     FormsModule,
     TabView,
     NgForOf,
-    PoiNavigationButtonComponent,
-    NgStyle
+    PoiNavigationButtonComponent
   ],
   styles: [`
     #trip-container {

@@ -2,10 +2,10 @@ package net.enovea
 
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
-import net.enovea.api.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
-import net.enovea.api.poi.PointOfInterestEntity
-import net.enovea.common.geo.GeoCodingService
-import net.enovea.common.geo.SpatialService
+import net.enovea.poi.PointOfInterestCategory.PointOfInterestCategoryEntity
+import net.enovea.poi.PointOfInterestEntity
+import net.enovea.spatial.GeoCodingService
+import net.enovea.spatial.SpatialService
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord

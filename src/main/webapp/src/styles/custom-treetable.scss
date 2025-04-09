@@ -1,0 +1,62 @@
+.dynamic-tt-parent-node {
+  background-color: #aa001f !important;
+  color: white !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 15px 15px 0 0 !important;
+  box-shadow: 0 2px 4px #0000001a !important;
+  clip-path: polygon(0% 100%, 0% 15%, 25% 15%, 27% 75%, 100% 75%, 100% 100%) !important;
+  line-height: 30px;
+}
+
+.simple-tt-parent-node {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid red !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  line-height: 30px;
+  padding: 5px;
+}
+
+.dynamic-tt-header td {
+  font-weight: 700 !important;
+  text-align: center !important;
+  background-color: #9E9E9E !important;
+  color: #ffffff !important;
+  border: 1px solid #dddddd !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.dynamic-tt-leaf {
+  background-color: var(--p-gray-200) !important;
+  font-weight: 600;
+  border: 1px solid #dddddd !important;
+
+  &:hover {
+    background-color: #f1f1f1 !important;
+    color: #000000 !important;
+  }
+}
+
+.dynamic-tt-togglerButton {
+  background: none !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  top: 3px;
+
+  svg {
+    background: #aa001f !important;
+    color: #ffffff !important;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    padding: 0.2rem;
+  }
+
+}

@@ -9,6 +9,13 @@ import {GeoJSONGeometry} from "wellknown";
 import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 import {Router} from "@angular/router";
+import {ButtonDirective, ButtonModule} from "primeng/button";
+import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {TabPanel, TabView} from "primeng/tabview";
+import {ProgressSpinner} from "primeng/progressspinner";
+import {InputText} from "primeng/inputtext";
+import {Select} from "primeng/select";
 
 @Component({
   selector: 'app-poi-popup',
@@ -20,7 +27,7 @@ import {Router} from "@angular/router";
           <div class="p-fluid">
             <div class="p-field">
               <label><h4>Dénomination :</h4></label>
-              <span>{{entity.client_code?? "0000"}}-{{ entity.client_label }}</span>
+              <span>{{ entity.client_code ?? "0000" }}-{{ entity.client_label }}</span>
             </div>
             <div class="p-field">
               <label><h4>Adresse :</h4></label>
@@ -32,7 +39,8 @@ import {Router} from "@angular/router";
             </div>
             <div class="p-field">
               <label><h4>Coordonnées :</h4></label>
-              <span>Latitude :  {{ entity.coordinate.coordinates[1] }} <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
+              <span>Latitude :  {{ entity.coordinate.coordinates[1] }}
+                <br/>Longitude : {{ entity.coordinate.coordinates[0] }}</span>
             </div>
           </div>
         </p-tabPanel>
@@ -47,20 +55,23 @@ import {Router} from "@angular/router";
           <div *ngIf="!loadingProximity && proximityVehicles.length > 0">
             <div *ngFor="let vehicle of proximityVehicles" class="vehicle-item">
               <div>
-                <strong>{{ vehicle.second.driver?.firstName }} {{ vehicle.second.driver?.lastName }}-{{ vehicle.second.licenseplate }}</strong>
+                <strong>{{ vehicle.second.driver?.firstName }} {{ vehicle.second.driver?.lastName }}
+                  -{{ vehicle.second.licenseplate }}</strong>
                 - {{ vehicle.second.category.label }}
                 <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
               </div>
               <div class="vehicle-actions">
-                <button pButton label="Zoom" icon="pi pi-search-plus"
-                        (click)="centerMapOnVehicle(vehicle.second)" style="background-color: #aa001f; border:#aa001f;"></button>
-                <button
-                  pButton
+                <p-button
+                  label="Zoom"
+                  icon="pi pi-search-plus"
+                  (click)="centerMapOnVehicle(vehicle.second)" >
+                </p-button>
+                <p-button
                   [label]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('vehicle-' + vehicle.second.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-                  style="background-color: #515151; border:#515151"
-                ></button>
+                  styleClass="custom-gray-button">
+                </p-button>
               </div>
             </div>
           </div>
@@ -82,10 +93,10 @@ import {Router} from "@angular/router";
                 <strong>{{ vehicle.licenseplate }}</strong> - {{ vehicle.category.label }}
               </div>
               <div>
-                Équipe: {{ vehicle.team.label }} ({{ vehicle.team.category.label }})
+                Équipe: {{ vehicle.team?.label }} ({{ vehicle.team?.category?.label }})
               </div>
               <div>
-                Dernière communication: {{ vehicle.device.lastCommunicationDate | date:'short' }}
+                Dernière communication: {{ vehicle.device?.lastCommunicationDate | date:'short' }}
               </div>
             </div>
           </div>
@@ -99,14 +110,18 @@ import {Router} from "@angular/router";
               <div class="p-field">
                 <label for="label">Code client : </label>
                 <input
+                  pInputText
                   type="text"
                   id="label-code"
                   [(ngModel)]="updatedPoi.clientCode"
                   name="label-code"
                   required
                 />
+              </div>
+              <div class="p-field">
                 <label for="label">Nom :</label>
                 <input
+                  pInputText
                   type="text"
                   id="label"
                   [(ngModel)]="updatedPoi.clientLabel"
@@ -116,19 +131,20 @@ import {Router} from "@angular/router";
               </div>
               <div class="p-field">
                 <label for="category">Type : </label>
-                <select
-                  id="category"
-                  [(ngModel)]="selectedCategoryId"
-                  name="category"
-                  required
-                >
-                  <option [ngValue]="null" disabled>Sélectionner une catégorie</option>
-                  <option *ngFor="let category of categoryOptions" [ngValue]="category.value">
-                    {{ category.label }}
-                  </option>
-                </select>
+                <div class="p-field">
+                  <p-select
+                    id="category"
+                    [(ngModel)]="selectedCategoryId"
+                    optionLabel="label"
+                    optionValue="value"
+                    name="category"
+                    required
+                    [options]="categoryOptions"
+                  >
+                  </p-select>
+                </div>
                 <small
-                  *ngIf="!poiForm.form.controls['category']?.valid && poiForm.form.controls['category']?.touched"
+                  *ngIf="!poiForm.form.controls['category']?.valid && poiForm.form.controls['category']?.get('touched')"
                   class="error-message"
                 >
                   Veuillez sélectionner une catégorie.
@@ -137,33 +153,27 @@ import {Router} from "@angular/router";
             </div>
             <div class="form-actions">
               <div class="button-row">
-                <button
-                  pButton
+                <p-button
                   type="submit"
                   label="Mettre à jour"
                   icon="pi pi-check"
                   [disabled]="!poiForm.form.valid"
-                  style="background-color: #aa001f; border: #aa001f;"
-
-                ></button>
-                <button
-                  pButton
+                ></p-button>
+                <p-button
                   type="button"
                   label="Supprimer le POI"
                   icon="pi pi-trash"
-                  (click)="deletePOI()"
-                  style="background-color: #aa001f; border: #aa001f;"
-                ></button>
+                  (onClick)="deletePOI()"
+                ></p-button>
               </div>
               <div class="button-row">
-                <button
-                  pButton
+                <p-button
                   type="button"
                   label="Aller à l'Édition POI"
                   icon="pi pi-external-link"
-                  (click)="navigateToPoiEdit()"
-                  style="background-color: #515151; border: #515151;"
-                ></button>
+                  (onClick)="navigateToPoiEdit()"
+                  styleClass="custom-gray-button"
+                ></p-button>
               </div>
             </div>
           </form>
@@ -171,16 +181,29 @@ import {Router} from "@angular/router";
       </p-tabView>
     </div>
   `,
+  standalone: true,
+  imports: [
+    NgIf,
+    FormsModule,
+    NgForOf,
+    TabPanel,
+    ProgressSpinner,
+    DecimalPipe,
+    TabView,
+    DatePipe,
+    ButtonModule,
+    InputText,
+    Select
+  ],
   styles: [`
     .form-actions .button-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 10px;
     }
+
     .form-actions .button-row button:last-child {
       margin-right: 0;
-    }
-    .poi-popup {
     }
     .vehicle-item {
       border: 1px solid #ccc;
@@ -188,31 +211,38 @@ import {Router} from "@angular/router";
       margin-bottom: 10px;
       border-radius: 5px;
     }
+
     .vehicle-actions {
       margin-top: 10px;
       display: flex;
       gap: 5px;
     }
+
     .form-actions {
       margin-top: 20px;
       display: flex;
       flex-direction: column;
     }
+
     .button-row {
       display: flex;
       gap: 10px;
     }
+
     .custom-spinner {
       display: block;
       margin: 0 auto;
     }
+
     .error-message {
       color: red;
       font-size: 0.8rem;
     }
+
     .required {
       color: red;
     }
+
     .p-field select {
       width: 100%;
       padding: 0.5rem;

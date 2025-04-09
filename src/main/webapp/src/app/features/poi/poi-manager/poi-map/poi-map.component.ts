@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
 import {MapManager, MapManagerConfig} from "../../../../core/cartography/map/map.manager";
 import * as L from 'leaflet';
 import 'leaflet-draw';
@@ -14,6 +14,7 @@ import {ActivatedRoute} from "@angular/router";
 import {PoiService} from "../../poi.service";
 import {LatLng, LatLngExpression} from "leaflet";
 import {TilesService} from "../../../../services/tiles.service";
+import {PoiSearchComponent} from "../poi-search/poi-search.component";
 
 
 @Component({
@@ -21,7 +22,7 @@ import {TilesService} from "../../../../services/tiles.service";
   template: `
     <div class="transparent-blur-bg" style="width: 100%">
       <div class="poi-map-container">
-        <div class="map-container" id="map"></div>
+        <div class="map-container" id="poiEdition-map"></div>
         <div class="side-panel">
           <app-poi-search
             [poiCategories]="poiCategories"
@@ -41,6 +42,11 @@ import {TilesService} from "../../../../services/tiles.service";
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    PoiSearchComponent,
+    PoiListComponent
+  ],
   styles: [`
     :host ::ng-deep .poi-map-container {
       display: flex;
@@ -80,7 +86,7 @@ import {TilesService} from "../../../../services/tiles.service";
 
     /* Facultatif : si vous voulez un léger ombrage sur le side-panel */
     .side-panel {
-      box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
     }
 
     /* Annule le style inline height: 88vh qui est dans le composant,
@@ -146,23 +152,13 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
 
   private initMap(): void {
     const normandyCenter: L.LatLngExpression = [49.1817, 0.3714];
-    this.map = L.map('map', { zoomControl: true, zoomDelta: 1}).setView(normandyCenter, 9);
+    this.map = L.map('poiEdition-map', { zoomControl: true, zoomDelta: 1}).setView(normandyCenter, 9);
     this.map.setMaxZoom(18);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
     this.map.attributionControl.setPosition('bottomleft')
-    // this.tilesService.getTileUrls().subscribe(tileUrls => {
-    //   const baseLayers = {
-    //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
-    //     "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
-    //   };
-    //
-    //   L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
-    //
-    //   baseLayers["Carte routière"].addTo(this.map!);
-    // })
 
     this.mapManager = new MapManager(this.map, this.viewContainerRef, null!, new MapManagerConfig(false));
   }

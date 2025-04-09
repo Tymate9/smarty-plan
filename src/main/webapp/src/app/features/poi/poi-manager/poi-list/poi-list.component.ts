@@ -9,6 +9,15 @@ import {PointOfInterestForm, PoiService} from "../../poi.service";
 import {GeoJSONGeometry} from "wellknown";
 import * as wellknown from 'wellknown'
 import * as L from 'leaflet';
+import {FormsModule} from "@angular/forms";
+import {InputNumber} from "primeng/inputnumber";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
+import {ButtonDirective} from "primeng/button";
+import {InputText} from "primeng/inputtext";
+import {GeoJSON} from "leaflet";
+import {ConfirmationService} from "primeng/api";
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-poi-list',
@@ -24,8 +33,11 @@ import * as L from 'leaflet';
           <span class="poi-title">{{ poiPanel.poi.denomination }}</span>
           <span class="poi-address">{{ poiPanel.poi.address }}</span>
           <span class="expand-icon">{{ poiPanel.expanded ? '▼' : '►' }}</span>
-          <button pButton label="✖" class="delete-button"
-                  (click)="onRemovePanel(poiPanel); $event.stopPropagation();"></button>
+          <p-button
+            icon="pi pi-times"
+            class="delete-button"
+            (click)="onRemovePanel(poiPanel); $event.stopPropagation();">
+          </p-button>
         </div>
         <div class="poi-body" [hidden]="!poiPanel.expanded">
           <div>
@@ -52,24 +64,29 @@ import * as L from 'leaflet';
 
             <label>
               Catégorie:
-              <select [(ngModel)]="poiPanel.selectedCategoryId"
-                      (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"
-                      name="category{{poiPanel.poi.id}}"
-                      required>
-                <option *ngFor="let category of poiCategories" [ngValue]="category.id">
-                  {{ category.label }}
-                </option>
-              </select>
+              <p-select
+                [(ngModel)]="poiPanel.selectedCategoryId"
+                (ngModelChange)="onCategoryChange($event, poiPanel); poiPanel.isModified = true"
+                [options]="poiCategories"
+                optionLabel="label"
+                optionValue="id"
+                name="category{{poiPanel.poi.id}}"
+                required>
+              </p-select>
+
             </label>
 
             <label>
               Modifier :
-              <select [(ngModel)]="poiPanel.inputType"
-                      name="inputType{{poiPanel.poi.id}}"
-                      (ngModelChange)="poiPanel.isModified = true">
-                <option value="adresse">Adresse</option>
-                <option value="coordonnees">Coordonnées</option>
-              </select>
+              <p-select
+                [(ngModel)]="poiPanel.inputType"
+                (ngModelChange)="poiPanel.isModified = true"
+                [options]="inputTypeOptions"
+                optionLabel="label"
+                optionValue="value"
+                name="inputType{{poiPanel.poi.id}}">
+              </p-select>
+
             </label>
 
             <div *ngIf="poiPanel.inputType === 'adresse'">
@@ -107,30 +124,36 @@ import * as L from 'leaflet';
             <!-- Première zone de boutons (dessin) -->
             <div class="button-area">
               <!-- Définir un Polygone -->
-              <button pButton label="Définir un Polygone" type="button" icon="pi pi-pencil" (click)="startPolygonDrawing(poiPanel)">
+              <button pButton label="Définir un Polygone" type="button" icon="pi pi-pencil"
+                      (click)="startPolygonDrawing(poiPanel)">
               </button>
 
               <!-- Définir un Cercle (peut être masqué si class="hidden") -->
-              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle" (click)="startCircleDrawing(poiPanel)" class="hidden">
+              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle"
+                      (click)="startCircleDrawing(poiPanel)" class="hidden">
               </button>
 
               <!-- Définir un Cercle (via Dialog) -->
-              <button pButton  label="Définir un Cercle" type="button" icon="pi pi-circle" (click)="openEditAreaDialog(poiPanel)">
+              <button pButton label="Définir un Cercle" type="button" icon="pi pi-circle"
+                      (click)="openEditAreaDialog(poiPanel)">
               </button>
             </div>
 
             <!-- Seconde zone de boutons (CRUD) -->
             <div class="button-area">
               <!-- Ajouter POI -->
-              <button *ngIf="poiPanel.poi.id < 0" pButton label="Ajouter POI" type="button" icon="pi pi-plus" [disabled]="!isFormValid(poiPanel)" (click)="onCreate(poiPanel)">
+              <button *ngIf="poiPanel.poi.id < 0" pButton label="Ajouter POI" type="button" icon="pi pi-plus"
+                      [disabled]="!isFormValid(poiPanel)" (click)="onCreate(poiPanel)">
               </button>
 
               <!-- Mettre à jour -->
-              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Mettre à jour" type="button" icon="pi pi-check" [disabled]="!isFormValid(poiPanel)" (click)="onUpdate(poiPanel)">
+              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Mettre à jour" type="button" icon="pi pi-check"
+                      [disabled]="!isFormValid(poiPanel)" (click)="onUpdate(poiPanel)">
               </button>
 
               <!-- Supprimer -->
-              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Supprimer" type="button" icon="pi pi-trash" (click)="deletePoi(poiPanel)">
+              <button *ngIf="poiPanel.poi.id >= 0" pButton label="Supprimer" type="button" icon="pi pi-trash"
+                      (click)="deletePoi(poiPanel)">
               </button>
             </div>
           </div>
@@ -165,6 +188,18 @@ import * as L from 'leaflet';
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    FormsModule,
+    InputNumber,
+    NgClass,
+    NgForOf,
+    ButtonDirective,
+    InputText,
+    NgIf,
+    SelectModule,
+    ButtonModule
+  ],
   styles: [`
     /* Conteneur principal de la liste (scrollable) */
     .poi-list {
@@ -218,14 +253,6 @@ import * as L from 'leaflet';
 
     .expand-icon {
       font-size: 16px;
-    }
-
-    .delete-button {
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      color: #ff0000;
     }
 
     /* Corps du panel (zone "formulaire") */
@@ -353,15 +380,22 @@ export class PoiListComponent implements OnInit {
   @Input() poiPanels: PoiPanel[] = [];
   poiCategories: PointOfInterestCategoryEntity[] = [];
 
-  @Output() poiDrawingRequested = new EventEmitter<{ poi: dto.PointOfInterestEntity, shape: 'polygon'|'circle' }>();
+  @Output() poiDrawingRequested = new EventEmitter<{ poi: dto.PointOfInterestEntity, shape: 'polygon' | 'circle' }>();
   @Output() poiMarkerAdded = new EventEmitter<dto.PointOfInterestEntity>();
   @Output() poiMarkerUpdated = new EventEmitter<dto.PointOfInterestEntity>();
   @Output() poiMarkerRemoved = new EventEmitter<number>();
 
   constructor(
     private poiService: PoiService,
-    private geocodingService: GeocodingService
-  ) {}
+    private geocodingService: GeocodingService,
+    private confirmationService: ConfirmationService
+  ) {
+  }
+
+  inputTypeOptions = [
+    { label: 'Adresse', value: 'adresse' },
+    { label: 'Coordonnées', value: 'coordonnees' }
+  ];
 
   ngOnInit(): void {
     this.loadCategories();
@@ -385,7 +419,7 @@ export class PoiListComponent implements OnInit {
   onCategoryChange(categoryId: number, poiPanel: PoiPanel) {
     const selectedCategory = this.poiCategories.find(cat => cat.id === categoryId);
     if (selectedCategory) {
-      poiPanel.poi.category = { ...selectedCategory };
+      poiPanel.poi.category = {...selectedCategory};
       poiPanel.isModified = true;
     } else {
       console.warn(`Catégorie avec l'ID ${categoryId} non trouvée.`);
@@ -398,11 +432,11 @@ export class PoiListComponent implements OnInit {
   }
 
   startPolygonDrawing(poiPanel: PoiPanel) {
-    this.poiDrawingRequested.emit({ poi: poiPanel.poi, shape: 'polygon' });
+    this.poiDrawingRequested.emit({poi: poiPanel.poi, shape: 'polygon'});
   }
 
   startCircleDrawing(poiPanel: PoiPanel) {
-    this.poiDrawingRequested.emit({ poi: poiPanel.poi, shape: 'circle' });
+    this.poiDrawingRequested.emit({poi: poiPanel.poi, shape: 'circle'});
   }
 
   circleDialogVisible = false;
@@ -458,7 +492,7 @@ export class PoiListComponent implements OnInit {
           if (poiPanel.hasLocationChanged()) {
             const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
             if (confirmUpdate) {
-              const circle = L.circle([latitude, longitude], { radius: 20 });
+              const circle = L.circle([latitude, longitude], {radius: 20});
               const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
               const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
               poi.area = geoJsonPolygon;
@@ -483,7 +517,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -498,7 +532,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -529,7 +563,7 @@ export class PoiListComponent implements OnInit {
           if (poiPanel.hasLocationChanged()) {
             const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
             if (confirmUpdate) {
-              const circle = L.circle([latitude, longitude], { radius: 20 });
+              const circle = L.circle([latitude, longitude], {radius: 20});
               const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
               const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
               poi.area = geoJsonPolygon;
@@ -554,7 +588,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -569,7 +603,7 @@ export class PoiListComponent implements OnInit {
             if (poiPanel.hasLocationChanged()) {
               const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
               if (confirmUpdate) {
-                const circle = L.circle([lat, lng], { radius: 20 });
+                const circle = L.circle([lat, lng], {radius: 20});
                 const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
                 const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
                 poi.area = geoJsonPolygon;
@@ -622,16 +656,20 @@ export class PoiListComponent implements OnInit {
         const latitude = result.latitude;
         const longitude = result.longitude;
         const adresse = result.adresse
-        const defaultCategory = this.poiCategories.length > 0 ? { ...this.poiCategories[0] } : { id: 1, label: 'Default', color: '#000000' } as PointOfInterestCategoryEntity;
+        const defaultCategory = this.poiCategories.length > 0 ? {...this.poiCategories[0]} : {
+          id: 1,
+          label: 'Default',
+          color: '#000000'
+        } as PointOfInterestCategoryEntity;
 
-        const circle = L.circle([latitude, longitude], { radius: 50 });
+        const circle = L.circle([latitude, longitude], {radius: 50});
         const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
         const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
 
         const newPoi: PointOfInterestEntity = {
           id: -1,
-          client_code: "0000",
-          client_label: `${adresse}`,
+          client_code: "",
+          client_label: ``,
           denomination: "",
           category: defaultCategory,
           address: adresse,
@@ -669,16 +707,20 @@ export class PoiListComponent implements OnInit {
   }
 
   private createDraftPoiFromLatLong(address: string, latitude: number, longitude: number) {
-    const defaultCategory = this.poiCategories.length > 0 ? { ...this.poiCategories[0] } : { id: 1, label: 'Default', color: '#000000' } as PointOfInterestCategoryEntity;
+    const defaultCategory = this.poiCategories.length > 0 ? {...this.poiCategories[0]} : {
+      id: 1,
+      label: 'Default',
+      color: '#000000'
+    } as PointOfInterestCategoryEntity;
 
-    const circle = L.circle([latitude, longitude], { radius: 50 });
+    const circle = L.circle([latitude, longitude], {radius: 50});
     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
 
     const newPoi: PointOfInterestEntity = {
       id: -1,
-      client_code: "0000",
-      client_label: `${address}`,
+      client_code: "",
+      client_label: ``,
       denomination: "",
       category: defaultCategory,
       address: address,
@@ -703,7 +745,7 @@ export class PoiListComponent implements OnInit {
     }
 
     const poiData: PointOfInterestForm = {
-      clientCode: poi.client_code?? '0000',
+      clientCode: poi.client_code ?? '0000',
       clientLabel: poi.client_label,
       type: poi.category.id,
       WKTPoint: wktPoint,
@@ -716,7 +758,7 @@ export class PoiListComponent implements OnInit {
     this.poiService.createPOI(poiData).subscribe(
       (createdPoi) => {
         poi.id = createdPoi.id;
-        poi.client_code = createdPoi.client_code?? '0000';
+        poi.client_code = createdPoi.client_code ?? '0000';
         poi.client_label = createdPoi.client_label;
         poi.category = createdPoi.category;
         poi.address = createdPoi.address;
@@ -733,7 +775,17 @@ export class PoiListComponent implements OnInit {
       },
       (error) => {
         console.error('Erreur lors de la création du POI :', error);
-        alert('Erreur lors de la création du POI. Veuillez réessayer.');
+        // Par défaut, un message générique
+        let errorMsg = "Erreur lors de la création du POI. Veuillez réessayer.";
+        // Si le back-end renvoie une erreur structurée dans error.error.error, l'utiliser
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        }
+        this.confirmationService.confirm({
+          message: errorMsg,
+          header: "Erreur lors de la création du nouveaux POI.",
+          icon: "pi pi-exclamation-triangle",
+        });
       }
     );
   }
@@ -747,12 +799,12 @@ export class PoiListComponent implements OnInit {
     }
 
     const poiData: PointOfInterestForm = {
-      clientCode: poi.client_code?? '0000',
+      clientCode: poi.client_code ?? '0000',
       clientLabel: poi.client_label,
       type: poi.category.id,
       WKTPoint: wktPoint,
       WKTPolygon: wktPolygon,
-      adresse:poi.address
+      adresse: poi.address
     };
 
     this.poiService.updatePOI(poi.id, poiData).subscribe(

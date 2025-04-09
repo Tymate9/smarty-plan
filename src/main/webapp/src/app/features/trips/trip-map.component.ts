@@ -10,13 +10,22 @@ import {TimelineEventDTO, TimelineEventsDTO, TimelineEventType} from "./timeline
 import TripEventsDTO = dto.TripEventsDTO;
 import TripStatus = dto.TripStatus;
 import TripEventType = dto.TripEventType;
+import {NgForOf, NgIf, NgStyle} from "@angular/common";
+import {PrimeTemplate} from "primeng/api";
+import {Timeline} from "primeng/timeline";
+import {TabPanel, TabView} from "primeng/tabview";
+import {Card} from "primeng/card";
+import {ToggleButton} from "primeng/togglebutton";
+import {FormsModule} from "@angular/forms";
+import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-navigation-button.component";
 
 
 @Component({
   selector: 'app-trip-map',
   template: `
     <div id="trip-container">
-      <div id="map"></div>
+      <div id="map" [style.visibility]="isMapVisible ? 'visible' : 'hidden'"></div>
+      <div id="map-non-geoloc" *ngIf="non_geoloc">Trajets non géolocalisés pour ce véhicule et ce jour.</div>
       <div id="side-panel" class="h-screen p-4 {{ showSidePanel ? 'show' : 'hide'}}">
         <p-toggleButton
           [(ngModel)]="showSidePanel"
@@ -149,7 +158,7 @@ import TripEventType = dto.TripEventType;
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                    [style]="{marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
+                    [style]="{position: 'relative', marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
                   >
                     <div
                       *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">
@@ -186,6 +195,15 @@ import TripEventType = dto.TripEventType;
                       <div *ngFor="let subEvent of event.originalEvent.subTripEvents">
                         {{ subEvent.description }}
                       </div>
+                    </div>
+                    <!-- Ajout du bouton pour les événements STOP sans POI existant -->
+                    <div *ngIf="!event.originalEvent.poiLabel && !non_geoloc && (event.type === TimelineEventType.STOP || event.type === TimelineEventType.VEHICLE_PARKED || event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP)"
+                         style="position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
+                    >
+                      <app-poi-navigation-button
+                        [buttonLabel]="'Créer POI'"
+                        [coords]="[event.originalEvent.lat + ',' + event.originalEvent.lng]">
+                      </app-poi-navigation-button>
                     </div>
                   </div>
                 </ng-template>
@@ -287,7 +305,7 @@ import TripEventType = dto.TripEventType;
                     (mouseenter)="onTripEventMouseEnter(event)"
                     (mouseleave)="onTripEventMouseLeave(event)"
                     (click)="onTripEventClick(event)"
-                    [style]="{marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
+                    [style]="{position: 'relative', marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
                   >
                     <div
                       *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">
@@ -327,6 +345,15 @@ import TripEventType = dto.TripEventType;
                         {{ subEvent.description }}
                       </div>
                     </div>
+                    <!-- Ajout du bouton pour les événements STOP sans POI existant -->
+                    <div *ngIf="!event.originalEvent.poiLabel && !non_geoloc && (event.type === TimelineEventType.STOP || event.type === TimelineEventType.VEHICLE_PARKED || event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP)"
+                         style="position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
+                    >
+                      <app-poi-navigation-button
+                        [buttonLabel]="'Créer POI'"
+                        [coords]="[event.originalEvent.lat + ',' + event.originalEvent.lng]">
+                      </app-poi-navigation-button>
+                    </div>
                   </div>
                 </ng-template>
               </p-timeline>
@@ -347,6 +374,19 @@ import TripEventType = dto.TripEventType;
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    NgIf,
+    PrimeTemplate,
+    Timeline,
+    TabPanel,
+    Card,
+    ToggleButton,
+    FormsModule,
+    TabView,
+    NgForOf,
+    PoiNavigationButtonComponent
+  ],
   styles: [`
     #trip-container {
       overflow-x: hidden;
@@ -364,6 +404,22 @@ import TripEventType = dto.TripEventType;
           margin-top: 70px;
         }
       }
+    }
+
+    #map-non-geoloc {
+      height: 80vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      text-align: center;
+      padding-top: 20%;
+      padding-right: 20%;
+      font-size: x-large;
+      color: grey;
+      z-index: 2;
     }
 
     #side-panel {
@@ -387,7 +443,7 @@ import TripEventType = dto.TripEventType;
       }
 
       &.hide {
-        margin-left: -38px;
+        margin-left: -3rem;
       }
 
       &.show {
@@ -395,31 +451,12 @@ import TripEventType = dto.TripEventType;
       }
 
       #side-panel-toggle {
-        position: relative;
-        margin-top: 10%;
-        width: 39px;
+        width: 2rem;
 
-
-        ::ng-deep .p-element.p-button.p-togglebutton.p-component.p-button-icon-only.p-highlight {
-          background-color: #aa001f !important;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
+        ::ng-deep .p-togglebutton-label {
+          display:none;
         }
-
-        ::ng-deep .p-element.p-button.p-togglebutton.p-component.p-button-icon-only {
-          background-color: #aa001f !important;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
-        }
-
-        ::ng-deep .pi.p-button-icon.p-button-icon-left.pi-angle-left {
-          color: white !Important;
-        }
-
       }
-
       .trip-dot {
         width: 10px;
         height: 10px;
@@ -474,21 +511,17 @@ import TripEventType = dto.TripEventType;
         margin: 0.5rem;
         width: 28%;
         text-align: center;
-        border-radius: 5px;
-        font-weight: bold;
-        font-size: 1.0rem;
 
         .p-card {
           height: 15vh;
         }
 
         .p-card-title {
-          font-size: 0.7rem;
           background-color: lightgray;
-          margin: -1rem;
+          margin: -1.25rem;
           padding: .5rem 0;
           border-radius: 5px 5px 0 0;
-          font-weight: bold;
+          height: 2.5rem;
         }
       }
     }
@@ -496,6 +529,7 @@ import TripEventType = dto.TripEventType;
     #trips-timeline {
       overflow-y: auto;
       height: 60%;
+      padding-left:15px;
 
       ::ng-deep {
         .p-timeline-event-content .trip-event>div:first-child {
@@ -545,11 +579,22 @@ export class TripMapComponent {
   private map: L.Map | null = null;
   private featureGroup: L.FeatureGroup = L.featureGroup();
 
+  protected isMapVisible = true
 
+  non_geoloc : boolean = false;
   constructor(
     protected tripsService: TripsService,
     protected tilesService: TilesService
   ) {
+    this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
+    console.log("=== trip-map.component.ts constructor")
+  }
+
+  @Input() set tripGeoloc(geoloc : boolean | null){
+    if(geoloc == null){
+      return;
+    }
+    this.isMapVisible = geoloc
   }
 
   @Input() set tripData(tripEventsDTO: TripEventsDTO | null) {
@@ -593,17 +638,6 @@ export class TripMapComponent {
 
       // add gmaps redirect control
       GeoUtils.getGMapsRedirectControl(this.map).addTo(this.map);
-
-      // this.tilesService.getTileUrls().subscribe(tileUrls => {
-      //   const baseLayers = {
-      //     "Carte routière": L.tileLayer(tileUrls.roadmapUrl).on('tileerror', this.tilesService.onTileError),
-      //     "Satellite": L.tileLayer(tileUrls.satelliteUrl).on('tileerror', this.tilesService.onTileError),
-      //   };
-      //
-      //   L.control.layers(baseLayers, {}, {position: "bottomleft"}).addTo(this.map!);
-      //
-      //   baseLayers["Carte routière"].addTo(this.map!);
-      // })
     }
 
     tripEventsDTO?.tripEvents?.forEach(tripEvent => {

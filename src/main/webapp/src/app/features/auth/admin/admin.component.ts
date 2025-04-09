@@ -9,8 +9,8 @@ import { HttpClient } from '@angular/common/http';
       <p>{{ message }}</p>
     </div>
   `,
-  styles: [
-  ]
+  standalone: true,
+  styles: []
 })
 export class AdminComponent implements OnInit {
   message: string = '';

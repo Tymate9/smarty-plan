@@ -12,8 +12,13 @@ import {FilterService} from "../../commons/navbar/filter.service";
 import {LayerEvent, LayerEventType} from "../../core/cartography/layer/layer.event";
 import {NotificationService} from "../../commons/notification/notification.service";
 import {TilesService} from "../../services/tiles.service";
-import {TeamService} from "../vehicle/team.service";
+import {Button} from "primeng/button";
+import {NgClass, NgIf} from "@angular/common";
+import {TeamService} from "../teams/team.service";
 import Range = dto.Range;
+import {
+  ScrollingInfoBannerComponent
+} from "../../commons/app-scrolling-info-banner/app-scrolling-info-banner.component";
 
 
 @Component({
@@ -28,21 +33,26 @@ import Range = dto.Range;
       <p-button
         label="Alerting véhicules"
         icon="{{ isCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up' }}"
-        [raised]="true" severity="info"
         (onClick)="toggleDiv()"
-        styleClass="custom-button-red">
+        >
       </p-button>
-      <p-button label="Mettre à jour les positions" [raised]="true" severity="info" (click)="refreshVehiclePositions()"
-                styleClass="custom-button-red"></p-button>
+      <p-button label="Mettre à jour les positions" (click)="refreshVehiclePositions()"></p-button>
     </div>
     <div [ngClass]="{ 'hidden': isCollapsed }" class="collapsible-content">
       <p>{{ noComVehicle }}</p>
       <p>{{ unpluggedVehicle }}</p>
     </div>
-    <div id="map"></div>
+    <div id="cartography-map"></div>
   `,
+  standalone: true,
+  imports: [
+    Button,
+    NgClass,
+    ScrollingInfoBannerComponent,
+    NgIf
+  ],
   styles: [`
-    #map {
+    #cartography-map {
       height: 87vh;
       width: 100%;
     }
@@ -55,13 +65,6 @@ import Range = dto.Range;
       padding: 10px;
       border: 1px solid #ddd;
       background-color: var(--gray-100);
-    }
-
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button-red {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      font-weight: 600;
     }
   `]
 })
@@ -97,8 +100,14 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Annule les souscriptions
     this.filterSubscription?.unsubscribe();
     this.updateSubscription?.unsubscribe();
+
+    // IMPORTANT : retire la carte pour éviter "Map container is already initialized."
+    if (this.map) {
+      this.map.remove();
+    }
   }
 
   private loadLunchPauseMessage() {
@@ -112,8 +121,6 @@ export class MapComponent implements OnInit, OnDestroy {
       next: (message: string) => {
         // S'il est vide => on n'affiche pas le composant
         this.lunchPauseMessage = message.trim();
-        // On pourrait logger ou gérer autrement
-        console.log("Pause message: ", this.lunchPauseMessage);
       },
       error: (err) => {
         console.error("Erreur lors de la récupération du message de pause: ", err);
@@ -123,7 +130,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     const normandyCoordinates: L.LatLngExpression = [49.1829, -0.3707];
-    this.map = L.map('map', {zoomControl: true, zoomDelta:1}).setView(normandyCoordinates, 9);
+    this.map = L.map('cartography-map', {zoomControl: true, zoomDelta:1}).setView(normandyCoordinates, 9);
     this.map.setMaxZoom(18);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -202,7 +209,6 @@ export class MapComponent implements OnInit, OnDestroy {
       // Call getFilteredVehicles each time filters change
       this.vehicleService.getFilteredVehicles(this.filters.agencies, this.filters.vehicles, this.filters.drivers)
         .subscribe(filteredVehicles => {
-          console.log(filteredVehicles)
           // Handle the filtered vehicles here, for example by updating the map markers
           this.displayFilteredVehiclesOnMap(filteredVehicles);
           this.mapManager.handleLayerEvent(
@@ -280,8 +286,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
     const startHoursMinutes = startParisString.split(' ')[1].substring(0,5); // "HH:mm"
     const endHoursMinutes = endParisString.split(' ')[1].substring(0,5);     // "HH:mm"
-
-    console.log(`Now Paris: ${nowParisHoursMinutes}, Start: ${startHoursMinutes}, End: ${endHoursMinutes}`);
 
     // Comparaison uniquement basée sur les heures/minutes
     return (startHoursMinutes <= nowParisHoursMinutes && nowParisHoursMinutes <= endHoursMinutes);

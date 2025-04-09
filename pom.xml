@@ -237,6 +237,13 @@
             <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
         </dependency>
 
+        <!-- hibernate validator -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.2.Final</version>
+        </dependency>
+
         <!-- CSVImport -->
 
         <dependency>
@@ -393,9 +400,15 @@
                 <configuration>
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
-                        <pattern>net.enovea.api.*.*Entity</pattern>
-                        <pattern>net.enovea.api.*.*DTO</pattern>
-                        <pattern>net.enovea.dto.*DTO</pattern>
+<!--                        <pattern>net.enovea.api.*.*Entity</pattern>-->
+<!--                        <pattern>net.enovea.api.*.*DTO</pattern>-->
+<!--                        <pattern>net.enovea.dto.*DTO</pattern>-->
+                        <pattern>net.enovea.*.*Entity</pattern>
+                        <pattern>net.enovea.*.*.*Entity</pattern>
+                        <pattern>net.enovea.*.*DTO</pattern>
+                        <pattern>net.enovea.*.*.*DTO</pattern>
+                        <pattern>net.enovea.*.*Form</pattern>
+                        <pattern>net.enovea.*.*.*Form</pattern>
                     </classPatterns>
                     <customTypeMappings>
                         <mapping>org.locationtech.jts.geom.Point:custom.GeoPoint</mapping>

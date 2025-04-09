@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
+import {MapComponent} from "../map/map.component";
 
 @Component({
   selector: 'app-cartography',
@@ -8,6 +9,10 @@ import {FilterService} from "../../commons/navbar/filter.service";
       <app-map></app-map>
     </div>
   `,
+  standalone: true,
+  imports: [
+    MapComponent
+  ],
   styles: [`
     h1 {
       margin-bottom: 20px;

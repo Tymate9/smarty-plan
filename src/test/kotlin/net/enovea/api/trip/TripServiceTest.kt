@@ -4,14 +4,19 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import net.enovea.api.poi.PointOfInterestEntity
-import net.enovea.common.geo.SpatialService
+import net.enovea.poi.PointOfInterestEntity
+import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
+import net.enovea.spatial.SpatialService
+import net.enovea.trip.TripDTO
+import net.enovea.trip.TripService
+import net.enovea.trip.TripStatus
 import java.time.LocalDateTime
 
 class TripServiceTest : StringSpec({
 
     val tripRepository = mockk<TripRepository>()
     val spatialService = mockk<SpatialService>()
+    val vehicleStatsRepository = mockk<VehicleStatsRepository>()
     val tripService = TripService(tripRepository, spatialService)
 
     "computeTripMapDTO should return correct TripMapDTO" {
@@ -43,7 +48,7 @@ class TripServiceTest : StringSpec({
         every { spatialService.getNearestEntityWithinArea(any(), PointOfInterestEntity :: class) } returns null
         every { spatialService.getAddressFromEntity(any()) } returns "Some Address"
 
-        val result = tripService.computeTripEventsDTO(vehicleId, date)
+        val result = tripService.computeTripEventsDTO(vehicleId, date).second
 
         result?.vehicleId shouldBe vehicleId
         result?.tripAmount shouldBe 1

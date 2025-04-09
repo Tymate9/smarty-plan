@@ -5,6 +5,15 @@ import {dto} from "../../../habarta/dto";
 import TripEventsDTO = dto.TripEventsDTO;
 import {Calendar} from "primeng/calendar";
 import {downloadAsCsv} from "../../core/csv/csv.downloader";
+import {ProgressSpinner} from "primeng/progressspinner";
+import {TripListComponent} from "./trip-list.component";
+import {Button} from "primeng/button";
+import {TabPanel, TabView} from "primeng/tabview";
+import {TripMapComponent} from "./trip-map.component";
+import {PrimeTemplate} from "primeng/api";
+import {FormsModule} from "@angular/forms";
+import {NgIf} from "@angular/common";
+ import {DatePicker} from "primeng/datepicker";
 
 
 @Component({
@@ -16,7 +25,11 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
           <ng-template pTemplate="header">
             <i class="pi pi-map"></i>
           </ng-template>
-          <app-trip-map [tripData]="tripData"></app-trip-map>
+          <app-trip-map
+            [tripGeoloc]="tripGeoloc"
+            [tripData]="tripData"
+          >
+          </app-trip-map>
         </p-tabPanel>
         <p-tabPanel>
           <ng-template pTemplate="header">
@@ -26,21 +39,21 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         </p-tabPanel>
         <p-button id="download-csv-button" (click)="downloadCsv()"
                   title="Télécharger un CSV des trajets de la journée de ce véhicule"
-                  icon="pi pi-download"
-                  styleClass="custom-button"
-                  >
+                  icon="pi pi-download">
         </p-button>
-        <p-calendar #calendar
-                    id="date-selector"
-                    [(ngModel)]="calendarDate"
-                    [showIcon]="true"
-                    [readonlyInput]="true"
-                    [showButtonBar]="true"
-                    [maxDate]="now"
-                    dateFormat="yymmdd"
-                    [showOtherMonths]="true"
-                    [selectOtherMonths]="true"
-                    ></p-calendar>
+        <p-datepicker
+          #calendar
+          id="date-selector"
+          [(ngModel)]="calendarDate"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [maxDate]="now"
+          [readonlyInput]="true"
+          [showOtherMonths]="true"
+          [selectOtherMonths]="true"
+          dateFormat="yymmdd"
+          />
+
       </p-tabView>
       <div *ngIf="loading" class="full-screen-info">
         Données en cours de chargement...
@@ -51,10 +64,23 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    ProgressSpinner,
+    TripListComponent,
+    Button,
+    TabPanel,
+    TabView,
+    TripMapComponent,
+    PrimeTemplate,
+    FormsModule,
+    NgIf,
+    DatePicker
+  ],
   styles: [`
     #trip-container {
       position: relative;
-      z-index: 10000;
+      z-index: 0;
 
       .full-screen-info {
         position: absolute;
@@ -74,26 +100,13 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         .p-progress-spinner {
           width: 40px;
           height: 40px;
+
           .p-progress-spinner-circle {
             animation: p-progress-spinner-dash 1.5s ease-in-out infinite;
             stroke: #aa001f;
           }
         }
 
-        .p-button.p-component.p-button-icon-only.custom-button {
-          background-color: #aa001f !important;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
-
-        }
-
-        .p-calendar .p-button {
-          background-color: #aa001f;
-          border-color: #aa001f !important;
-          color: white !important;
-          font-weight: 600;
-        }
       }
 
       #download-csv-button {
@@ -110,23 +123,8 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
         transform: translateX(-50%);
         z-index: 10001;
 
+
         ::ng-deep {
-          .p-datepicker-trigger[aria-expanded=true] {
-            &:before {
-              content: "\\e90b";
-              font-family: primeicons;
-              speak: none;
-              font-style: normal;
-              font-weight: 400;
-              font-variant: normal;
-              text-transform: none;
-            }
-
-            calendaricon {
-              display: none;
-            }
-          }
-
           .p-datepicker {
             top: 110%;
             left: 50%;
@@ -134,30 +132,24 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
           }
         }
       }
+    }
+    ::ng-deep .p-tablist-content {
+      z-index: 10000;
+      padding: 5px;
+      height: 60px;
+      align-items: center;
+      display: flex;
+    }
 
-      ::ng-deep {
-        .p-tabview-nav-container {
-          z-index: 10000;
-          padding: 5px;
-          height: 60px;
-          align-items: center;
-          display: flex;
-        }
-
-        .p-tabview-nav {
-          background: transparent;
-          border: none;
-
-          .p-tabview-nav-link {
-            margin-left: 5px;
-            border-radius: 10px;
-          }
-        }
-
-        .p-tabview-panels {
-          padding: 0;
-        }
-      }
+    :host ::ng-deep .p-tablist-tab-list
+    {
+      z-index: 999 !important;
+      background-color: transparent !important;
+      border:none !important;
+    }
+    :host ::ng-deep .p-tabpanels
+    {
+      padding: 0 !important;
     }
   `]
 })
@@ -175,13 +167,15 @@ export class TripsComponent implements OnInit {
   }
 
   set calendarDate(date: Date) {
+    const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
     date.setHours(3);
     this.loading = true;
-    this.router.navigate(['/trip', this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
+    this.router.navigate(['/trip'+(nonGeolocalized?'-non-geoloc':''), this.vehicleId, date.toISOString().slice(0, 10).replaceAll('-', '')])
   }
 
   protected tripData: TripEventsDTO | null = null;
   protected loading: boolean = true;
+  public tripGeoloc:boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -203,7 +197,8 @@ export class TripsComponent implements OnInit {
     this.tripsService.getTripByDateAndVehicle(this.vehicleId, this.date).subscribe({
       next: (data) => {
         this.loading = false;
-        this.tripData = data;
+        this.tripData = data.tripEvents;
+        this.tripGeoloc = data.geolocDay;
       },
       error: (error) => {
         console.error('Erreur lors de la récupération du trajet:', error);
@@ -232,7 +227,8 @@ export class TripsComponent implements OnInit {
         tripEvent.eventType === dto.TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-',
         tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance || 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
       ].join(',')) || [];
-    downloadAsCsv([headers.join(','), ...dataRows], `trips_${this.vehicleId}_${this.date}.csv`);
+    downloadAsCsv([headers.join(','), ...dataRows], `trips_` +
+      (this.tripGeoloc ? `` : `non_geoloc_`) + `${this.vehicleId}_${this.date}.csv`);
   }
 
   protected hideCalendar(event: Event) {

@@ -3,6 +3,14 @@ import {dto} from "../../../../../habarta/dto";
 import PointOfInterestEntity = dto.PointOfInterestEntity;
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import {PoiService} from "../../poi.service";
+import {InputNumber} from "primeng/inputnumber";
+import {FormsModule} from "@angular/forms";
+import {ButtonDirective, ButtonModule} from "primeng/button";
+import {NgIf} from "@angular/common";
+import {SelectButton} from "primeng/selectbutton";
+import {AutoComplete} from "primeng/autocomplete";
+import {InputText} from "primeng/inputtext";
+
 
 @Component({
   selector: 'app-poi-search',
@@ -15,7 +23,7 @@ import {PoiService} from "../../poi.service";
           [(ngModel)]="searchQuery"
           [suggestions]="filteredPois"
           (completeMethod)="searchPois($event)"
-          field="client_label"
+          optionLabel="denomination"
           placeholder="Rechercher un POI"
           (onSelect)="onPoiSelected($event)"
           [minLength]="2"
@@ -32,15 +40,16 @@ import {PoiService} from "../../poi.service";
           [(ngModel)]="inputType"
           optionLabel="label"
           optionValue="value"
+          [allowEmpty]="false"
         ></p-selectButton>
       </div>
 
       <div class="form-group" *ngIf="inputType === 'adresse'">
         <input
+          pInputText
           type="text"
           [(ngModel)]="newPoiAddress"
           placeholder="Entrez une adresse"
-          class="basic-input"
         />
       </div>
 
@@ -57,7 +66,6 @@ import {PoiService} from "../../poi.service";
             [maxFractionDigits]="5"
             placeholder="Latitude"
             [showButtons]="false"
-            class="basic-input"
           ></p-inputNumber>
         </div>
         <div class="form-group">
@@ -72,21 +80,30 @@ import {PoiService} from "../../poi.service";
             [maxFractionDigits]="5"
             [showButtons]="false"
             placeholder="Longitude"
-            class="basic-input"
+
           ></p-inputNumber>
         </div>
       </div>
 
-      <button
-        pButton
-        type="button"
+      <p-button
         label="Ajouter un brouillon de POI"
         (click)="addNewPoi()"
         [disabled]="isAddPoiDisabled()"
-        class="basic-button"
-      ></button>
+        class="basic-button">
+      </p-button>
     </div>
   `,
+  standalone: true,
+  imports: [
+    InputNumber,
+    FormsModule,
+    ButtonDirective,
+    NgIf,
+    SelectButton,
+    AutoComplete,
+    InputText,
+    ButtonModule
+  ],
   styles: [`
     :host ::ng-deep .search-section {
       background-color: #f9f9f9;
@@ -94,7 +111,7 @@ import {PoiService} from "../../poi.service";
       border-radius: 4px;
       padding: 12px;
       position: relative;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -115,49 +132,11 @@ import {PoiService} from "../../poi.service";
       margin-bottom: 10px;
     }
 
-    /* Champs input de base */
-    :host ::ng-deep .basic-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 6px 8px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      transition: border-color 0.2s ease;
-    }
-    :host ::ng-deep .basic-input:focus {
-      outline: none;
-      border-color: #007ad9; /* Bleu discret au focus */
-    }
-
     /* Organisation verticale pour les champs coords */
     :host ::ng-deep .coords-fields-vertical {
       display: flex;
       flex-direction: column;
       gap: 10px;
-    }
-
-    /* Bouton principal (rouge #aa001f) */
-    :host ::ng-deep .basic-button {
-      width: 100%;
-      padding: 10px;
-      font-size: 14px;
-      text-align: center;
-      box-sizing: border-box;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background-color: #aa001f;  /* Rouge principal */
-      color: #fff;
-      font-weight: 600;
-      transition: background-color 0.2s ease;
-    }
-    :host ::ng-deep .basic-button:hover {
-      background-color: #8e001b;  /* Rouge plus sombre au survol */
-    }
-    :host ::ng-deep .basic-button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
     }
 
     /* Panel d’auto-complétion */
@@ -167,23 +146,9 @@ import {PoiService} from "../../poi.service";
       background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       max-height: 200px;
       overflow-y: auto;
-    }
-
-    /* Ajustements éventuels du selectButton PrimeNG */
-    :host ::ng-deep .p-selectbutton .p-button {
-      border-radius: 0;
-      background-color: #e0e0e0;
-      color: #333;
-      border: 1px solid #ccc;
-    }
-
-    :host ::ng-deep .p-selectbutton .p-button.p-highlight {
-      background-color: #aa001f;
-      color: #fff;
-      border-color: #8e001b;
     }
 
     /* Label global */

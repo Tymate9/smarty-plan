@@ -35,12 +35,6 @@ import {SelectButton} from "primeng/selectbutton";
         appendTo="body"
       >
       </p-datepicker>
-
-      <p-button
-        icon="pi pi-search"
-        (click)="fetchVehicleStats()"
-        >
-      </p-button>
       <p-selectButton
         [options]="inputVehicleOptions"
         [(ngModel)]="vehiclesTypeList"
@@ -49,6 +43,11 @@ import {SelectButton} from "primeng/selectbutton";
         [multiple]="true"
         (ngModelChange)="onVehicleSelectionChange()"
       ></p-selectButton>
+      <p-button
+        icon="pi pi-search"
+        (click)="fetchVehicleStats()"
+      >
+      </p-button>
     </div>
 
   `,

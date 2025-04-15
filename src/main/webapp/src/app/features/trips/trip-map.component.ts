@@ -160,7 +160,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     (click)="onTripEventClick(event)"
                     [style]="{position: 'relative', marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
                   >
-                    <div style="width: calc(100% - 5rem); white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; hyphens: auto;"
+                    <div style="width: calc(100% - 5.8rem); white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; hyphens: auto;"
                       *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">
                       {{ event.originalEvent.poiLabel ? event.originalEvent.poiLabel + ' ' + event.originalEvent.address : event.originalEvent.address }}
                     </div>
@@ -198,7 +198,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     </div>
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
                     <div  *ngIf="!event.originalEvent.poiLabel && !non_geoloc && (event.type === TimelineEventType.STOP || event.type === TimelineEventType.VEHICLE_PARKED || event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP)"
-                         style="position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
+                         style="max-width: 8rem; position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
                     >
                       <app-poi-navigation-button
                         [buttonLabel]="'Créer POI'"
@@ -307,7 +307,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     (click)="onTripEventClick(event)"
                     [style]="{position: 'relative', marginLeft: event.type === TimelineEventType.STOP_LUNCH_BREAKING || event.type === TimelineEventType.LUNCH_STOP_AFTER_START || event.type === TimelineEventType.LUNCH_STOP_BEFORE_STOP || event.type === TimelineEventType.LUNCH_STOP ? '2rem' : '0'}"
                   >
-                    <div style="width: calc(100% - 5rem); white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; hyphens: auto;"
+                    <div style="width: calc(100% - 5.8rem); white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; hyphens: auto;"
                       *ngIf="event.type !== TimelineEventType.LUNCH_STOP_AFTER_START && event.type !== TimelineEventType.LUNCH_STOP_BEFORE_STOP && event.type !== TimelineEventType.LUNCH_STOP">
                       {{ event.originalEvent.poiLabel ? event.originalEvent.poiLabel + ' ' + event.originalEvent.address : event.originalEvent.address }}
                     </div>
@@ -347,10 +347,10 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                     </div>
                     <!-- Ajout du bouton pour les événements STOP sans POI existant -->
                     <div *ngIf="!event.originalEvent.poiLabel && !non_geoloc && (event.type === TimelineEventType.STOP || event.type === TimelineEventType.VEHICLE_PARKED || event.type === TimelineEventType.LUNCH_STOP_BEFORE_START || event.type === TimelineEventType.LUNCH_STOP_AFTER_STOP)"
-                         style="position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
+                         style="max-width: 8rem; position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
                     >
                       <app-poi-navigation-button
-                        [buttonLabel]="'Créer POI'"
+                        [buttonLabel]="'Créer un POI'"
                         [coords]="[event.originalEvent.lat + ',' + event.originalEvent.lng]">
                       </app-poi-navigation-button>
                     </div>

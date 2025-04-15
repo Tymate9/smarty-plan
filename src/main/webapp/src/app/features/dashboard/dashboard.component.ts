@@ -87,7 +87,7 @@ interface StatusCount {
                  #treeTable
                  [value]="vehiclesTree"
                  [scrollable]="true"
-                 [tableStyle]="{'width': '96vw', 'margin': '0 auto' , 'table-layout' :'auto'}"
+                 [tableStyle]="{'width': '96vw', 'margin': '0 auto' , 'table-layout' :'fixed'}"
                  [resizableColumns]="true"
                  styleClass="p-treetable-gridlines">
 
@@ -305,7 +305,11 @@ interface StatusCount {
           </td>
 
           <!-- 8. Bouton d'action -->
-          <td>
+          <td [ngStyle]="{
+          'display': 'flex',
+          'justify-content': 'center',
+          'align-items': 'center'
+          }">
             <p-button (onClick)="router.navigate(['trip'+(non_geoloc?'-non-geoloc':''), rowData.vehicle.id, today])"
                       icon="pi pi-calendar"
                       [style]="{ 'margin-right': '5px' }">
@@ -425,6 +429,12 @@ interface StatusCount {
       clip-path: polygon(0% 100%, 0% 15%, 25% 15%, 27% 75%, 100% 75%, 100% 100%) !important;
       height: 50px;
       line-height: 50px;
+    }
+
+    :host ::ng-deep .p-treetable .p-treetable-tbody>tr>td {
+      text-align: start;
+      border-style: none;
+      border-width: 0 0 1px 0;
     }
     :host ::ng-deep .p-treetable.custom-tree-table .root-node td {
       padding: 12px;

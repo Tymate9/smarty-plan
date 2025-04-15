@@ -151,7 +151,10 @@ export class VehicleFormComponent implements OnInit {
       devices: null,
       teams: null,
       ranges: null,
-      lastPositionDate: null
+      lastPositionDate: null,
+      theoreticalConsumption: null,
+      mileage: null,
+      serviceDate: null
     };
     this.mode = 'create';
     this.buildFormDescription(this.vehicleEntity);
@@ -209,6 +212,30 @@ export class VehicleFormComponent implements OnInit {
           (opt: any) => opt.label,
           vehicleDto.category,
           'Sélectionnez une catégorie'
+        ),
+        new FormInput(
+          'theoreticalConsumption',
+          'number',
+          'Consommation théorique',
+          [VehicleValidator.theoreticalConsumption],
+          vehicleDto.theoreticalConsumption,
+          'ex: 12.34'
+        ),
+        new FormInput(
+          'mileage',
+          'number',
+          'Kilométrage',
+          [VehicleValidator.mileage],
+          vehicleDto.mileage,
+          'ex: 12345.67'
+        ),
+        new FormInput(
+          'serviceDate',
+          'date',
+          'Date de Mise en Service',
+          [VehicleValidator.serviceDate],
+          vehicleDto.serviceDate,
+          'Format : YYYY-MM-DD'
         )
       ];
 
@@ -220,7 +247,10 @@ export class VehicleFormComponent implements OnInit {
           engine: rawEntity.engine,
           energy: rawEntity.energy,
           validated: rawEntity.validated,
-          category: rawEntity.category?.id ?? null
+          category: rawEntity.category?.id ?? null,
+          theoreticalConsumption: rawEntity.theoreticalConsumption ?? null,
+          mileage: rawEntity.mileage ?? null,
+          serviceDate: rawEntity.serviceDate ?? null
         } as VehicleForm;
       };
 

@@ -11,6 +11,7 @@ import net.enovea.driver.DriverEntity
 import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
 import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
+import java.math.BigDecimal
 import java.time.LocalDate
 
 /**
@@ -64,9 +65,21 @@ data class VehicleEntity(
     @JoinColumn(name = "category_id")
     var category: VehicleCategoryEntity? = null,
 
+    // Consommation théorique (NUMERIC(10,2)), optionnel
+    @Column(name = "theoretical_consumption", precision = 10, scale = 2, nullable = true)
+    var theoreticalConsumption: BigDecimal? = null,
+
+    // Kilométrage (NUMERIC(10,2)), optionnel
+    @Column(name = "mileage", precision = 10, scale = 2, nullable = true)
+    var mileage: BigDecimal? = null,
+
+    // Date de mise en service (DATE), optionnel
+    @Column(name = "service_date", nullable = true)
+    var serviceDate: LocalDate? = null
+
+
 
     ) : PanacheEntityBase {
-
     fun retrieveVehicleDrivers(): List<VehicleDriverEntity> {
         return vehicleDrivers
     }

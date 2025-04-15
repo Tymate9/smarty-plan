@@ -129,6 +129,20 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
           asc ? valA.localeCompare(valB) : valB.localeCompare(valA),
       },
       {
+        field: 'phoneNumber',
+        header: 'Téléphone',
+        ascending: true,
+        comparator: (valA: string, valB: string, asc: boolean) =>
+          asc ? valA.localeCompare(valB) : valB.localeCompare(valA),
+      },
+      {
+        field: 'phoneComment',
+        header: 'Commentaire',
+        ascending: true,
+        comparator: (valA: string, valB: string, asc: boolean) =>
+          asc ? valA.localeCompare(valB) : valB.localeCompare(valA),
+      },
+      {
         header: 'Actions',
         isDynamic: true
       }
@@ -237,6 +251,8 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
         label: team.label,
         parentLabel: parentLabel,
         categoryLabel: team.category.label,
+        phoneNumber: team.phoneNumber || '',
+        phoneComment: team.phoneComment || '',
         dynamicComponents: {
           Actions: dynamicComps
         }
@@ -251,17 +267,20 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
       'ID',
       'Nom de l\'équipe',
       'Équipe parente',
-      'Catégorie'
+      'Catégorie',
+      'Téléphone',
+      'Commentaire'
     ];
   }
-
 
   convertToCsv(item: TeamDTO): string {
     const values = [
       item.id,
       item.label,
       item.parentTeam ? item.parentTeam.label : '',
-      item.category ? item.category.label : ''
+      item.category ? item.category.label : '',
+      item.phoneNumber || '',
+      item.phoneComment || ''
     ];
     return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
   }

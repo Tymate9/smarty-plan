@@ -330,6 +330,30 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
           asc ? valA.localeCompare(valB) : valB.localeCompare(valA)
       },
       {
+        field: 'theoreticalConsumption',
+        header: 'Consommation théorique',
+        ascending: true,
+        comparator: (valA: number, valB: number, asc: boolean) => {
+          if (asc) { return valA - valB;} else {return valB - valA;}
+        }
+      },
+      {
+        field: 'mileage',
+        header: 'Kilométrage',
+        ascending: true,
+        comparator: (valA: number, valB: number, asc: boolean) => {
+          if (asc) { return valA - valB;} else {return valB - valA;}
+        }
+      },
+      {
+        field: 'serviceDate',
+        header: 'Date MES',
+        ascending: true,
+        comparator: (valA: string, valB: string, asc: boolean) => {
+          if (asc) { return valA.localeCompare(valB);} else {return valB.localeCompare(valA);}
+        }
+      },
+      {
         header: 'Actions',
         isDynamic: true
       }
@@ -492,6 +516,9 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
         category: vehicle.category ? vehicle.category.label : '',
         validated: vehicle.validated ? "Actif" : "Inactif",
         parentId: currentTeamId,
+        theoreticalConsumption: vehicle.theoreticalConsumption,
+        mileage: vehicle.mileage,
+        serviceDate: vehicle.serviceDate,
         dynamicComponents: dynamicComponents
       },
       leaf: true,
@@ -529,7 +556,10 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       'Moteur',
       'Identifiant externe',
       'Plaque d\'immatriculation',
-      'Catégorie'
+      'Catégorie',
+      'Consommation théorique',
+      'Kilométrage',
+      'Date MES'
     ];
   }
 
@@ -540,10 +570,12 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       item.engine,
       item.externalId,
       item.licenseplate,
-      item.category?.label
+      item.category?.label,
+      item.theoreticalConsumption,
+      item.mileage,
+      item.serviceDate
     ];
     // Chaque valeur est entourée de guillemets pour éviter les soucis avec les virgules présentes dans les données
     return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
   }
-
 }

@@ -91,4 +91,85 @@ export class VehicleValidator {
       return null;
     };
   }
+
+  /**
+   * Valide que 'theoreticalConsumption' est un nombre >= 0.
+   * Optionnel : Si le champ est vide ou null, pas d'erreur.
+   */
+  static theoreticalConsumption(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value == null || value === '') {
+        // Champ facultatif
+        return null;
+      }
+
+      // Tenter de parser la valeur en nombre
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) {
+        return { invalidTheoreticalConsumption: "La consommation théorique doit être un nombre valide." };
+      }
+
+      if (numericValue < 0) {
+        return { negativeTheoreticalConsumption: "La consommation théorique ne doit pas être négative." };
+      }
+
+      //Vérifier max 2 décimales via regex :
+       if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+         return { decimalPrecision: "La consommation théorique ne doit pas dépasser 2 décimales." };
+       }
+
+      return null;
+    };
+  }
+
+  /**
+   * Valide que 'mileage' est un nombre >= 0.
+   * Optionnel : Si le champ est vide ou null, pas d'erreur.
+   */
+  static mileage(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value == null || value === '') {
+        // Champ facultatif
+        return null;
+      }
+
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) {
+        return { invalidMileage: "Le kilométrage doit être un nombre valide." };
+      }
+
+      if (numericValue < 0) {
+        return { negativeMileage: "Le kilométrage ne doit pas être négatif." };
+      }
+
+      return null;
+    };
+  }
+
+  /**
+   * Valide que 'serviceDate' (optionnel) respecte un format YYYY-MM-DD si renseigné.
+   */
+  static serviceDate(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null;
+      }
+
+      // Vérification par expression régulière
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(value)) {
+        return { invalidServiceDate: "La date de mise en service doit être au format YYYY-MM-DD." };
+      }
+
+      const parsedDate = new Date(value);
+      if (isNaN(parsedDate.getTime())) {
+         return { invalidServiceDate: "Date invalide." };
+      }
+
+      return null;
+    };
+  }
 }

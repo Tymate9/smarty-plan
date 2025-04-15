@@ -1,11 +1,10 @@
 package net.enovea.vehicle
 
-import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Positive
-import jakarta.validation.constraints.Size
+import jakarta.validation.constraints.*
 import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
 import net.enovea.commons.ExistsInDatabase
+import java.math.BigDecimal
+import java.time.LocalDate
 
 data class VehicleForm (
     @field:Pattern(
@@ -36,5 +35,19 @@ data class VehicleForm (
     @field:ExistsInDatabase(entityClass = VehicleCategoryEntity::class, message = "La catégorie de véhicule n'existe pas en base.")
     var category: Int?,
 
-    var validated: Boolean = false
+    var validated: Boolean = false,
+
+    // Consommation théorique (NUMERIC(10,2)), BigDecimal
+    @field:Digits(integer = 8, fraction = 2, message = "La consommation théorique ne doit pas dépasser 8 chiffres et 2 décimales.")
+    @field:DecimalMin(value = "0.0", inclusive = true, message = "La consommation théorique ne doit pas être négatif.")
+    var theoreticalConsumption: BigDecimal? = null,
+
+    // Kilométrage (NUMERIC(10,2)), BigDecimal
+    @field:Digits(integer = 8, fraction = 2, message = "Le kilométrage ne doit pas dépasser 8 chiffres et 2 décimales.")
+    @field:DecimalMin(value = "0.0", inclusive = true, message = "Le kilométrage ne doit pas être négatif.")
+    var mileage: BigDecimal? = null,
+
+    // Date de mise en service (DATE)
+    var serviceDate: LocalDate? = null
+
 )

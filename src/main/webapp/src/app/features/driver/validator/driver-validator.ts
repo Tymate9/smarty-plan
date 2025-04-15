@@ -31,6 +31,7 @@ export class DriverValidator {
    * Valide que le champ phone_number, s'il est renseigné, correspond à un numéro de téléphone valide.
    * Ici, le numéro est attendu sous forme de 10 chiffres, éventuellement précédé d'un indicatif international.
    */
+  //TODO(à déplacer dans un phone number Validator)
   static validPhoneNumber(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;

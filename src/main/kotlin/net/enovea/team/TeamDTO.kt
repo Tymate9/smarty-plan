@@ -24,5 +24,7 @@ data class TeamDTO (
     var parentTeam: TeamDTO?,
     var category: TeamCategoryDTO,
     var lunchBreakStart: LocalTime? = null,
-    var lunchBreakEnd: LocalTime? = null
+    var lunchBreakEnd: LocalTime? = null,
+    var phoneNumber: String? = null,
+    var phoneComment: String? = null
 )

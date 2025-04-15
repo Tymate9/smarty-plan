@@ -21,8 +21,6 @@ class VehicleServiceConfiguration {
     fun vehicleService(
         vehicleMapper: VehicleMapper,
         vehicleTableMapper: VehicleTableMapper,
-        spatialService: SpatialService,
-        geoCodingService: GeoCodingService,
         entityManager: EntityManager,
         tripService: TripService,
         vehicleStatsRepository: VehicleStatsRepository,
@@ -31,8 +29,6 @@ class VehicleServiceConfiguration {
         return VehicleService(
             vehicleMapper,
             vehicleTableMapper,
-            spatialService,
-            geoCodingService,
             entityManager,
             tripService,
             vehicleStatsRepository,

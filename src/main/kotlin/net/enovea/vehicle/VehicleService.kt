@@ -30,8 +30,6 @@ import kotlin.math.round
 open class VehicleService(
     private val vehicleMapper: VehicleMapper,
     private val vehicleDataMapper: VehicleTableMapper,
-    private val spatialService: SpatialService,
-    private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
     private val vehicleStatsRepository: VehicleStatsRepository,
@@ -76,6 +74,10 @@ open class VehicleService(
             ?: throw NotFoundException("Vehicle category with id=${form.category} not found")
         entity.category = categoryEntity
         entity.validated = form.validated
+        entity.mileage = form.mileage
+        entity.serviceDate = form.serviceDate
+        entity.theoreticalConsumption = form.theoreticalConsumption
+
         entity.persistAndFlush()
         return vehicleMapper.toVehicleDTO(entity)
     }

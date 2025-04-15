@@ -81,6 +81,8 @@ class TeamService (
         existingEntity.path       = updatedEntity.path
         existingEntity.parentTeam = updatedEntity.parentTeam
         existingEntity.category   = updatedEntity.category
+        existingEntity.phoneNumber = updatedEntity.phoneNumber
+        existingEntity.phoneComment = updatedEntity.phoneComment
 
         // Affecter directement les chaînes de lunchBreak via les variables publiques
         existingEntity.lunchBreakStartStr = updatedEntity.lunchBreakStartStr
@@ -110,7 +112,6 @@ class TeamService (
     }
 
     /**
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
      * Calcule les 4 stats demandées
      */
     @Transactional

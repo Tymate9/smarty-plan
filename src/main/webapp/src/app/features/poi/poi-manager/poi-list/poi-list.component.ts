@@ -18,6 +18,7 @@ import {GeoJSON} from "leaflet";
 import {ConfirmationService} from "primeng/api";
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import {NotificationService} from "../../../../commons/notification/notification.service";
 
 @Component({
   selector: 'app-poi-list',
@@ -388,7 +389,8 @@ export class PoiListComponent implements OnInit {
   constructor(
     private poiService: PoiService,
     private geocodingService: GeocodingService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private notificationService: NotificationService
   ) {
   }
 
@@ -622,8 +624,15 @@ export class PoiListComponent implements OnInit {
   }
 
   deletePoi(poiPanel: PoiPanel) {
-    this.poiPanels = this.poiPanels.filter(p => p !== poiPanel);
-    this.deletePoiFromDB(poiPanel);
+    this.confirmationService.confirm({
+      message: "Êtes-vous sûre de vouloir supprimer ce POI",
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.poiPanels = this.poiPanels.filter(p => p !== poiPanel);
+        this.deletePoiFromDB(poiPanel);
+      }
+    })
   }
 
   isFormValid(poiPanel: PoiPanel): boolean {
@@ -826,7 +835,7 @@ export class PoiListComponent implements OnInit {
     if (poi.id > 0) {
       this.poiService.deletePOI(poi.id).subscribe(
         () => {
-          alert("POI supprimé.");
+          this.notificationService.success("Poi supprimé.", `Le POI ${poi.denomination} a été supprimé avec succès`)
           this.poiMarkerRemoved.emit(poi.id);
         },
         (error) => {
@@ -835,7 +844,7 @@ export class PoiListComponent implements OnInit {
         }
       );
     } else {
-      alert("Création du POI annulée.");
+      this.notificationService.success("Création du POI annulée.", `Le brouillon du POI ${poi.denomination} a été annulé avec succès`)
       this.poiMarkerRemoved.emit(poi.id);
     }
   }

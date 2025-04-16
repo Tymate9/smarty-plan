@@ -53,6 +53,8 @@ export class EntityDeleteButtonComponent {
 
   public onDelete(): void {
     this.confirmationService.confirm({
+      acceptVisible:true,
+      rejectVisible:true,
       message: this.confirmationMessage,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',

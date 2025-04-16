@@ -307,10 +307,7 @@ class PointOfInterestResource (
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    fun putPOI(
-        @PathParam("id") id: Int,
-        poiForm: PointOfInterestForm
-    ): Response {
+    fun putPOI( @PathParam("id") id: Int, poiForm: PointOfInterestForm ): Response {
         try {
             // 1. Trouver l'entité POI existante
             val existingPOI = PointOfInterestEntity.findById(id)
@@ -353,15 +350,40 @@ class PointOfInterestResource (
             existingPOI.address = poiForm.adresse
 
             // 6. Persister les changements
-            existingPOI.persist()
+            existingPOI.persistAndFlush()
 
             // 7. Retourner la réponse avec le POI mis à jour
             return Response.ok(existingPOI).build()
 
         } catch (e: Exception) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(mapOf("error" to "Erreur lors de la mise à jour du POI: ${e.message}"))
-                .build()
+            var cause: Throwable? = e
+            var messageToReturn: String? = null
+
+            // Parcourir la chaîne de causes pour détecter une ConstraintViolationException.
+            while (cause != null) {
+                if (cause is org.hibernate.exception.ConstraintViolationException) {
+                    val errorMsg = cause.message ?: ""
+                    messageToReturn = when {
+                        errorMsg.contains("unique_client_code", ignoreCase = true) ->
+                            "Le code client existe déjà."
+                        errorMsg.contains("unique_client_label", ignoreCase = true) ->
+                            "Le libellé client existe déja."
+                        else -> "Une erreur de type ConstraintViolationException est survenue !"
+                    }
+                    break
+                }
+                cause = cause.cause
+            }
+
+            return if (messageToReturn != null) {
+                Response.status(Response.Status.CONFLICT)
+                    .entity(mapOf("error" to messageToReturn))
+                    .build()
+            } else {
+                Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(mapOf("error" to "Erreur lors de la mise à jour du POI: ${e.message}"))
+                    .build()
+            }
         }
     }
 

@@ -625,6 +625,8 @@ export class PoiListComponent implements OnInit {
 
   deletePoi(poiPanel: PoiPanel) {
     this.confirmationService.confirm({
+      acceptVisible:true,
+      rejectVisible:true,
       message: "Êtes-vous sûre de vouloir supprimer ce POI",
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
@@ -778,8 +780,7 @@ export class PoiListComponent implements OnInit {
         panel.resetModifiedValues(); // Met à jour les valeurs originales
 
         this.poiMarkerRemoved.emit(oldId);
-
-        alert("POI ajouté à la base de données.");
+        this.notificationService.success("POI ajouté", `Le POI ${createdPoi.client_label} a été ajouté à la base de donnée.`)
         this.poiMarkerAdded.emit(poi);
       },
       (error) => {
@@ -791,6 +792,8 @@ export class PoiListComponent implements OnInit {
           errorMsg = error.error.error;
         }
         this.confirmationService.confirm({
+          acceptVisible: false,
+          rejectVisible: false,
           message: errorMsg,
           header: "Erreur lors de la création du nouveaux POI.",
           icon: "pi pi-exclamation-triangle",
@@ -819,13 +822,25 @@ export class PoiListComponent implements OnInit {
     this.poiService.updatePOI(poi.id, poiData).subscribe(
       (updatedPoi) => {
         panel.poi = updatedPoi;
-        panel.resetModifiedValues(); // Met à jour les valeurs originales
-        alert("Modification sauvegardée.");
+        panel.resetModifiedValues();
+        this.notificationService.success("Modification sauvegardée.", `Le POI ${updatedPoi.client_label} a été mis à jour.`)
         this.poiMarkerUpdated.emit(updatedPoi);
       },
       (error) => {
-        console.error('Erreur lors de la mise à jour du POI :', error);
-        alert('Erreur lors de la mise à jour du POI. Veuillez réessayer.');
+        console.error('Erreur lors de la création du POI :', error);
+        // Par défaut, un message générique
+        let errorMsg = "Erreur lors de la création du POI. Veuillez réessayer.";
+        // Si le back-end renvoie une erreur structurée dans error.error.error, l'utiliser
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        }
+        this.confirmationService.confirm({
+          acceptVisible: false,
+          rejectVisible: false,
+          message: errorMsg,
+          header: "Erreur lors de la mise à jours du POI.",
+          icon: "pi pi-exclamation-triangle",
+        });
       }
     );
   }

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import {KeycloakService} from "keycloak-angular";
-import {AdminComponent} from "../admin/admin.component";
 
 @Component({
   selector: 'app-landing-page',

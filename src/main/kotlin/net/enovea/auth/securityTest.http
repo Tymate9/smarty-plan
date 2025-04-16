@@ -18,5 +18,5 @@ grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&user
 > {% client.global.set("access_token_admin", response.body.access_token); %}
 
 ### Appeler /admin avec le token de l'utilisateur admin
-GET http://{{api_host}}/admin
+GET http://{{api_host}}/api/admin
 Authorization: Bearer {{access_token_admin}}

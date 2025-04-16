@@ -12,7 +12,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken
 
 
 
-@Path("/admin")
+@Path("/api/admin")
 class AdminResource {
     @Inject
     lateinit var jwt: JsonWebToken

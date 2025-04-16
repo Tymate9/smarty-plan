@@ -36,28 +36,22 @@ abstract class DriverMapper {
     /**
      * Méthode custom, appelée depuis l'expression Java ci-dessus,
      * pour déterminer le TeamSummaryDTO en fonction de la dateParam.
-     *
-     * Note: c'est une 'default method' en Java, ou équivalent en Kotlin (membres "default" / "static").
      */
     fun mapTeamAtDate(driver: DriverEntity, dateParam: Timestamp?): TeamSummaryDTO? {
-        return if (dateParam == null) {
-            // Cas 1 : pas de date => prendre la dernière affectation (endDate == null, max startDate)
-            driver.driverTeams
-                .filter { it.endDate == null }
-                .maxByOrNull { it.id.startDate }
-                ?.let { teamSummaryMapper.toDto(it.team!!) }
-        } else {
-            // Cas 2 : date fournie => prendre l’affectation active à dateParam
-            driver.driverTeams
-                .filter {
-                    val startLd = it.id.startDate
-                    // startDate <= dateParam
-                    startLd <= dateParam &&
-                            // endDate == null ou endDate >= dateParam
-                            (it.endDate == null || it.endDate!! >= dateParam)
-                }
-                .maxByOrNull { it.id.startDate }
-                ?.let { teamSummaryMapper.toDto(it.team!!) }
-        }
+        // 1) Si la date n'est pas fournie, on utilise l'heure courante
+        val effectiveDate = dateParam ?: Timestamp(System.currentTimeMillis())
+
+        // 2) Filtrer pour ne garder que les DriverTeamEntity en cours à "effectiveDate"
+        return driver.driverTeams
+            .filter { dte ->
+                // Condition d'appartenance : startDate <= effectiveDate
+                dte.id.startDate <= effectiveDate &&
+                        // endDate == null (sans borne) ou endDate >= effectiveDate
+                        (dte.endDate == null || dte.endDate!! >= effectiveDate)
+            }
+            // 3) Prendre l'affectation dont le startDate est le plus récent
+            .maxByOrNull { it.id.startDate }
+            // 4) Mapper en TeamSummaryDTO
+            ?.let { teamSummaryMapper.toDto(it.team!!) }
     }
 }

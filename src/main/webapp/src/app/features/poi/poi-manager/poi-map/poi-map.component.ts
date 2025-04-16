@@ -53,8 +53,7 @@ import {PoiSearchComponent} from "../poi-search/poi-search.component";
       /* soustraire la hauteur de la navbar (ex. 60px) */
       height: calc(100vh - 75px);
       padding: 10px;
-      /* Si vous voulez un fond gris clair derrière la carte et le panel :
-         background-color: #f9f9f9; */
+      /* background-color: #f9f9f9; */
     }
 
     .map-container {
@@ -84,7 +83,6 @@ import {PoiSearchComponent} from "../poi-search/poi-search.component";
       border-left: 1px solid #ccc;
     }
 
-    /* Facultatif : si vous voulez un léger ombrage sur le side-panel */
     .side-panel {
       box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
     }

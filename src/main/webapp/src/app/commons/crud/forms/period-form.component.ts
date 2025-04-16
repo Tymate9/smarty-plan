@@ -127,7 +127,7 @@ export class PeriodFormComponent implements OnInit {
     this.periodFormDescription = new FormDescription(
       this.title,
       inputs,
-      undefined, // Vous pouvez ajouter des contraintes spécifiques ici si nécessaire
+      undefined,
       undefined,
       transformFunction
     );
@@ -211,8 +211,6 @@ export class PeriodFormComponent implements OnInit {
     this.periodFormDescription = new FormDescription(
       this.title,
       inputs,
-      // Par exemple, vous pouvez réutiliser le TimeValidator ici
-      // TimeValidator.checkDatesConstraint,
       undefined,
       undefined,
       transformFunction

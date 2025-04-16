@@ -13,6 +13,7 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {VehicleFormComponent} from "./form/vehicle-form.component";
 import {DrawerOptions} from "../../commons/drawer/drawer.component";
+import TeamDTO = dto.TeamDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -274,7 +275,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
   //Implémentation de l'interface IEntityService.
 
   getAuthorizedData(): Observable<dto.VehicleDTO[]> {
-    return this.http.get<dto.VehicleDTO[]>(`${this.baseUrl}/list`);
+    return this.http.get<dto.VehicleDTO[]>(`${this.baseUrl}/all`);
   }
 
   getCount(): Observable<number> {
@@ -425,7 +426,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     const vehicleLabel = vehicle.licenseplate;
 
     // Récupération de l'équipe actuelle (la première équipe dans vehicle.teams)
-    let currentTeamId: string | null = null;
+    let currentTeam: TeamDTO | null = null;
     if (vehicle.teams) {
       const teamsEntries = Object.entries(vehicle.teams);
       const today = new Date();
@@ -437,7 +438,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
             ? new Date(9999, 0, 1)
             : new Date(match[2].trim());
           if (today >= startDate && today <= endDate) {
-            currentTeamId = team.id ? team.id.toString() : null;
+            currentTeam = team ;
             break;
           }
         } else {
@@ -515,7 +516,8 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
         energy: vehicle.energy,
         category: vehicle.category ? vehicle.category.label : '',
         validated: vehicle.validated ? "Actif" : "Inactif",
-        parentId: currentTeamId,
+        parentId: currentTeam ? currentTeam.id?.toString() : null,
+        parentLabel: currentTeam ? currentTeam.label?.toString() : null,
         theoreticalConsumption: vehicle.theoreticalConsumption,
         mileage: vehicle.mileage,
         serviceDate: vehicle.serviceDate,

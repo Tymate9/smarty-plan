@@ -91,7 +91,6 @@ interface StatusCount {
                  [resizableColumns]="true"
                  styleClass="p-treetable-gridlines">
 
-      <!-- En-tête (facultatif si vous n’affichez pas de colonnes en-tête statiques) -->
       <ng-template pTemplate="header">
       </ng-template>
 

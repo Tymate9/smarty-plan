@@ -254,6 +254,7 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
       data: {
         id: driver.id,
         parentId: driver.team ? driver.team.id : null,
+        parentLabel: driver.team ? driver.team.label?.toString() : null,
         firstName: driver.firstName,
         lastName: driver.lastName,
         phoneNumber: driver.phoneNumber,

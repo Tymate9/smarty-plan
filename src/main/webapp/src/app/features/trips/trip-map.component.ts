@@ -690,8 +690,6 @@ export class TripMapComponent {
     this._tripData?.tripEvents.forEach(event => {
       if (event.tripEventDetails && event.tripEventDetails.length > 0) {
         event.tripEventDetails.forEach(sub => {
-          // Assurez-vous que le timestamp est de type Date dans le front.
-          // Par exemple, si sub.timestamp est au format string, convertissez-le via new Date(sub.timestamp)
           if (sub.timestamp && sub.lat != null && sub.lng != null) {
             allSubTripEvents.push({
               timestamp: new Date(sub.timestamp),

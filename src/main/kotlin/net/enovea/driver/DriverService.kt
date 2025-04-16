@@ -99,6 +99,7 @@ class DriverService(
         // 4) Si l’utilisateur fournit des agences, on joint la table DriverTeamEntity
         if (!agencyIds.isNullOrEmpty()) {
             baseQuery += """
+                    
             JOIN DriverTeamEntity dt ON d.id = dt.id.driverId
                 AND dt.id.startDate <= :theDate
                 AND (dt.endDate IS NULL OR dt.endDate >= :theDate)
@@ -108,6 +109,7 @@ class DriverService(
 
             // On ajoute un WHERE pour filtrer sur les agences
             baseQuery += """
+                
             WHERE ( t.label IN :agencyIds
                 OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds) )
         """.trimIndent()
@@ -118,6 +120,7 @@ class DriverService(
 
         // 5) Ajouter ensuite la condition pour exclure les périodes non suivies (untracked)
         val untrackedCondition = """
+            
         ${if (hasWhere) "AND" else "WHERE"} 
         vup.id.startDate IS NULL
         AND dup.id.startDate IS NULL

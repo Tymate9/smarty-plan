@@ -118,10 +118,12 @@ data class VehicleEntity(
         WHERE 1 = 1
         """
         private const val GEOLOCALIZED_CONDITION = """
+            
             AND vup.id.startDate IS NULL
             AND dup.id.startDate IS NULL
             """
         private const val NON_GEOLOCALIZED_CONDITION = """
+            
             AND (
                 vup.id.startDate IS NOT NULL
                 OR dup.id.startDate IS NOT NULL
@@ -270,6 +272,7 @@ data class VehicleEntity(
                         // 1) Cas : à la fois "Véhicule non attribué" ET une liste de noms
                         hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
                             query += """
+                                
                             AND (
                                 (d.lastName || ' ' || d.firstName) IN :driverNames
                             OR d IS NULL

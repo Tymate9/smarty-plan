@@ -466,6 +466,7 @@ open class VehicleService(
         if (!agencyIds.isNullOrEmpty()) {
 
             baseQuery += """
+                
             JOIN VehicleTeamEntity vt ON v.id = vt.id.vehicleId
             JOIN TeamEntity t ON vt.id.teamId = t.id
             LEFT JOIN t.parentTeam parent_team
@@ -478,6 +479,7 @@ open class VehicleService(
         }
 
         baseQuery += """
+            
             ${if (baseQuery.contains("WHERE")) "AND" else "WHERE"}  vup.id.startDate IS NULL
             AND dup.id.startDate IS NULL
         """.trimIndent()

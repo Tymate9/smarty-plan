@@ -103,7 +103,7 @@ interface StatusCount {
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
           'dynamic-tt-leaf': rowData.vehicle
         }">
-          <td *ngIf="!rowData.vehicle" colspan="8">
+          <td *ngIf="!rowData.vehicle" [attr.colspan]="non_geoloc?'7':'8'">
             <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>

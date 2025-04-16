@@ -128,6 +128,13 @@ class VehicleResource(
 
     /// Other
 
+    // TODO(Fix fait très rapidement pour livrée les retours de recette en dix minutes)
+    @GET
+    @Path("/all")
+    fun getAll(): List<VehicleDTO> {
+        return VehicleEntity.listAll().map{ it -> vehicleMapper.toVehicleDTO(it)}
+    }
+
     @GET
     @Path("/list")
     fun getVehiclesList(@QueryParam("agencyIds") agencyIds: List<String>? =null): List<VehicleSummaryDTO> {

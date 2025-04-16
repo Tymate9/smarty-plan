@@ -10,13 +10,10 @@ import net.enovea.commons.StatsDTO
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.driver.driverUntrackedPeriod.DriverUntrackedPeriodEntity
 import net.enovea.trip.TripService
-import net.enovea.spatial.GeoCodingService
-import net.enovea.spatial.SpatialService
 import net.enovea.team.TeamDTO
 import net.enovea.team.TeamEntity
 import net.enovea.team.TeamMapper
 import net.enovea.vehicle.vehicleStats.*
-import net.enovea.vehicle.vehicleTable.VehicleTableMapper
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import net.enovea.vehicle.vehicleUntrackedPeriod.VehicleUntrackedPeriodEntity
 import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
@@ -29,9 +26,6 @@ import kotlin.math.round
 
 open class VehicleService(
     private val vehicleMapper: VehicleMapper,
-    private val vehicleDataMapper: VehicleTableMapper,
-    private val spatialService: SpatialService,
-    private val geoCodingService: GeoCodingService,
     private val entityManager: EntityManager,
     private val tripService: TripService,
     private val vehicleStatsRepository: VehicleStatsRepository,
@@ -76,6 +70,10 @@ open class VehicleService(
             ?: throw NotFoundException("Vehicle category with id=${form.category} not found")
         entity.category = categoryEntity
         entity.validated = form.validated
+        entity.mileage = form.mileage
+        entity.serviceDate = form.serviceDate
+        entity.theoreticalConsumption = form.theoreticalConsumption
+
         entity.persistAndFlush()
         return vehicleMapper.toVehicleDTO(entity)
     }
@@ -322,7 +320,7 @@ open class VehicleService(
             allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty() }
                 .map { vehicle ->
                     // Convert to VehicleTableDTO
-                    val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+                    val vehicleDTO = vehicleMapper.toVehicleTableDTO(vehicle)
 
                     // Enrich the DTO with trip statistics if available
                     tripStats[vehicle.id]?.let { stats ->
@@ -359,7 +357,7 @@ open class VehicleService(
             allVehicles.filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
                 .map { vehicle ->
                     // Convert to VehicleTableDTO
-                    val vehicleDTO = vehicleDataMapper.toVehicleTableDTO(vehicle, vehicleMapper)
+                    val vehicleDTO = vehicleMapper.toVehicleTableDTO(vehicle)
 
                     // Enrich the DTO with trip statistics if available
                     tripStats[vehicle.id]?.let { stats ->
@@ -508,12 +506,6 @@ open class VehicleService(
             .distinct()
     }
 
-    /**
-     * Si besoin, on peut reprendre la logique d’héritage
-     * dans le VehicleService si vous souhaitez qu'elle soit spécifique au véhicule.
-     * Mais si c’est identique, on peut la laisser aussi dans le DriverService,
-     * ou la dupliquer ici pour séparer strictement les responsabilités.
-     */
     fun findInheritedStart(team: TeamEntity?): LocalTime? {
         if (team == null) return null
         return team.lunchBreakStart ?: findInheritedStart(team.parentTeam)

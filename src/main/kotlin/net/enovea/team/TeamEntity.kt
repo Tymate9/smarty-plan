@@ -7,7 +7,6 @@ import io.quarkus.panache.common.Parameters
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import net.enovea.team.teamCategory.TeamCategoryEntity
-import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
 import java.io.Serializable
 import java.time.LocalTime
 
@@ -35,24 +34,32 @@ class TeamEntity(
     var lunchBreakStartStr: String? = null,
 
     @Column(name = "lunch_break_end", nullable = true)
-    var lunchBreakEndStr: String? = null
+    var lunchBreakEndStr: String? = null,
 
-) : Serializable , PanacheEntityBase {
+    // Champ optionnel pour stocker le numéro de téléphone (VARCHAR(10))
+    @Column(name = "phone_number", nullable = true)
+    var phoneNumber: String? = null,
+
+    // Champ optionnel pour un commentaire lié au téléphone (TEXT)
+    @Column(name = "phone_comment", nullable = true)
+    var phoneComment: String? = null
+
+) : Serializable, PanacheEntityBase {
 
     // Propriétés transitoires exposées en LocalTime
     @get:Transient
-        var lunchBreakStart: LocalTime?
-            get() = lunchBreakStartStr?.let { LocalTime.parse(it) }
-            set(value) {
-                lunchBreakStartStr = value?.toString()
-            }
+    var lunchBreakStart: LocalTime?
+        get() = lunchBreakStartStr?.let { LocalTime.parse(it) }
+        set(value) {
+            lunchBreakStartStr = value?.toString()
+        }
 
     @get:Transient
-        var lunchBreakEnd: LocalTime?
-            get() = lunchBreakEndStr?.let { LocalTime.parse(it) }
-            set(value) {
-                lunchBreakEndStr = value?.toString()
-            }
+    var lunchBreakEnd: LocalTime?
+        get() = lunchBreakEndStr?.let { LocalTime.parse(it) }
+        set(value) {
+            lunchBreakEndStr = value?.toString()
+        }
 
     companion object : PanacheCompanionBase<TeamEntity, Int> {
         const val ENTITY_NAME = "TeamEntity"

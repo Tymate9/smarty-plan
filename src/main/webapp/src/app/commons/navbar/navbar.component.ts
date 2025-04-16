@@ -26,9 +26,6 @@ export interface Option {
 }
 
 @Component({
-  // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
-  // return this.http.get<{ geolocDay: boolean; tripEvents: TripEventsDTO | null }>
-  // (`${this.apiUrl}/vehicle`+(nonGeolocalized?'-non-geoloc':'')+
   selector: 'app-navbar',
   template: `
     <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}"

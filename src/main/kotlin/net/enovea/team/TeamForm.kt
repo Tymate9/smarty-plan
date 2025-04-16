@@ -45,7 +45,14 @@ data class TeamForm (
         regexp = "^(?:(?:([01]?\\d|2[0-3]):)?([0-5]?\\d):)?([0-5]?\\d)\$",
         message = "Format d'heure invalide pour le lunchBreakEndStr. Attendu HH:mm:ss (avec tolérance heure/minute facultative)."
     )
-    var lunchBreakEndStr: String?
+    var lunchBreakEndStr: String?,
+
+    // Numéro de téléphone : peut être nul, max 10 caractères
+    @field:Size(max = 10, message = "Le numéro de téléphone ne doit pas dépasser 10 caractères.")
+    var phoneNumber: String? = null,
+
+    // Commentaire lié au téléphone (texte, pas de contrainte de taille car TEXT en base)
+    var phoneComment: String? = null
 
 )
 

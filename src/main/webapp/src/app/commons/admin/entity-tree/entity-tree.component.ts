@@ -3,7 +3,6 @@ import {
   Input,
   OnInit,
   ChangeDetectorRef,
-  AfterViewInit,
   ViewChildren,
   QueryList,
   Type, SimpleChanges, OnChanges, OnDestroy
@@ -178,7 +177,6 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   private subscribeToCrudEvents(): void {
     this.crudSubscription = this.entityService!.crudEvents$.subscribe(event => {
-      console.log("Event received in entityTree : ", event)
       switch (event.type) {
         case CrudEventType.CREATE:
           this.handleCreateEvent(event.newData);
@@ -214,8 +212,6 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
   }
 
   private handleUpdateEvent(oldData: any, updatedData: any): void {
-    console.log("oldData received in update event", oldData)
-    console.log("oldData received in update event", updatedData)
     if (!updatedData || updatedData.id === undefined || updatedData.id === null) {
       console.error("Mise à jour impossible : l'objet mis à jour ne possède aucun id valide.", updatedData);
       return;
@@ -265,37 +261,77 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
     }, 10);
   }
 
-  private removeNodeFromGroup(nodeId: any): boolean {
-    for (let i = 0; i < this.treeData.length; i++) {
-      const group = this.treeData[i];
-      if (group.children && Array.isArray(group.children)) {
-        const idx = group.children.findIndex(leaf =>
-          leaf.data && leaf.data.id === nodeId
-        );
+  private removeNodeFromGroup(nodeId: any, nodes: TreeNode[] = this.treeData): boolean {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+
+      // 1) Vérifie si le nœud courant est lui-même celui à supprimer
+      if (node.data && node.data.id === nodeId) {
+        nodes.splice(i, 1);
+        return true;
+      }
+
+      // 2) S'il a des enfants, on procède de la même manière pour eux
+      if (node.children && Array.isArray(node.children)) {
+        // a) Chercher directement dans les enfants
+        const idx = node.children.findIndex(child => child.data && child.data.id === nodeId);
         if (idx !== -1) {
-          group.children.splice(idx, 1);
-          // Si le groupe est vide après suppression, on le retire
-          if (group.children.length === 0) {
-            this.treeData.splice(i, 1);
+          // Supprimer l'enfant trouvé
+          node.children.splice(idx, 1);
+
+          // Optionnel : si plus d’enfants, on supprime également le groupe
+          if (node.children.length === 0) {
+            nodes.splice(i, 1);
           }
           return true;
         }
+
+        // b) Non trouvé dans les enfants immédiats : descente récursive
+        for (let j = 0; j < node.children.length; j++) {
+          const child = node.children[j];
+
+          if (child.children && child.children.length > 0) {
+            const removed = this.removeNodeFromGroup(nodeId, child.children);
+
+            if (removed) {
+              // Si l’enfant n’a plus de sous‐enfants après la suppression, on le retire
+              if (child.children.length === 0) {
+                node.children.splice(j, 1);
+
+                // Si le nœud parent n’a plus d’enfants, on supprime également ce parent
+                if (node.children.length === 0) {
+                  nodes.splice(i, 1);
+                }
+              }
+              return true;
+            }
+          }
+        }
       }
     }
+
+    // Si on sort de la boucle sans avoir supprimé, on renvoie false
     return false;
   }
 
   private updateTreeWithNewLeaf(newLeaf: TreeNode): void {
+    // Extraction et conversion du parentId
     const groupId = newLeaf.data.parentId ? newLeaf.data.parentId.toString() : "-1";
+
+    // Détermination du label à utiliser pour le groupe
+    const groupLabel: string = newLeaf.data.parentLabel
+      ? newLeaf.data.parentLabel
+      : (groupId === "-1" ? "Orphan" : `Groupe ${groupId}`);
 
     // Recherche du groupe correspondant dans l'arbre
     let group = this.findGroupInTree(this.treeData, groupId);
-    if (group) {
-    } else {
+
+    if (!group) {
+      // Si aucun groupe correspondant n'est trouvé, on le crée en utilisant le libellé approprié.
       group = {
-        label: (groupId === "-1") ? "Orphan" : `Groupe ${groupId}`,
+        label: groupLabel,
         data: {
-          groupId: groupId
+          groupId: groupId,
         },
         expanded: false,
         children: []
@@ -305,7 +341,8 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
     // Ajout de la nouvelle feuille dans le groupe
     group.children?.unshift(newLeaf);
-    // Réassignation pour déclencher la détection des changements
+
+    // Réassignation de l'arbre pour déclencher la détection des changements
     this.treeData = [...this.treeData];
     this.cdr.detectChanges();
 
@@ -316,7 +353,6 @@ export class EntityTreeComponent implements OnInit, OnChanges, OnDestroy{
 
   private findGroupInTree(nodes: TreeNode[], groupId: string): TreeNode | undefined {
     for (const node of nodes) {
-
       if (node.data && node.data.groupId?.toString() === groupId.toString()) {
         return node;
       }

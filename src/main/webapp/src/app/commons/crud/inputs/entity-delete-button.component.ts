@@ -4,7 +4,6 @@ import { ConfirmationService } from 'primeng/api';
 import {CrudEventType, IEntityService} from "../interface/ientity-service";
 import {Button} from "primeng/button";
 
-
 @Component({
   selector: 'app-entity-delete-button',
   standalone: true,

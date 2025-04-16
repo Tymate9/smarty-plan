@@ -295,8 +295,9 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                       ...
                     </span>
 
-                    <div class="distance-rectangle small-right">
-                      {{ Math.max(1, Math.ceil(event.originalEvent.distance)) }} Km
+                    <div class="distance-rectangle small-right" style="position: relative">
+                      <p
+                        style="position: absolute; top:-0.6rem; left:0.2rem;">{{ Math.max(1, Math.ceil(event.originalEvent.distance)) }} Km</p>
                     </div>
                   </div>
                   <div
@@ -350,7 +351,7 @@ import {PoiNavigationButtonComponent} from "../poi/poi-navigation-button/poi-nav
                          style="max-width: 8rem; position: absolute; transform: scale(0.8); transform-origin: top right; margin: 0.2rem; top: 0; right: 0;"
                     >
                       <app-poi-navigation-button
-                        [buttonLabel]="'Créer un POI'"
+                        [buttonLabel]="'Créer POI'"
                         [coords]="[event.originalEvent.lat + ',' + event.originalEvent.lng]">
                       </app-poi-navigation-button>
                     </div>

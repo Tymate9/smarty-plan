@@ -247,11 +247,12 @@ export class MapComponent implements OnInit, OnDestroy {
       if (vehicle.device && vehicle.device.coordinate) {
 
         this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
+        const refVehicle = `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `;
         if (vehicle.device.state === "" || vehicle.device.state === "NO_COM" || vehicle.device?.state === null) {
-          this.noComVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
+          this.noComVehicle += refVehicle
         }
-        if (vehicle.device.state === "UNPLUGGED") {
-          this.unpluggedVehicle += `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `
+        if (vehicle.device?.plugged) {
+          this.unpluggedVehicle += refVehicle
         }
       }
     });

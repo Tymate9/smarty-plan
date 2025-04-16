@@ -11,6 +11,7 @@ import {forkJoin} from "rxjs";
 import {EntityFormComponent} from "../../../commons/crud/forms/entity-form.component";
 import {NgIf} from "@angular/common";
 import {NotificationService} from "../../../commons/notification/notification.service";
+import {DriverValidator} from "../../driver/validator/driver-validator";
 
 @Component({
   selector: 'app-team-form',
@@ -49,12 +50,9 @@ export class TeamFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('[TeamFormComponent] ngOnInit - teamId:', this.teamId);
     if (this.teamId != null) {
-      console.log('[TeamFormComponent] Initialisation en mode update');
       this.loadExistingTeam(this.teamId);
     } else {
-      console.log('[TeamFormComponent] Initialisation en mode create');
       this.initForCreate();
     }
   }
@@ -82,7 +80,9 @@ export class TeamFormComponent implements OnInit {
       parentTeam: null,
       category: { id: 0, label: '' },
       lunchBreakEnd: null,
-      lunchBreakStart: null
+      lunchBreakStart: null,
+      phoneNumber: '',
+      phoneComment: ''
     };
     this.mode = 'create';
     this.buildFormDescription(this.teamEntity);
@@ -126,6 +126,24 @@ export class TeamFormComponent implements OnInit {
           (opt: any) => opt.label,
           teamDto.parentTeam,
           'Veuillez sélectionner un groupe parent'
+        ),
+        new FormInput(
+          'phoneNumber',
+          'text',
+          'Numéro de téléphone',
+          [
+            DriverValidator.validPhoneNumber()
+          ],
+          teamDto.phoneNumber,
+          'Entrez un numéro de téléphone (max. 10 caractères)'
+        ),
+        new FormInput(
+          'phoneComment',
+          'textarea',
+          'Commentaire',
+          [],
+          teamDto.phoneComment,
+          'Entrez un commentaire'
         )
       ];
 
@@ -138,7 +156,9 @@ export class TeamFormComponent implements OnInit {
           parentTeam: rawEntity.parentTeam ? rawEntity.parentTeam.id : null,
           category: rawEntity.category?.id ?? null,
           lunchBreakStartStr: "12:00:00",
-          lunchBreakEndStr: "13:30:00"
+          lunchBreakEndStr: "13:30:00",
+          phoneNumber: rawEntity.phoneNumber || null,
+          phoneComment: rawEntity.phoneComment || null
         };
       };
 
@@ -156,9 +176,7 @@ export class TeamFormComponent implements OnInit {
           }
         ],
         transformFunction
-      );
-      console.log('[TeamFormComponent] buildFormDescription - formDescription construit:', this.formDescription);
-    });
+      );});
   }
 
   public handleResponse(response: any): void {

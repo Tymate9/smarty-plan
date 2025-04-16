@@ -33,7 +33,10 @@ Authorization: Bearer {{access_token_admin}}
   "category": 2,
   "parentTeam": null,
   "lunchBreakStartStr": "12:00:00",
-  "lunchBreakEndStr": "13:00:00"
+  "lunchBreakEndStr": "13:00:00",
+
+  "phoneNumber": "0123456789",
+  "phoneComment": "Commentaire initial"
 }
 
 > {%
@@ -56,7 +59,10 @@ Authorization: Bearer {{access_token_admin}}
   "category": 2,
   "parentTeam": null,
   "lunchBreakStartStr": "25:00:00",
-  "lunchBreakEndStr": "13:00:00"
+  "lunchBreakEndStr": "13:00:00",
+
+  "phoneNumber": "0123456789",
+  "phoneComment": "Commentaire format invalide"
 }
 
 > {%
@@ -78,7 +84,10 @@ Authorization: Bearer {{access_token_admin}}
   "category": 2,
   "parentTeam": null,
   "lunchBreakStartStr": "14:00:00",
-  "lunchBreakEndStr": "13:00:00"
+  "lunchBreakEndStr": "13:00:00",
+
+  "phoneNumber": "0123456789",
+  "phoneComment": "Commentaire horaires incohérents"
 }
 
 > {%
@@ -100,7 +109,10 @@ Authorization: Bearer {{access_token_admin}}
   "category": 1,
   "parentTeam": null,
   "lunchBreakStartStr": "11:00:00",
-  "lunchBreakEndStr": "12:00:00"
+  "lunchBreakEndStr": "12:00:00",
+
+  "phoneNumber": "0123000000",
+  "phoneComment": "Commentaire Agence Valide"
 }
 
 > {%
@@ -123,7 +135,10 @@ Authorization: Bearer {{access_token_admin}}
   "category": 1,
   "parentTeam": {{agence_id}},
   "lunchBreakStartStr": "11:00:00",
-  "lunchBreakEndStr": "12:00:00"
+  "lunchBreakEndStr": "12:00:00",
+
+  "phoneNumber": "0123000000",
+  "phoneComment": "Agence parent"
 }
 
 > {%
@@ -145,7 +160,10 @@ Authorization: Bearer {{access_token_admin}}
   "category": 2,
   "parentTeam": null,
   "lunchBreakStartStr": "11:30:00",
-  "lunchBreakEndStr": "12:30:00"
+  "lunchBreakEndStr": "12:30:00",
+
+  "phoneNumber": "0987654321",
+  "phoneComment": "Commentaire modifié"
 }
 
 > {%
@@ -163,6 +181,8 @@ Authorization: Bearer {{access_token_admin}}
     client.test("READ Team => 200", function() {
         client.assert(response.status === 200, "Expected 200 OK on reading updated team");
         client.assert(response.body.label === "Equipe Modifiée", "Expected team label to be 'Equipe Modifiée'");
+        client.assert(response.body.phoneNumber === "0987654321", "Expected phoneNumber to be updated to 0987654321");
+        client.assert(response.body.phoneComment === "Commentaire modifié", "Expected phoneComment to be updated");
     });
 %}
 

@@ -544,7 +544,7 @@ class TripService(
                             lat = firstCoord.y,
                             lng = firstCoord.x,
                             timestamp = lunchBreakEnd,
-                            type = TripEventDetailsType.END_LUNCH_BREAK,  // Assurez-vous que cet enum est défini dans votre projet
+                            type = TripEventDetailsType.END_LUNCH_BREAK,
                             description = "Pause déjeuner terminée durant ce trajet à $lunchBreakEnd"
                         )
                     )
@@ -862,9 +862,6 @@ class TripService(
      * Selon ta logique, on peut prioriser la "plus spécifique" ou la "plus large".
      */
     private fun getInheritedLunchBreakFromTeams(teams: List<TeamEntity>): Pair<LocalTime?, LocalTime?> {
-        // On peut chercher la première team qui a lunchBreakStart/end non null,
-        // sinon remonter au parent. Si tu as plusieurs teams actives,
-        // il faut décider laquelle on prend (ex. la plus “récente”).
         for (team in teams) {
             val (start, end) = findLunchBreakWithInheritance(team)
             if (start != null && end != null) {

@@ -26,9 +26,6 @@ export interface Option {
 }
 
 @Component({
-  // const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
-  // return this.http.get<{ geolocDay: boolean; tripEvents: TripEventsDTO | null }>
-  // (`${this.apiUrl}/vehicle`+(nonGeolocalized?'-non-geoloc':'')+
   selector: 'app-navbar',
   template: `
     <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}"
@@ -82,7 +79,7 @@ export interface Option {
       </ng-template>
       <ng-template pTemplate="end">
         <div class="user-info compact">
-          <p-button icon="pi pi-cog" class="user-settings" (onClick)="navigateTo('admin')"></p-button>
+          <p-button icon="pi pi-cog" class="user-settings" (onClick)="navigateTo('administration')"></p-button>
           <p-button (onClick)="logout()" icon="pi pi-power-off"
                     [disabled]="!logoutURL"></p-button>
         </div>

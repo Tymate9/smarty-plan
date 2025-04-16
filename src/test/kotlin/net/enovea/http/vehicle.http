@@ -33,7 +33,11 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT123",
   "licenseplate": "AB123CD",
   "category": 1,
-  "validated": false
+  "validated": false,
+
+  "theoreticalConsumption": 12.34,
+  "mileage": 12345.67,
+  "serviceDate": "2025-04-12"
 }
 
 > {%
@@ -56,7 +60,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT123",
   "licenseplate": "AB-123-CD",
   "category": 1,
-  "validated": false
+  "validated": false,
+  "theoreticalConsumption": 10.0,
+  "mileage": 1000.0,
+  "serviceDate": "2025-04-10"
 }
 
 > {%
@@ -78,7 +85,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT123",
   "licenseplate": "AB-123-CD",
   "category": 1,
-  "validated": false
+  "validated": false,
+  "theoreticalConsumption": 10.0,
+  "mileage": 1000.0,
+  "serviceDate": "2025-04-10"
 }
 
 > {%
@@ -100,7 +110,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "",
   "licenseplate": "AB-123-CD",
   "category": 1,
-  "validated": false
+  "validated": false,
+  "theoreticalConsumption": 10.0,
+  "mileage": 1000.0,
+  "serviceDate": "2025-04-10"
 }
 
 > {%
@@ -122,7 +135,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT123",
   "licenseplate": "INVALID",
   "category": 1,
-  "validated": false
+  "validated": false,
+  "theoreticalConsumption": 10.0,
+  "mileage": 1000.0,
+  "serviceDate": "2025-04-10"
 }
 
 > {%
@@ -144,7 +160,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT456",
   "licenseplate": "CD-456-EF",
   "category": 305,
-  "validated": true
+  "validated": true,
+  "theoreticalConsumption": 10.0,
+  "mileage": 1000.0,
+  "serviceDate": "2025-04-10"
 }
 
 > {%
@@ -166,7 +185,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT456",
   "licenseplate": "CD-456-EF",
   "category": null,
-  "validated": true
+  "validated": true,
+  "theoreticalConsumption": 10.0,
+  "mileage": 1000.0,
+  "serviceDate": "2025-04-10"
 }
 
 > {%
@@ -188,7 +210,10 @@ Authorization: Bearer {{access_token_admin}}
   "externalid": "EXT789",
   "licenseplate": "EF789GH",
   "category": 1,
-  "validated": true
+  "validated": true,
+  "theoreticalConsumption": 8.99,
+  "mileage": 20000.00,
+  "serviceDate": "2026-01-01"
 }
 
 > {%
@@ -207,6 +232,9 @@ Authorization: Bearer {{access_token_admin}}
         client.assert(response.status === 200, "Expected 200 OK on read after update");
         client.assert(response.body.energy === "Hybride", "Energy should be updated to Hybride");
         client.assert(response.body.engine === "V8 Turbo", "Engine should be updated to V8 Turbo");
+        client.assert(response.body.theoreticalConsumption === 8.99, "Expected theoreticalConsumption to be 8.99");
+        client.assert(response.body.mileage === 20000.00, "Expected mileage to be 20000.00");
+        client.assert(response.body.serviceDate === "2026-01-01", "Expected serviceDate to be 2026-01-01");
     });
 %}
 

@@ -12,6 +12,7 @@ import net.enovea.team.TeamEntity
 import net.enovea.team.teamCategory.TeamCategoryEntity
 import net.enovea.vehicle.VehicleEntity
 import net.enovea.commons.ICRUDService
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class DriverService(
@@ -67,48 +68,68 @@ class DriverService(
 
     @Transactional
     fun getDrivers(agencyIds: List<String>?): List<DriverDTO> {
+        // 1) Définir la date de référence sous forme de LocalDate et la convertir en Timestamp à minuit.
+        val today = LocalDate.now()
+        val timestampParam = Timestamp.valueOf(today.atTime(LocalTime.MAX))
 
-        val params = mutableMapOf<String, Any>()
-
-
+        // 2) On va construire la requête de base en utilisant le paramètre :theDate qui est maintenant un Timestamp
         var baseQuery = """
         SELECT d
         FROM DriverEntity d
         JOIN FETCH VehicleDriverEntity vd ON d.id = vd.id.driverId
+            AND vd.id.startDate <= :theDate
+            AND (vd.endDate IS NULL OR vd.endDate >= :theDate)
         JOIN FETCH VehicleEntity v ON vd.id.vehicleId = v.id
         LEFT JOIN VehicleUntrackedPeriodEntity vup 
             ON vup.id.vehicleId = v.id 
-            AND vup.id.startDate <= current_date()
-            AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
+            AND vup.id.startDate <= :theDate
+            AND (vup.endDate IS NULL OR vup.endDate >= :theDate)    
         LEFT JOIN DriverUntrackedPeriodEntity dup 
             ON dup.id.driverId = d.id 
-            AND dup.id.startDate <= current_date() 
-            AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
-    """
+            AND dup.id.startDate <= :theDate
+            AND (dup.endDate IS NULL OR dup.endDate >= :theDate)
+    """.trimIndent()
 
-        // Extend the query only if agencyIds are provided
+        // 3) Préparation des paramètres (en injectant le timestamp)
+        val params = mutableMapOf<String, Any>(
+            "theDate" to timestampParam
+        )
+        var hasWhere = false
+
+        // 4) Si l’utilisateur fournit des agences, on joint la table DriverTeamEntity
         if (!agencyIds.isNullOrEmpty()) {
             baseQuery += """
             JOIN DriverTeamEntity dt ON d.id = dt.id.driverId
+                AND dt.id.startDate <= :theDate
+                AND (dt.endDate IS NULL OR dt.endDate >= :theDate)
             JOIN TeamEntity t ON dt.id.teamId = t.id
             LEFT JOIN t.parentTeam parent_team
-            WHERE dt.endDate IS NULL 
-            AND (t.label IN :agencyIds OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds))
-        """
-            params["agencyIds"] = agencyIds
+        """.trimIndent()
 
+            // On ajoute un WHERE pour filtrer sur les agences
+            baseQuery += """
+            WHERE ( t.label IN :agencyIds
+                OR (parent_team IS NOT NULL AND parent_team.label IN :agencyIds) )
+        """.trimIndent()
+
+            params["agencyIds"] = agencyIds
+            hasWhere = true
         }
 
-        baseQuery += """
-            ${if (baseQuery.contains("WHERE")) "AND" else "WHERE"} vd.endDate IS NULL
-            AND vup.id.startDate IS NULL
-            AND dup.id.startDate IS NULL
-        """
+        // 5) Ajouter ensuite la condition pour exclure les périodes non suivies (untracked)
+        val untrackedCondition = """
+        ${if (hasWhere) "AND" else "WHERE"} 
+        vup.id.startDate IS NULL
+        AND dup.id.startDate IS NULL
+    """.trimIndent()
 
+        baseQuery += "\n$untrackedCondition"
+
+        // 6) On exécute la requête Panache en utilisant la requête construite et les paramètres
         val panacheQuery = DriverEntity.find(baseQuery, params)
 
+        // 7) On mappe les entités DriverEntity en DriverDTO
         return panacheQuery.list().map { driverMapper.toDto(it) }
-
     }
 
     // ====================================================

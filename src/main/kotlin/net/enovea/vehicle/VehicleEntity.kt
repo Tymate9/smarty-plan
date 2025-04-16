@@ -11,6 +11,7 @@ import net.enovea.driver.DriverEntity
 import net.enovea.vehicle.vehicle_category.VehicleCategoryEntity
 import net.enovea.vehicle.vehicleDriver.VehicleDriverEntity
 import net.enovea.vehicle.vehicleTeam.VehicleTeamEntity
+import java.math.BigDecimal
 import java.time.LocalDate
 
 /**
@@ -45,61 +46,77 @@ data class VehicleEntity(
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle"
-        )
+    )
     val vehicleDevices: List<DeviceVehicleInstallEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle"
-        )
+    )
     val vehicleDrivers: List<VehicleDriverEntity> = mutableListOf(),
 
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "vehicle"
-        )
+    )
     val vehicleTeams: List<VehicleTeamEntity> = mutableListOf(),
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     var category: VehicleCategoryEntity? = null,
 
+    // Consommation théorique (NUMERIC(10,2)), optionnel
+    @Column(name = "theoretical_consumption", precision = 10, scale = 2, nullable = true)
+    var theoreticalConsumption: BigDecimal? = null,
 
-    ) : PanacheEntityBase {
+    // Kilométrage (NUMERIC(10,2)), optionnel
+    @Column(name = "mileage", precision = 10, scale = 2, nullable = true)
+    var mileage: BigDecimal? = null,
 
+    // Date de mise en service (DATE), optionnel
+    @Column(name = "service_date", nullable = true)
+    var serviceDate: LocalDate? = null
+
+
+) : PanacheEntityBase {
     fun retrieveVehicleDrivers(): List<VehicleDriverEntity> {
         return vehicleDrivers
     }
+
     companion object : PanacheCompanionBase<VehicleEntity, String> {
         const val ENTITY_NAME = "VehicleEntity"
         const val TABLE_NAME = "vehicle"
-        private const val BASE_QUERY = """
+        private const val BASE_QUERY= """
             SELECT v
-            FROM VehicleEntity v
+                FROM VehicleEntity v
             JOIN FETCH VehicleTeamEntity vt ON v.id = vt.id.vehicleId
+                AND vt.id.startDate <= :theDate
+                AND (vt.endDate IS NULL OR vt.endDate >= :theDate)
             JOIN FETCH TeamEntity t ON vt.id.teamId = t.id
             LEFT JOIN t.parentTeam parent_team
+            
             LEFT JOIN FETCH VehicleDriverEntity vd ON v.id = vd.id.vehicleId
-                AND vd.id.startDate <= current_date()
-                AND (vd.endDate IS NULL OR vd.endDate >= current_date())   
+                AND vd.id.startDate <= :theDate
+            AND (vd.endDate IS NULL OR vd.endDate >= :theDate)
             LEFT JOIN FETCH DriverEntity d ON vd.id.driverId = d.id
-            JOIN FETCH DeviceVehicleInstallEntity dvi ON v.id = dvi.id.vehicleId
-                AND dvi.id.startDate <= current_date()
-                AND (dvi.endDate IS NULL OR dvi.endDate >= current_date())   
-            JOIN FETCH DeviceEntity de ON dvi.id.deviceId = de.id
-            LEFT JOIN FETCH DeviceDataStateEntity ds ON de.id = ds.device_id 
-            LEFT JOIN VehicleUntrackedPeriodEntity vup 
-                ON vup.id.vehicleId = v.id 
-                AND vup.id.startDate <= current_date()
-                AND (vup.endDate IS NULL OR vup.endDate >= current_date())    
-            LEFT JOIN DriverUntrackedPeriodEntity dup 
-                ON dup.id.driverId = d.id 
-                AND dup.id.startDate <= current_date() 
-                AND (dup.endDate IS NULL OR dup.endDate >= current_date()) 
-            WHERE 1 = 1
-            AND vt.endDate IS NULL
-            AND vd.endDate IS NULL
-            """
+
+        JOIN FETCH DeviceVehicleInstallEntity dvi ON v.id = dvi.id.vehicleId
+            AND dvi.id.startDate <= :theDate
+            AND (dvi.endDate IS NULL OR dvi.endDate >= :theDate)
+        JOIN FETCH DeviceEntity de ON dvi.id.deviceId = de.id
+        LEFT JOIN FETCH DeviceDataStateEntity ds ON de.id = ds.device_id 
+
+        LEFT JOIN VehicleUntrackedPeriodEntity vup 
+            ON vup.id.vehicleId = v.id 
+            AND vup.id.startDate <= :theDate
+            AND (vup.endDate IS NULL OR vup.endDate >= :theDate)
+        LEFT JOIN DriverUntrackedPeriodEntity dup 
+            ON dup.id.driverId = d.id 
+            AND dup.id.startDate <= :theDate
+            AND (dup.endDate IS NULL OR dup.endDate >= :theDate)
+            
+        WHERE 1 = 1
+        """
         private const val GEOLOCALIZED_CONDITION = """
             AND vup.id.startDate IS NULL
             AND dup.id.startDate IS NULL
@@ -111,9 +128,11 @@ data class VehicleEntity(
             )
             """
 
-        fun getCurrentDriver(vehicleDriversList: List<VehicleDriverEntity>): DriverEntity? = vehicleDriversList.filter { it.endDate == null }.maxByOrNull { it.id.startDate }?.driver
+        fun getCurrentDriver(vehicleDriversList: List<VehicleDriverEntity>): DriverEntity? =
+            vehicleDriversList.filter { it.endDate == null }.maxByOrNull { it.id.startDate }?.driver
 
-        fun getCurrentDevice(vehicleDevicesList: List<DeviceVehicleInstallEntity>): DeviceEntity? = vehicleDevicesList.filter { it.endDate == null }.maxByOrNull { it.id.startDate }?.device
+        fun getCurrentDevice(vehicleDevicesList: List<DeviceVehicleInstallEntity>): DeviceEntity? =
+            vehicleDevicesList.filter { it.endDate == null }.maxByOrNull { it.id.startDate }?.device
 
         // Method to find by ID as String
         @Transactional
@@ -131,10 +150,14 @@ data class VehicleEntity(
             ).list()
         }
 
-        data class VehicleAndCurrentDriver(val vehicle: VehicleEntity, val geolocalized: Boolean? = false, val driver: DriverEntity?)
+        data class VehicleAndCurrentDriver(
+            val vehicle: VehicleEntity,
+            val geolocalized: Boolean? = false,
+            val driver: DriverEntity?
+        )
 
         @Transactional
-        fun getAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver?{
+        fun getAtDateIfTracked(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver? {
             try {
                 val vehicle = getEntityManager().createQuery(
                     """
@@ -157,12 +180,11 @@ data class VehicleEntity(
                         AND dup.id.startDate <= :date 
                         AND (dup.endDate IS NULL OR dup.endDate >= :date)      
                 WHERE v.id = :vehicleId 
-                """.trimIndent(), VehicleAndCurrentDriver::class.java)
-                    .setParameter("vehicleId", vehicleId).
-                    setParameter("date", date.atStartOfDay()).
-                    singleResult
+                """.trimIndent(), VehicleAndCurrentDriver::class.java
+                )
+                    .setParameter("vehicleId", vehicleId).setParameter("date", date.atStartOfDay()).singleResult
                 return vehicle
-            }catch (ex: NoResultException){
+            } catch (ex: NoResultException) {
                 return null
             }
         }
@@ -170,8 +192,9 @@ data class VehicleEntity(
 
         //Method to get the driver and the vehicle entity
         @Transactional
-        fun getVehicleDriverAtDate(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver?= getEntityManager().createQuery(
-            """
+        fun getVehicleDriverAtDate(vehicleId: String, date: LocalDate): VehicleAndCurrentDriver? =
+            getEntityManager().createQuery(
+                """
                 SELECT v, d
                 FROM VehicleEntity v 
                     LEFT JOIN FETCH VehicleDriverEntity vd  
@@ -180,7 +203,8 @@ data class VehicleEntity(
                         AND (vd.endDate IS NULL OR vd.endDate >= :date) 
                     LEFT JOIN FETCH DriverEntity d ON d.id = vd.id.driverId    
                 WHERE v.id = :vehicleId 
-                """.trimIndent(), VehicleAndCurrentDriver::class.java).setParameter("vehicleId", vehicleId).setParameter("date", date.atStartOfDay()).resultList.firstOrNull()
+                """.trimIndent(), VehicleAndCurrentDriver::class.java
+            ).setParameter("vehicleId", vehicleId).setParameter("date", date.atStartOfDay()).resultList.firstOrNull()
 
 
         @Transactional
@@ -188,9 +212,12 @@ data class VehicleEntity(
             teamLabels: List<String>? = null,
             vehicleIds: List<String>? = null,
             driverNames: List<String>? = null,
+            dateFilter: LocalDate? = null
         ): List<VehicleEntity> {
-            var (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)
-            val panacheQuery = VehicleEntity.find(BASE_QUERY+GEOLOCALIZED_CONDITION+queryTemp, params)
+            val theDate = (dateFilter ?: LocalDate.now()).atStartOfDay() // si la date n'est pas fournie, on prend today
+            val (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)
+            params["theDate"] = theDate
+            val panacheQuery = VehicleEntity.find(BASE_QUERY + GEOLOCALIZED_CONDITION + queryTemp, params)
 
             return panacheQuery.list()
         }
@@ -200,9 +227,12 @@ data class VehicleEntity(
             teamLabels: List<String>? = null,
             vehicleIds: List<String>? = null,
             driverNames: List<String>? = null,
+            dateFilter: LocalDate? = null
         ): List<VehicleEntity> {
-            var (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)
-            val panacheQuery = VehicleEntity.find(BASE_QUERY+NON_GEOLOCALIZED_CONDITION+queryTemp, params)
+            val theDate = (dateFilter ?: LocalDate.now()).atStartOfDay()  // si la date n'est pas fournie, on prend today
+            val (queryTemp, params) = getFiltersRequest(teamLabels, vehicleIds, driverNames)
+            params["theDate"] = theDate
+            val panacheQuery = VehicleEntity.find(BASE_QUERY + NON_GEOLOCALIZED_CONDITION + queryTemp, params)
 
             return panacheQuery.list()
         }
@@ -212,7 +242,7 @@ data class VehicleEntity(
             teamLabels: List<String>? = null,
             vehicleIds: List<String>? = null,
             driverNames: List<String>? = null,
-        ): Pair<String,  MutableMap<String, Any>> {
+        ): Pair<String, MutableMap<String, Any>> {
             val params = mutableMapOf<String, Any>()
             var query = ""
             if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driverNames.isNullOrEmpty()) {

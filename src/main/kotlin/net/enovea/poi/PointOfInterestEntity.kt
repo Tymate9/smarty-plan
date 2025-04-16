@@ -234,8 +234,7 @@ data class PointOfInterestEntity(
 }
 
 /**
- * Petite extension utilitaire pour convertir un Point en WKT,
- * au besoin, si vous n'utilisez pas déjà .toText() de JTS.
+ * Petite extension utilitaire pour convertir un Point en WKT
  */
 fun Point.toText(): String {
     val wktWriter = WKTWriter()

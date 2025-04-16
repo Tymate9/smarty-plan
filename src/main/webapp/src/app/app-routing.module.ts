@@ -24,7 +24,7 @@ export const routes: Routes = [
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'admin', component: EntityAdminComponent }
+      { path: 'administration', component: EntityAdminComponent }
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

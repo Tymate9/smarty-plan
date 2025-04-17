@@ -76,8 +76,8 @@ import {TableModule} from "primeng/table";
           <td>Départ tardif (>7H30)</td>
           <td>Dernier arrêt tardif (>18H)</td>
           <td>Dernier trajet long (>45mn)</td>
-          <td>Amplitude</td>
-          <td>Temps d'attente</td>
+          <td>Amplitude moyenne journalière</td>
+          <td>Durée arrêt total</td>
           <td>Détails</td>
         </tr>
 
@@ -128,7 +128,7 @@ import {TableModule} from "primeng/table";
               <th>Date</th>
               <th>Conducteur</th>
               <th>Nb de trajets effectués (nb)</th>
-              <th>Distance parcourue</th>
+              <th>Distance parcourue (en km)</th>
               <th>Temps de conduite (en HH:MM)</th>
               <th>Distance moyenne / Trajet (en km)</th>
               <th>Durée moyenne / Trajet (en HH:MM)</th>
@@ -136,7 +136,7 @@ import {TableModule} from "primeng/table";
               <th>Dernier arrêt tardif (>18H)</th>
               <th>Dernier trajet long (>45mn)</th>
               <th>Amplitude</th>
-              <th>Temps d'attente</th>
+              <th>Temps d'arrêt total</th>
             </tr>
           </ng-template>
           <ng-template #body let-dailyStat>
@@ -148,13 +148,13 @@ import {TableModule} from "primeng/table";
               <td>{{ dailyStat.drivingTime }}</td>
               <td>{{ dailyStat.distancePerTripAvg }}</td>
               <td>{{ dailyStat.durationPerTripAvg }}</td>
-              <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#e5e7eb' : 'transparent'}">
+              <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#fca5a5' : 'transparent'}">
                 {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}
               </td>
-              <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#e5e7eb' : 'transparent'}">
+              <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#fca5a5' : 'transparent'}">
                 {{ dailyStat.hasLateStop ? 'Oui' : 'Non' }}
               </td>
-              <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#e5e7eb' : 'transparent'}">
+              <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#fca5a5' : 'transparent'}">
                 {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non' }}
               </td>
               <td>{{ dailyStat.rangeAvg }}</td>

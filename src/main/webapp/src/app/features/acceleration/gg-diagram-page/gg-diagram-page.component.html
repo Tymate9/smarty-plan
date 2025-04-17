@@ -1,0 +1,13 @@
+<div id="gg-diagram-page">
+  <label for="deviceId">Device ID :</label>
+  <input type="number" [(ngModel)]="deviceId" id="deviceId" name="deviceId" value="161"/>
+  <label for="beginDate">Begin Date :</label>
+  <input type="text" [(ngModel)]="beginDate" id="beginDate" name="beginDate" value="2025-01-01T00:00:00"/>
+  <label for="endDate">End Date :</label>
+  <input type="text" [(ngModel)]="endDate" id="endDate" name="endDate" value="2025-05-05T00:00:00"/>
+
+  <p-button (onClick)="displayGgDiagram()" title="Voir GG"></p-button>
+
+  <gg-diagram [ggDiagram]="ggDiagram"/>
+
+</div>

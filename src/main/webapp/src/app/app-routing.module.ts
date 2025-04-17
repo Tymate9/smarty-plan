@@ -8,6 +8,7 @@ import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/admin/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
+import {GgDiagramPageComponent} from "./features/acceleration/gg-diagram-page/gg-diagram-page.component";
 
 export const routes: Routes = [
   {
@@ -24,7 +25,8 @@ export const routes: Routes = [
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'administration', component: EntityAdminComponent }
+      { path: 'administration', component: EntityAdminComponent },
+      { path: 'acceleration/gg-diagram', component: GgDiagramPageComponent}
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

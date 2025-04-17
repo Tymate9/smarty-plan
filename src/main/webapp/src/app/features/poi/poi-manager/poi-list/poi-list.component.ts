@@ -795,7 +795,7 @@ export class PoiListComponent implements OnInit {
           acceptVisible: false,
           rejectVisible: false,
           message: errorMsg,
-          header: "Erreur lors de la création du nouveaux POI.",
+          header: "Erreur lors de la création du nouveau POI.",
           icon: "pi pi-exclamation-triangle",
         });
       }

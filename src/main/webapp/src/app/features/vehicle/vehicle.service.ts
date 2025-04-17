@@ -74,6 +74,17 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
 
   constructor(private readonly http: HttpClient,private messageService: MessageService) {}
 
+  /**
+   * Method used to adapted the vehicles queried in function of its geolocalization.
+   * @param originalURL : original url of the query.
+   * @private
+   */
+  private getGeolocalizedURL(originalURL: string){
+    const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
+    return originalURL+(nonGeolocalized?'-non-geoloc':'')
+  }
+
+
   // Méthode pour récupérer tous les véhicules
   getAllVehicles(): Observable<dto.VehicleSummaryDTO[]> {
     return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`);
@@ -84,9 +95,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     const params = {
       agencyIds: agencyIds && agencyIds.length > 0 ? agencyIds : []
     };
-      const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
-      return this.http.get<VehicleSummaryDTO[]>(`${this.baseUrl}/list`+(nonGeolocalized?'-non-geoloc':''),
-        { params });
+    return this.http.get<VehicleSummaryDTO[]>( this.getGeolocalizedURL(`${this.baseUrl}/list`), { params });
   }
 
   // Méthode pour récupérer les véhicules les plus proches avec leur distance
@@ -118,7 +127,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       vehicleIds: vehicleIds.length ? vehicleIds : [],
       driverNames: driverNames.length ? driverNames : []
     }
-    return this.http.get<dto.VehicleSummaryDTO[]>(`${this.baseUrl}`, {params});
+    return this.http.get<VehicleSummaryDTO[]>( this.getGeolocalizedURL(`${this.baseUrl}`), { params });
   }
 
   // Méthode pour récupérer les véhicules dans la page Dashboard

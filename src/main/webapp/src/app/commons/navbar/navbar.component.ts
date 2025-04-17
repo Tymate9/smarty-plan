@@ -439,12 +439,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
       });
 
-
-      // this.driverService.subscribeToCrudEvents();
-      // this.teamService.subscribeToCrudEvents();
-      // this.vehicleService.subscribeToCrudEvents();
-      //
-      this.subscribeToCrudEvents();
+      //this.subscribeToCrudEvents();
 
     } catch (error) {
       console.error('Erreur lors de l\'initialisation de Navbar', error);

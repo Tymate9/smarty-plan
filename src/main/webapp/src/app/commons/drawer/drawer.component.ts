@@ -219,6 +219,8 @@ export class DrawerComponent implements AfterViewInit, OnDestroy {
 
     // Sinon, on affiche le dialogue de confirmation.
     this.confirmationService.confirm({
+      acceptVisible:true,
+      rejectVisible:true,
       message: this.closeConfirmationMessage,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',

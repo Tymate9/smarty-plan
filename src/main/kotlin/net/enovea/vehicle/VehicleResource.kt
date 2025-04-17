@@ -165,6 +165,21 @@ class VehicleResource(
         return Response.ok(formatResponse(format ?: VehicleFormat.RESUME, vehicleFinale)).build()
     }
 
+    @GET
+    @Path("-non-geoloc")
+    fun getFilteredNonGeolocVehicles(
+        @QueryParam("format") format: VehicleFormat?,
+        @QueryParam("teamLabels") teamLabels: List<String>?,
+        @QueryParam("vehicleIds") vehicleIds: List<String>?,
+        @QueryParam("driverNames") driverNames: List<String>?
+    ): Response {
+        val filteredVehicles = VehicleEntity.getFilteredNonGeolocVehicles(teamLabels, vehicleIds, driverNames)
+        val vehicleSummaries = filteredVehicles
+        val vehicleFinale = vehicleSummaries
+            .filter { it.vehicleDevices.isNotEmpty() && it.vehicleTeams.isNotEmpty()}
+        return Response.ok(formatResponse(format ?: VehicleFormat.RESUME, vehicleFinale)).build()
+    }
+
     private fun formatResponse(vehicleFormat: VehicleFormat, vehicles : List<VehicleEntity>) : Any {
         return when(vehicleFormat)
         {

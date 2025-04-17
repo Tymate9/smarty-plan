@@ -23,6 +23,7 @@ import {ButtonModule} from "primeng/button";
 import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 import {MaskToggleComponent} from "../../commons/mask-toggle/mask-toggle.component";
 import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
+import {NotificationService} from "../../commons/notification/notification.service";
 
 /** Définition d'une constante pour les détails de statuts (primaires + unplugged) */
 const STATUS_DETAILS: Record<string, { displayName: string, color: string, icon: string }> = {
@@ -73,7 +74,7 @@ interface StatusCount {
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles()"></p-button>
+      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles(true)"></p-button>
       <p-button icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()"></p-button>
       <p-button label="Exporter CSV" (click)="exportToCSV()"
@@ -87,7 +88,7 @@ interface StatusCount {
                  #treeTable
                  [value]="vehiclesTree"
                  [scrollable]="true"
-                 [tableStyle]="{'width': '96vw', 'margin': '0 auto' , 'table-layout' :'fixed'}"
+                 [tableStyle]="{'width': '96vw', 'margin': '0 auto' , 'table-layout' :'auto'}"
                  [resizableColumns]="true"
                  styleClass="p-treetable-gridlines">
 
@@ -113,14 +114,14 @@ interface StatusCount {
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
             class="dynamic-tt-header">
-          <td>Conducteur</td>
+          <td class="driver-column">Conducteur</td>
           <td>Immatriculation</td>
           <td>État</td>
           <td>Dernière communication</td>
           <td>Heure de départ</td>
-          <td *ngIf="!non_geoloc">Adresse</td>
-          <td>Distance totale</td>
-          <td>Action</td>
+          <td class="address-column"  *ngIf="!non_geoloc">Adresse</td>
+          <td >Distance totale</td>
+          <td >Action</td>
         </tr>
 
         <!-- Ligne pour les véhicules (rowData.vehicle != null) -->
@@ -224,7 +225,7 @@ interface StatusCount {
               {{ rowData.vehicle.firstTripStart }}
             </span>
             <ng-template #notStarted>
-              Journée <br/>non commencée
+              Journée non commencée
             </ng-template>
           </td>
 
@@ -366,6 +367,16 @@ interface StatusCount {
     ToggleButtonsGroupComponent
   ],
   styles: [`
+
+    .driver-colum{
+      width: 15vw;
+    }
+
+    .address-column{
+      width: 30vw;
+      text-overflow: ellipsis;
+    }
+
     /* Styles inchangés pour préserver l’apparence et éviter toute régression */
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
       background-color: #007ad9 !important;
@@ -690,6 +701,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private filterService: FilterService,
     private readonly vehicleService: VehicleService,
     protected router: Router,
+    private readonly notificationService: NotificationService,
   ) {
     this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
   }
@@ -736,7 +748,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedUnpluggedStatus = null;
   }
 
-  loadFilteredVehicles(): void {
+  loadFilteredVehicles(called : boolean = false): void {
 
     if (this.non_geoloc) {
       this.vehicleService.getFilteredNonGeolocVehiclesDashboard(
@@ -745,6 +757,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.filters.drivers
       ).subscribe(filteredVehicles => {
         this.loadFilteredDataAndFilters(filteredVehicles)
+        if (called)
+          this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
       });
     }
     else {
@@ -754,6 +768,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.filters.drivers
       ).subscribe(filteredVehicles => {
         this.loadFilteredDataAndFilters(filteredVehicles)
+        if (called)
+          this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
       });
     }
 

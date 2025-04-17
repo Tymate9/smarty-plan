@@ -250,9 +250,12 @@ export class MapComponent implements OnInit, OnDestroy {
         const refVehicle = `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `;
         if (vehicle.device.state === "" || vehicle.device.state === "NO_COM" || vehicle.device?.state === null) {
           this.noComVehicle += refVehicle
-        }
-        if (vehicle.device?.plugged) {
-          this.unpluggedVehicle += refVehicle
+        }else {
+          console.log("=== displayFilteredVehiclesOnMap / vehicle : ", vehicle)
+          console.log("---> displayFilteredVehiclesOnMap / vehicle : ", vehicle.licenseplate)
+          if (vehicle.device?.plugged) {
+            this.unpluggedVehicle += refVehicle
+          }
         }
       }
     });

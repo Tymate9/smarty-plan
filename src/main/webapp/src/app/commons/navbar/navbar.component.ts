@@ -10,7 +10,7 @@ import TeamDTO = dto.TeamDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import DriverDTO = dto.DriverDTO;
 import {ConfigService} from "../../core/config/config.service";
-import {forkJoin, Subscription} from "rxjs";
+import {forkJoin, map, merge, of, Subscription} from "rxjs";
 import {NotificationService} from "../notification/notification.service";
 import {Button, ButtonDirective} from "primeng/button";
 import {Menubar} from "primeng/menubar";
@@ -19,6 +19,8 @@ import {AppConfig} from "../../app.config";
 import {AutoCompleteModule} from 'primeng/autocomplete';
 import {FormsModule} from '@angular/forms';
 import {TreeSelectModule} from 'primeng/treeselect';
+import {CrudEventType, IEntityService} from "../crud/interface/ientity-service";
+import VehicleDTO = dto.VehicleDTO;
 
 export interface Option {
   label: string;
@@ -50,14 +52,14 @@ export interface Option {
               selectionMode="checkbox"
               [showClear]="true"
               appendTo="body"
-              (ngModelChange)="onSelectionChange($event)">
+              (ngModelChange)="updateSelectedAgencies($event)">
             </p-treeSelect>
             <p-autoComplete
               [suggestions]="filteredVehicleAutocomplete"
               [(ngModel)]="vehicleSelected"
               (completeMethod)="filterVehicles($event)"
               [multiple]="true"
-              (ngModelChange)="updateVehicles($event)"
+              (ngModelChange)="updateSelectedVehicles($event)"
               [placeholder]="'Filtrer Véhicles...'"
               [dropdown]="true"
               appendTo="body">
@@ -67,7 +69,7 @@ export interface Option {
               [(ngModel)]="driverSelected"
               (completeMethod)="filterDrivers($event)"
               [multiple]="true"
-              (ngModelChange)="updateDrivers($event)"
+              (ngModelChange)="updateSelectedDrivers($event)"
               [placeholder]="'Filtrer Conducteurs...'"
               [dropdown]="true"
               appendTo="body">
@@ -222,16 +224,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
   vehicleSelected: string[] = [];
   driverSelected: string[] = [];
 
-  logoutURL: string = ''; // Propriété pour stocker la logoutURL
-  private configSubscription: Subscription; // Abonnement pour la configuration
+  // Adresse de déconnexion
+  logoutURL: string = '';
+  // Abonnement pour la configuration
+  private configSubscription: Subscription;
 
-
-  onSelectionChange(selectedNodes: any[]) {
-    const previousSelection = [...this.agencySelected]; // Store previous state
+  /**
+   * Actionable method to update selected agencies.
+   * @param tags : label of selected agencies.
+   */
+  updateSelectedAgencies(selectedNodes: any[]) {
+    // Store previous state
+    const previousSelection = [...this.agencySelected];
     if (!selectedNodes || selectedNodes.length === 0) {
-      this.agencySelected = [];
-      this.vehicleSelected = [];
-      this.driverSelected = [];
+      this.resetBaseEntitiesSelected()
     } else {
       // Extract only the labels of selected nodes
       this.agencySelected = selectedNodes.map(node => node.label);
@@ -244,9 +250,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
 
-  // Method to filter driver options based on user input
+  /**
+   * Actionable method to filter driver options.
+   * @param event
+   */
   filterDrivers(event: any) {
     const query = event.query.toLowerCase();
+    console.log("=== filterDrivers : ", query)
     this.filteredDriverAutocomplete = this.filteredDriverOptions.filter(driver =>
       driver.toLowerCase().includes(query)
     );
@@ -310,12 +320,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return roots;
   }
 
-  updateVehicles(tags: string[]) {
+  /**
+   * Actionable method to update selected vehicles.
+   * @param tags : licence plates of selected vehicles.
+   */
+  updateSelectedVehicles(tags: string[]) {
     this.vehicleSelected = tags;
     this.emitSelectedTags();
   }
 
-  updateDrivers(tags: string[]) {
+  /**
+   * Actionable method to update selected drivers.
+   * @param tags : first name followed by last name of selected drivers.
+   */
+  updateSelectedDrivers(tags: string[]) {
     this.driverSelected = tags;
     this.emitSelectedTags();
   }
@@ -325,10 +343,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
       agencies: this.agencySelected,
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
-    };
+    }
 
     if (!this.areFiltersEqual(this.filterService.getCurrentFilters(), newFilters)) {
-      this.filterService.updateFilters(newFilters);
+      this.filterService.updateFilters(newFilters)
     }
   }
   // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
@@ -421,9 +439,128 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
       });
 
+
+      // this.driverService.subscribeToCrudEvents();
+      // this.teamService.subscribeToCrudEvents();
+      // this.vehicleService.subscribeToCrudEvents();
+      //
+      this.subscribeToCrudEvents();
+
     } catch (error) {
       console.error('Erreur lors de l\'initialisation de Navbar', error);
     }
+  }
+
+  private crudSubscription?: Subscription;
+
+  private subscribeToCrudEvents(): void {
+    const obs1 = this.driverService!.crudEvents$.pipe(map(val => ({ source: 'driver', val })));
+    const obs2 = this.teamService!.crudEvents$.pipe(map(val => ({ source: 'team',val})));
+    const obs3 = this.vehicleService!.crudEvents$.pipe(map(val => ({ source: 'vehicle', val })));
+
+    merge(obs1, obs2, obs3).subscribe(({ source, val }) => {
+      console.log(`=== Received from ${source}:`, val);
+    });
+
+
+    merge(obs1, obs2, obs3).subscribe(({ source, val })  => {
+      var modified = false;
+      // var service: IEntityService<any, any>
+      // switch (source){
+      //   case 'team':
+      //     service = this.teamService;
+      //     break;
+      //   case 'vehicle':
+      //     break;
+      //   case 'driver':
+      // }
+      switch (val.type) {
+        case CrudEventType.CREATE:
+          modified = true;
+          break;
+        case CrudEventType.UPDATE:
+          this.filteredVehicleOptions = this.filteredDriverOptions.
+          map(item => item === (val.oldData as VehicleDTO).licenseplate ?
+            (val.newData as VehicleDTO).licenseplate : item);
+          this.vehicleSelected = this.vehicleSelected.
+          map(item => item === (val.oldData as VehicleDTO).licenseplate ?
+            (val.newData as VehicleDTO).licenseplate : item);
+          modified = true;
+          break;
+        case CrudEventType.DELETE:
+          // if(source==='team'){
+          //   this.agencySelected = this.agencySelected.filter(item => item !== toDelete)
+          // }
+
+          // this.driverSelected = this.driverSelected.filter(item => item !== val);
+          modified = true;
+          break;
+        default:
+          console.warn('[navBarComponent] Événement CRUD inconnu:', event);
+      }
+      if(modified)
+        this.handleCrudEvent();
+    });
+
+    // this.crudSubscription = this.driverService!.crudEvents$.subscribe(event => {
+    //   switch (event.type) {
+    //
+    //     case CrudEventType.CREATE:
+    //     case CrudEventType.UPDATE:
+    //     case CrudEventType.DELETE:
+    //       this.handleCrudEvent();
+    //       break;
+    //
+    //     // case CrudEventType.CREATE:
+    //     //   this.handleCreateEvent(event.newData);
+    //     //   break;
+    //     // case CrudEventType.UPDATE:
+    //     //   this.handleUpdateEvent(event.oldData, event.newData);
+    //     //   break;
+    //     // case CrudEventType.DELETE:
+    //     //   this.handleDeleteEvent(event.oldData);
+    //     //   break;
+    //     default:
+    //       console.warn('[navBarComponent] Événement CRUD inconnu:', event);
+    //   }
+    //   // this.cdr.markForCheck();
+    // });
+  }
+
+  //Rafraichir le contenu des filtres
+  private handleCrudEvent(){
+
+    // Chargement parallèle des données (agences, véhicules, conducteurs)
+    forkJoin({
+      agencies: this.teamService.getAgencies(),
+      vehicles: this.vehicleService.getVehiclesList(),
+      drivers: this.driverService.getAffectedDrivers()
+    }).subscribe(({agencies, vehicles, drivers}) => {
+
+      // Traitement des agences
+      this.agencyOptions = this.transformToHierarchy(agencies);
+      this.agencyOptionsTree = this.agencyOptions;
+      this.agencyTree = this.agencyOptions;
+
+      // Traitement des véhicules
+      this.vehicleOptions = vehicles;
+      this.filteredVehicleOptions = vehicles
+        .sort((a, b) => (a.licenseplate || '').localeCompare(b.licenseplate || ''))
+        .map(vehicle => vehicle.licenseplate || '');
+
+      // Traitement des conducteurs
+      this.driverOptions = drivers;
+      this.filteredDriverOptions = drivers
+        .sort((a, b) => {
+          const cmp = (a.lastName || '').localeCompare(b.lastName || '');
+          return cmp !== 0 ? cmp : (a.firstName || '').localeCompare(b.firstName || '');
+        })
+        .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+        .concat('Véhicule non attribué');
+
+      // Chargement des filtres initiaux depuis le FilterService
+      this.loadInitialFilters();
+    });
   }
 
   // Méthode de déconnexion utilisant directement l'instance Keycloak injectée
@@ -590,18 +727,23 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.agencySelected = [];
-    this.vehicleSelected = [];
-    this.driverSelected = [];
-    this.selectedNodes=[];
+    this.resetBaseEntitiesSelected()
+    this.selectedNodes=[]
 
-    this.filterService.resetFilters();
-    this.filterService.triggerReset();
+    this.filterService.resetFilters()
+    this.filterService.triggerReset()
 
-    this.filterVehiclesAndDrivers();
-    this.updateFilteredOptionsAfterLoading();
-    this.emitSelectedTags();
+    this.filterVehiclesAndDrivers()
+    this.updateFilteredOptionsAfterLoading()
+    this.emitSelectedTags()
   }
+
+  private resetBaseEntitiesSelected(): void {
+    this.agencySelected = []
+    this.vehicleSelected = []
+    this.driverSelected = []
+  }
+
   ngOnDestroy() {
     if (this.configSubscription) {
       this.configSubscription.unsubscribe();

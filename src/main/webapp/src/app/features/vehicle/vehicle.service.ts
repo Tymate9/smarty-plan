@@ -81,7 +81,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
    */
   private getGeolocalizedURL(originalURL: string){
     const nonGeolocalized = location.pathname.indexOf('-non-geoloc')>0
-    return `${this.baseUrl}/list`+(nonGeolocalized?'-non-geoloc':'')
+    return originalURL+(nonGeolocalized?'-non-geoloc':'')
   }
 
 

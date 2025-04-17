@@ -70,9 +70,9 @@ interface DynamicComponentConfig {
                 [icon]="col.ascending ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
               >
               </p-button>
-              <span *ngIf="col.field && col.comparator">
-            ({{ col.ascending ? 'Asc' : 'Desc' }})
-          </span>
+<!--              <span *ngIf="col.field && col.comparator">-->
+<!--            ({{ col.ascending ? 'Asc' : 'Desc' }})-->
+<!--          </span>-->
             </td>
           </tr>
         </ng-container>

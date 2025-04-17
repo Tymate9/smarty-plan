@@ -1,14 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
+import {black} from "ansi-colors";
 
 @Component({
   standalone: true,
   selector: 'app-toggle-buttons-group',
   template: `
-    <div class="toggle-buttons-group">
-      <button *ngFor="let item of items"
-              (click)="onItemClick(item)"
-              [ngStyle]="{
+      <div class="toggle-buttons-group">
+          <button *ngFor="let item of items"
+                  (click)="onItemClick(item)"
+                  [ngStyle]="{
                 'background-color': '#ffffff',
                 '--button-color': colorFn ? colorFn(item) : '#007bff',
                 'width': buttonWidth,
@@ -16,19 +17,31 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
                 'display': 'flex',
                 'flex-direction' : 'row'
               }"
-              [class.active]="selectedItem && identifierFn(selectedItem) === identifierFn(item)">
-          <!-- Nombre affiché en blanc -->
-        <div class="status-count" [ngStyle]="{
-        'background-color' : colorFn ? colorFn(item) : '#007bff'
-        }">{{ item.count }}</div>
-        <div class="status-text-container" [ngStyle]="{
-        'color' : colorFn ? colorFn(item) : '#007bff'
-        }">
-          <div class=>{{ displayFn(item) }}</div>
-          <i *ngIf="iconFn" [ngClass]="iconFn(item)"></i>
-        </div>
-      </button>
-    </div>
+                  [class.active]="selectedItem && identifierFn(selectedItem) === identifierFn(item)"
+                  [disabled]="!clickable">
+              <!-- Nombre affiché en blanc -->
+              <!--        <div class="status-count" [ngStyle]="{-->
+              <!--        'background-color' : colorFn ? colorFn(item) : '#007bff' ,'font-size': fontSize-->
+              <!--        }">{{ item.count }}</div>-->
+              <!--        <div class="status-text-container" [ngStyle]="{-->
+              <!--        'color' : colorFn ? colorFn(item) : '#007bff', 'font-size': fontSize-->
+              <!--        }">-->
+            <div class="status-count" [ngStyle]="{
+                      'background-color': colorFn ? colorFn(item) : '#007bff',
+                      'font-size': fontSize,
+                    }">{{ item.count }}
+            </div>
+
+            <!-- Text color (from input if provided) & font-size -->
+            <div class="status-text-container" [ngStyle]="{
+                      'color': textColor ? textColor : (colorFn ? colorFn(item) : '#007bff'),
+                      'font-size': fontSize
+                    }">
+                  <div class=>{{ displayFn(item) }}</div>
+                  <i *ngIf="iconFn" [ngClass]="iconFn(item)"></i>
+              </div>
+          </button>
+      </div>
   `,
   imports: [
     NgForOf,
@@ -44,6 +57,9 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       margin-top: 20px;
       justify-content: center;
       align-items: center;
+      //width: 100vw;
+      //flex-direction: row;
+      //flex-wrap: wrap;
     }
 
     .toggle-buttons-group button {
@@ -55,6 +71,7 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       font-weight: bold;
       border: none;
       width: 100%;
+      //min-width: 16vw;
       flex: 1 1 170px;
       box-sizing: border-box;
       position: relative;
@@ -62,16 +79,16 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       color: #333;
       background: white;
       overflow: hidden;
-      cursor: pointer;
       transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
       white-space: nowrap;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       flex-direction: row;
     }
 
-    .toggle-buttons-group button:hover {
+    .toggle-buttons-group button:hover:not(:disabled){
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       transform: translateY(-2px);
+      cursor: pointer;
     }
 
 
@@ -92,7 +109,7 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
       color: white !important;
       padding: 0 5px !important;
       font-weight: bold !important;
-      font-size:1.5rem !important;
+      //font-size:1.5rem !important;
       min-width: 30%;
       display: flex;
       align-items: center;
@@ -154,10 +171,19 @@ export class ToggleButtonsGroupComponent <T> {
    */
   @Output() selectionChange: EventEmitter<any | null> = new EventEmitter();
 
+  @Input() clickable = true ;
+
+  @Input() fontSize: string = '1.5rem';
+
+  @Input() textColor?: string;
+
   /**
    * Gère la logique de sélection/désélection.
    */
   onItemClick(item: any): void {
+    if (!this.clickable) {
+      return
+    }
     if (this.selectedItem && this.identifierFn(this.selectedItem) === this.identifierFn(item)) {
       this.selectedItem = null;
     } else {
@@ -165,4 +191,6 @@ export class ToggleButtonsGroupComponent <T> {
     }
     this.selectionChange.emit(this.selectedItem);
   }
+
+  protected readonly black = black;
 }

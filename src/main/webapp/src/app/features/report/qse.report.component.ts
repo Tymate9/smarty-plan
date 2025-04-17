@@ -11,28 +11,69 @@ import {TreeTableModule} from "primeng/treetable";
 import {NgClass, NgIf} from "@angular/common";
 import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
 import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
+import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
+import {StatsCount} from "./report.component";
+
+
+const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> = {
+  totalDrivingTime:{displayName:"TEMPS DE CONDUITE TOTAL",color:"#fee2e2"},
+  totalWaitingTime:{displayName:"TEMPS D'ARRET TOTAL (en hh:mm)",color:"#fee2e2"},
+  totalDistanceSum:{displayName:"DISTANCE PARCOURUE (en km)",color:"#fee2e2"},
+  selectionScore:{displayName:"SCORE DE LA SELECTION",color:"#fee2e2"},
+  severityOfUseTurn:{displayName:"SEVERITE D'USAGE VIRAGE",color:"#fee2e2"},
+  severityOfAcceleration:{displayName:"SEVERITE D'USAGE ACCELERATION-FREINAGE",color:"#fee2e2"},
+  averageRangeAvg:{displayName:"AMPLITUDE MOYENNE",color:"#fee2e2"},
+  idleDurationTotal:{displayName:"TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)",color:"#fee2e2"},
+  longestTrip:{displayName:"LE TRAJET LE PLUS LONG",color:"#d1d5db"}
+};
+
 
 @Component({
   selector: 'app-qse-report',
   template: `
     <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
-    <app-indicator-buttons
-      [statsMap]="vehiclesStatsTotal"
-      [keyLabels]="keyLabels"
-      [buttonColor]="'var(--p-red-100)'"
-      [sliceRange]="[0, 4]"
-      [keyToPropertyMap]="keyToPropertyMap"
-      (filterClicked)="filterByKey($event)">
-    </app-indicator-buttons>
+<!--    <app-indicator-buttons-->
+<!--      [statsMap]="vehiclesStatsTotal"-->
+<!--      [keyLabels]="keyLabels"-->
+<!--      [buttonColor]="'var(&#45;&#45;p-red-100)'"-->
+<!--      [sliceRange]="[0, 4]"-->
+<!--      [keyToPropertyMap]="keyToPropertyMap"-->
+<!--      (filterClicked)="filterByKey($event)">-->
+<!--    </app-indicator-buttons>-->
 
-    <app-indicator-buttons
-      [statsMap]="vehiclesStatsTotal"
-      [keyLabels]="keyLabels"
-      [buttonColor]="'var(--p-gray-300)'"
-      [sliceRange]="[4, 9]"
-      [keyToPropertyMap]="keyToPropertyMap"
-      (filterClicked)="filterByKey($event)">
-    </app-indicator-buttons>
+<!--    <app-indicator-buttons-->
+<!--      [statsMap]="vehiclesStatsTotal"-->
+<!--      [keyLabels]="keyLabels"-->
+<!--      [buttonColor]="'var(&#45;&#45;p-gray-300)'"-->
+<!--      [sliceRange]="[4, 9]"-->
+<!--      [keyToPropertyMap]="keyToPropertyMap"-->
+<!--      (filterClicked)="filterByKey($event)">-->
+<!--    </app-indicator-buttons>-->
+
+    <app-toggle-buttons-group
+      [items]="statsCounts.slice(0,4)"
+      [selectedItem]="selectedStats"
+      [identifierFn]="identifierFn"
+      [displayFn]="displayFn"
+      [colorFn]="colorFn"
+      (selectionChange)="filterByKey($event)"
+      buttonWidth="18.5vw"
+      [clickable]="false"
+      fontSize="0.7rem"
+      textColor="black">
+    </app-toggle-buttons-group>
+    <app-toggle-buttons-group
+      [items]="statsCounts.slice(4,9)"
+      [selectedItem]="selectedStats"
+      [identifierFn]="identifierFn"
+      [displayFn]="displayFn"
+      [colorFn]="colorFn"
+      (selectionChange)="filterByKey($event)"
+      buttonWidth="18.5vw"
+      [clickable]="true"
+      fontSize="0.7rem"
+      textColor="black">
+    </app-toggle-buttons-group>
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
@@ -120,10 +161,10 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
   standalone: true,
   imports: [
     DateRangePickerComponent,
-    IndicatorButtonsComponent,
     TreeTableModule,
     NgClass,
-    NgIf
+    NgIf,
+    ToggleButtonsGroupComponent
   ],
   styles: [``]
 })
@@ -146,24 +187,29 @@ export class QseReportComponent implements OnInit {
   vehiclesStatsTotal: Record<string, any>;
   filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = [];
 
+  statsCounts: StatsCount[] = [];
+  selectedStats: StatsCount | null = null;
 
   keyToPropertyMap: Record<string, keyof VehicleStatsQseDTO> = {
     // example# totalHasLastTripLong: "hasLastTripLong",
     longestTrip : "distanceMax"
   };
 
-  keyLabels: Record<string, string> = {
-    totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
-    totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
-    totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-    selectionScore: "SCORE DE LA SELECTION",
-    severityOfUseTurn: "SEVERITE D'USAGE VIRAGE",
-    severityOfAcceleration: "SEVERITE D'USAGE ACCELERATION-FREINAGE",
-    averageRangeAvg: "AMPLITUDE MOYENNE",
-    idleDurationTotal:"TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)",
-    longestTrip:"LE TRAJET LE PLUS LONG"
-  };
+  // keyLabels: Record<string, string> = {
+  //   totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
+  //   totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
+  //   totalDistanceSum: "DISTANCE PARCOURUE (en km)",
+  //   selectionScore: "SCORE DE LA SELECTION",
+  //   severityOfUseTurn: "SEVERITE D'USAGE VIRAGE",
+  //   severityOfAcceleration: "SEVERITE D'USAGE ACCELERATION-FREINAGE",
+  //   averageRangeAvg: "AMPLITUDE MOYENNE",
+  //   idleDurationTotal: "TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)",
+  //   longestTrip: "LE TRAJET LE PLUS LONG"
+  // };
 
+  identifierFn = (item: StatsCount) => item.state;
+  displayFn    = (item: StatsCount) => `${item.displayName}`;
+  colorFn      = (item: StatsCount) => item.color;
 
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
@@ -199,6 +245,15 @@ export class QseReportComponent implements OnInit {
           this.vehicleStatsQse = teamHierarchyNodes;
           this.vehiclesStatsTotal = stats;
 
+          this.statsCounts=Object.entries(this.vehiclesStatsTotal)
+            .filter(([key]) => STATS_QSE_DETAILS[key]) // only include keys defined in STATS_DETAILS
+            .map(([key, value]) => ({
+              state: key,
+              count: value,
+              displayName: STATS_QSE_DETAILS[key].displayName,
+              color: STATS_QSE_DETAILS[key].color
+            }));
+
           //transformer les résultats originaux de la table.ts en TreeNode
           this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
             this.vehicleStatsQse,
@@ -226,12 +281,12 @@ export class QseReportComponent implements OnInit {
   };
 
 
-  filterByKey(key: string): void {
-    const property = this.keyToPropertyMap[key];
+  filterByKey(selected: StatsCount): void {
+    const property = this.keyToPropertyMap[selected.state];
 
     console.log(property);
     if (property) {
-      const longestTripValue = this.vehiclesStatsTotal?.[key];
+      const longestTripValue = this.vehiclesStatsTotal?.[selected.state];
 
       if (typeof longestTripValue !== 'number') {
         return;

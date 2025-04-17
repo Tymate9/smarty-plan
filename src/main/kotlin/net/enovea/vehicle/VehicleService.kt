@@ -152,10 +152,10 @@ open class VehicleService(
         val averageDistance = if (totalTripCount > 0) round((totalDistance / totalTripCount).toDouble()) else 0
         val averageDuration = if (totalTripCount > 0) String.format("%02d:%02d", (vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) }.toDouble() / totalTripCount).roundToInt() / 3600, ((vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) }.toDouble() / totalTripCount).roundToInt() % 3600) / 60) else "00:00"
         val totalWaitingTime = String.format("%02d:%02d", (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } / 3600), (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } % 3600) / 60)
+        val averageRangeAvg = String.format("%02d:%02d", (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() / 3600), (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() % 3600)/ 60)
         val totalHasLateStart = vehiclesStats.sumOf { it.hasLateStartSum }
         val totalHasLateStop = vehiclesStats.sumOf { it.hasLateStop }
         val totalHasLastTripLong = vehiclesStats.sumOf { it.hasLastTripLong }
-        val averageRangeAvg = String.format("%02d:%02d", (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() / 3600), (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() % 3600)/ 60)
 
         // Return results as a map
         return mapOf(
@@ -167,10 +167,10 @@ open class VehicleService(
             "averageDistance" to averageDistance,
             "averageDuration" to averageDuration,
             "totalWaitingTime" to totalWaitingTime,
+            "averageRangeAvg" to averageRangeAvg,
             "totalHasLateStartSum" to totalHasLateStart,
             "totalHasLateStop" to totalHasLateStop,
-            "totalHasLastTripLong" to totalHasLastTripLong,
-            "averageRangeAvg" to averageRangeAvg
+            "totalHasLastTripLong" to totalHasLastTripLong
         )
     }
 
@@ -260,9 +260,10 @@ open class VehicleService(
             "selectionScore" to selectionScore,
             "severityOfUseTurn" to severityOfUseTurn,
             "severityOfAcceleration" to severityOfAcceleration,
+            "longestTrip" to longestTrip,
             "averageRangeAvg" to averageRangeAvg,
-            "idleDurationTotal" to idleDurationTotal,
-            "longestTrip" to longestTrip
+            "idleDurationTotal" to idleDurationTotal
+
         )
     }
 

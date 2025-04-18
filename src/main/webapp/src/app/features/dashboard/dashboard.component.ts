@@ -151,7 +151,7 @@ interface StatusCount {
          'pi-sort-alt': sortColumn !== 'firstTripStart'
        }"></i>
           </td>
-          <td *ngIf="!non_geoloc" (click)="sortByColumn('address')" class="address-column" *ngIf="!non_geoloc">
+          <td *ngIf="!non_geoloc" (click)="sortByColumn('address')" class="address-column">
             Adresse
             <i class="pi"
                [ngClass]="{
@@ -745,6 +745,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private filterService: FilterService,
     private readonly vehicleService: VehicleService,
     protected router: Router,
+    private readonly notificationService: NotificationService,
   ) {
     this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
   }

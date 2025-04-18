@@ -74,7 +74,7 @@ interface StatusCount {
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles(true)"></p-button>
+      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles()"></p-button>
       <p-button icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()"></p-button>
       <p-button label="Exporter CSV" (click)="exportToCSV()"
@@ -793,9 +793,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.sortColumn) {
       this.sortByColumn(this.sortColumn);
     }
+
+    this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
   }
 
-  loadFilteredVehicles(called : boolean = false): void {
+  loadFilteredVehicles(): void {
 
     if (this.non_geoloc) {
       this.vehicleService.getFilteredNonGeolocVehiclesDashboard(
@@ -804,8 +806,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.filters.drivers
       ).subscribe(filteredVehicles => {
         this.loadFilteredDataAndFilters(filteredVehicles)
-        if (called)
-          this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
       });
     }
     else {
@@ -815,8 +815,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.filters.drivers
       ).subscribe(filteredVehicles => {
         this.loadFilteredDataAndFilters(filteredVehicles)
-        if (called)
-          this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
       });
     }
 

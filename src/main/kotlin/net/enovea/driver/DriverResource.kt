@@ -1,7 +1,6 @@
 package net.enovea.driver
 
 import io.quarkus.security.Authenticated
-import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.ws.rs.*
@@ -68,7 +67,6 @@ class DriverResource(
      * Créer un nouveau conducteur (Create).
      * Retourne 400 si le formulaire est invalide.
      */
-    @RolesAllowed("NOT_ALLOWED_YET")
     @POST
     @Transactional
     override fun create(form: DriverForm): Response {
@@ -86,7 +84,6 @@ class DriverResource(
      * Mettre à jour un conducteur existant (Update).
      * Retourne 400 si le formulaire est invalide et 404 si l'entité n'existe pas.
      */
-    @RolesAllowed("NOT_ALLOWED_YET")
     @PUT
     @Transactional
     @Path("/{id}")
@@ -109,7 +106,6 @@ class DriverResource(
      * Retourne 404 si l'entité n'existe pas.
      * Retourne le DTO du conducteur supprimé pour permettre une éventuelle annulation.
      */
-    @RolesAllowed("NOT_ALLOWED_YET")
     @DELETE
     @Path("/{id}")
     @Transactional

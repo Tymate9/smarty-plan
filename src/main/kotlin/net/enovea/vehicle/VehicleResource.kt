@@ -1,7 +1,6 @@
 package net.enovea.vehicle
 
 import io.quarkus.security.Authenticated
-import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.Validator
@@ -55,7 +54,6 @@ class VehicleResource(
      * Créer un nouveau véhicule.
      * Retourne 400 si le formulaire est invalide.
      */
-    @RolesAllowed("NOT_ALLOWED_YET")
     @POST
     @Transactional
     override fun create(form: VehicleForm): Response {
@@ -72,7 +70,6 @@ class VehicleResource(
      * Mettre à jour un véhicule existant.
      * Retourne 400 si le formulaire est invalide et 404 si l'entité n'existe pas.
      */
-    @RolesAllowed("NOT_ALLOWED_YET")
     @PUT
     @Path("/{id}")
     @Transactional
@@ -92,7 +89,6 @@ class VehicleResource(
      * Retourne 404 si l'entité n'existe pas.
      * Retourne le DTO du véhicule supprimé.
      */
-    @RolesAllowed("NOT_ALLOWED_YET")
     @DELETE
     @Path("/{id}")
     @Transactional

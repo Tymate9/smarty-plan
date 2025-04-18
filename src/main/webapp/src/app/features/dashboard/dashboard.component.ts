@@ -111,17 +111,61 @@ interface StatusCount {
         </tr>
 
         <!-- Ligne d'en-tête pour les colonnes quand c’est un root-node -->
-        <tr [ttRow]="rowNode"
-            *ngIf="!rowNode.parent"
-            class="dynamic-tt-header">
-          <td class="driver-column">Conducteur</td>
-          <td>Immatriculation</td>
-          <td>État</td>
-          <td>Dernière communication</td>
-          <td>Heure de départ</td>
-          <td class="address-column"  *ngIf="!non_geoloc">Adresse</td>
-          <td >Distance totale</td>
-          <td >Action</td>
+        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
+          <td (click)="sortByColumn('driver')" class="driver-column">
+            Conducteur
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'driver' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'driver' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'driver'
+       }"></i>
+          </td>
+          <td>
+            Immatriculation
+          </td>
+          <td (click)="sortByColumn('state')">
+            État
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'state' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'state' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'state'
+       }"></i>
+          </td>
+          <td (click)="sortByColumn('lastComm')">
+            Dernière communication
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'lastComm' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'lastComm' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'lastComm'
+       }"></i>
+          </td>
+          <td (click)="sortByColumn('firstTripStart')">
+            Heure de départ
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'firstTripStart' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'firstTripStart' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'firstTripStart'
+       }"></i>
+          </td>
+          <td *ngIf="!non_geoloc" (click)="sortByColumn('address')" class="address-column">
+            Adresse
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'address' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'address' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'address'
+       }"></i>
+          </td>
+          <td>
+            Distance totale
+          </td>
+          <td>
+            Action
+          </td>
         </tr>
 
         <!-- Ligne pour les véhicules (rowData.vehicle != null) -->
@@ -640,7 +684,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   smsModalCallingCode: string;
   smsModalCompanyName: string;
 
-  non_geoloc : boolean = false;
+  non_geoloc: boolean = false;
 
   // Ouvre la modale
   openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode: string, companyName: string) {
@@ -658,7 +702,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /**
    * Filtres
    */
-  filters: { agencies: string[], vehicles: string[], drivers: string[] } = { agencies: [], vehicles: [], drivers: [] };
+  filters: { agencies: string[], vehicles: string[], drivers: string[] } = {agencies: [], vehicles: [], drivers: []};
 
   /**
    * Les données brutes (non filtrées) pour garder la hiérarchie initiale
@@ -716,18 +760,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   primaryIdentifierFn = (item: StatusCount) => item.state;
-  primaryDisplayFn    = (item: StatusCount) => `${item.displayName}`;
-  primaryColorFn      = (item: StatusCount) => item.color;
-  primaryIconFn       = (item: StatusCount) => item.icon;
+  primaryDisplayFn = (item: StatusCount) => `${item.displayName}`;
+  primaryColorFn = (item: StatusCount) => item.color;
+  primaryIconFn = (item: StatusCount) => item.icon;
 
   unpluggedIdentifierFn = (item: StatusCount) => item.state;
-  unpluggedDisplayFn    = (item: StatusCount) => `${item.displayName}`;
-  unpluggedColorFn      = (item: StatusCount) => item.color;
-  unpluggedIconFn       = (item: StatusCount) => item.icon;
+  unpluggedDisplayFn = (item: StatusCount) => `${item.displayName}`;
+  unpluggedColorFn = (item: StatusCount) => item.color;
+  unpluggedIconFn = (item: StatusCount) => item.icon;
 
 
-  loadFilteredDataAndFilters(filteredVehicles : TeamHierarchyNodeBase[]) : void{
-    // On stocke la hiérarchie brute pour un futur filtrage combiné
+  loadFilteredDataAndFilters(filteredVehicles: TeamHierarchyNodeBase[]): void {
     this.originalTeamHierarchy = filteredVehicles;
     this.teamHierarchy = filteredVehicles;
 
@@ -746,6 +789,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Réinitialise la sélection dans les deux groupes
     this.selectedPrimaryStatus = null;
     this.selectedUnpluggedStatus = null;
+
+    if (this.sortColumn) {
+      this.sortByColumn(this.sortColumn);
+    }
   }
 
   loadFilteredVehicles(called : boolean = false): void {
@@ -937,7 +984,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const csvData = this.convertToCSV(this.teamHierarchy);
     const bom = '\uFEFF';
     const fullData = bom + csvData;
-    const blob = new Blob([fullData], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([fullData], {type: 'text/csv;charset=utf-8;'});
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString('fr-FR'); // Format: dd/mm/yyyy
     const formattedTime = currentDate.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}); // Format: hh:mm
@@ -999,7 +1046,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   toggleTree(): void {
-    console.log('le vehicleTree',this.vehiclesTree)
+    console.log('le vehicleTree', this.vehiclesTree)
     if (this.vehiclesTree && this.vehiclesTree.length > 0) {
       this.isExpanded = !this.isExpanded;
       this.vehiclesTree = this.vehiclesTree.map(vehicle => ({
@@ -1044,4 +1091,70 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const lunchBreak = vehicle.ranges.find(r => r.label === 'LUNCH_BREAK');
     return lunchBreak?.description ?? '';
   }
+
+
+  sortColumn: string | null = 'null';
+  sortDirection: boolean = true;
+
+
+  sortByColumn(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = !this.sortDirection;
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = false;
+    }
+
+
+    this.vehiclesTree.forEach((parentNode, i) => {
+      if (!parentNode.children?.length) return;
+
+      //  pour chaque sous-équipe
+      parentNode.children.forEach((childNode, j) => {
+        if (!childNode.children?.length) return;
+
+        const vehicleChildren = childNode.children.filter(c => c.data?.vehicle);
+        const nonVehicleChildren = childNode.children.filter(c => !c.data?.vehicle);
+
+        vehicleChildren.sort((a, b) => {
+          const aVal = this.getValueForColumn(a.data.vehicle, column);
+          const bVal = this.getValueForColumn(b.data.vehicle, column);
+
+          if (aVal == null && bVal == null) return 0;
+          if (aVal == null) return this.sortDirection ? -1 : 1;
+          if (bVal == null) return this.sortDirection ? 1 : -1;
+
+          return this.sortDirection
+            ? aVal.toString().localeCompare(bVal.toString(), 'fr', {numeric: true})
+            : bVal.toString().localeCompare(aVal.toString(), 'fr', {numeric: true});
+        });
+
+        childNode.children = [...nonVehicleChildren, ...vehicleChildren];
+      });
+    });
+
+    this.vehiclesTree = [...this.vehiclesTree];
+  }
+
+
+  getValueForColumn(vehicle: any, column: string): any {
+    if (!vehicle) return '';
+    switch (column) {
+      case 'driver':
+        return vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '';
+      case 'state':
+        return vehicle.device?.deviceDataState?.state ?? '';
+      case 'lastComm':
+        return vehicle.device?.deviceDataState?.lastCommTime ?? '';
+      case 'firstTripStart':
+        return vehicle.firstTripStart ?? '';
+      case 'address':
+        return vehicle.lastPositionAddress ?? '';
+      case 'distance':
+        return vehicle.distance ?? 0;
+      default:
+        return '';
+    }
+  }
+
 }

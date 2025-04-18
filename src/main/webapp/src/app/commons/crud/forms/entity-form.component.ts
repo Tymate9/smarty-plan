@@ -6,13 +6,15 @@ import {IFormDescription} from "../interface/iform-description";
 import {Observable, Subscription} from "rxjs";
 import {NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@angular/common";
 import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.component";
+import {InputText} from "primeng/inputtext";
+import {Button} from "primeng/button";
 
 @Component({
   selector: 'app-entity-form',
   template: `
-    <h2>{{ formDescription.title }}</h2>
+<!--    <h2>{{ formDescription.title }}</h2>-->
     <form [formGroup]="entityForm" (ngSubmit)="onSubmit()">
-      <div *ngFor="let input of formDescription.formInputs">
+      <div *ngFor="let input of formDescription.formInputs" class="form-group">
         <label
           [for]="input.name"
           (mouseenter)="showErrors(input.name)"
@@ -28,6 +30,7 @@ import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.compon
 
         <ng-container [ngSwitch]="input.type">
           <input
+            pInputText
             *ngSwitchCase="'text'"
             [id]="input.name"
             [placeholder]="input.placeholder"
@@ -36,6 +39,7 @@ import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.compon
             [ngClass]="{ 'invalid': hasFieldErrors(input.name) }"
           />
           <input
+            pInputText
             *ngSwitchCase="'number'"
             [id]="input.name"
             [placeholder]="input.placeholder"
@@ -56,6 +60,7 @@ import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.compon
             ></app-autocomplete-input>
           </ng-container>
           <input
+            pInputText
             *ngSwitchDefault
             [id]="input.name"
             [placeholder]="input.placeholder"
@@ -72,33 +77,38 @@ import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.compon
         </span>
       </div>
 
-      <button type="submit" [disabled]="!entityForm.valid">Soumettre</button>
+      <p-button type="submit"  label="Soumettre" [disabled]="!entityForm.valid"></p-button>
     </form>
   `,
   standalone: true,
   imports: [
     ReactiveFormsModule,
     NgClass,
-    AutocompleteInputComponent,
     NgSwitch,
     NgForOf,
     NgIf,
     NgSwitchCase,
-    NgSwitchDefault
+    NgSwitchDefault,
+    InputText,
+    Button,
+    AutocompleteInputComponent
   ],
   styles: [`
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
     .error {
-      color: red;
+      color: #aa001f;
       font-size: 0.9em;
     }
-
     .error-list {
       display: block;
       position: absolute;
       background-color: white;
-      border: 1px solid red;
+      border: 1px solid #aa001f;
       padding: 5px;
-      color: red;
+      color: #aa001f;
       z-index: 10;
     }
 
@@ -109,7 +119,7 @@ import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.compon
     }
 
     input.invalid, select.invalid {
-      border-color: red;
+      border-color: #aa001f;
       outline: none;
     }
   `]
@@ -240,5 +250,11 @@ export class EntityFormComponent implements OnInit, OnChanges {
     return this.entityForm && this.entityForm.errors
       ? Object.keys(this.entityForm.errors)
       : [];
+  }
+  filterOptions(event: any, input: any) {
+    const query = event.query.toLowerCase();
+    input.filteredOptions = (input.allOptions || []).filter((option: any) =>
+      input.displayFn(option).toLowerCase().includes(query)
+    );
   }
 }

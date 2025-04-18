@@ -142,7 +142,7 @@ interface StatusCount {
          'pi-sort-alt': sortColumn !== 'lastComm'
        }"></i>
           </td>
-          <td (click)="sortByColumn('firstTripStart')">
+          <td (click)="sortByColumn('firstTripStart')" class="starting-hour-column">
             Heure de départ
             <i class="pi"
                [ngClass]="{
@@ -412,8 +412,12 @@ interface StatusCount {
   ],
   styles: [`
 
-    .driver-colum{
-      width: 15vw;
+    .driver-column{
+      width: 12vw;
+    }
+
+    .starting-hour-column{
+      width: 12vw;
     }
 
     .address-column{

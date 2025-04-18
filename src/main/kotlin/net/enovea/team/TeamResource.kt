@@ -1,6 +1,7 @@
 package net.enovea.team
 
 import io.quarkus.security.Authenticated
+import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.Validator
@@ -48,6 +49,7 @@ class TeamResource(
      * Créer une nouvelle équipe (Create).
      * Retourne 400 si le formulaire est invalide.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @POST
     @Transactional
     override fun create(form: TeamForm): Response {
@@ -68,6 +70,7 @@ class TeamResource(
      * Retourne 400 si le formulaire est invalide.
      * Retourne 404 si l'id fourni n'existe pas.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @PUT
     @Path("/{id}")
     @Transactional
@@ -92,6 +95,7 @@ class TeamResource(
      * Retourne 404 si l'id fourni n'existe pas.
      * Retourne l'entité supprimée (TeamDTO) si la suppression a réussi
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @DELETE
     @Path("/{id}")
     @Transactional

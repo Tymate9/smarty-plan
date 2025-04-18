@@ -74,7 +74,7 @@ interface StatusCount {
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles(true)"></p-button>
+      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles()"></p-button>
       <p-button icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
                 (click)="toggleTree()"></p-button>
       <p-button label="Exporter CSV" (click)="exportToCSV()"
@@ -142,7 +142,7 @@ interface StatusCount {
          'pi-sort-alt': sortColumn !== 'lastComm'
        }"></i>
           </td>
-          <td (click)="sortByColumn('firstTripStart')">
+          <td (click)="sortByColumn('firstTripStart')" class="starting-hour-column">
             Heure de départ
             <i class="pi"
                [ngClass]="{
@@ -412,8 +412,12 @@ interface StatusCount {
   ],
   styles: [`
 
-    .driver-colum{
-      width: 15vw;
+    .driver-column{
+      width: 12vw;
+    }
+
+    .starting-hour-column{
+      width: 12vw;
     }
 
     .address-column{
@@ -793,9 +797,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.sortColumn) {
       this.sortByColumn(this.sortColumn);
     }
+
+    this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
   }
 
-  loadFilteredVehicles(called : boolean = false): void {
+  loadFilteredVehicles(): void {
 
     if (this.non_geoloc) {
       this.vehicleService.getFilteredNonGeolocVehiclesDashboard(
@@ -804,8 +810,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.filters.drivers
       ).subscribe(filteredVehicles => {
         this.loadFilteredDataAndFilters(filteredVehicles)
-        if (called)
-          this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
       });
     }
     else {
@@ -815,8 +819,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.filters.drivers
       ).subscribe(filteredVehicles => {
         this.loadFilteredDataAndFilters(filteredVehicles)
-        if (called)
-          this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
       });
     }
 
@@ -1138,23 +1140,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
   getValueForColumn(vehicle: any, column: string): any {
-    if (!vehicle) return '';
+    var res = ''
+    if (!vehicle)
+      return res
     switch (column) {
       case 'driver':
-        return vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '';
+        res =  vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : ''
+        break
       case 'state':
-        return vehicle.device?.deviceDataState?.state ?? '';
+        res = vehicle.device?.deviceDataState?.state ?? ''
+        break
       case 'lastComm':
-        return vehicle.device?.deviceDataState?.lastCommTime ?? '';
+        res = vehicle.device?.deviceDataState?.lastCommTime ?? ''
+        break
       case 'firstTripStart':
-        return vehicle.firstTripStart ?? '';
+        res = vehicle.firstTripStart ?? ''
+        break
       case 'address':
-        return vehicle.lastPositionAddress ?? '';
+        res = vehicle.lastPositionAddress ?? ''
+        break
       case 'distance':
-        return vehicle.distance ?? 0;
-      default:
-        return '';
+        res = vehicle.distance ?? '0'
     }
+    return res
   }
 
 }

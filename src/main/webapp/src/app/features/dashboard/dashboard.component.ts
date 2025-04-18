@@ -1138,23 +1138,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
   getValueForColumn(vehicle: any, column: string): any {
-    if (!vehicle) return '';
+    var res = ''
+    if (!vehicle)
+      return res
     switch (column) {
       case 'driver':
-        return vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '';
+        res =  vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : ''
+        break
       case 'state':
-        return vehicle.device?.deviceDataState?.state ?? '';
+        res = vehicle.device?.deviceDataState?.state ?? ''
+        break
       case 'lastComm':
-        return vehicle.device?.deviceDataState?.lastCommTime ?? '';
+        res = vehicle.device?.deviceDataState?.lastCommTime ?? ''
+        break
       case 'firstTripStart':
-        return vehicle.firstTripStart ?? '';
+        res = vehicle.firstTripStart ?? ''
+        break
       case 'address':
-        return vehicle.lastPositionAddress ?? '';
+        res = vehicle.lastPositionAddress ?? ''
+        break
       case 'distance':
-        return vehicle.distance ?? 0;
-      default:
-        return '';
+        res = vehicle.distance ?? '0'
     }
+    return res
   }
 
 }

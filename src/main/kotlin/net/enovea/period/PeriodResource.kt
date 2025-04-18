@@ -2,6 +2,7 @@ package net.enovea.period
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.security.Authenticated
+import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.RequestScoped
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
@@ -52,6 +53,7 @@ class PeriodResource(
         return Response.ok(dto).build()
     }
 
+    @RolesAllowed("NOT_ALLOWED_YET")
     @POST
     @Transactional
     override fun create(form: PeriodForm): Response {
@@ -92,6 +94,7 @@ class PeriodResource(
         }
     }
 
+    @RolesAllowed("NOT_ALLOWED_YET")
     @PUT
     @Path("/{id}")
     @Transactional
@@ -138,6 +141,7 @@ class PeriodResource(
         }
     }
 
+    @RolesAllowed("NOT_ALLOWED_YET")
     @DELETE
     @Path("/{id}")
     @Transactional

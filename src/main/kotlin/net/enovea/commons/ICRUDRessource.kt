@@ -1,5 +1,6 @@
 package net.enovea.commons
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -21,6 +22,7 @@ interface ICRUDResource<F, D, ID> {
      * @param form Formulaire ou DTO de création.
      * @return Réponse HTTP avec l'entité créée.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ interface ICRUDResource<F, D, ID> {
      * @param form Formulaire ou DTO de mise à jour.
      * @return Réponse HTTP avec l'entité mise à jour.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -43,6 +46,7 @@ interface ICRUDResource<F, D, ID> {
      * @param id Identifiant de l'entité à supprimer.
      * @return Réponse HTTP avec l'entité supprimée.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)

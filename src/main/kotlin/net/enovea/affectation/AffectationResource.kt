@@ -3,6 +3,7 @@ package net.enovea.affectation
 import com.fasterxml.jackson.annotation.JsonValue
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.security.Authenticated
+import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.RequestScoped
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
@@ -161,6 +162,7 @@ class AffectationResource (
     /**
      * Créer une nouvelle affectation.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @POST
     @Transactional
     override fun create(form: AffectationForm): Response {
@@ -207,6 +209,7 @@ class AffectationResource (
         }
     }
 
+    @RolesAllowed("NOT_ALLOWED_YET")
     @PUT
     @Path("/{id}")
     @Transactional
@@ -265,6 +268,7 @@ class AffectationResource (
     /**
      * Supprimer une affectation.
      */
+    @RolesAllowed("NOT_ALLOWED_YET")
     @DELETE
     @Path("/{id}")
     @Transactional

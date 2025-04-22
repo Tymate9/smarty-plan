@@ -1,0 +1,213 @@
+### ----------------------------------------------------
+### Définition des variables
+### ----------------------------------------------------
+@client_id = smarty-plan-api
+@client_secret = **********
+@keycloak_host = localhost:45180
+@api_host = localhost:8080
+@realm = NormandieManutention
+
+@username_admin = admin
+@password_admin = root
+
+// Variables pour les tests de listing par resource
+// Pour DRIVER_UP, la resource est un driver (ex: 97)
+@driver_up_resource = 97
+
+// Pour VEHICLE_UP, la resource est un véhicule (ex: "05116c8f-ccc9-417c-af06-f594f445da57")
+@vehicle_up_resource = 05116c8f-ccc9-417c-af06-f594f445da57
+
+### 1) Obtenir le token d'accès
+### ----------------------------------------------------
+POST http://{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username_admin}}&password={{password_admin}}
+
+> {%
+    client.global.set("access_token_admin", response.body.access_token);
+%}
+
+### 2.1) CREATE : Période DRIVER_UP valide
+POST http://{{api_host}}/api/periods/DRIVER_UP
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "resourceId": {{driver_up_resource}},
+  "startDate": "2025-03-12T08:00:00.000Z",
+  "endDate": null
+}
+
+> {%
+    client.global.set("driver_up_id", response.body.id);
+    client.test("CREATE : Période DRIVER_UP valide", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 2.2) CREATE : Période DRIVER_UP invalide (resourceId manquant => 400)
+POST http://{{api_host}}/api/periods/DRIVER_UP
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "startDate": "2025-03-12T08:00:00.000Z"
+}
+
+> {%
+    client.test("CREATE DRIVER_UP (resourceId manquant) => 400", function() {
+        client.assert(response.status === 400, "Expected 400 Bad Request for missing resourceId.");
+    });
+%}
+
+### 2.3) CREATE : Période DRIVER_UP duplicate (déjà existante) => 409
+POST http://{{api_host}}/api/periods/DRIVER_UP
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "resourceId": {{driver_up_resource}},
+  "startDate": "2025-03-12T08:00:00.000Z"
+}
+> {%
+    client.test("CREATE DRIVER_UP (duplicate) => 409", function() {
+        client.assert(response.status === 409, "Expected 409 Conflict for duplicate period.");
+    });
+%}
+
+### 2.4) UPDATE : Mettre fin à la période DRIVER_UP en précisant endDate => 200
+PUT http://{{api_host}}/api/periods/DRIVER_UP/{{driver_up_id}}
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "resourceId": {{driver_up_resource}},
+  "startDate": "2025-03-12T08:00:00.000Z",
+  "endDate": "2025-03-15T18:00:00.000Z"
+}
+
+> {%
+    client.test("UPDATE DRIVER_UP => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK for valid update.");
+    });
+%}
+
+### 2.5) READ : Vérifier la mise à jour de la période DRIVER_UP => 200
+GET http://{{api_host}}/api/periods/DRIVER_UP/{{driver_up_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ DRIVER_UP => 200", function() {
+        client.assert(response.status === 200, "Expected 200 after update.");
+        client.assert(response.body.endDate === "2025-03-15T18:00:00.000+00:00", "endDate non mise à jour");
+    });
+%}
+
+### 2.6) LIST : Récupérer la liste des périodes DRIVER_UP par resourceId
+GET http://{{api_host}}/api/periods/DRIVER_UP/list/resource?resourceId={{driver_up_resource}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("LIST DRIVER_UP par resourceId => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on listing DRIVER_UP periods by resourceId");
+        client.assert(Array.isArray(response.body), "Expected response body to be an array");
+    });
+%}
+
+### 2.7) DELETE : Supprimer la période DRIVER_UP => 200
+DELETE http://{{api_host}}/api/periods/DRIVER_UP/{{driver_up_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("DELETE DRIVER_UP => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK for deletion");
+    });
+%}
+
+### 2.8) READ après DELETE : Vérifier que la période DRIVER_UP n'existe plus => 404
+GET http://{{api_host}}/api/periods/DRIVER_UP/{{driver_up_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ after DELETE DRIVER_UP => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after deletion");
+    });
+%}
+
+### 2.9) CREATE : Période VEHICLE_UP valide
+POST http://{{api_host}}/api/periods/VEHICLE_UP
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "resourceId": "{{vehicle_up_resource}}",
+  "startDate": "2025-03-12T08:00:00.000Z",
+  "endDate": null
+}
+
+> {%
+    client.global.set("vehicle_up_id", response.body.id);
+    client.test("CREATE : Période VEHICLE_UP valide", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 2.10) UPDATE : Mettre fin à la période VEHICLE_UP en précisant endDate => 200
+PUT http://{{api_host}}/api/periods/VEHICLE_UP/{{vehicle_up_id}}
+Authorization: Bearer {{access_token_admin}}
+Content-Type: application/json
+
+{
+  "resourceId": "{{vehicle_up_resource}}",
+  "startDate": "2025-03-12T08:00:00.000Z",
+  "endDate": "2025-03-15T18:00:00.000Z"
+}
+
+> {%
+    client.test("UPDATE VEHICLE_UP => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK for valid update.");
+    });
+%}
+
+### 2.11) READ : Vérifier la mise à jour de la période VEHICLE_UP => 200
+GET http://{{api_host}}/api/periods/VEHICLE_UP/{{vehicle_up_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ VEHICLE_UP => 200", function() {
+        client.assert(response.status === 200, "Expected 200 after update.");
+        client.assert(response.body.endDate === "2025-03-15T18:00:00.000+00:00", "endDate non mise à jour");
+    });
+%}
+
+### 2.12) LIST : Récupérer la liste des périodes VEHICLE_UP par resourceId
+GET http://{{api_host}}/api/periods/VEHICLE_UP/list/resource?resourceId={{vehicle_up_resource}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("LIST VEHICLE_UP par resourceId => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK on listing VEHICLE_UP periods by resourceId");
+        client.assert(Array.isArray(response.body), "Expected response body to be an array");
+    });
+%}
+
+### 2.13) DELETE : Supprimer la période VEHICLE_UP => 200
+DELETE http://{{api_host}}/api/periods/VEHICLE_UP/{{vehicle_up_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("DELETE VEHICLE_UP => 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK for deletion");
+    });
+%}
+
+### 2.14) READ après DELETE : Vérifier que la période VEHICLE_UP n'existe plus => 404
+GET http://{{api_host}}/api/periods/VEHICLE_UP/{{vehicle_up_id}}
+Authorization: Bearer {{access_token_admin}}
+
+> {%
+    client.test("READ after DELETE VEHICLE_UP => 404", function() {
+        client.assert(response.status === 404, "Expected 404 Not Found after deletion");
+    });
+%}

@@ -1,7 +1,12 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {SmsApiService, SmsForm, SmsPackForm, SmsStatistics} from "../../../services/sms-api.service";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {ButtonDirective} from "primeng/button";
+import {NgIf} from "@angular/common";
+import {TableModule} from "primeng/table";
 import {NotificationService} from "../../../commons/notification/notification.service";
+import {InputText} from "primeng/inputtext";
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-sms-form',
@@ -9,7 +14,7 @@ import {NotificationService} from "../../../commons/notification/notification.se
     <div class="sms-form-container">
       <!-- (A) Affichage des statistiques SMS -->
       <h4>SMS disponible</h4>
-      <p-table [value]="[smsStatistics]" *ngIf="smsStatistics">
+      <p-table [value]="[smsStatistics]" *ngIf="smsStatistics" showGridlines stripedRows>
         <ng-template pTemplate="header">
           <tr>
             <th>Total SMS achetés</th>
@@ -26,43 +31,43 @@ import {NotificationService} from "../../../commons/notification/notification.se
         </ng-template>
       </p-table>
 
-<!--      &lt;!&ndash; (B) Achat de pack SMS &ndash;&gt;
-      <div class="sms-pack-form" style="margin-top: 1rem;">
-        <h5>Achat de pack SMS</h5>
-        <form [formGroup]="smsPackFormGroup" (ngSubmit)="buySmsPack()">
-          <div class="p-field">
-            <label for="totalSms">Quantité à acheter :</label>
-            <input
-              id="totalSms"
-              type="number"
-              formControlName="totalSms"
-              class="p-inputtext"
-            />
-            <div
-              *ngIf="
-                smsPackFormGroup.get('totalSms')?.invalid &&
-                (smsPackFormGroup.get('totalSms')?.touched ||
-                  smsPackFormGroup.get('totalSms')?.dirty)
-              "
-              class="error"
-            >
-              <small *ngIf="smsPackFormGroup.get('totalSms')?.errors?.['required']"
-                >Ce champ est requis.</small
-              >
-              <small *ngIf="smsPackFormGroup.get('totalSms')?.errors?.['min']"
-                >La quantité doit être >= 1</small
-              >
-            </div>
-          </div>
-          <button
-            pButton
-            type="submit"
-            label="Acheter"
-            [disabled]="smsPackFormGroup.invalid"
-            style="background-color: #aa001f; border: #aa001f;"
-          ></button>
-        </form>
-      </div>-->
+      <!--      &lt;!&ndash; (B) Achat de pack SMS &ndash;&gt;
+            <div class="sms-pack-form" style="margin-top: 1rem;">
+              <h5>Achat de pack SMS</h5>
+              <form [formGroup]="smsPackFormGroup" (ngSubmit)="buySmsPack()">
+                <div class="p-field">
+                  <label for="totalSms">Quantité à acheter :</label>
+                  <input
+                    id="totalSms"
+                    type="number"
+                    formControlName="totalSms"
+                    class="p-inputtext"
+                  />
+                  <div
+                    *ngIf="
+                      smsPackFormGroup.get('totalSms')?.invalid &&
+                      (smsPackFormGroup.get('totalSms')?.touched ||
+                        smsPackFormGroup.get('totalSms')?.dirty)
+                    "
+                    class="error"
+                  >
+                    <small *ngIf="smsPackFormGroup.get('totalSms')?.errors?.['required']"
+                      >Ce champ est requis.</small
+                    >
+                    <small *ngIf="smsPackFormGroup.get('totalSms')?.errors?.['min']"
+                      >La quantité doit être >= 1</small
+                    >
+                  </div>
+                </div>
+                <button
+                  pButton
+                  type="submit"
+                  label="Acheter"
+                  [disabled]="smsPackFormGroup.invalid"
+                  style="background-color: #aa001f; border: #aa001f;"
+                ></button>
+              </form>
+            </div>-->
 
       <!-- (C) Formulaire d'envoi de SMS -->
       <div class="sms-send-form" style="margin-top: 2rem;">
@@ -77,11 +82,13 @@ import {NotificationService} from "../../../commons/notification/notification.se
               <div class="p-field">
                 <label>Indicatif :</label>
                 <input
-                  id="callingCode"
+                  pInputText
                   type="text"
+                  id="callingCode"
                   formControlName="callingCode"
                   class="p-inputtext"
                 />
+
               </div>
             </div>
             <!-- Numéro de téléphone -->
@@ -89,6 +96,7 @@ import {NotificationService} from "../../../commons/notification/notification.se
               <div class="p-field">
                 <label>Numéro de téléphone :</label>
                 <input
+                  pInputText
                   id="phoneNumber"
                   type="text"
                   formControlName="phoneNumber"
@@ -103,6 +111,7 @@ import {NotificationService} from "../../../commons/notification/notification.se
             <label for="content">Message :</label>
             <br/>
             <textarea
+              pTextarea
               id="content"
               formControlName="content"
               rows="5"
@@ -140,6 +149,16 @@ import {NotificationService} from "../../../commons/notification/notification.se
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+    ButtonDirective,
+    FormsModule,
+    ReactiveFormsModule,
+    NgIf,
+    TableModule,
+    InputText,
+    TextareaModule
+  ],
   styles: [`
     .sms-form-container {
       color: #000; /* texte en noir */
@@ -303,7 +322,6 @@ export class SmsFormComponent implements OnInit {
     };
     this.smsApiService.buySmsPack(packForm).subscribe({
       next: (response) => {
-        console.log('Pack SMS acheté avec succès:', response);
         // On recharge les stats
         this.loadSmsStatistics();
         // On reset le form

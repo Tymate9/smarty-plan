@@ -1,14 +1,29 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {TeamHierarchyNode, VehicleService} from "../vehicle/vehicle.service";
+import {TeamHierarchyNode, TeamHierarchyNodeBase, VehicleService} from "../vehicle/vehicle.service";
 import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
 import {Router} from "@angular/router";
-import {TreeTable} from "primeng/treetable";
+import {
+  DatePipe,
+  NgClass,
+  NgIf,
+  NgOptimizedImage,
+  NgStyle,
+  NgSwitch,
+  NgSwitchCase,
+  NgSwitchDefault
+} from "@angular/common";
+import {TreeTable, TreeTableModule} from "primeng/treetable";
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {Subscription} from "rxjs";
 import VehicleDTO = dto.VehicleDTO;
 import VehicleLocalizationDTO = dto.VehicleLocalizationDTO;
+import {ButtonModule} from "primeng/button";
+import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
+import {MaskToggleComponent} from "../../commons/mask-toggle/mask-toggle.component";
+import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
+import {NotificationService} from "../../commons/notification/notification.service";
 
 /** Définition d'une constante pour les détails de statuts (primaires + unplugged) */
 const STATUS_DETAILS: Record<string, { displayName: string, color: string, icon: string }> = {
@@ -58,13 +73,12 @@ interface StatusCount {
       </app-toggle-buttons-group>
     </div>
 
-    <div style="display: flex; justify-content: flex-end; gap: 10px; width: 96vw; margin: 0 auto">
-      <p-button [raised]="true" severity="info" icon="pi pi-sync" (click)="loadFilteredVehicles()"
-                styleClass="custom-button"></p-button>
-      <p-button [raised]="true" severity="info" icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
-                (click)="toggleTree()" styleClass="custom-button"></p-button>
-      <p-button label="Exporter CSV" [raised]="true" severity="info" (click)="exportToCSV()"
-                styleClass="custom-button"></p-button>
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <p-button icon="pi pi-sync" (click)="loadFilteredVehicles()"></p-button>
+      <p-button icon="{{ isExpanded ? 'pi pi-minus' : 'pi pi-plus' }}"
+                (click)="toggleTree()"></p-button>
+      <p-button label="Exporter CSV" (click)="exportToCSV()"
+                ></p-button>
     </div>
 
     <div style="margin-bottom: 10px;"></div>
@@ -76,9 +90,8 @@ interface StatusCount {
                  [scrollable]="true"
                  [tableStyle]="{'width': '96vw', 'margin': '0 auto' , 'table-layout' :'auto'}"
                  [resizableColumns]="true"
-                 styleClass="p-treetable-gridlines custom-tree-table">
+                 styleClass="p-treetable-gridlines">
 
-      <!-- En-tête (facultatif si vous n’affichez pas de colonnes en-tête statiques) -->
       <ng-template pTemplate="header">
       </ng-template>
 
@@ -87,38 +100,81 @@ interface StatusCount {
         <!-- Lignes parent (pas de véhicule -> colspan=8) -->
         <tr [ttRow]="rowNode"
             [ngClass]="{
-              'root-node': !rowNode.parent,
-              'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
-              'has-vehicle': rowData.vehicle
-            }"
-            *ngIf="!rowData.vehicle">
-          <td colspan="8">
-            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+          'dynamic-tt-parent-node': !rowNode.parent,
+          'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
+          'dynamic-tt-leaf': rowData.vehicle
+        }">
+          <td *ngIf="!rowData.vehicle" [attr.colspan]="non_geoloc?'7':'8'">
+            <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
         </tr>
 
         <!-- Ligne d'en-tête pour les colonnes quand c’est un root-node -->
-        <tr [ttRow]="rowNode"
-            *ngIf="!rowNode.parent"
-            class="table-header">
-          <td>Conducteur</td>
-          <td>Immatriculation</td>
-          <td>État</td>
-          <td>Dernière communication</td>
-          <td>Heure de départ</td>
-          <td>Adresse</td>
-          <td>Distance totale</td>
-          <td>Bouton d'action</td>
+        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
+          <td (click)="sortByColumn('driver')" class="driver-column">
+            Conducteur
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'driver' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'driver' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'driver'
+       }"></i>
+          </td>
+          <td>
+            Immatriculation
+          </td>
+          <td (click)="sortByColumn('state')">
+            État
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'state' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'state' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'state'
+       }"></i>
+          </td>
+          <td (click)="sortByColumn('lastComm')">
+            Dernière communication
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'lastComm' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'lastComm' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'lastComm'
+       }"></i>
+          </td>
+          <td (click)="sortByColumn('firstTripStart')" class="starting-hour-column">
+            Heure de départ
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'firstTripStart' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'firstTripStart' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'firstTripStart'
+       }"></i>
+          </td>
+          <td *ngIf="!non_geoloc" (click)="sortByColumn('address')" class="address-column">
+            Adresse
+            <i class="pi"
+               [ngClass]="{
+         'pi-sort-amount-up-alt': sortColumn === 'address' && sortDirection,
+         'pi-sort-amount-down': sortColumn === 'address' && !sortDirection,
+         'pi-sort-alt': sortColumn !== 'address'
+       }"></i>
+          </td>
+          <td>
+            Distance totale
+          </td>
+          <td>
+            Action
+          </td>
         </tr>
 
         <!-- Ligne pour les véhicules (rowData.vehicle != null) -->
         <tr [ttRow]="rowNode"
             [ngClass]="{
-              'root-node': !rowNode.parent,
-              'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
-              'has-vehicle': rowData.vehicle
-            }"
+          'dynamic-tt-parent-node': !rowNode.parent,
+          'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
+          'dynamic-tt-leaf': rowData.vehicle
+        }"
             *ngIf="rowData.vehicle">
           <!-- 1. Conducteur -->
           <td *ngIf="rowData.vehicle.driver; else noDriver">
@@ -203,22 +259,22 @@ interface StatusCount {
           </td>
 
           <!-- 4. Dernière communication -->
-          <td class="custom-cell">
+          <td>
             {{ rowData.vehicle.device?.deviceDataState?.lastCommTime | date: 'HH:mm  dd-MM-yyyy' }}
           </td>
 
           <!-- 5. Heure de départ -->
-          <td class="custom-cell">
+          <td>
             <span *ngIf="rowData.vehicle.firstTripStart; else notStarted">
               {{ rowData.vehicle.firstTripStart }}
             </span>
             <ng-template #notStarted>
-              Journée <br/>non commencée
+              Journée non commencée
             </ng-template>
           </td>
 
           <!-- 6. Adresse -->
-          <td class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
+          <td *ngIf="!non_geoloc" class="poi-cell" [ngStyle]="{ 'width': 'auto' }">
             <app-mask-toggle
               [canMask]="isVehicleInLunchBreak(rowData.vehicle)"
               [canToggle]="false"
@@ -288,19 +344,22 @@ interface StatusCount {
           </td>
 
           <!-- 7. Distance totale -->
-          <td class="custom-cell">
+          <td>
             {{ rowData.vehicle.distance?.toFixed(0) ?? 0 }} km
           </td>
 
           <!-- 8. Bouton d'action -->
-          <td class="custom-cell">
-            <p-button (onClick)="router.navigate(['trip', rowData.vehicle.id, today])"
+          <td [ngStyle]="{
+          'display': 'flex',
+          'justify-content': 'center',
+          'align-items': 'center'
+          }">
+            <p-button (onClick)="router.navigate(['trip'+(non_geoloc?'-non-geoloc':''), rowData.vehicle.id, today])"
                       icon="pi pi-calendar"
-                      styleClass="red-button">
+                      [style]="{ 'margin-right': '5px' }">
             </p-button>
-            <p-button *ngIf="rowData.vehicle.driver"
+            <p-button *ngIf="!non_geoloc && rowData.vehicle.driver"
                       icon="pi pi-envelope"
-                      styleClass="red-button"
                       (click)="openSmsOverlay(
                         rowData.vehicle.driver.firstName + ' ' + rowData.vehicle.driver.lastName,
                         rowData.vehicle.driver.phoneNumber,
@@ -310,6 +369,7 @@ interface StatusCount {
             </p-button>
           </td>
         </tr>
+
       </ng-template>
     </p-treeTable>
 
@@ -328,12 +388,43 @@ interface StatusCount {
           </app-sms-form>
         </div>
         <div class="dialog-footer">
-          <button (click)="closeSmsOverlay()">Fermer</button>
+          <p-button (click)="closeSmsOverlay()" label="Fermer"></p-button>
         </div>
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [
+
+    NgStyle,
+    NgClass,
+    TreeTableModule,
+    NgIf,
+    NgOptimizedImage,
+    NgSwitchDefault,
+    NgSwitchCase,
+    NgSwitch,
+    DatePipe,
+    SmsFormComponent,
+    ButtonModule,
+    MaskToggleComponent,
+    ToggleButtonsGroupComponent
+  ],
   styles: [`
+
+    .driver-column{
+      width: 12vw;
+    }
+
+    .starting-hour-column{
+      width: 12vw;
+    }
+
+    .address-column{
+      width: 30vw;
+      text-overflow: ellipsis;
+    }
+
     /* Styles inchangés pour préserver l’apparence et éviter toute régression */
     :host ::ng-deep .p-treetable.p-treetable-gridlines.custom-tree-table th {
       background-color: #007ad9 !important;
@@ -397,32 +488,38 @@ interface StatusCount {
       height: 50px;
       line-height: 50px;
     }
+
+    :host ::ng-deep .p-treetable .p-treetable-tbody>tr>td {
+      text-align: start;
+      border-style: none;
+      border-width: 0 0 1px 0;
+    }
     :host ::ng-deep .p-treetable.custom-tree-table .root-node td {
       padding: 12px;
       border-width: 0px;
       font-weight: 700 !important;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .DRIVING {
+    .DRIVING {
       background-color: #21A179;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .IDLE {
+    .IDLE {
       background-color: #FE8F2B;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .PARKED {
+    .PARKED {
       background-color: #C71400;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .NO_COM {
-      background-color: var(--gray-400);
+    .NO_COM {
+      background-color: #E0E0E0;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .UNPLUGGED {
-      background-color: var(--gray-400);
+    .UNPLUGGED {
+      background-color: #BDBDBD;
       color: white;
     }
-    :host ::ng-deep .p-treetable.custom-tree-table .DEFAULT {
+    .DEFAULT {
       background-color: #E5E5E5;
       color: white;
     }
@@ -438,6 +535,32 @@ interface StatusCount {
       color: white;
       margin-left: 0.5rem;
     }
+
+    .p-treeTable .poi-cell {
+      white-space: nowrap;
+      width: auto;
+      display: flex;
+      text-align: left;
+      justify-content: space-between;
+    }
+
+    /*fin de style de colonne d'adresse*/
+
+    /* Icônes de statut (span + i) */
+    .status-icon {
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+      justify-content: space-between;
+      color: white;
+    }
+    .status-icon i {
+      font-size: 1.2rem;
+      color: white;
+      margin-left: 0.5rem;
+    }
+
+    /* Conteneur et style des boutons d'indicateurs */
     .status-buttons {
       display: flex;
       gap: 15px;
@@ -506,18 +629,8 @@ interface StatusCount {
     .custom-status-button .status-text {
       color: var(--button-color, #007bff);
     }
-    ::ng-deep .p-button.p-component.p-button-info.p-button-raised.custom-button {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      font-weight: 600;
-    }
-    ::ng-deep .p-button.p-component.p-button-icon-only.red-button {
-      background-color: #aa001f !important;
-      border-color: #aa001f !important;
-      color: white !important;
-      margin: 1px !important;
-    }
+
+    /* Overlay + dialog SMS */
     .overlay {
       position: fixed;
       top: 0;
@@ -528,7 +641,7 @@ interface StatusCount {
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
+      z-index: 9998;
     }
     .dialog-box {
       background: #fff;
@@ -563,8 +676,8 @@ interface StatusCount {
     .dialog-footer button:hover {
       background-color: #8e001b;
     }
-  `]
-})
+  `]}
+)
 export class DashboardComponent implements OnInit, OnDestroy {
   /**
    * Propriétés pour la modale SMS
@@ -575,20 +688,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
   smsModalCallingCode: string;
   smsModalCompanyName: string;
 
+  non_geoloc: boolean = false;
+
+  // Ouvre la modale
+  openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode: string, companyName: string) {
+    this.smsModalDriverLabel = driverLabel
+    this.smsModalPhoneNumber = phoneNumber
+    this.smsModalCallingCode = callingCode
+    this.smsModalCompanyName = companyName
+    this.smsOverlayVisible = true;
+  }
+
+  // Ferme la modale
+  closeSmsOverlay() {
+    this.smsOverlayVisible = false;
+  }
   /**
    * Filtres
    */
-  filters: { agencies: string[], vehicles: string[], drivers: string[] } = { agencies: [], vehicles: [], drivers: [] };
+  filters: { agencies: string[], vehicles: string[], drivers: string[] } = {agencies: [], vehicles: [], drivers: []};
 
   /**
    * Les données brutes (non filtrées) pour garder la hiérarchie initiale
    */
-  originalTeamHierarchy: TeamHierarchyNode[];
-  teamHierarchy: TeamHierarchyNode[];
+  originalTeamHierarchy: TeamHierarchyNode<dto.VehicleTableDTO>[];
+  teamHierarchy: TeamHierarchyNode<dto.VehicleTableDTO>[];
 
-  /**
-   * Arbre utilisé par le p-treeTable
-   */
+  // Callback quand <app-sms-form> émet (smsSent)
+  onSmsSent() {
+    this.closeSmsOverlay()
+  }
+
+  // Callback quand <app-sms-form> émet (packPurchased)
+  onPackPurchased() {
+    console.log("Pack de SMS acheté !");
+  }
+
+  protected unTrackedVehicle: String = "Liste des véhicules non-communicants : ";
+  vehicles: VehicleSummaryDTO[] = [];
   vehiclesTree: TreeNode[] = [];
   @ViewChild(TreeTable) treeTable: TreeTable;
 
@@ -604,17 +741,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedPrimaryStatus: StatusCount | null = null;
   selectedUnpluggedStatus: StatusCount | null = null;
 
-  private filtersSubscription?: Subscription;
   today = new Date().toISOString().split('T')[0].replaceAll('-', '');
   isExpanded = true;
+  private filtersSubscription?: Subscription
 
   constructor(
     private filterService: FilterService,
     private readonly vehicleService: VehicleService,
-    public router: Router,
-  ) {}
+    protected router: Router,
+    private readonly notificationService: NotificationService,
+  ) {
+    this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
+  }
 
   ngOnInit() {
+    this.non_geoloc = location.pathname.indexOf('-non-geoloc')>0
     this.filtersSubscription = this.subscribeToFilterChanges();
   }
 
@@ -622,85 +763,82 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.filtersSubscription?.unsubscribe();
   }
 
+  primaryIdentifierFn = (item: StatusCount) => item.state;
+  primaryDisplayFn = (item: StatusCount) => `${item.displayName}`;
+  primaryColorFn = (item: StatusCount) => item.color;
+  primaryIconFn = (item: StatusCount) => item.icon;
+
+  unpluggedIdentifierFn = (item: StatusCount) => item.state;
+  unpluggedDisplayFn = (item: StatusCount) => `${item.displayName}`;
+  unpluggedColorFn = (item: StatusCount) => item.color;
+  unpluggedIconFn = (item: StatusCount) => item.icon;
+
+
+  loadFilteredDataAndFilters(filteredVehicles: TeamHierarchyNodeBase[]): void {
+    this.originalTeamHierarchy = filteredVehicles;
+    this.teamHierarchy = filteredVehicles;
+
+    // Transforme la hiérarchie en TreeNodes pour le p-treeTable
+    this.vehiclesTree = VehicleService.transformToTreeNodes(
+      filteredVehicles,
+      (vehicle: dto.VehicleTableDTO) => ({
+        driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+        licensePlate: vehicle.licenseplate,
+      })
+    );
+    // Calcule les compteurs pour les statuts primaires et unplugged
+    this.primaryStatusCounts = this.calculatePrimaryStatusCounts(filteredVehicles);
+    this.unpluggedStatusCounts = this.calculateUnpluggedStatusCounts(filteredVehicles);
+
+    // Réinitialise la sélection dans les deux groupes
+    this.selectedPrimaryStatus = null;
+    this.selectedUnpluggedStatus = null;
+
+    if (this.sortColumn) {
+      this.sortByColumn(this.sortColumn);
+    }
+
+    this.notificationService.success('Mise à jour réussie', "L\'état du parc automobile a été mis à jour.")
+  }
+
+  loadFilteredVehicles(): void {
+
+    if (this.non_geoloc) {
+      this.vehicleService.getFilteredNonGeolocVehiclesDashboard(
+        this.filters.agencies,
+        this.filters.vehicles,
+        this.filters.drivers
+      ).subscribe(filteredVehicles => {
+        this.loadFilteredDataAndFilters(filteredVehicles)
+      });
+    }
+    else {
+      this.vehicleService.getFilteredVehiclesDashboard(
+        this.filters.agencies,
+        this.filters.vehicles,
+        this.filters.drivers
+      ).subscribe(filteredVehicles => {
+        this.loadFilteredDataAndFilters(filteredVehicles)
+      });
+    }
+
+  }
+
+
   private subscribeToFilterChanges(): Subscription {
     return this.filterService.filters$.subscribe(filters => {
       this.filters = filters as { agencies: string[], vehicles: string[], drivers: string[] };
       this.loadFilteredVehicles();
-    });
-  }
-
-  primaryIdentifierFn = (item: StatusCount) => item.state;
-  primaryDisplayFn    = (item: StatusCount) => `${item.displayName}`;
-  primaryColorFn      = (item: StatusCount) => item.color;
-  primaryIconFn       = (item: StatusCount) => item.icon;
-
-  unpluggedIdentifierFn = (item: StatusCount) => item.state;
-  unpluggedDisplayFn    = (item: StatusCount) => `${item.displayName}`;
-  unpluggedColorFn      = (item: StatusCount) => item.color;
-  unpluggedIconFn       = (item: StatusCount) => item.icon;
+    })
+  };
 
 
-  loadFilteredVehicles(): void {
-    this.vehicleService.getFilteredVehiclesDashboard(
-      this.filters.agencies,
-      this.filters.vehicles,
-      this.filters.drivers
-    ).subscribe(filteredVehicles => {
-      // On stocke la hiérarchie brute pour un futur filtrage combiné
-      this.originalTeamHierarchy = filteredVehicles;
-      this.teamHierarchy = filteredVehicles;
-
-      // Transforme la hiérarchie en TreeNodes pour le p-treeTable
-      this.vehiclesTree = this.transformToTreeNodes(filteredVehicles);
-
-      // Calcule les compteurs pour les statuts primaires et unplugged
-      this.primaryStatusCounts = this.calculatePrimaryStatusCounts(filteredVehicles);
-      this.unpluggedStatusCounts = this.calculateUnpluggedStatusCounts(filteredVehicles);
-
-      // Réinitialise la sélection dans les deux groupes
-      this.selectedPrimaryStatus = null;
-      this.selectedUnpluggedStatus = null;
-    });
-  }
-
-  transformToTreeNodes(teamNodes: TeamHierarchyNode[]): TreeNode[] {
-    const sortByLabel = (a: { data: { label: string } }, b: { data: { label: string } }) =>
-      a.data.label.localeCompare(b.data.label);
-
-    const sortByDriverName = (
-      a: { data: { vehicle: dto.VehicleTableDTO } },
-      b: { data: { vehicle: dto.VehicleTableDTO } }
-    ) => {
-      const driverA = a.data.vehicle?.driver || { lastName: '', firstName: '' };
-      const driverB = b.data.vehicle?.driver || { lastName: '', firstName: '' };
-      const lastNameComparison = driverA.lastName.localeCompare(driverB.lastName);
-      return lastNameComparison !== 0
-        ? lastNameComparison
-        : driverA.firstName.localeCompare(driverB.firstName);
-    };
-
-    return teamNodes.map(team => ({
-      data: { label: team.label, vehicle: null },
-      expanded: true,
-      children: (team.children || []).map(child => ({
-        data: { label: child.label, vehicle: null },
-        expanded: true,
-        children: (child.vehicles || [])
-          .map((vehicle: dto.VehicleTableDTO) => ({
-            data: { label: vehicle.licenseplate, vehicle },
-            expanded: true,
-            children: []
-          }))
-          .sort(sortByDriverName)
-      })).sort(sortByLabel)
-    })).sort(sortByLabel);
-  }
-
-  calculatePrimaryStatusCounts(teamNodes: TeamHierarchyNode[]): StatusCount[] {
+  //Cette méthode permet de calculer le nombre de véhicules pour chaque état
+  calculatePrimaryStatusCounts(teamNodes: TeamHierarchyNodeBase[]): StatusCount[] {
     const primaryStates = ['DRIVING', 'PARKED', 'IDLE', 'NO_COM'];
     const counts: Record<string, number> = {};
 
-    const traverse = (nodes: TeamHierarchyNode[]) => {
+    const traverse = (nodes: TeamHierarchyNodeBase[]) => {
       nodes.forEach(team => {
         team.vehicles.forEach(vehicle => {
           const st = vehicle.device?.deviceDataState?.state;
@@ -723,10 +861,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }));
   }
 
-  calculateUnpluggedStatusCounts(teamNodes: TeamHierarchyNode[]): StatusCount[] {
+  calculateUnpluggedStatusCounts(teamNodes: TeamHierarchyNodeBase[]): StatusCount[] {
     let unpluggedCount = 0;
 
-    const traverse = (nodes: TeamHierarchyNode[]) => {
+    const traverse = (nodes: TeamHierarchyNodeBase[]) => {
       nodes.forEach(team => {
         team.vehicles.forEach(vehicle => {
           // On compte si plugged === false
@@ -748,6 +886,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }];
   }
 
+  //Cette méthode permet de filtrer les véhicule en fonction du statut sélectionné
   filterVehicles(): void {
     if (!this.originalTeamHierarchy) {
       console.error('Aucune donnée d’origine disponible pour filtrer.');
@@ -756,11 +895,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Si aucun statut n'est sélectionné, on réaffiche tout
     if (!this.selectedPrimaryStatus && !this.selectedUnpluggedStatus) {
       this.teamHierarchy = this.originalTeamHierarchy;
-      this.vehiclesTree = this.transformToTreeNodes(this.originalTeamHierarchy);
+      this.vehiclesTree = VehicleService.transformToTreeNodes(this.originalTeamHierarchy,
+        (vehicle: dto.VehicleTableDTO) => ({
+          driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+          licensePlate: vehicle.licenseplate,
+        }));
       return;
     }
 
-    const filteredHierarchy: TeamHierarchyNode[] = this.originalTeamHierarchy.map(team => {
+    const filteredHierarchy: TeamHierarchyNodeBase[] = this.originalTeamHierarchy.map(team => {
       // Filtrage des vehicles
       const filteredVehicles = (team.vehicles || []).filter(vehicle => {
         let primaryOk = true;
@@ -809,7 +952,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // Met à jour la hiérarchie filtrée et le TreeTable
     this.teamHierarchy = filteredHierarchy;
-    this.vehiclesTree = this.transformToTreeNodes(filteredHierarchy);
+    this.vehiclesTree = VehicleService.transformToTreeNodes(filteredHierarchy,
+      (vehicle: dto.VehicleTableDTO) => ({
+        driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+        licensePlate: vehicle.licenseplate,
+      }));
   }
 
   onPrimaryStatusChange(selected: StatusCount | null): void {
@@ -823,15 +970,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.filterVehicles();
   }
 
+  resetTreeNode() {
+    //this.vehiclesTree = this.transformToTreeNodes(this.teamHierarchy);
+    this.vehiclesTree = VehicleService.transformToTreeNodes(
+      this.teamHierarchy,
+      (vehicle: dto.VehicleTableDTO) => ({
+        driverName: vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : '',
+        licensePlate: vehicle.licenseplate,
+      }))
+
+  }
+
+  //Cette méthode permet d'exporter un fichier CSV
   exportToCSV(): void {
     const csvData = this.convertToCSV(this.teamHierarchy);
     const bom = '\uFEFF';
     const fullData = bom + csvData;
-    const blob = new Blob([fullData], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([fullData], {type: 'text/csv;charset=utf-8;'});
     const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString('fr-FR');
-    const formattedTime = currentDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    const fileName = `Positions Au ${formattedDate} ${formattedTime}.csv`.replace(/[:]/g, '-');
+    const formattedDate = currentDate.toLocaleDateString('fr-FR'); // Format: dd/mm/yyyy
+    const formattedTime = currentDate.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}); // Format: hh:mm
+    const fileName = `Positions ` + (this.non_geoloc ? ` non géolocalisées` : ``) + ` Au ${formattedDate} ${formattedTime}.csv`.replace(/[:]/g, '-'); // Replace colons in time for compatibility
+
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -841,7 +1001,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     document.body.removeChild(link);
   }
 
-  convertToCSV(data: TeamHierarchyNode[]): string {
+  convertToCSV(data: TeamHierarchyNode<dto.VehicleTableDTO>[]): string {
     const rows: string[] = [];
     const headers = [
       'Véhicule', 'Immatriculation', 'Marque', 'Modèle', 'Etat', 'Energie', 'Conducteur',
@@ -850,7 +1010,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     ];
     rows.push(headers.join(','));
 
-    const processNode = (node: TeamHierarchyNode, parentLabel: string = ''): void => {
+    const processNode = (node: TeamHierarchyNode<dto.VehicleTableDTO>, parentLabel: string = ''): void => {
       const teamLabel = node.label;
       if (node.vehicles) {
         for (const vehicle of node.vehicles) {
@@ -869,7 +1029,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             vehicle.lastPositionAddress,
             vehicle.lastPositionAddressInfo?.label,
             vehicle.distance?.toString() ?? '0',
-            vehicle.driver?.team.label ?? '',
+            vehicle.driver?.team?.label ?? '',
             parentLabel || teamLabel,
             teamLabel,
           ].join(','));
@@ -888,6 +1048,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   toggleTree(): void {
+    console.log('le vehicleTree', this.vehiclesTree)
     if (this.vehiclesTree && this.vehiclesTree.length > 0) {
       this.isExpanded = !this.isExpanded;
       this.vehiclesTree = this.vehiclesTree.map(vehicle => ({
@@ -933,23 +1094,75 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return lunchBreak?.description ?? '';
   }
 
-  openSmsOverlay(driverLabel: string, phoneNumber: string, callingCode: string, companyName: string): void {
-    this.smsModalDriverLabel = driverLabel;
-    this.smsModalPhoneNumber = phoneNumber;
-    this.smsModalCallingCode = callingCode;
-    this.smsModalCompanyName = companyName;
-    this.smsOverlayVisible = true;
+
+  sortColumn: string | null = 'null';
+  sortDirection: boolean = true;
+
+
+  sortByColumn(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = !this.sortDirection;
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = false;
+    }
+
+
+    this.vehiclesTree.forEach((parentNode, i) => {
+      if (!parentNode.children?.length) return;
+
+      //  pour chaque sous-équipe
+      parentNode.children.forEach((childNode, j) => {
+        if (!childNode.children?.length) return;
+
+        const vehicleChildren = childNode.children.filter(c => c.data?.vehicle);
+        const nonVehicleChildren = childNode.children.filter(c => !c.data?.vehicle);
+
+        vehicleChildren.sort((a, b) => {
+          const aVal = this.getValueForColumn(a.data.vehicle, column);
+          const bVal = this.getValueForColumn(b.data.vehicle, column);
+
+          if (aVal == null && bVal == null) return 0;
+          if (aVal == null) return this.sortDirection ? -1 : 1;
+          if (bVal == null) return this.sortDirection ? 1 : -1;
+
+          return this.sortDirection
+            ? aVal.toString().localeCompare(bVal.toString(), 'fr', {numeric: true})
+            : bVal.toString().localeCompare(aVal.toString(), 'fr', {numeric: true});
+        });
+
+        childNode.children = [...nonVehicleChildren, ...vehicleChildren];
+      });
+    });
+
+    this.vehiclesTree = [...this.vehiclesTree];
   }
 
-  closeSmsOverlay(): void {
-    this.smsOverlayVisible = false;
+
+  getValueForColumn(vehicle: any, column: string): any {
+    var res = ''
+    if (!vehicle)
+      return res
+    switch (column) {
+      case 'driver':
+        res =  vehicle.driver ? `${vehicle.driver.lastName} ${vehicle.driver.firstName}` : ''
+        break
+      case 'state':
+        res = vehicle.device?.deviceDataState?.state ?? ''
+        break
+      case 'lastComm':
+        res = vehicle.device?.deviceDataState?.lastCommTime ?? ''
+        break
+      case 'firstTripStart':
+        res = vehicle.firstTripStart ?? ''
+        break
+      case 'address':
+        res = vehicle.lastPositionAddress ?? ''
+        break
+      case 'distance':
+        res = vehicle.distance ?? '0'
+    }
+    return res
   }
 
-  onSmsSent(): void {
-    this.closeSmsOverlay();
-  }
-
-  onPackPurchased(): void {
-    console.log("Pack de SMS acheté !");
-  }
 }

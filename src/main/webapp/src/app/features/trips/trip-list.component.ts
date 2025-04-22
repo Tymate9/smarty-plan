@@ -3,12 +3,14 @@ import {dto} from "../../../habarta/dto";
 import TripEventsDTO = dto.TripEventsDTO;
 import TripEventType = dto.TripEventType;
 import {TripsService} from "./trips.service";
+import {DatePipe, NgIf} from "@angular/common";
+import {TableModule} from "primeng/table";
 
 @Component({
   selector: 'app-trip-list',
   template: `
     <div>
-      <p-table [value]="tripData?.tripEvents ?? []" [tableStyle]="{ 'min-width': '50rem' }">
+      <p-table [value]="tripData?.tripEvents ?? []" [tableStyle]="{ 'min-width': '50rem' }" showGridlines stripedRows  >
         <ng-template pTemplate="header">
           <tr>
             <th>Type / Adresse</th>
@@ -38,19 +40,27 @@ import {TripsService} from "./trips.service";
       </p-table>
     </div>
   `,
+  standalone: true,
+  imports: [
+    DatePipe,
+    TableModule,
+    NgIf
+  ],
   styles: [`
     table {
       width: 100%;
       border-collapse: collapse;
     }
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
     }
+
     th {
       background-color: #f2f2f2;
     }
-    p-table ::ng-deep .p-datatable>.p-datatable-wrapper {
+    p-table ::ng-deep .p-datatable>.p-datatable-table-container {
       height: calc(100vh - 135px);
     }
   `]

@@ -7,7 +7,10 @@ import {dto} from "../../../../habarta/dto";
 import {VehicleService, VehicleWithDistanceDTO} from "../../vehicle/vehicle.service";
 import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.event";
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
-import {TabViewChangeEvent} from "primeng/tabview";
+import {TabPanel, TabView, TabViewChangeEvent} from "primeng/tabview";
+import {Button} from "primeng/button";
+import {DecimalPipe, NgForOf, NgIf} from "@angular/common";
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-map-popup',
@@ -16,7 +19,8 @@ import {TabViewChangeEvent} from "primeng/tabview";
       <h4>Adresse : {{ address }}</h4>
       <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
       <!-- Create POI Tab -->
-      <p-button [raised]="true" (click)="redirectToPoiEditWithCoords()" styleClass="custom-button-red">Créer un POI</p-button>
+      <p-button (click)="redirectToPoiEditWithCoords()" styleClass="space-bottom custom-gray-button" >Créer un POI
+      </p-button>
       <p-tabView (onChange)="selectTab($event)">
         <!-- Véhicule Tab -->
         <p-tabPanel header="Véhicule">
@@ -27,19 +31,18 @@ import {TabViewChangeEvent} from "primeng/tabview";
             <li *ngFor="let vehicle of nearbyVehicles">
               <strong>{{ vehicle.second.licenseplate }}</strong> - {{ vehicle.second.category.label }}
               <span> ({{ vehicle.first | number:'1.2-2' }} km)</span>
-              <p-button
-                label="Zoom"
-                [raised]="true"
-                (click)="centerMapOnVehicle(vehicle.second)"
-                styleClass="custom-button-red">
-              </p-button>
-              <p-button
-                [raised]="true"
-                (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
-                styleClass="custom-button-gray"
-                [class.active]="highlightedStates['vehicle-' + vehicle.second.id]">
-                {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Surbrillance' : 'Surbrillance' }}
-              </p-button>
+              <div style="display: flex; gap: 10px;">
+                <p-button
+                  label="Zoom"
+                  (click)="centerMapOnVehicle(vehicle.second)">
+                </p-button>
+                <p-button
+                  (click)="toggleHighlightMarker('vehicle-' + vehicle.second.id)"
+                  styleClass="custom-gray-button"
+                  [class.active]="highlightedStates['vehicle-' + vehicle.second.id]">
+                  {{ highlightedStates['vehicle-' + vehicle.second.id] ? 'Surbrillance' : 'Surbrillance' }}
+                </p-button>
+              </div>
             </li>
           </ul>
         </p-tabPanel>
@@ -53,44 +56,37 @@ import {TabViewChangeEvent} from "primeng/tabview";
             <li *ngFor="let poi of nearbyPOIs">
               <strong>{{ poi.second.label }}</strong> - {{ poi.second.category.label }}
               <span> ({{ poi.first | number:'1.2-2' }} km)</span>
-              <p-button
-                label="Zoom"
-                [raised]="true"
-                (click)="centerMapOnPOI(poi.second)"
-                styleClass="custom-button-red">
-              </p-button>
-              <p-button
-                [raised]="true"
-                (click)="toggleHighlightMarker('poi-' + poi.second.id)"
-                styleClass="custom-button-gray"
-                [class.active]="highlightedStates['poi-' + poi.second.id]">
-                {{ highlightedStates['poi-' + poi.second.id] ? 'Surbrillance' : 'Surbrillance' }}
-              </p-button>
+              <div style="display: flex; gap: 10px;">
+                <p-button
+                  label="Zoom"
+                  (click)="centerMapOnPOI(poi.second)">
+                </p-button>
+                <p-button
+                  (click)="toggleHighlightMarker('poi-' + poi.second.id)"
+                  styleClass="custom-gray-button"
+                  [class.active]="highlightedStates['poi-' + poi.second.id]">
+                  {{ highlightedStates['poi-' + poi.second.id] ? 'Surbrillance' : 'Surbrillance' }}
+                </p-button>
+              </div>
             </li>
           </ul>
         </p-tabPanel>
       </p-tabView>
     </div>
   `,
+  standalone: true,
+  imports: [
+    Button,
+    DecimalPipe,
+    TabPanel,
+    TabView,
+    NgIf,
+    NgForOf
+  ],
   styles: [`
     .active {
       background-color: #007bff;
       color: white;
-    }
-
-    ::ng-deep .p-button.p-component.p-button-raised.custom-button-red  {
-      background-color:#aa001f !important;
-      border-color:#aa001f !important;
-      color: white !important;
-      font-weight:600;
-      padding:0.2rem;
-    }
-    ::ng-deep .p-button.p-component.p-button-raised.custom-button-gray  {
-      background-color:var(--gray-400)  !important;
-      border-color:var(--gray-400)  !important;
-      color: white !important;
-      font-weight:600;
-      padding:0.2rem;
     }
 
     .mapContextMenu {
@@ -98,6 +94,7 @@ import {TabViewChangeEvent} from "primeng/tabview";
       height: 300px;
       overflow: auto;
     }
+
   `]
 })
 export class MapPopupComponent implements OnInit {

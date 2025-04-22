@@ -30,6 +30,15 @@ WHERE vt.vehicle_id IS NULL;
 
 
 
+
+-- Véhicule assigné à plusieurs équipes simulanéement
+SELECT vt.*
+FROM vehicle_team vt
+JOIN vehicle_team vt1
+;
+
+-- Conducteur assigné à plusieurs équipes simulanéement
+
 -- TEST pour détecter les véhicules qui ont plus d'un conducteur simultanéement
 SELECT v.id, v.externalid, vd1.*, d1.first_name, d1.last_name, vd2.*, d2.first_name, d2.last_name
 FROM vehicle_driver vd1
@@ -53,4 +62,18 @@ FROM vehicle_driver vd1
          JOIN vehicle v1 ON vd1.vehicle_id = v1.id
          JOIN vehicle v2 ON vd2.vehicle_id = v2.id
 WHERE (vd1.end_date IS NULL AND vd2.end_date IS NULL)
-   OR (vd1.start_date >= vd2.start_date AND NOT(vd2.end_date IS NOT NULL AND vd2.end_date <= vd1.start_date))
+   OR (vd1.start_date >= vd2.start_date AND NOT(vd2.end_date IS NOT NULL AND vd2.end_date <= vd1.start_date));
+
+
+-- TEST pour détecter les boitiers qui ont plus d'un véhicule simultanéement
+select  d.imei, d.label, d.id, v1.licenseplate, v2.licenseplate, dvi1.*
+from  device_vehicle_install dvi1
+          join device_vehicle_install dvi2
+               on dvi1.device_id = dvi2.device_id
+                   and dvi1.vehicle_id <> dvi2.vehicle_id
+          join device d on dvi1.device_id = d.id
+          join vehicle v1 on dvi1.vehicle_id = v1.id
+          join vehicle v2 on dvi2.vehicle_id = v2.id
+where (dvi1.end_date is null and dvi2 is null) or
+    (dvi1.start_date >= dvi2.start_date AND NOT(dvi2.end_date IS NOT NULL AND dvi2.end_date <= dvi1.start_date));
+

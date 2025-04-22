@@ -1,235 +1,339 @@
-import {Component, EventEmitter, Output, OnInit, OnDestroy} from '@angular/core';
-import { Router } from '@angular/router';
-import { FilterService } from './filter.service';
-import {KeycloakService} from "keycloak-angular";
-import {KeycloakProfile} from "keycloak-js";
+import {Component, OnInit, OnDestroy, inject, NgModule} from '@angular/core';
+import {Router} from '@angular/router';
+import {FilterService} from './filter.service';
+import Keycloak from 'keycloak-js';
 import {VehicleService} from "../../features/vehicle/vehicle.service";
-import {TeamService} from "../../features/vehicle/team.service";
-import {DriverService} from "../../features/vehicle/driver.service";
-import {Option, TeamTreeComponent} from '../searchAutocomplete/team.tree.component';
+import {TeamService} from "../../features/teams/team.service";
+import {DriverService} from "../../features/driver/driver.service";
 import {dto} from "../../../habarta/dto";
 import TeamDTO = dto.TeamDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import DriverDTO = dto.DriverDTO;
 import {ConfigService} from "../../core/config/config.service";
-import {forkJoin, Subscription} from "rxjs";
+import {forkJoin, map, merge, of, Subscription} from "rxjs";
 import {NotificationService} from "../notification/notification.service";
+import {Button, ButtonDirective} from "primeng/button";
+import {Menubar} from "primeng/menubar";
+import {PrimeTemplate, TreeNode} from "primeng/api";
+import {AppConfig} from "../../app.config";
+import {AutoCompleteModule} from 'primeng/autocomplete';
+import {FormsModule} from '@angular/forms';
+import {TreeSelectModule} from 'primeng/treeselect';
+import {CrudEventType, IEntityService} from "../crud/interface/ientity-service";
+import VehicleDTO = dto.VehicleDTO;
+
+export interface Option {
+  label: string;
+  children?: Option[];
+}
 
 @Component({
   selector: 'app-navbar',
   template: `
-    <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}" class="p-menubar transparent-blur-bg full-width ">
+    <p-menubar [style]="{'border': 'none', 'width': '100%', 'z-index':1000, 'position': 'relative'}"
+               class="p-menubar transparent-blur-bg full-width ">
       <ng-template pTemplate="start">
         <div class="nav-container">
           <div class="nav-buttons">
             <div class="nav-buttons-row">
-              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" styleClass="custom-button-bg"></p-button>
-              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" styleClass="custom-button-bg"></p-button>
-              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" styleClass="custom-button-bg"></p-button>
+              <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" title="Tableau de bord"></p-button>
+              <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" title="Cartographie"></p-button>
+              <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" title="POIs"></p-button>
+              <p-button disabled="true" (onClick)="navigateTo('report')" icon="pi pi-chart-bar" title="Suivi d'activité"></p-button>
+              <p-button disabled="true" (onClick)="navigateTo('qse-report')" icon="pi pi-chart-line" title="Rapport QSE"></p-button>
             </div>
           </div>
           <div class="filters center">
-            <app-team-tree [label]="'Agences'" [options]="agencyOptions" (selectedTagsChange)="updateAgencies($event)" [selectedItems]="agencySelected"></app-team-tree>
-            <app-search-autocomplete [label]="'Véhicules'" [options]="filteredVehicleOptions" (selectedTagsChange)="updateVehicles($event)" [selectedItems]="vehicleSelected"></app-search-autocomplete>
-            <app-search-autocomplete [label]="'Conducteurs'" [options]="filteredDriverOptions" (selectedTagsChange)="updateDrivers($event)" [selectedItems]="driverSelected"></app-search-autocomplete>
-            <button pButton type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()" class="custom-button-bg"></button>
-            <p-button (onClick)="saveFilters()" icon="pi pi-save" styleClass="custom-button-bg"></p-button>
+            <p-treeSelect
+              [options]="agencyOptionsTree"
+              [(ngModel)]="selectedNodes"
+              [placeholder]="'Filtrer Agence...'"
+              filter="true"
+              selectionMode="checkbox"
+              [showClear]="true"
+              appendTo="body"
+              (ngModelChange)="updateSelectedAgencies($event)">
+            </p-treeSelect>
+            <p-autoComplete
+              [suggestions]="filteredVehicleAutocomplete"
+              [(ngModel)]="vehicleSelected"
+              (completeMethod)="filterVehicles($event)"
+              [multiple]="true"
+              (ngModelChange)="updateSelectedVehicles($event)"
+              [placeholder]="'Filtrer Véhicles...'"
+              [dropdown]="true"
+              appendTo="body">
+            </p-autoComplete>
+            <p-autoComplete
+              [suggestions]="filteredDriverAutocomplete"
+              [(ngModel)]="driverSelected"
+              (completeMethod)="filterDrivers($event)"
+              [multiple]="true"
+              (ngModelChange)="updateSelectedDrivers($event)"
+              [placeholder]="'Filtrer Conducteurs...'"
+              [dropdown]="true"
+              appendTo="body">
+            </p-autoComplete>
+            <p-button type="button" icon="pi pi-refresh" label="Reset" (click)="resetFilters()"></p-button>
+            <p-button (onClick)="saveFilters()" icon="pi pi-save"></p-button>
           </div>
         </div>
       </ng-template>
       <ng-template pTemplate="end">
         <div class="user-info compact">
-          <p-button icon="pi pi-cog" class="user-settings" styleClass="custom-button-bg"></p-button>
-          <p-button (onClick)="logout()" icon="pi pi-power-off" styleClass="custom-button-bg" [disabled]="!logoutURL"></p-button>
+          <p-button disabled="true" icon="pi pi-cog" class="user-settings" (onClick)="navigateTo('administration')"></p-button>
+          <p-button (onClick)="logout()" icon="pi pi-power-off"
+                    [disabled]="!logoutURL"></p-button>
         </div>
       </ng-template>
     </p-menubar>
   `,
-  styles: [
-    `
-      .navbar {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-      }
-      .nav-container {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        justify-content: space-between;
-      }
-      .nav-buttons {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-right: auto;
-      }
-      .nav-buttons-row {
-        display: flex;
-        align-items: center;
-      }
-      .nav-button-center {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-      }
-      .nav-buttons p-button {
-        margin-right: 10px;
-        background: transparent;
-        border: none;
-      }
-      .filters {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin: 0 auto;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      .user-info {
-        display: flex;
-        align-items: center;
-        margin-left: auto;
-      }
-      .user-info.compact {
-        gap: 5px;
-      }
-      .user-settings {
-        margin-right: 10px;
-        background: transparent;
-        border: none;
-      }
+  styles: [`
+    /* Conteneur global du menu */
+    .nav-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
 
-      .p-menubar{
-        padding: 0.5rem;
-        color: transparent !important;
-        border: 1px solid #dee2e6;
-        border-radius: 3px;
-        width: 100%;
-        background:transparent !important;
-        z-index:1000;
-        position:relative;
-        display: flex;
-        align-items: center;
-        min-height: 75px;
-        max-height: 75px;
-      }
+    .nav-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: auto;
+    }
 
-      ::ng-deep .p-menubar.p-component
-      {
-        background: transparent !important;
-        align-items: center;
-      }
+    .nav-buttons-row {
+      display: flex;
+      align-items: center;
+    }
 
+    /* Applique un margin-right et retire fond/bordures sur les p-button internes */
+    .nav-buttons p-button {
+      margin-right: 10px;
+      background: transparent;
+      border: none;
+    }
 
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
 
-      ::ng-deep .p-button.p-component.p-button-icon-only.custom-button-bg {
-        background-color: #aa001f !important;
-        border-color: #aa001f !important;
-        color: white !important;
-      }
-      .p-button {
-        background-color: #aa001f !important;
-        border-color: #aa001f !important;
-        color: white !important;
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
 
-      }
+    /* Utilisée dans <div class="user-info compact"> */
+    .user-info.compact {
+      gap: 5px;
+    }
 
-    `,
+    .user-settings {
+      margin-right: 10px;
+      background: transparent;
+      border: none;
+    }
+    /*Modifier la taille du texte dans les filtres et la taille de 'inputtext'  */
+    ::ng-deep .p-treeselect-label {
+      max-height: 50px !important;
+      max-width: 200px !important;
+      min-width: 175px !important;
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      font-size: 0.75rem !important;
+    }
+    ::ng-deep .p-autocomplete-input-multiple {
+      max-height: 50px !important;
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      max-width: 200px !important;
+      min-width: 150px !important;
+    }
+    ::ng-deep .p-autocomplete-input-chip input {
+      font-size: 0.75rem !important;
+    }
+
+    ::ng-deep .p-menubar{
+      display: flex;
+      align-items: center;
+      min-height: 75px;
+      max-height: 75px;
+    }
+
+    ::ng-deep .p-menubar.p-component
+    {
+      background: transparent !important;
+      align-items: center;
+    }
+  `],
+  imports: [
+    Button,
+    Menubar,
+    PrimeTemplate,
+    AutoCompleteModule,
+    FormsModule,
+    TreeSelectModule
   ],
+  standalone: true
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private filterService: FilterService,
-    private keycloakService: KeycloakService,
-    private router: Router,
+    protected router: Router,
     private vehicleService: VehicleService,
     private teamService: TeamService,
     private driverService: DriverService,
     private configService: ConfigService,
-    private notificationService : NotificationService
-  ) {}
+    private notificationService: NotificationService
+  ) {
+  }
+
+  // Injection directe de l'instance Keycloak via l'injection token
+  private keycloak: Keycloak = inject(Keycloak);
+  userProfile: any = null;
 
   userName: string = '';
   userRole: string = '';
-  userProfile: KeycloakProfile | null = null;
-
   agencyOptions: Option[] = [];
+  agencyOptionsTree: TreeNode[] = [];
   agencyTree: Option[] = [];
   driverOptions: DriverDTO[] = [];
   vehicleOptions: VehicleSummaryDTO[] = [];
+  selectedNodes:any[]=[];
 
   // Options filtrées en fonction des agences sélectionnées
   filteredVehicleOptions: string[] = [];
   filteredDriverOptions: string[] = [];
 
+  // Options filtrées en fonction d'autocomplete component
+  filteredVehicleAutocomplete: string[] = [];
+  filteredDriverAutocomplete: string[] = [];
+
   agencySelected: string[] = [];
   vehicleSelected: string[] = [];
   driverSelected: string[] = [];
 
-  logoutURL: string = ''; // Propriété pour stocker la logoutURL
-  private configSubscription: Subscription; // Abonnement pour la configuration
+  // Adresse de déconnexion
+  logoutURL: string = '';
+  // Abonnement pour la configuration
+  private configSubscription: Subscription;
 
-  updateAgencies(tags: string[]) {
-    const previouslySelectedAgencies = [...this.agencySelected];
-    this.agencySelected = tags;
-
-
-
-    // Gérer uniquement les suppressions d'agences
-    if (this.agencySelected.length < previouslySelectedAgencies.length) {
-      const removedAgencies = previouslySelectedAgencies.filter(
-        agency => !this.agencySelected.includes(agency)
-      );
-
-      removedAgencies.forEach(agency => {
-        this.removeVehiclesAndDriversForAgency(agency);
-      });
+  /**
+   * Actionable method to update selected agencies.
+   * @param tags : label of selected agencies.
+   */
+  updateSelectedAgencies(selectedNodes: any[]) {
+    // Store previous state
+    const previousSelection = [...this.agencySelected];
+    if (!selectedNodes || selectedNodes.length === 0) {
+      this.resetBaseEntitiesSelected()
+    } else {
+      // Extract only the labels of selected nodes
+      this.agencySelected = selectedNodes.map(node => node.label);
     }
 
+    const removedNodes = previousSelection.filter(label => !this.agencySelected.includes(label));
+    removedNodes.forEach(label => this.removeVehiclesAndDriversForAgency(label));
     this.emitSelectedTags();
     this.filterVehiclesAndDrivers();
   }
 
-  transformToHierarchy(teams: TeamDTO[]): any[] {
-    const teamMap = new Map<number, any>();
-    const roots: any[] = [];
+
+  /**
+   * Actionable method to filter driver options.
+   * @param event
+   */
+  filterDrivers(event: any) {
+    const query = event.query.toLowerCase();
+    console.log("=== filterDrivers : ", query)
+    this.filteredDriverAutocomplete = this.filteredDriverOptions.filter(driver =>
+      driver.toLowerCase().includes(query)
+    );
+  }
+  filterVehicles(event: any) {
+    const query = event.query.toLowerCase();
+    this.filteredVehicleAutocomplete = this.filteredVehicleOptions.filter(vehicle =>
+      vehicle.toLowerCase().includes(query)
+    );
+  }
+  transformToHierarchy(agencies: TeamDTO[]): any[] {
+    const teamMap = new Map<number, any>(); // Map to store all teams
+    const roots: any[] = []; // Root-level teams (agencies)
 
     const sortByLabel = (a: any, b: any) => a.label.localeCompare(b.label);
-    // Mapper toutes les équipes par ID
-    teams.forEach(team => {
-      teamMap.set(team.id, { ...team, children: [] });
-    });
 
-    // Lier les enfants à leurs parents
-    teams.forEach(team => {
-      if (team.parentTeam?.id) {
-        const parent = teamMap.get(team.parentTeam.id);
-        if (parent) {
-          parent.children.push(teamMap.get(team.id));
-        }
-      } else {
-        // Équipe de niveau racine
-        roots.push(teamMap.get(team.id));
+    //Create a map of teams
+    agencies.forEach(team => {
+      if (team.id !== null) {
+        teamMap.set(team.id, {
+          label: team.label,
+          key: `team-${team.id}`,
+          selectable: true, // Teams should be selectable
+          children: []
+        });
       }
     });
 
-    teamMap.forEach(team => {
-      team.children.sort(sortByLabel);
+    //Link child teams to their parent team
+    agencies.forEach(team => {
+      if (team.id !== null && team.parentTeam && team.parentTeam?.id !== null) {
+        const parent = teamMap.get(team.parentTeam.id);
+        const child = teamMap.get(team.id);
+
+        if (parent && child) {
+          parent.children.push(child);
+        }
+      }
     });
 
+    //Identify root-level teams (agencies)
+    agencies.forEach(team => {
+      if (team.id !== null && !team.parentTeam) {
+        const agencyNode = teamMap.get(team.id);
+        if (agencyNode) {
+          agencyNode.selectable = true; // Agencies should not be selectable
+          roots.push(agencyNode);
+        }
+      }
+    });
+
+    //Sort the teams within each agency
+    teamMap.forEach(team => {
+      if (team.children) {
+        team.children.sort(sortByLabel);
+      }
+    });
+
+    // Sort the root-level agencies
     roots.sort(sortByLabel);
     return roots;
-
   }
 
-  updateVehicles(tags: string[]) {
+  /**
+   * Actionable method to update selected vehicles.
+   * @param tags : licence plates of selected vehicles.
+   */
+  updateSelectedVehicles(tags: string[]) {
     this.vehicleSelected = tags;
     this.emitSelectedTags();
   }
 
-  updateDrivers(tags: string[]) {
+  /**
+   * Actionable method to update selected drivers.
+   * @param tags : first name followed by last name of selected drivers.
+   */
+  updateSelectedDrivers(tags: string[]) {
     this.driverSelected = tags;
     this.emitSelectedTags();
   }
@@ -239,31 +343,72 @@ export class NavbarComponent implements OnInit, OnDestroy {
       agencies: this.agencySelected,
       vehicles: this.vehicleSelected,
       drivers: this.driverSelected
-    };
+    }
 
     if (!this.areFiltersEqual(this.filterService.getCurrentFilters(), newFilters)) {
-      this.filterService.updateFilters(newFilters);
+      this.filterService.updateFilters(newFilters)
     }
   }
+  // private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
+  //   return Object.keys(filters1).every((key) =>
+  //     filters1[key].length === filters2[key]?.length &&
+  //     filters1[key].every((value, index) => value === filters2[key][index])
+  //   );
+  // }
 
   private areFiltersEqual(filters1: { [key: string]: string[] }, filters2: { [key: string]: string[] }): boolean {
     return JSON.stringify(filters1) === JSON.stringify(filters2);
+
   }
 
   async ngOnInit() {
     try {
-      // Charger le profil utilisateur depuis Keycloak
-      this.userProfile = await this.keycloakService.loadUserProfile();
-      this.userName = `${this.userProfile.firstName} ${this.userProfile.lastName}`;
+      // Vérification de l'instance Keycloak injectée
+      //console.log('Keycloak instance:', this.keycloak);
 
-      // Charger les agences, les véhicules et les conducteurs en parallèle
+      if (this.keycloak && this.keycloak.authenticated) {
+        // Extraction du profil depuis le token décodé
+        this.userProfile = this.keycloak.tokenParsed;
+        //console.log('Token Parsed:', this.keycloak.tokenParsed);
+        this.userName = `${this.userProfile.firstName || ''} ${this.userProfile.lastName || ''}`.trim();
+      } else {
+        console.warn('Keycloak non authentifié ou instance non disponible');
+      }
+
+      // Extraction des rôles depuis le token (en vérifiant resourceAccess et realm_access)
+      let roles: string[] = [];
+      if (this.keycloak && this.keycloak.tokenParsed) {
+        const tokenParsed = this.keycloak.tokenParsed;
+        //console.log('Token Parsed for roles:', tokenParsed);
+        if (tokenParsed["resourceAccess"]) {
+          //console.log('resourceAccess:', tokenParsed["resourceAccess"]);
+          const clientId = AppConfig.config.keycloakConfig.frontendClientId;
+          if (tokenParsed["resourceAccess"][clientId]) {
+            roles = tokenParsed["resourceAccess"][clientId].roles;
+          }
+        } else if (tokenParsed["realm_access"]) {
+          //console.log('realm_access:', tokenParsed["realm_access"]);
+          if(tokenParsed["realm_access"]!.roles)
+            roles = tokenParsed["realm_access"]!.roles;
+        } else {
+          console.warn('Aucune propriété resourceAccess ou realm_access dans le token');
+        }
+      } else {
+        console.warn('tokenParsed non disponible');
+      }
+      //console.log('Rôles extraits:', roles);
+      this.userRole = roles && roles.length > 0 ? roles.join(' / ') : 'Aucun rôle trouvé';
+
+      // Chargement parallèle des données (agences, véhicules, conducteurs)
       forkJoin({
         agencies: this.teamService.getAgencies(),
         vehicles: this.vehicleService.getVehiclesList(),
-        drivers: this.driverService.getDrivers()
-      }).subscribe(({ agencies, vehicles, drivers }) => {
+        drivers: this.driverService.getAffectedDrivers()
+      }).subscribe(({agencies, vehicles, drivers}) => {
+
         // Traitement des agences
         this.agencyOptions = this.transformToHierarchy(agencies);
+        this.agencyOptionsTree = this.agencyOptions;
         this.agencyTree = this.agencyOptions;
 
         // Traitement des véhicules
@@ -276,34 +421,150 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.driverOptions = drivers;
         this.filteredDriverOptions = drivers
           .sort((a, b) => {
-            const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
-            if (lastNameComparison !== 0) {
-              return lastNameComparison;
-            }
-            return (a.firstName || '').localeCompare(b.firstName || '');
+            const cmp = (a.lastName || '').localeCompare(b.lastName || '');
+            return cmp !== 0 ? cmp : (a.firstName || '').localeCompare(b.firstName || '');
           })
           .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
           .concat('Véhicule non attribué');
 
-        // Charger les filtres initiaux depuis le FilterService
+        // Chargement des filtres initiaux depuis le FilterService
         this.loadInitialFilters();
       });
 
-      // Récupérer les rôles de l'utilisateur depuis Keycloak
-      const roles = this.keycloakService.getUserRoles();
-      if (roles && roles.length > 0) {
-        this.userRole = roles.join(' / ');
-      }
-
-      // Abonner à la configuration Keycloak pour obtenir la logoutURL
+      // Abonnement à la configuration pour récupérer l'URL de déconnexion
       this.configSubscription = this.configService.getConfig().subscribe(config => {
+        //console.log('Configuration Keycloak:', config);
         if (config) {
           this.logoutURL = config.keycloakConfig.redirectUrl;
         }
       });
 
+      //this.subscribeToCrudEvents();
+
     } catch (error) {
-      console.error('Failed to load user profile', error);
+      console.error('Erreur lors de l\'initialisation de Navbar', error);
+    }
+  }
+
+  private crudSubscription?: Subscription;
+
+  private subscribeToCrudEvents(): void {
+    const obs1 = this.driverService!.crudEvents$.pipe(map(val => ({ source: 'driver', val })));
+    const obs2 = this.teamService!.crudEvents$.pipe(map(val => ({ source: 'team',val})));
+    const obs3 = this.vehicleService!.crudEvents$.pipe(map(val => ({ source: 'vehicle', val })));
+
+    merge(obs1, obs2, obs3).subscribe(({ source, val }) => {
+      console.log(`=== Received from ${source}:`, val);
+    });
+
+
+    merge(obs1, obs2, obs3).subscribe(({ source, val })  => {
+      var modified = false;
+      // var service: IEntityService<any, any>
+      // switch (source){
+      //   case 'team':
+      //     service = this.teamService;
+      //     break;
+      //   case 'vehicle':
+      //     break;
+      //   case 'driver':
+      // }
+      switch (val.type) {
+        case CrudEventType.CREATE:
+          modified = true;
+          break;
+        case CrudEventType.UPDATE:
+          this.filteredVehicleOptions = this.filteredDriverOptions.
+          map(item => item === (val.oldData as VehicleDTO).licenseplate ?
+            (val.newData as VehicleDTO).licenseplate : item);
+          this.vehicleSelected = this.vehicleSelected.
+          map(item => item === (val.oldData as VehicleDTO).licenseplate ?
+            (val.newData as VehicleDTO).licenseplate : item);
+          modified = true;
+          break;
+        case CrudEventType.DELETE:
+          // if(source==='team'){
+          //   this.agencySelected = this.agencySelected.filter(item => item !== toDelete)
+          // }
+
+          // this.driverSelected = this.driverSelected.filter(item => item !== val);
+          modified = true;
+          break;
+        default:
+          console.warn('[navBarComponent] Événement CRUD inconnu:', event);
+      }
+      if(modified)
+        this.handleCrudEvent();
+    });
+
+    // this.crudSubscription = this.driverService!.crudEvents$.subscribe(event => {
+    //   switch (event.type) {
+    //
+    //     case CrudEventType.CREATE:
+    //     case CrudEventType.UPDATE:
+    //     case CrudEventType.DELETE:
+    //       this.handleCrudEvent();
+    //       break;
+    //
+    //     // case CrudEventType.CREATE:
+    //     //   this.handleCreateEvent(event.newData);
+    //     //   break;
+    //     // case CrudEventType.UPDATE:
+    //     //   this.handleUpdateEvent(event.oldData, event.newData);
+    //     //   break;
+    //     // case CrudEventType.DELETE:
+    //     //   this.handleDeleteEvent(event.oldData);
+    //     //   break;
+    //     default:
+    //       console.warn('[navBarComponent] Événement CRUD inconnu:', event);
+    //   }
+    //   // this.cdr.markForCheck();
+    // });
+  }
+
+  //Rafraichir le contenu des filtres
+  private handleCrudEvent(){
+
+    // Chargement parallèle des données (agences, véhicules, conducteurs)
+    forkJoin({
+      agencies: this.teamService.getAgencies(),
+      vehicles: this.vehicleService.getVehiclesList(),
+      drivers: this.driverService.getAffectedDrivers()
+    }).subscribe(({agencies, vehicles, drivers}) => {
+
+      // Traitement des agences
+      this.agencyOptions = this.transformToHierarchy(agencies);
+      this.agencyOptionsTree = this.agencyOptions;
+      this.agencyTree = this.agencyOptions;
+
+      // Traitement des véhicules
+      this.vehicleOptions = vehicles;
+      this.filteredVehicleOptions = vehicles
+        .sort((a, b) => (a.licenseplate || '').localeCompare(b.licenseplate || ''))
+        .map(vehicle => vehicle.licenseplate || '');
+
+      // Traitement des conducteurs
+      this.driverOptions = drivers;
+      this.filteredDriverOptions = drivers
+        .sort((a, b) => {
+          const cmp = (a.lastName || '').localeCompare(b.lastName || '');
+          return cmp !== 0 ? cmp : (a.firstName || '').localeCompare(b.firstName || '');
+        })
+        .map(driver => `${driver.lastName || ''} ${driver.firstName || ''}`.trim())
+        .concat('Véhicule non attribué');
+
+      // Chargement des filtres initiaux depuis le FilterService
+      this.loadInitialFilters();
+    });
+  }
+
+  // Méthode de déconnexion utilisant directement l'instance Keycloak injectée
+  logout() {
+    if (this.keycloak) {
+      this.keycloak.logout({redirectUri: this.logoutURL});
+    } else {
+      console.error('Instance Keycloak non disponible pour la déconnexion.');
+      alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
     }
   }
 
@@ -317,7 +578,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           .map(vehicle => vehicle.licenseplate || '');
       });
 
-      this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
+      this.driverService.getAffectedDrivers(this.agencySelected).subscribe((filteredDrivers) => {
         this.filteredDriverOptions = filteredDrivers
           .sort((a, b) => {
             const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
@@ -339,11 +600,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   }
 
+
+  //TODO(Travailler sur la nullité des team et des vehicle)
   removeVehiclesAndDriversForAgency(deletedAgencyId: string): void {
     // Obtenir tous les IDs d'agences à supprimer (y compris les enfants)
     let agenciesToRemove = this.getAllAgencyIdsToRemove(deletedAgencyId);
     const vehiclesToRemove = this.vehicleOptions
-      .filter(vehicle => agenciesToRemove.includes(vehicle.team.label))
+      .filter(vehicle => agenciesToRemove.includes(vehicle.team!!.label))
       .map(vehicle => vehicle.licenseplate);
 
     this.vehicleSelected = this.vehicleSelected.filter(
@@ -351,7 +614,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     );
 
     const driversToRemove = this.driverOptions
-      .filter(driver => agenciesToRemove.includes(driver.team.label))
+      .filter(driver => agenciesToRemove.includes(driver.team!!.label))
       .map(driver => `${driver.lastName} ${driver.firstName}`);
 
     this.driverSelected = this.driverSelected
@@ -392,15 +655,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.router.navigate([`/${page}`]);  // Utilise le routeur pour naviguer
   }
 
-  logout() {
-    if (this.logoutURL) {
-      this.keycloakService.logout(this.logoutURL);
-    } else {
-      console.error('Logout URL not available.');
-      alert('Impossible de déconnecter. Veuillez réessayer plus tard.');
-    }
-  }
-
   saveFilters(): void {
     this.filterService.saveFiltersToLocalStorage();
 
@@ -410,7 +664,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private loadInitialFilters(): void {
     // Récupérer les filtres initiaux depuis le FilterService
-    const currentFilters = this.filterService.getCurrentFilters() as { agencies: string[], vehicles: string[], drivers: string[] };
+    const currentFilters = this.filterService.getCurrentFilters() as {
+      agencies: string[],
+      vehicles: string[],
+      drivers: string[]
+    };
 
     // Mettre à jour les sélections locales avec les filtres chargés
     this.agencySelected = currentFilters.agencies || [];
@@ -439,7 +697,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       });
 
       // Filtrer les conducteurs
-      this.driverService.getDrivers(this.agencySelected).subscribe((filteredDrivers) => {
+      this.driverService.getAffectedDrivers(this.agencySelected).subscribe((filteredDrivers) => {
         this.filteredDriverOptions = filteredDrivers
           .sort((a, b) => {
             const lastNameComparison = (a.lastName || '').localeCompare(b.lastName || '');
@@ -464,16 +722,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.agencySelected = [];
-    this.vehicleSelected = [];
-    this.driverSelected = [];
+    this.resetBaseEntitiesSelected()
+    this.selectedNodes=[]
 
-    this.filterService.resetFilters();
-    this.filterService.triggerReset();
+    this.filterService.resetFilters()
+    this.filterService.triggerReset()
 
-    this.filterVehiclesAndDrivers();
-    this.updateFilteredOptionsAfterLoading();
-    this.emitSelectedTags();
+    this.filterVehiclesAndDrivers()
+    this.updateFilteredOptionsAfterLoading()
+    this.emitSelectedTags()
+  }
+
+  private resetBaseEntitiesSelected(): void {
+    this.agencySelected = []
+    this.vehicleSelected = []
+    this.driverSelected = []
   }
 
   ngOnDestroy() {
@@ -482,4 +745,3 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 }
-

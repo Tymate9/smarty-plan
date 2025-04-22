@@ -1,8 +1,11 @@
 package net.enovea
 
 import mu.KotlinLogging
-import net.enovea.api.trip.TripDailyStatsRowMapper
-import net.enovea.api.trip.TripRowMapper
+import net.enovea.trip.TripDailyStatsRowMapper
+import net.enovea.trip.TripRowMapper
+import net.enovea.vehicle.vehicleStats.VehicleStatsMapper
+import net.enovea.vehicle.vehicleStats.VehicleStatsQseMapper
+import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.statement.SqlLogger
 import org.jdbi.v3.core.statement.StatementContext
@@ -41,5 +44,7 @@ class DorisJdbiContext(dataSource: DataSource) {
         jdbi
             .registerRowMapper(TripRowMapper())
             .registerRowMapper(TripDailyStatsRowMapper())
+            .registerRowMapper(VehicleStatsMapper())
+            .registerRowMapper(VehicleStatsQseMapper())
     }
 }

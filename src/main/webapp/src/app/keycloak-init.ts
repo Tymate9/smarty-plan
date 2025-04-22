@@ -28,7 +28,6 @@ export function initializeKeycloak(keycloak: KeycloakService, configService: Con
       }),
       catchError(error => {
         console.error('Erreur lors de la récupération de la configuration Keycloak:', error);
-        // Vous pouvez choisir de retourner une configuration par défaut ou de bloquer l'initialisation
         return of(false); // Empêche l'initialisation de Keycloak
       })
     ).toPromise();

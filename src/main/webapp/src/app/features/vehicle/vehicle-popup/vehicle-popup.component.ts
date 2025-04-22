@@ -6,14 +6,18 @@ import {PopUpConfig} from "../../../core/cartography/marker/pop-up-config";
 import {EntityType} from "../../../core/cartography/marker/MarkerFactory";
 import {SmsApiService, SmsForm, SmsPackForm, SmsStatistics} from "../../../services/sms-api.service";
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
+import {TabPanel, TabView} from "primeng/tabview";
+import {SmsFormComponent} from "../../sms/sms-form/sms-form.component";
+import {ButtonDirective, ButtonModule} from "primeng/button";
+import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
+import {ProgressSpinner} from "primeng/progressspinner";
 @Component({
   selector: 'app-vehicle-popup',
   template: `
-    <img *ngIf="entity.device.plugged == false"
-      src="../../../../assets/icon/unplugged.svg"
-      alt="unplugged"
-      style="position: absolute; top: 10px; right: 10px; width: 40px; height: auto; padding: 0 5px;"
+    <img *ngIf="entity.device?.plugged == false"
+         src="../../../../assets/icon/unplugged.svg"
+         alt="unplugged"
+         style="position: absolute; top: 10px; right: 10px; width: 40px; height: auto; padding: 0 5px;"
     />
     <div class="vehicle-popup">
       <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event)">
@@ -22,7 +26,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           <div class="p-field">
             <label><strong>Conducteur:</strong></label>
             <span *ngIf="entity.driver; else noDriver">
-                {{ entity.driver.firstName }} {{ entity.driver.lastName || 'Véhicule non attribué' }}
+                {{ entity.driver?.firstName }} {{ entity.driver?.lastName || 'Véhicule non attribué' }}
             </span>
             <ng-template #noDriver>
               <span>Véhicule non attribué</span>
@@ -30,11 +34,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           </div>
           <div class="p-field">
             <label><strong>Plaque d'immatriculation:</strong></label>
-            <span>{{entity.licenseplate || "Aucune plaque d'immatriculation" }}</span>
+            <span>{{ entity.licenseplate || "Aucune plaque d'immatriculation" }}</span>
           </div>
           <div class="p-field">
             <label><strong>Équipe:</strong></label>
-            <span>{{ entity.team.label }}</span>
+            <span>{{ entity.team?.label }}</span>
           </div>
           <div class="p-field">
             <label><strong>Catégorie:</strong></label>
@@ -42,7 +46,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           </div>
           <div class="p-field">
             <label><strong>Dernière communication:</strong></label>
-            <span>{{ entity.device.lastCommunicationDate | date:'short' }}</span>
+            <span>{{ entity.device?.lastCommunicationDate | date:'short' }}</span>
           </div>
         </p-tabPanel>
 
@@ -56,20 +60,22 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           <div *ngIf="!loadingNearbyPOIs && nearbyPOIs.length > 0">
             <div *ngFor="let poi of nearbyPOIs" class="poi-item">
               <div>
-                <strong>{{ (poi.poi.client_code?? '0000') + "" + poi.poi.client_label }}</strong> - {{ poi.poi.category.label }} - Distance
+                <strong>{{ (poi.poi.client_code ?? '0000') + "" + poi.poi.client_label }}</strong>
+                - {{ poi.poi.category.label }} - Distance
                 : {{ poi.distance | number:'1.0-2' }} km
               </div>
               <div class="poi-actions">
-                <button pButton label="Centrer sur ce POI" icon="pi pi-search-plus"
-                        (click)="centerMapOnPOI(poi.poi)"
-                        style="background-color: #aa001f; border: #aa001f;"></button>
-                <button
-                  pButton
+                <p-button
+                  label="Centrer sur ce POI"
+                  icon="pi pi-search-plus"
+                  (click)="centerMapOnPOI(poi.poi)">
+                </p-button>
+                <p-button
                   [label]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'Désactiver surbrillance' : 'Mettre en surbrillance'"
                   [icon]="isMarkerHighlighted('poi-' + poi.poi.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
                   (click)="toggleHighlightMarker('poi-' + poi.poi.id)"
-                  style="background-color: #515151; border: #515151;"
-                ></button>
+                  styleClass="custom-gray-button">
+                </p-button>
               </div>
             </div>
           </div>
@@ -83,14 +89,25 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
             [callingCode]="'+33'"
             [companyName]="'Normandie Manutention'"
             (smsSent)="onSmsSent()"
-            (packPurchased)="onPackPurchased()"
-          >
+            (packPurchased)="onPackPurchased()">
           </app-sms-form>
         </p-tabPanel>
-
       </p-tabView>
     </div>
   `,
+  standalone: true,
+  imports: [
+    TabPanel,
+    SmsFormComponent,
+    ButtonDirective,
+    DecimalPipe,
+    ProgressSpinner,
+    DatePipe,
+    TabView,
+    NgIf,
+    NgForOf,
+    ButtonModule
+  ],
   styles: [`
     .p-grid > .p-col-6 {
       padding: 0 0.5rem;
@@ -116,24 +133,29 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
     .vehicle-popup {
     }
+
     .p-field {
       margin-bottom: 1rem;
     }
+
     .poi-item {
       border: 1px solid #ccc;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
     }
+
     .poi-actions {
       margin-top: 10px;
       display: flex;
       gap: 5px;
     }
+
     .custom-spinner {
       display: block;
       margin: 0 auto;
     }
+
   `]
 })
 export class VehiclePopupComponent implements OnInit {
@@ -189,7 +211,6 @@ export class VehiclePopupComponent implements OnInit {
       phoneNumber: this.entity.driver?.phoneNumber || '',
       callingCode: '+33'
     });
-    console.log(this.entity)
   }
 
   loadSmsStatistics(): void {
@@ -218,8 +239,8 @@ export class VehiclePopupComponent implements OnInit {
 
   loadNearbyPOIs() {
     this.loadingNearbyPOIs = true;
-    const latitude = this.entity.device.coordinate?.coordinates[1] ?? 0.0;
-    const longitude = this.entity.device.coordinate?.coordinates[0] ?? 0.0;
+    const latitude = this.entity.device?.coordinate?.coordinates[1] ?? 0.0;
+    const longitude = this.entity.device?.coordinate?.coordinates[0] ?? 0.0;
     this.poiService.getNearestPOIsWithDistance(latitude, longitude, 3).subscribe({
       next: (response) => {
         this.nearbyPOIs = response.map((pair: any) => {
@@ -265,8 +286,8 @@ export class VehiclePopupComponent implements OnInit {
     this.layerEvent.emit({
       type: LayerEventType.ZoomToHighlightedMarkersIncludingCoords,
       payload: {
-        lat: this.entity.device.coordinate?.coordinates[1] ?? 0.0,
-        lng: this.entity.device.coordinate?.coordinates[0] ?? 0.0,
+        lat: this.entity.device?.coordinate?.coordinates[1] ?? 0.0,
+        lng: this.entity.device?.coordinate?.coordinates[0] ?? 0.0,
       }
     });
   }

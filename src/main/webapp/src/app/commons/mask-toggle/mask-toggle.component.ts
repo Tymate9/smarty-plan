@@ -1,4 +1,5 @@
 import { Component, Input, ContentChild, TemplateRef, OnChanges, SimpleChanges } from '@angular/core';
+import {NgIf, NgTemplateOutlet} from "@angular/common";
 
 /**
  * Composant inline : sépare la capacité à être masqué (`canMask`)
@@ -9,6 +10,7 @@ import { Component, Input, ContentChild, TemplateRef, OnChanges, SimpleChanges }
  * - `isMask` = état interne (true=affiche template masqué, false=affiche template non masqué).
  */
 @Component({
+  standalone: true,
   selector: 'app-mask-toggle',
   template: `
     <!--
@@ -25,6 +27,10 @@ import { Component, Input, ContentChild, TemplateRef, OnChanges, SimpleChanges }
       </div>
     </ng-template>
   `,
+  imports: [
+    NgIf,
+    NgTemplateOutlet
+  ],
   styles: [`
     :host {
       display: inline-block;

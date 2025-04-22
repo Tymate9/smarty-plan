@@ -4,8 +4,9 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.context.Dependent
 import jakarta.enterprise.inject.Produces
 import jakarta.inject.Named
-import net.enovea.api.trip.TripService
-import net.enovea.common.geo.SpatialService
+import net.enovea.trip.TripService
+import net.enovea.vehicle.vehicleStats.VehicleStatsRepository
+import net.enovea.spatial.SpatialService
 import net.enovea.api.trip.TripRepository
 import javax.sql.DataSource
 import io.quarkus.agroal.DataSource as AgroalDataSource
@@ -25,6 +26,14 @@ class DorisBeanFactory {
 
     @Produces
     @ApplicationScoped
+    @Named("vehicleStatsRepository")
+    fun vehicleStatsRepository(dorisJdbiContext: DorisJdbiContext): VehicleStatsRepository = VehicleStatsRepository(dorisJdbiContext)
+
+    @Produces
+    @ApplicationScoped
     @Named("tripService")
-    fun tripService(tripRepository: TripRepository, spatialService: SpatialService): TripService = TripService(tripRepository, spatialService)
+    fun tripService(
+        tripRepository: TripRepository,
+        spatialService: SpatialService,
+        ): TripService = TripService(tripRepository, spatialService)
 }

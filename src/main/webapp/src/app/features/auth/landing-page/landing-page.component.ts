@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import {KeycloakService} from "keycloak-angular";
-import {AdminComponent} from "../admin/admin.component";
 
 @Component({
   selector: 'app-landing-page',
@@ -11,8 +10,8 @@ import {AdminComponent} from "../admin/admin.component";
       <button (click)="logout()">Se déconnecter</button>
     </div>
   `,
-  styles: [
-  ]
+  standalone: true,
+  styles: []
 })
 export class LandingPageComponent {
 

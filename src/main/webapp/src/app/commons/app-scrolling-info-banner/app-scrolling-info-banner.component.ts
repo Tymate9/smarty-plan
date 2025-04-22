@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: true,
   selector: 'app-scrolling-info-banner',
   template: `
     <div class="scrolling-container">

@@ -21,7 +21,6 @@ import {DriverValidator} from "../../driver/validator/driver-validator";
     NgIf
   ],
   template: `
-    <h2>Team Form</h2>
     <app-entity-form
       *ngIf="formDescription"
       [formDescription]="formDescription"
@@ -163,7 +162,7 @@ export class TeamFormComponent implements OnInit {
       };
 
       this.formDescription = new FormDescription(
-        'Édition des groupe',
+        undefined,
         inputs,
         TeamValidator.checkCategoryParentConstraint(),
         [

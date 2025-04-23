@@ -4,14 +4,14 @@ import {IFormInput} from "./iform-input";
 import {Subscription} from "rxjs";
 
 export class FormDescription implements IFormDescription {
-  title: string;
+  title: string | undefined;
   formValidator?: ValidatorFn;
   formInputs: IFormInput[];
   dependencies?: IFormDependency[];
   transformToForm?: (rawEntity: any) => any;
 
   constructor(
-    title: string,
+    title: string | undefined,
     formInputs: IFormInput[],
     formValidator?: ValidatorFn,
     dependencies?: IFormDependency[],

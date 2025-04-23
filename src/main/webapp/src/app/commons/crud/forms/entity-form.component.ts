@@ -8,11 +8,13 @@ import {NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@
 import {AutocompleteInputComponent} from "../../inputs/autocomplete-input.component";
 import {InputText} from "primeng/inputtext";
 import {Button} from "primeng/button";
+import {Calendar} from "primeng/calendar";
+import {DatePicker} from "primeng/datepicker";
 
 @Component({
   selector: 'app-entity-form',
   template: `
-<!--    <h2>{{ formDescription.title }}</h2>-->
+    <h2 *ngIf="formDescription.title != undefined">{{  formDescription.title }}</h2>
     <form [formGroup]="entityForm" (ngSubmit)="onSubmit()">
       <div *ngFor="let input of formDescription.formInputs" class="form-group">
         <label
@@ -59,6 +61,21 @@ import {Button} from "primeng/button";
               [ngClass]="{ 'invalid': hasFieldErrors(input.name) }"
             ></app-autocomplete-input>
           </ng-container>
+<!--          <ng-container *ngSwitchCase="'date'">-->
+<!--            <p-datepicker-->
+<!--              [id]="input.name"-->
+<!--              [placeholder]="input.placeholder"-->
+<!--              formControlName="{{ input.name }}"-->
+<!--              [ngClass]="{ 'invalid': hasFieldErrors(input.name) }"-->
+<!--              [showOtherMonths]="true"-->
+<!--              [selectOtherMonths]="true"-->
+<!--              [showButtonBar]="true"-->
+<!--              [showIcon]="true"-->
+<!--              [readonlyInput]="true"-->
+<!--              appendTo="body"-->
+<!--            >-->
+<!--            </p-datepicker>-->
+<!--          </ng-container>-->
           <input
             pInputText
             *ngSwitchDefault
@@ -91,7 +108,9 @@ import {Button} from "primeng/button";
     NgSwitchDefault,
     InputText,
     Button,
-    AutocompleteInputComponent
+    AutocompleteInputComponent,
+    Calendar,
+    DatePicker
   ],
   styles: [`
 
@@ -136,6 +155,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
   protected readonly FormInputUtils = FormInputUtils;
 
   ngOnInit(): void {
+    console.log(this.formDescription)
     this.initializeReactiveForm();
   }
 
@@ -145,6 +165,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
       (changes['entity'] && !changes['entity'].firstChange) ||
       (changes['mode'] && !changes['mode'].firstChange)
     ) {
+      console.log(this.formDescription)
       this.initializeReactiveForm();
     }
   }
@@ -152,8 +173,11 @@ export class EntityFormComponent implements OnInit, OnChanges {
   private initializeReactiveForm(): void {
     const controls: { [key: string]: FormControl } = {};
 
+    console.log(controls)
     this.formDescription.formInputs.forEach(input => {
-      controls[input.name] = new FormControl(input.value, input.validators);
+      controls[input.name] = new FormControl();
+      controls[input.name].setValue(input.value);
+      controls[input.name].setValidators(input.validators);
       if (input.showErrors === undefined) {
         input.showErrors = false;
       }

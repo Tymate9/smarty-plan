@@ -35,7 +35,7 @@ export const dataTableConfig = {
     row: {
       background: "{content.background}",
       hoverBackground: "{content.hover.background}",
-      selectedBackground: "{highlight.background}",
+      selectedBackground: nmColors.headerGray,
       color: "{content.color}",
       hoverColor: "{content.hover.color}",
       selectedColor: "{highlight.color}",

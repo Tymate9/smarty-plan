@@ -19,7 +19,9 @@ class VehicleStatsQseMapper: RowMapper<VehicleStatsQseDTO> {
             rangeAvg = rs.getString("range_avg"),
             idleDuration = rs.getString("idle_duration").takeIf { !rs.wasNull() },
             distanceMax = rs.getInt("longest_trip_distance").takeIf { !rs.wasNull() },
-
+            highwaySpeed = rs.getInt("highway_speed"),
+            roadSpeed = rs.getInt("road_speed"),
+            citySpeed = rs.getInt("city_speed"),
         )
     }
 

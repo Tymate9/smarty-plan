@@ -51,7 +51,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             hour(MAX(end_time)) > 18 AS has_late_stop,
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long
                     
-                        FROM <dorisView>
+                        FROM <dorisView> 
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
@@ -194,7 +194,10 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             LPAD(CAST(FLOOR(SUM(daily_idle_duration) / 3600) AS STRING), 2, '0'), 
                             ':',
                             LPAD(CAST(FLOOR((SUM(daily_idle_duration) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS idle_duration
+                        ) AS idle_duration,
+                          round(avg(avgHighwaySpeedScore)) as highway_speed,
+                          round(avg(avgRoadSpeedScore)) as road_speed,
+                          round(avg(avgCitySpeedScore)) as city_speed
                     FROM (
                         SELECT
                             vehicle_id,
@@ -205,9 +208,13 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             SUM(distance) AS distance_sum,
                             SUM(duration) AS duration_sum,
                             time_to_sec(timediff(max(end_time), min(start_time))) AS `range`,
-                            SUM(idle_duration) As daily_idle_duration
+                            SUM(idle_duration) As daily_idle_duration,
+                            avg(if(speed_limit > 10000, speed / speed_limit * 100, null)) as avgHighwaySpeedScore,
+                            avg(if(speed_limit > 5000 and speed_limit <= 10000, speed / speed_limit * 100, null)) as avgRoadSpeedScore,
+                            avg(if(speed_limit <= 5000, speed / speed_limit * 100, null)) as avgCitySpeedScore
                             
-                        FROM <dorisView>
+                        FROM <dorisView> t
+                        LEFT JOIN map_datapoints mdp ON mdp.trip_id = t.trip_id and mdp.device_id = t.device_id
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL

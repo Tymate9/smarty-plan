@@ -57,12 +57,12 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
         <tr [ttRow]="rowNode"
             *ngIf="!rowNode.parent"
             class="dynamic-tt-header">
-          <td rowspan="3">Véhicule</td>
-          <td rowspan="3">Conducteur</td>
-          <td rowspan="3">Distance parcourue</td>
-          <td rowspan="3">Durée de conduite moyenne (en HH:MM)</td>
-          <td rowspan="3">Amplitude moyenne (en HH:MM)</td>
-          <td rowspan="3">Temps de moteur tournant estimé total (en HH:MM)</td>
+          <td rowspan="2">Véhicule</td>
+          <td rowspan="2">Conducteur</td>
+          <td rowspan="2">Distance parcourue</td>
+          <td rowspan="2">Durée de conduite moyenne (en HH:MM)</td>
+          <td rowspan="2">Amplitude moyenne (en HH:MM)</td>
+          <td rowspan="2">Temps de moteur tournant estimé total (en HH:MM)</td>
 
           <!-- Grouped Columns -->
           <td colspan="3">Accélération et freinage (/20)</td>
@@ -80,18 +80,6 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
           <td>AR</td>
           <td>R</td>
           <td>V</td>
-        </tr>
-
-        <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
-          <td>note/20</td>
-          <td>note/20</td>
-          <td>note/20</td>
-          <td>note/20</td>
-          <td>note/20</td>
-          <td>note/20</td>
-          <td>%</td>
-          <td>%</td>
-          <td>%</td>
         </tr>
 
 
@@ -113,15 +101,15 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
           <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.accelerationAR }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.accelerationR }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.accelerationV }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.turnAR }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.turnR }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.turnV }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.speedAR }}%</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.speedR }}%</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.speedV }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.highwayAccel }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.roadAccel }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.cityAccel }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.highwayTurn }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.roadTurn }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.cityTurn }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.highwaySpeed }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.roadSpeed }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.citySpeed }}%</td>
 
         </tr>
 

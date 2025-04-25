@@ -40,18 +40,17 @@ data class VehicleStatsQseDTO(
     var driverName: String? = null,
     val idleDuration: String?,
 
-    //TODO A changer les noms des variables suivants
-    var accelerationAR: Int? = 18,
-    var accelerationR: Int? = 15,
-    var accelerationV: Int? = 19,
+    var highwayAccel: Int? = 18,
+    var roadAccel: Int? = 15,
+    var cityAccel: Int? = 19,
 
-    var turnAR: Int? = 15,
-    var turnR: Int? = 20,
-    var turnV: Int? = 17,
+    var highwayTurn: Int? = 15,
+    var roadTurn: Int? = 20,
+    var cityTurn: Int? = 17,
 
-    var speedAR: Int? = 90,
-    var speedR: Int? = 70,
-    var speedV: Int? = 50
+    var highwaySpeed: Int? = 90,
+    var roadSpeed: Int? = 70,
+    var citySpeed: Int? = 50
 )
 data class VehiclesStatsQseDTO(
     val vehicleStatsQse: VehicleStatsQseDTO,

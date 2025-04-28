@@ -13,8 +13,14 @@ export class AccelerationService {
 
   constructor(private http: HttpClient) {}
 
-  computeGGDiagram(id: number, beginDate: string, endDate: string): Observable<GGDiagramDTO[]> {
-    let httpParams = {'beginDate': beginDate, 'endDate': endDate}
+  computeGGDiagram(id: number,
+                   beginDate: string,
+                   endDate: string,
+                   phi: number,
+                   theta: number,
+                   psi: number
+                   ): Observable<GGDiagramDTO[]> {
+    let httpParams = {'beginDate': beginDate, 'endDate': endDate, 'phi': phi, 'theta': theta, 'psi': psi}
     return this.http.get<GGDiagramDTO[]>(`${this.baseUrl}/${id}/gg-diagram`, { params: httpParams });
   }
 }

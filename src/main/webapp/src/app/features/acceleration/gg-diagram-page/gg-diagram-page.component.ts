@@ -15,21 +15,22 @@ import GGDiagramDTO = dto.GGDiagramDTO;
 })
 export class GgDiagramPageComponent {
 
-  deviceId: number;
-  beginDate: string;
-  endDate: string;
+  deviceId: number = 161;
+  beginDate: string = "2025-01-01T00:00:00";
+  endDate: string = "2025-05-05T00:00:00";
+  phi: number = 0;
+  theta: number = 0;
+  psi: number = 0;
 
   ggDiagram: GGDiagramDTO[]
 
   constructor(
     private accelerationService: AccelerationService
-  ) {
-  }
+  ) {}
 
   displayGgDiagram() {
-    this.accelerationService.computeGGDiagram(this.deviceId,this.beginDate,this.endDate).subscribe({
+    this.accelerationService.computeGGDiagram(this.deviceId,this.beginDate,this.endDate,this.phi,this.theta,this.psi).subscribe({
       next: (ggDiagram) => {
-        console.log(ggDiagram);
         this.ggDiagram = ggDiagram
       },
       error: (err) => {

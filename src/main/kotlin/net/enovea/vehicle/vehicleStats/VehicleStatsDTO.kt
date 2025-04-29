@@ -40,17 +40,17 @@ data class VehicleStatsQseDTO(
     var driverName: String? = null,
     val idleDuration: String?,
 
-    var highwayAccel: Int? = 18,
-    var roadAccel: Int? = 15,
-    var cityAccel: Int? = 19,
+    var highwayAccelScore: Int? = null,
+    var roadAccelScore: Int? = null,
+    var cityAccelScore: Int? = null,
 
-    var highwayTurn: Int? = 15,
-    var roadTurn: Int? = 20,
-    var cityTurn: Int? = 17,
+    var highwayTurnScore: Int? = null,
+    var roadTurnScore: Int? = null,
+    var cityTurnScore: Int? = null,
 
-    var highwaySpeed: Int? = 90,
-    var roadSpeed: Int? = 70,
-    var citySpeed: Int? = 50
+    var highwaySpeedScore: Int? = null,
+    var roadSpeedScore: Int? = null,
+    var citySpeedScore: Int? = null
 )
 data class VehiclesStatsQseDTO(
     val vehicleStatsQse: VehicleStatsQseDTO,

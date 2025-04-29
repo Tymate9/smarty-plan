@@ -2,6 +2,7 @@
 -- ==            Device Accel Angles table
 -- ===================================================
 
+DROP TABLE IF EXISTS device_accel_angles;
 DROP TYPE IF EXISTS DeviceAccelAnglesStatus;
 CREATE TYPE DeviceAccelAnglesStatus AS ENUM (
         'NOT_COMPUTED',
@@ -24,3 +25,6 @@ CREATE TABLE IF NOT EXISTS device_accel_angles
   PRIMARY KEY (device_id, begin_date),
   FOREIGN KEY (device_id) REFERENCES device(id)
 );
+
+INSERT INTO device_accel_angles (device_id, begin_date)
+SELECT device_id, start_date FROM device_vehicle_install

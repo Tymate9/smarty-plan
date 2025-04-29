@@ -211,7 +211,16 @@ open class VehicleService(
                 drivingTime = stats.drivingTime,
                 rangeAvg = stats.rangeAvg,
                 idleDuration = stats.idleDuration,
-                distanceMax = stats.distanceMax
+                distanceMax = stats.distanceMax,
+                highwayAccelScore = stats.highwayAccelScore,
+                roadAccelScore = stats.roadAccelScore,
+                cityAccelScore = stats.cityAccelScore,
+                highwayTurnScore = stats.highwayTurnScore,
+                roadTurnScore = stats.roadTurnScore,
+                cityTurnScore = stats.cityTurnScore,
+                highwaySpeedScore = stats.highwaySpeedScore,
+                roadSpeedScore = stats.roadSpeedScore,
+                citySpeedScore = stats.citySpeedScore,
                 )
             VehiclesStatsQseDTO(
                 vehicleStatsQse = vehicleStatsQseDTO,
@@ -690,10 +699,10 @@ fun <T> buildTeamHierarchyForest(vehicles: List<T>, extractTeamHierarchy: (T) ->
 
 private fun getDorisView(vehiclesType: String): String {
     return when (vehiclesType) {
-        "tracked" -> "trips_tracked_view"
-        "untracked" -> "trips_untracked_view"
-        "allVehicles" -> "trips_vehicle_team_view"
-        else -> "trips_tracked_view"
+        "tracked" -> "trips_tracked_view_with_angles"
+        "untracked" -> "trips_untracked_view_with_angles"
+        "allVehicles" -> "trips_vehicle_team_view_with_angles"
+        else -> "trips_tracked_view_with_angles"
     }
 }
 

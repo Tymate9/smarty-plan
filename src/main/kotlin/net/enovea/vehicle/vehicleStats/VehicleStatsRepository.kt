@@ -169,6 +169,37 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         driversIds: List<String>? = null,
         dorisView: String
     ): List<VehicleStatsQseDTO> {
+        val clauses =
+            if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
+                "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
+                        " AND (license_plate IN (<vehicleIds>) OR driver_name IN (<driversIds>))"
+            } else {
+                var conditions = mutableListOf<String>()
+                if (!teamLabels.isNullOrEmpty()) {
+                    conditions.add("AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))")
+                }
+                if (!vehicleIds.isNullOrEmpty()) {
+                    conditions.add("AND license_plate IN (<vehicleIds>)")
+                }
+                if (!driversIds.isNullOrEmpty()) {
+                    val hasUnassignedSentinel = driversIds.contains("Véhicule non attribué")
+                    val realDriverNames = driversIds.filter { it != "Véhicule non attribué" }
+                    when {
+                        hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
+                            conditions.add("AND (driver_name IN (<driversIds>) OR driver_name IS NULL)")
+                        }
+
+                        hasUnassignedSentinel -> {
+                            conditions.add("AND driver_name IS NULL")
+                        }
+
+                        else -> {
+                            conditions.add("AND driver_name IN (<driversIds>)")
+                        }
+                    }
+                }
+                conditions.joinToString(" ")
+            }
         return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseDTO>, Exception> { handle ->
             handle.createQuery(
                 """
@@ -195,9 +226,15 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             ':',
                             LPAD(CAST(FLOOR((SUM(daily_idle_duration) % 3600) / 60) AS STRING), 2, '0')
                         ) AS idle_duration,
-                          round(avg(avgHighwaySpeedScore)) as highway_speed,
-                          round(avg(avgRoadSpeedScore)) as road_speed,
-                          round(avg(avgCitySpeedScore)) as city_speed
+                        round(20 - scores.city_x_stddev * 10) as city_accel_score,
+                        round(20 - scores.city_y_stddev * 10) as city_turn_score,
+                        round(20 - scores.road_x_stddev * 10) as road_accel_score,
+                        round(20 - scores.road_y_stddev * 10) as road_turn_score,
+                        round(20 - scores.highway_x_stddev * 10) as highway_accel_score,
+                        round(20 - scores.highway_y_stddev * 10) as highway_turn_score,
+                        round(scores.city_speed_ratio * 100) as city_speed_score,
+                        round(scores.road_speed_ratio * 100) as road_speed_score,
+                        round(scores.highway_speed_ratio * 100) as highway_speed_score
                     FROM (
                         SELECT
                             vehicle_id,
@@ -208,52 +245,60 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             SUM(distance) AS distance_sum,
                             SUM(duration) AS duration_sum,
                             time_to_sec(timediff(max(end_time), min(start_time))) AS `range`,
-                            SUM(idle_duration) As daily_idle_duration,
-                            avg(if(speed_limit > 10000, speed / speed_limit * 100, null)) as avgHighwaySpeedScore,
-                            avg(if(speed_limit > 5000 and speed_limit <= 10000, speed / speed_limit * 100, null)) as avgRoadSpeedScore,
-                            avg(if(speed_limit <= 5000, speed / speed_limit * 100, null)) as avgCitySpeedScore
+                            SUM(idle_duration) As daily_idle_duration
                             
                         FROM <dorisView> t
-                        LEFT JOIN map_datapoints mdp ON mdp.trip_id = t.trip_id and mdp.device_id = t.device_id
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
-
-                           ${
-                    if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
-                        "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
-                                " AND (license_plate IN (<vehicleIds>) OR driver_name IN (<driversIds>))"
-                    } else {
-                        var conditions = mutableListOf<String>()
-                        if (!teamLabels.isNullOrEmpty()) {
-                            conditions.add("AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))")
-                        }
-                        if (!vehicleIds.isNullOrEmpty()) {
-                            conditions.add("AND license_plate IN (<vehicleIds>)")
-                        }
-                        if (!driversIds.isNullOrEmpty()) {
-                            val hasUnassignedSentinel = driversIds.contains("Véhicule non attribué")
-                            val realDriverNames = driversIds.filter { it != "Véhicule non attribué" }
-                            when {
-                                hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
-                                    conditions.add("AND (driver_name IN (<driversIds>) OR driver_name IS NULL)")
-                                }
-
-                                hasUnassignedSentinel -> {
-                                    conditions.add("AND driver_name IS NULL")
-                                }
-
-                                else -> {
-                                    conditions.add("AND driver_name IN (<driversIds>)")
-                                }
-                            }
-                        }
-                        conditions.joinToString(" ")
-                    }
-                }
+                          ${clauses}
                         GROUP BY vehicle_id, date(start_time), driver_name , license_plate
                          ) daily
-                    GROUP BY vehicle_id , license_plate ;
+                         JOIN (select dp.device_id,
+                                      stddev((speed_limit > 10000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                  (speed_limit > 10000) * array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                  (speed_limit > 10000) * array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                                          as highway_x_stddev,
+                                      stddev((speed_limit > 10000) * array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  (speed_limit > 10000) * array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  (speed_limit > 10000) * array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                                          as highway_y_stddev,
+                                      stddev((speed_limit > 5000 and speed_limit <= 10000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 /
+                                           1000                                                          as road_x_stddev,
+                                      stddev((speed_limit > 5000 and speed_limit <= 10000) * array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 /
+                                           1000                                                          as road_y_stddev,
+                                      stddev((speed_limit <= 5000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                  (speed_limit <= 5000) * array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                  (speed_limit <= 5000) * array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                                          as city_x_stddev,
+                                      stddev((speed_limit <= 5000) * array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  (speed_limit <= 5000) * array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  (speed_limit <= 5000) * array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                                          as city_y_stddev,
+                                      avg(if(speed_limit > 10000, mdp.speed / speed_limit, null)) as highway_speed_ratio,
+                                      avg(if(speed_limit > 5000 and speed_limit <= 10000, mdp.speed / speed_limit,
+                                             null))                                               as road_speed_ratio,
+                                      avg(if(speed_limit <= 5000, mdp.speed / speed_limit, null)) as city_speed_ratio
+                               FROM datapoints dp
+                                      JOIN <dorisView> t
+                                           ON t.trip_id = dp.trip_id and t.device_id = dp.device_id
+                                      LEFT JOIN map_datapoints mdp
+                                                ON mdp.trip_id = dp.trip_id and mdp.device_id = dp.device_id and mdp.timestamp = dp.timestamp
+                               where date(dp.timestamp) between :startDate
+                                 AND :endDate
+                                 AND speed_limit is not null
+                                 AND mdp.speed
+                                 > 0
+                                 AND mdp.speed
+                                 < 14000
+                                 AND accx is not null
+                                 AND accy is not null
+                                 AND accz is not null
+                                 ${clauses}
+                               GROUP BY dp.device_id) scores ON scores.device_id = daily_trip_data.device_id
+                    GROUP BY vehicle_id, scores.device_id, license_plate, city_x_stddev, city_y_stddev,
+                     city_speed_ratio, road_x_stddev, road_y_stddev, road_speed_ratio,
+                     highway_x_stddev, highway_y_stddev, highway_speed_ratio ;
                 """.trimIndent()
             )
                 .bind("startDate", startDate)

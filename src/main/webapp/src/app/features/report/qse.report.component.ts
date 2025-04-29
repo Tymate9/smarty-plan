@@ -101,15 +101,15 @@ import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
           <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.highwayAccel }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.roadAccel }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.cityAccel }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.highwayTurn }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.roadTurn }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.cityTurn }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.highwaySpeed }}%</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.roadSpeed }}%</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.citySpeed }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.highwayAccelScore }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.roadAccelScore }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.cityAccelScore }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.highwayTurnScore }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.roadTurnScore }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.cityTurnScore }}/20</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.highwaySpeedScore }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.roadSpeedScore }}%</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.citySpeedScore }}%</td>
 
         </tr>
 

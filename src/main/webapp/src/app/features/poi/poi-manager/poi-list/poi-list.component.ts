@@ -14,7 +14,6 @@ import {InputNumber} from "primeng/inputnumber";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {ButtonDirective} from "primeng/button";
 import {InputText} from "primeng/inputtext";
-import {GeoJSON} from "leaflet";
 import {ConfirmationService} from "primeng/api";
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
@@ -491,15 +490,15 @@ export class PoiListComponent implements OnInit {
           poi.address = result.adresse;
           poi.coordinate.coordinates = [longitude, latitude];
 
-          if (poiPanel.hasLocationChanged()) {
-            const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
-            if (confirmUpdate) {
-              const circle = L.circle([latitude, longitude], {radius: 20});
-              const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
-              const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-              poi.area = geoJsonPolygon;
-            }
-          }
+          // if (poiPanel.hasLocationChanged()) {
+          //   const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
+          //   if (confirmUpdate) {
+          //     const circle = L.circle([latitude, longitude], {radius: 20});
+          //     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+          //     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+          //     poi.area = geoJsonPolygon;
+          //   }
+          // }
 
           this.createPoi(poiPanel, poi, longitude, latitude);
         },
@@ -516,30 +515,30 @@ export class PoiListComponent implements OnInit {
           (result) => {
             poi.address = result.adresse;
 
-            if (poiPanel.hasLocationChanged()) {
-              const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
-              if (confirmUpdate) {
-                const circle = L.circle([lat, lng], {radius: 20});
-                const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
-                const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-                poi.area = geoJsonPolygon;
-              }
-            }
+            // if (poiPanel.hasLocationChanged()) {
+            //   const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
+            //   if (confirmUpdate) {
+            //     const circle = L.circle([lat, lng], {radius: 20});
+            //     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+            //     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+            //     poi.area = geoJsonPolygon;
+            //   }
+            // }
 
             this.createPoi(poiPanel, poi, lng, lat);
           },
           (error) => {
             console.error('Erreur lors du reverse geocoding :', error);
             poi.address = `Coordonnées ${lat}, ${lng}`;
-            if (poiPanel.hasLocationChanged()) {
-              const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
-              if (confirmUpdate) {
-                const circle = L.circle([lat, lng], {radius: 20});
-                const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
-                const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-                poi.area = geoJsonPolygon;
-              }
-            }
+            // if (poiPanel.hasLocationChanged()) {
+            //   const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
+            //   if (confirmUpdate) {
+            //     const circle = L.circle([lat, lng], {radius: 20});
+            //     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+            //     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+            //     poi.area = geoJsonPolygon;
+            //   }
+            // }
             this.createPoi(poiPanel, poi, lng, lat);
             alert('Erreur lors du reverse geocoding. Le POI sera créé sans adresse exacte.');
           }
@@ -562,15 +561,15 @@ export class PoiListComponent implements OnInit {
           poi.address = result.adresse;
           poi.coordinate.coordinates = [longitude, latitude];
 
-          if (poiPanel.hasLocationChanged()) {
-            const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
-            if (confirmUpdate) {
-              const circle = L.circle([latitude, longitude], {radius: 20});
-              const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
-              const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-              poi.area = geoJsonPolygon;
-            }
-          }
+          // if (poiPanel.hasLocationChanged()) {
+          //   const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
+          //   if (confirmUpdate) {
+          //     const circle = L.circle([latitude, longitude], {radius: 20});
+          //     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+          //     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+          //     poi.area = geoJsonPolygon;
+          //   }
+          // }
 
           this.updatePoi(poiPanel, poi, longitude, latitude);
         },
@@ -587,30 +586,30 @@ export class PoiListComponent implements OnInit {
           (result) => {
             poi.address = result.adresse;
 
-            if (poiPanel.hasLocationChanged()) {
-              const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
-              if (confirmUpdate) {
-                const circle = L.circle([lat, lng], {radius: 20});
-                const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
-                const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-                poi.area = geoJsonPolygon;
-              }
-            }
+            // if (poiPanel.hasLocationChanged()) {
+            //   const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
+            //   if (confirmUpdate) {
+            //     const circle = L.circle([lat, lng], {radius: 20});
+            //     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+            //     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+            //     poi.area = geoJsonPolygon;
+            //   }
+            // }
 
             this.updatePoi(poiPanel, poi, lng, lat);
           },
           (error) => {
             console.error('Erreur lors du reverse geocoding :', error);
             poi.address = `Coordonnées ${lat}, ${lng}`;
-            if (poiPanel.hasLocationChanged()) {
-              const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
-              if (confirmUpdate) {
-                const circle = L.circle([lat, lng], {radius: 20});
-                const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
-                const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
-                poi.area = geoJsonPolygon;
-              }
-            }
+            // if (poiPanel.hasLocationChanged()) {
+            //   const confirmUpdate = confirm("La localisation (adresse/coordonnées) a changé. Voulez-vous repositionner le polygone automatiquement ?");
+            //   if (confirmUpdate) {
+            //     const circle = L.circle([lat, lng], {radius: 20});
+            //     const polygon = GeoUtils.convertCircleToPolygon(circle, 32);
+            //     const geoJsonPolygon = polygon.toGeoJSON().geometry as GeoJSON.Polygon;
+            //     poi.area = geoJsonPolygon;
+            //   }
+            // }
             this.updatePoi(poiPanel, poi, lng, lat);
             alert('Erreur lors du reverse geocoding. Le POI sera mis à jour sans adresse exacte.');
           }

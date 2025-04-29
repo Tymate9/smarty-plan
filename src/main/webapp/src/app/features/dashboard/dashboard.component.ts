@@ -178,7 +178,7 @@ interface StatusCount {
             *ngIf="rowData.vehicle">
           <!-- 1. Conducteur -->
           <td *ngIf="rowData.vehicle.driver; else noDriver">
-            {{ rowData.vehicle.driver.firstName }} {{ rowData.vehicle.driver.lastName || 'Véhicule non attribué' }}
+            {{ rowData.vehicle.driver.lastName }} {{ rowData.vehicle.driver.firstName || 'Véhicule non attribué'}}
           </td>
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
@@ -334,7 +334,7 @@ interface StatusCount {
                   <span
                     [title]="rowData.vehicle.lastPositionDate
                             ? ('Position calculée à ' + (rowData.vehicle.lastPositionDate | date:'dd/MM/yyyy HH:mm:ss':'Europe/Paris'))
-                            : 'Erreur lors de la récupération de l\\'heure de la position'"
+                            : 'Erreur lors de la récupération de l heure de la position'"
                   >
                     {{ rowData.vehicle.lastPositionAddress ?? 'Adresse inconnue' }}
                   </span>

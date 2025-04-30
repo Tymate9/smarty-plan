@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {dto} from "../../../habarta/dto";
 import GGDiagramDTO = dto.GGDiagramDTO;
+import VehicleAccelPeriodsDTO = dto.VehicleAccelPeriodsDTO;
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +15,18 @@ export class AccelerationService {
   constructor(private http: HttpClient) {}
 
   computeGGDiagram(id: number,
-                   beginDate: string,
-                   endDate: string,
+                   beginDate: Date,
                    phi: number,
                    theta: number,
                    psi: number
                    ): Observable<GGDiagramDTO[]> {
-    let httpParams = {'beginDate': beginDate, 'endDate': endDate, 'phi': phi, 'theta': theta, 'psi': psi}
-    return this.http.get<GGDiagramDTO[]>(`${this.baseUrl}/${id}/gg-diagram`, { params: httpParams });
+    let httpParams = {'phi': phi, 'theta': theta, 'psi': psi}
+    return this.http.get<GGDiagramDTO[]>(`${this.baseUrl}/${id}/${new Date(beginDate).toISOString()}/gg-diagram`, { params: httpParams });
   }
+
+  listCalibrationPeriods(): Observable<VehicleAccelPeriodsDTO[]>{
+    return this.http.get<VehicleAccelPeriodsDTO[]>(this.baseUrl);
+  }
+
+
 }

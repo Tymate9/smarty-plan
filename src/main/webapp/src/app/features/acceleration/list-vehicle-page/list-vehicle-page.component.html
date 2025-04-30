@@ -1,0 +1,56 @@
+<div id="accel-table-container">
+  <p-table
+    [value]="vehicleAccelPeriods"
+    [paginator]="true"
+    [rows]="10"
+  >
+    <ng-template #header>
+      <tr>
+        <th>
+          Id Vehicle
+        </th>
+        <th pSortableColumn="vehicle.licenseplate">
+          License Plate <p-sortIcon field="vehicle.licenseplate"/>
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-entity>
+      <tr (click)="selectVehicle(entity)" class="tr-vehicle">
+        <td>{{ entity.vehicle.id }}</td>
+        <td>{{ entity.vehicle.licenseplate }}</td>
+      </tr>
+      <tr *ngIf="vehicleSelected.includes(entity)" class="tr-periods">
+        <td colspan="2">
+          <p-table [value]="entity.periods">
+            <ng-template #header>
+              <tr>
+                <th>Device Id</th>
+                <th>Begin Date</th>
+                <th>&Phi;</th>
+                <th>&Theta;</th>
+                <th>&Psi;</th>
+                <th>Status</th>
+                <th>Computation Time</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-period>
+              <tr (click)="selectPeriod(period, entity.vehicle)" class="tr-period">
+                <td>{{ period.deviceId }}</td>
+                <td>{{ dateFormatter.formatDateHM(period.beginDate) }}</td>
+                <td>{{ period.phi }}</td>
+                <td>{{ period.theta }}</td>
+                <td>{{ period.psi }}</td>
+                <td>{{ period.status }}</td>
+                <td>{{ dateFormatter.formatDateHM(period.computationTime) }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<div id="accel-gg-diagram-calibration">
+  <gg-diagram-calibration [vehicle]="vehicleToDisplay" [period]="periodToDisplay"/>
+</div>

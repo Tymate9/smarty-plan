@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GgDiagramPageComponent } from './gg-diagram-page.component';
+import { GgDiagramCalibrationComponent } from './gg-diagram-calibration.component';
 
 describe('GgDiagramPageComponent', () => {
-  let component: GgDiagramPageComponent;
-  let fixture: ComponentFixture<GgDiagramPageComponent>;
+  let component: GgDiagramCalibrationComponent;
+  let fixture: ComponentFixture<GgDiagramCalibrationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GgDiagramPageComponent]
+      imports: [GgDiagramCalibrationComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GgDiagramPageComponent);
+    fixture = TestBed.createComponent(GgDiagramCalibrationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

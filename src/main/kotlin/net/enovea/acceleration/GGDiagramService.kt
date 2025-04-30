@@ -1,8 +1,11 @@
 package net.enovea.acceleration
 
+import io.quarkus.panache.common.Sort
+import jakarta.ws.rs.NotFoundException
 import net.enovea.DorisJdbiContext
 import org.apache.commons.math3.linear.MatrixUtils.createRealMatrix
 import org.apache.commons.math3.linear.RealMatrix
+import java.sql.Timestamp
 import java.time.LocalDateTime
 import kotlin.math.cos
 import kotlin.math.sin
@@ -79,15 +82,19 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         }
     }
 
-    fun computeGGDiagram(deviceId: Int,
-                         beginDate: String,
-                         endDate: String,
-                         phi: Int,
-                         theta: Int,
-                         psi: Int
-    ): List<GGDiagramDTO> =
-        computeGGDiagram(deviceId, LocalDateTime.parse(beginDate), LocalDateTime.parse(endDate), phi, theta, psi)
+    fun getPeriodBeginAndEnd(deviceId: Int, beginDate: LocalDateTime): Pair<LocalDateTime, LocalDateTime> {
+        val deviceAccelAnglesList: List<DeviceAccelAnglesEntity> =
+            DeviceAccelAnglesEntity.list("id.deviceId", sort = Sort.by("id.beginDate"), deviceId)
 
+        val found = deviceAccelAnglesList.withIndex()
+            .firstOrNull { (i, it) -> it.id.beginDate == Timestamp.valueOf(beginDate) }
+            ?: throw NotFoundException()
+
+        val endDate = if (found.index < deviceAccelAnglesList.size - 1) {
+            deviceAccelAnglesList[found.index + 1].id.beginDate.toLocalDateTime()
+        } else LocalDateTime.now()
+        return beginDate to endDate
+    }
 
     fun accelValueToBucket(column: String): String {
         return "CAST(ROUND($column/$granularity) AS INT)"

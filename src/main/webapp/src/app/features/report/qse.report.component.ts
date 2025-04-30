@@ -1,6 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {TeamHierarchyNodeStats, TeamHierarchyNodeStatsQSE, VehicleService} from "../vehicle/vehicle.service";
+import {
+  qseIndicatorAlertMap, qseIndicatorWarningMap,
+  QseAlertCount,
+  QseIndicatorCheckers,
+  TeamHierarchyNodeStats,
+  TeamHierarchyNodeStatsQSE,
+  VehicleService
+} from "../vehicle/vehicle.service";
 import {Subscription} from "rxjs";
 import {dto} from "../../../habarta/dto";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
@@ -8,23 +15,24 @@ import {TreeNode} from "primeng/api";
 import {DateRangePickerComponent} from "../dateRange/dateRange.component";
 import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
 import {TreeTableModule} from "primeng/treetable";
-import {NgClass, NgIf} from "@angular/common";
+import {KeyValuePipe, NgClass, NgIf} from "@angular/common";
 import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
 import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
 import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
 import {StatsCount} from "./report.component";
+import {Divider} from "primeng/divider";
 
 
 const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> = {
-  totalDrivingTime:{displayName:"TEMPS DE CONDUITE TOTAL",color:"#fee2e2"},
-  totalWaitingTime:{displayName:"TEMPS D'ARRET TOTAL (en hh:mm)",color:"#fee2e2"},
-  totalDistanceSum:{displayName:"DISTANCE PARCOURUE (en km)",color:"#fee2e2"},
-  selectionScore:{displayName:"SCORE DE LA SELECTION",color:"#fee2e2"},
-  severityOfUseTurn:{displayName:"SEVERITE D'USAGE VIRAGE",color:"#fee2e2"},
-  severityOfAcceleration:{displayName:"SEVERITE D'USAGE ACCELERATION-FREINAGE",color:"#fee2e2"},
-  averageRangeAvg:{displayName:"AMPLITUDE MOYENNE",color:"#fee2e2"},
-  idleDurationTotal:{displayName:"TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)",color:"#fee2e2"},
-  longestTrip:{displayName:"LE TRAJET LE PLUS LONG",color:"#d1d5db"}
+  totalDrivingTime: {displayName: "TEMPS DE CONDUITE TOTAL", color: "#fee2e2"},
+  totalWaitingTime: {displayName: "TEMPS D'ARRET TOTAL (en hh:mm)", color: "#fee2e2"},
+  totalDistanceSum: {displayName: "DISTANCE PARCOURUE (en km)", color: "#fee2e2"},
+  selectionScore: {displayName: "SCORE DE LA SELECTION", color: "#fee2e2"},
+  severityOfUseTurn: {displayName: "SEVERITE D'USAGE VIRAGE", color: "#fee2e2"},
+  severityOfAcceleration: {displayName: "SEVERITE D'USAGE ACCELERATION-FREINAGE", color: "#fee2e2"},
+  averageRangeAvg: {displayName: "AMPLITUDE MOYENNE", color: "#fee2e2"},
+  idleDurationTotal: {displayName: "TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)", color: "#fee2e2"},
+  longestTrip: {displayName: "LE TRAJET LE PLUS LONG", color: "#d1d5db"}
 };
 
 
@@ -32,48 +40,65 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
   selector: 'app-qse-report',
   template: `
     <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
-<!--    <app-indicator-buttons-->
-<!--      [statsMap]="vehiclesStatsTotal"-->
-<!--      [keyLabels]="keyLabels"-->
-<!--      [buttonColor]="'var(&#45;&#45;p-red-100)'"-->
-<!--      [sliceRange]="[0, 4]"-->
-<!--      [keyToPropertyMap]="keyToPropertyMap"-->
-<!--      (filterClicked)="filterByKey($event)">-->
-<!--    </app-indicator-buttons>-->
+    <!--    <app-indicator-buttons-->
+    <!--      [statsMap]="vehiclesStatsTotal"-->
+    <!--      [keyLabels]="keyLabels"-->
+    <!--      [buttonColor]="'var(&#45;&#45;p-red-100)'"-->
+    <!--      [sliceRange]="[0, 4]"-->
+    <!--      [keyToPropertyMap]="keyToPropertyMap"-->
+    <!--      (filterClicked)="filterByKey($event)">-->
+    <!--    </app-indicator-buttons>-->
 
-<!--    <app-indicator-buttons-->
-<!--      [statsMap]="vehiclesStatsTotal"-->
-<!--      [keyLabels]="keyLabels"-->
-<!--      [buttonColor]="'var(&#45;&#45;p-gray-300)'"-->
-<!--      [sliceRange]="[4, 9]"-->
-<!--      [keyToPropertyMap]="keyToPropertyMap"-->
-<!--      (filterClicked)="filterByKey($event)">-->
-<!--    </app-indicator-buttons>-->
+    <!--    <app-indicator-buttons-->
+    <!--      [statsMap]="vehiclesStatsTotal"-->
+    <!--      [keyLabels]="keyLabels"-->
+    <!--      [buttonColor]="'var(&#45;&#45;p-gray-300)'"-->
+    <!--      [sliceRange]="[4, 9]"-->
+    <!--      [keyToPropertyMap]="keyToPropertyMap"-->
+    <!--      (filterClicked)="filterByKey($event)">-->
+    <!--    </app-indicator-buttons>-->
+    <div class="indicators">
+      <app-toggle-buttons-group
+        [items]="statsCounts.slice(0,4)"
+        [selectedItem]="selectedStats"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterByKey($event)"
+        buttonWidth="18vw"
+        [clickable]="false"
+        fontSize="0.7rem"
+        textColor="black">
+      </app-toggle-buttons-group>
+      <app-toggle-buttons-group
+        [items]="statsCounts.slice(4,9)"
+        [selectedItem]="selectedStats"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterByKey($event)"
+        buttonWidth="18vw"
+        [clickable]="true"
+        fontSize="0.7rem"
+        textColor="black">
+      </app-toggle-buttons-group>
 
-    <app-toggle-buttons-group
-      [items]="statsCounts.slice(0,4)"
-      [selectedItem]="selectedStats"
-      [identifierFn]="identifierFn"
-      [displayFn]="displayFn"
-      [colorFn]="colorFn"
-      (selectionChange)="filterByKey($event)"
-      buttonWidth="18.5vw"
-      [clickable]="false"
-      fontSize="0.7rem"
-      textColor="black">
-    </app-toggle-buttons-group>
-    <app-toggle-buttons-group
-      [items]="statsCounts.slice(4,9)"
-      [selectedItem]="selectedStats"
-      [identifierFn]="identifierFn"
-      [displayFn]="displayFn"
-      [colorFn]="colorFn"
-      (selectionChange)="filterByKey($event)"
-      buttonWidth="18.5vw"
+      <p-divider/>
+
+      <h2>Alertes</h2>
+      <app-toggle-buttons-group
+      [items]="alerts"
+      [selectedItem]="selectedAlert"
+      [identifierFn]="alertIdentifierFn"
+      [displayFn]="alertDisplayFn"
+      [colorFn]="alertColorFn"
+      (selectionChange)="filterByAlert($event)"
+      buttonWidth="18vw"
       [clickable]="true"
       fontSize="0.7rem"
       textColor="black">
     </app-toggle-buttons-group>
+    </div>
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
@@ -142,15 +167,42 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
           <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.highwayAccelScore }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.roadAccelScore }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.cityAccelScore }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.highwayTurnScore }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.roadTurnScore }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.cityTurnScore }}/20</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.highwaySpeedScore }}%</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.roadSpeedScore }}%</td>
-          <td>{{ rowData.vehicle.vehicleStatsQse.citySpeedScore }}%</td>
+          <td
+            [style]="getIndicatorStyle('highwayAccelScore', rowData.vehicle.vehicleStatsQse.highwayAccelScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.highwayAccelScore ?? 'N/A' }}/20
+          </td>
+          <td
+            [style]="getIndicatorStyle('roadAccelScore', rowData.vehicle.vehicleStatsQse.roadAccelScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.roadAccelScore ?? 'N/A' }}/20
+          </td>
+          <td
+            [style]="getIndicatorStyle('cityAccelScore', rowData.vehicle.vehicleStatsQse.cityAccelScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.cityAccelScore ?? 'N/A' }}/20
+          </td>
+          <td
+            [style]="getIndicatorStyle('highwayTurnScore', rowData.vehicle.vehicleStatsQse.highwayTurnScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.highwayTurnScore ?? 'N/A' }}/20
+          </td>
+          <td
+            [style]="getIndicatorStyle('roadTurnScore', rowData.vehicle.vehicleStatsQse.roadTurnScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.roadTurnScore ?? 'N/A' }}/20
+          </td>
+          <td
+            [style]="getIndicatorStyle('cityTurnScore', rowData.vehicle.vehicleStatsQse.cityTurnScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.cityTurnScore ?? 'N/A' }}/20
+          </td>
+          <td
+            [style]="getIndicatorStyle('highwaySpeedScore', rowData.vehicle.vehicleStatsQse.highwaySpeedScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.highwaySpeedScore ?? 'N/A' }}%
+          </td>
+          <td
+            [style]="getIndicatorStyle('roadSpeedScore', rowData.vehicle.vehicleStatsQse.roadSpeedScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.roadSpeedScore ?? 'N/A' }}%
+          </td>
+          <td
+            [style]="getIndicatorStyle('citySpeedScore', rowData.vehicle.vehicleStatsQse.citySpeedScore)"
+          >{{ rowData.vehicle.vehicleStatsQse.citySpeedScore ?? 'N/A' }}%
+          </td>
 
         </tr>
 
@@ -164,9 +216,15 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
     TreeTableModule,
     NgClass,
     NgIf,
-    ToggleButtonsGroupComponent
+    ToggleButtonsGroupComponent,
+    Divider
   ],
-  styles: [``]
+  styles: [`
+    .indicators {
+      width: 96vw;
+      margin: 0 auto;
+    }
+  `]
 })
 export class QseReportComponent implements OnInit {
 
@@ -181,18 +239,20 @@ export class QseReportComponent implements OnInit {
   };
   dateFrom: Date = new Date();
   dateTo: Date = new Date();
-  vehiclesType:string='';
+  vehiclesType: string = '';
   vehicleStatsQse: any [] = [];
   vehiclesStatsTree: TreeNode[] = [];
   vehiclesStatsTotal: Record<string, any>;
-  filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = [];
 
   statsCounts: StatsCount[] = [];
   selectedStats: StatsCount | null = null;
 
+  alerts: QseAlertCount[] = [];
+  selectedAlert: QseAlertCount | null = null;
+
   keyToPropertyMap: Record<string, keyof VehicleStatsQseDTO> = {
     // example# totalHasLastTripLong: "hasLastTripLong",
-    longestTrip : "distanceMax"
+    longestTrip: "distanceMax"
   };
 
   // keyLabels: Record<string, string> = {
@@ -208,8 +268,8 @@ export class QseReportComponent implements OnInit {
   // };
 
   identifierFn = (item: StatsCount) => item.state;
-  displayFn    = (item: StatsCount) => `${item.displayName}`;
-  colorFn      = (item: StatsCount) => item.color;
+  displayFn = (item: StatsCount) => `${item.displayName}`;
+  colorFn = (item: StatsCount) => item.color;
 
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
@@ -219,10 +279,10 @@ export class QseReportComponent implements OnInit {
     this.filtersSubscription?.unsubscribe()
   }
 
-  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date ;vehiclesType:string}) {
+  onFetchVehicleStats(event: { dateFrom: Date; dateTo: Date; vehiclesType: string }) {
     this.dateFrom = event.dateFrom;
     this.dateTo = event.dateTo;
-    this.vehiclesType=event.vehiclesType;
+    this.vehiclesType = event.vehiclesType;
     this.fetchVehicleStatsQse();
   }
 
@@ -244,8 +304,9 @@ export class QseReportComponent implements OnInit {
 
           this.vehicleStatsQse = teamHierarchyNodes;
           this.vehiclesStatsTotal = stats;
+          this.alerts = this.vehicleService.getQseAlerts(teamHierarchyNodes);
 
-          this.statsCounts=Object.entries(this.vehiclesStatsTotal)
+          this.statsCounts = Object.entries(this.vehiclesStatsTotal)
             .filter(([key]) => STATS_QSE_DETAILS[key]) // only include keys defined in STATS_DETAILS
             .map(([key, value]) => ({
               state: key,
@@ -293,7 +354,7 @@ export class QseReportComponent implements OnInit {
       }
 
       //Filter vehicles that match `longestTrip` value for `distanceMax`
-      this.filteredVehiclesStats = this.vehicleStatsQse.map((node: TeamHierarchyNodeStatsQSE) => ({
+      const filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = this.vehicleStatsQse.map((node: TeamHierarchyNodeStatsQSE) => ({
         ...node,
         vehicles: node.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
           const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
@@ -312,7 +373,7 @@ export class QseReportComponent implements OnInit {
 
       //Update the table or tree structure
       this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
-        this.filteredVehiclesStats,
+        filteredVehiclesStats,
         (vehicle: VehiclesStatsQseDTO) => ({
           driverName: vehicle.vehicleStatsQse.driverName || '',
           licensePlate: vehicle.vehicleStatsQse.licensePlate || 'unknown',
@@ -321,4 +382,42 @@ export class QseReportComponent implements OnInit {
     }
   }
 
+  filterByAlert(selected: QseAlertCount | null): void {
+    this.selectedAlert = selected;
+
+    this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
+      selected === null ?
+        this.vehicleStatsQse :
+        this.vehicleService.filterQseAlerts(
+          this.vehicleStatsQse,
+          selected.key
+        ),
+      (vehicle: VehiclesStatsQseDTO) => ({
+        driverName: vehicle.vehicleStatsQse.driverName || '',
+        licensePlate: vehicle.vehicleStatsQse.licensePlate || 'unknown',
+      })
+    );
+  }
+
+  getIndicatorStyle(
+    indicatorKey: keyof QseIndicatorCheckers,
+    indicatorValue: number | null
+  ): { [key: string]: string } {
+    if (indicatorValue === null) {
+      return {};
+    }
+
+    if (qseIndicatorAlertMap[indicatorKey](indicatorValue)) {
+      return {color: 'var(--p-red-500)'};
+    } else if (qseIndicatorWarningMap[indicatorKey](indicatorValue)) {
+      return {color: 'var(--p-orange-500)'};
+    } else {
+      return {};
+    }
+  }
+
+  alertIdentifierFn = (alert: QseAlertCount) => alert.key;
+  alertDisplayFn = (alert: QseAlertCount) => alert.displayName;
+  alertColorFn = (alert: QseAlertCount) => alert.color;
+  protected readonly indicatorAlertMap = qseIndicatorAlertMap;
 }

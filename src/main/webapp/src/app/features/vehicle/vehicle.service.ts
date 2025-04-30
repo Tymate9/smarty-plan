@@ -1,19 +1,20 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {map, Observable, of, Subject} from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
 import {MessageService, TreeNode} from "primeng/api";
 import {CrudEvent, IEntityService} from "../../commons/crud/interface/ientity-service";
-import { EntityDeleteButtonComponent } from "../../commons/crud/inputs/entity-delete-button.component";
+import {EntityDeleteButtonComponent} from "../../commons/crud/inputs/entity-delete-button.component";
 import {CompOpenerButtonComponent} from "../../commons/drawer/comp-opener-button.component";
-import GenericNodeDTO = dto.GenericNodeDTO;
 import {EntityColumn} from "../../commons/admin/entity-tree/entity-tree.component";
-import VehicleStatsDTO = dto.VehicleStatsDTO;
-import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import {VehicleFormComponent} from "./form/vehicle-form.component";
 import {DrawerOptions} from "../../commons/drawer/drawer.component";
+import GenericNodeDTO = dto.GenericNodeDTO;
+import VehicleStatsDTO = dto.VehicleStatsDTO;
+import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import TeamDTO = dto.TeamDTO;
+import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -200,6 +201,46 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       teamHierarchyNodes: TeamHierarchyNodeStatsQSE[];
       stats: Record<string, any>
     }>(`${this.baseUrl}/vehicleStats/report-qse`, {params});
+  }
+
+  filterQseAlerts(vehicleStatsQSE: TeamHierarchyNodeStatsQSE[], indicatorKey: keyof QseIndicatorCheckers) {
+    const filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = vehicleStatsQSE.map((node: TeamHierarchyNodeStatsQSE) => ({
+      ...node,
+      vehicles: node.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
+        const indicatorValue = vehicle.vehicleStatsQse?.[indicatorKey];
+        return indicatorValue !== null && qseIndicatorAlertMap[indicatorKey](indicatorValue);
+      }) || [],
+      children: node.children?.map((childNode: TeamHierarchyNodeStatsQSE) => ({
+        ...childNode,
+        vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
+          const indicatorValue = vehicle.vehicleStatsQse?.[indicatorKey];
+          return indicatorValue !== null && qseIndicatorAlertMap[indicatorKey](indicatorValue);
+        }) || [],
+      }))
+        .filter((childNode) => childNode.vehicles.length > 0) || [],
+    }))
+      .filter((node) => node.children.length > 0 || node.vehicles.length > 0);
+
+
+    return filteredVehiclesStats;
+  }
+
+  getQseAlerts(vehicleStatsQse: TeamHierarchyNodeStatsQSE[]): QseAlertCount[] {
+    return Object.keys(qseIndicatorAlertMap).map((key) => {
+      const alertKey = key as keyof QseIndicatorCheckers;
+      const filteredStats = this.filterQseAlerts(vehicleStatsQse, alertKey);
+      const count = filteredStats.reduce((acc, node) => {
+        const nodeCount = node.vehicles.length + (node.children ? node.children.reduce((childAcc, childNode) => childAcc + childNode.vehicles.length, 0) : 0);
+        return acc + nodeCount;
+      }, 0);
+
+      return {
+        key: alertKey,
+        count,
+        displayName: qseIndicatorNamingMap[alertKey],
+        color: count > 0 ? '#C71400' : '#21A179',
+      };
+    });
   }
 
 //TODO make it more general (>3 levels)
@@ -589,4 +630,59 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     // Chaque valeur est entourée de guillemets pour éviter les soucis avec les virgules présentes dans les données
     return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
   }
+}
+
+export interface QseIndicatorCheckers {
+  highwayAccelScore: (val: number) => boolean,
+  roadAccelScore: (val: number) => boolean,
+  cityAccelScore: (val: number) => boolean,
+  highwayTurnScore: (val: number) => boolean,
+  roadTurnScore: (val: number) => boolean,
+  cityTurnScore: (val: number) => boolean,
+  highwaySpeedScore: (val: number) => boolean,
+  roadSpeedScore: (val: number) => boolean,
+  citySpeedScore: (val: number) => boolean
+}
+
+export interface QseAlertCount {
+  key: keyof QseIndicatorCheckers;
+  count: number;
+  displayName: string;
+  color: string;
+}
+
+export const qseIndicatorNamingMap: { [key in keyof QseIndicatorCheckers]: string } = {
+  highwayAccelScore: 'Accélération sévère sur autoroute',
+  roadAccelScore: 'Accélération sévère sur route',
+  cityAccelScore: 'Accélération sévère en ville',
+  highwayTurnScore: 'Virage sévère sur autoroute',
+  roadTurnScore: 'Virage sévère sur route',
+  cityTurnScore: 'Virage sévère en ville',
+  highwaySpeedScore: 'Allure élevée sur autoroute',
+  roadSpeedScore: 'Allure élevée sur route',
+  citySpeedScore: 'Allure élevée en ville'
+}
+
+export const qseIndicatorWarningMap: QseIndicatorCheckers = {
+  highwayAccelScore: (val: number) => val <= 12,
+  roadAccelScore: (val: number) => val <= 12,
+  cityAccelScore: (val: number) => val <= 12,
+  highwayTurnScore: (val: number) => val <= 12,
+  roadTurnScore: (val: number) => val <= 12,
+  cityTurnScore: (val: number) => val <= 12,
+  highwaySpeedScore: (val: number) => val >= 85,
+  roadSpeedScore: (val: number) => val >= 80,
+  citySpeedScore: (val: number) => val >= 75,
+}
+
+export const qseIndicatorAlertMap: QseIndicatorCheckers = {
+  highwayAccelScore: (val: number) => val <= 10,
+  roadAccelScore: (val: number) => val <= 10,
+  cityAccelScore: (val: number) => val <= 10,
+  highwayTurnScore: (val: number) => val <= 10,
+  roadTurnScore: (val: number) => val <= 10,
+  cityTurnScore: (val: number) => val <= 10,
+  highwaySpeedScore: (val: number) => val >= 90,
+  roadSpeedScore: (val: number) => val >= 85,
+  citySpeedScore: (val: number) => val >= 80,
 }

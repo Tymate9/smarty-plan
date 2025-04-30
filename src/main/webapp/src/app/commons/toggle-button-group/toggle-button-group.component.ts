@@ -12,7 +12,7 @@ import {black} from "ansi-colors";
                   [ngStyle]="{
                 'background-color': '#ffffff',
                 '--button-color': colorFn ? colorFn(item) : '#007bff',
-                'width': buttonWidth,
+                'min-width': buttonWidth,
                 'height': buttonHeight,
                 'display': 'flex',
                 'flex-direction' : 'row'
@@ -57,9 +57,8 @@ import {black} from "ansi-colors";
       margin-top: 20px;
       justify-content: center;
       align-items: center;
-      //width: 100vw;
-      //flex-direction: row;
-      //flex-wrap: wrap;
+      flex-direction: row;
+      flex-wrap: wrap;
     }
 
     .toggle-buttons-group button {
@@ -125,7 +124,7 @@ import {black} from "ansi-colors";
     }
   `]
 })
-export class ToggleButtonsGroupComponent <T> {
+export class ToggleButtonsGroupComponent <T extends { count: number }> {
   /**
    * Liste des objets à afficher en tant que boutons.
    */

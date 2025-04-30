@@ -57,7 +57,7 @@ interface StatusCount {
         [colorFn]="primaryColorFn"
         [iconFn]="primaryIconFn"
         (selectionChange)="onPrimaryStatusChange($event)"
-        buttonWidth="18.5vw">
+        buttonWidth="18vw">
       </app-toggle-buttons-group>
 
       <!-- Statut unplugged -->

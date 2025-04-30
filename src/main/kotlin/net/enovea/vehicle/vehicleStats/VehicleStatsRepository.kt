@@ -237,6 +237,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         round(scores.highway_speed_ratio * 100) as highway_speed_score
                     FROM (
                         SELECT
+                            device_id,
                             vehicle_id,
                             driver_name,
                             license_plate,
@@ -252,8 +253,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
                           ${clauses}
-                        GROUP BY vehicle_id, date(start_time), driver_name , license_plate
-                         ) daily
+                        GROUP BY vehicle_id, device_id, date(start_time), driver_name , license_plate
+                         ) daily_trip_data
                          JOIN (select dp.device_id,
                                       stddev((speed_limit > 10000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
                                                   (speed_limit > 10000) * array_avg(accy) * coalesce(matrix_0_1, 0) +

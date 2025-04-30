@@ -108,36 +108,36 @@ import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
     }
   `]
 })
-export class ToggleButtonsGroupComponent {
+export class ToggleButtonsGroupComponent <T> {
   /**
    * Liste des objets à afficher en tant que boutons.
    */
-  @Input() items: any[] = [];
+  @Input() items: T[] = [];
 
   /**
    * Élément actuellement sélectionné.
    */
-  @Input() selectedItem: any | null = null;
+  @Input() selectedItem: T | null = null;
 
   /**
    * Fonction d'extraction d'un identifiant unique pour comparer les objets.
    */
-  @Input() identifierFn: (item: any) => any = (item: any) => item;
+  @Input() identifierFn: (item: T) => any = (item: T) => item;
 
   /**
    * Fonction pour obtenir le texte à afficher, via displayFn.
    */
-  @Input() displayFn: (item: any) => string = (item: any) => String(item);
+  @Input() displayFn: (item: T) => string = (item: T) => String(item);
 
   /**
    * Fonction optionnelle pour obtenir la classe d'icône.
    */
-  @Input() iconFn?: (item: any) => string;
+  @Input() iconFn?: (item: T) => string;
 
   /**
    * Fonction optionnelle pour obtenir la couleur (pour le bandeau et le texte).
    */
-  @Input() colorFn?: (item: any) => string;
+  @Input() colorFn?: (item: T) => string;
 
   /**
    * Largeur du bouton (input permettant d'ajuster la taille). Par défaut : 350px.

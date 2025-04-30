@@ -68,7 +68,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId
-                AND duration > 60
+                AND duration > 60 OR (distance / duration * 3.6 > 5 AND distance / duration * 3.6 < 180)
             """.trimIndent()
             )
                 .bind("vehicleId", vehicleId)
@@ -97,7 +97,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     idle_duration,      
                     idle_count,
                     trip_status,
-                    st_astext(st_geometryfromwkb(trace)) as trace 
+                    st_astext(st_geometryfromwkb(trace)) as trace
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId 
                 AND date_trunc(start_time, 'day') = :date

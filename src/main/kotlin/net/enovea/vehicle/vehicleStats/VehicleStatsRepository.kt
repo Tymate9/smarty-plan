@@ -226,12 +226,14 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             ':',
                             LPAD(CAST(FLOOR((SUM(daily_idle_duration) % 3600) / 60) AS STRING), 2, '0')
                         ) AS idle_duration,
-                        round(20 - scores.city_x_stddev * 10) as city_accel_score,
-                        round(20 - scores.city_y_stddev * 10) as city_turn_score,
-                        round(20 - scores.road_x_stddev * 10) as road_accel_score,
-                        round(20 - scores.road_y_stddev * 10) as road_turn_score,
-                        round(20 - scores.highway_x_stddev * 10) as highway_accel_score,
-                        round(20 - scores.highway_y_stddev * 10) as highway_turn_score,
+                        if(scores.x_stddev = 0, null, round(20 - scores.x_stddev * 10)) as accel_score,
+                        if(scores.y_stddev = 0, null, round(20 - scores.y_stddev * 10)) as turn_score,
+                        if(scores.city_x_stddev = 0, null, round(20 - scores.city_x_stddev * 10)) as city_accel_score,
+                        if(scores.city_y_stddev = 0, null, round(20 - scores.city_y_stddev * 10)) as city_turn_score,
+                        if(scores.road_x_stddev = 0, null, round(20 - scores.road_x_stddev * 10)) as road_accel_score,
+                        if(scores.road_y_stddev = 0, null, round(20 - scores.road_y_stddev * 10)) as road_turn_score,
+                        if(scores.highway_x_stddev = 0, null, round(20 - scores.highway_x_stddev * 10)) as highway_accel_score,
+                        if(scores.highway_y_stddev = 0, null, round(20 - scores.highway_y_stddev * 10)) as highway_turn_score,
                         round(scores.city_speed_ratio * 100) as city_speed_score,
                         round(scores.road_speed_ratio * 100) as road_speed_score,
                         round(scores.highway_speed_ratio * 100) as highway_speed_score
@@ -255,27 +257,33 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                           ${clauses}
                         GROUP BY vehicle_id, device_id, date(start_time), driver_name , license_plate
                          ) daily_trip_data
-                         JOIN (select dp.device_id,
-                                      stddev((speed_limit > 10000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                  (speed_limit > 10000) * array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                  (speed_limit > 10000) * array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                                          as highway_x_stddev,
-                                      stddev((speed_limit > 10000) * array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  (speed_limit > 10000) * array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  (speed_limit > 10000) * array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                                          as highway_y_stddev,
-                                      stddev((speed_limit > 5000 and speed_limit <= 10000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 /
+                         JOIN (select dp.device_id,stddev(array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                  array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                  array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                                          as x_stddev,
+                                      stddev(array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                                          as y_stddev,
+                                      stddev(if(speed_limit > 10000, 
+                                                array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                array_avg(accz) * coalesce(matrix_0_2, 0), null) * 9.806 / 1000                                                          as highway_x_stddev,
+                                      stddev(if(speed_limit > 10000, array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  array_avg(accz) * coalesce(matrix_1_2, 0), null) * 9.806 / 1000                                                          as highway_y_stddev,
+                                      stddev(if(speed_limit > 5000 and speed_limit <= 10000, array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                  array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                  array_avg(accz) * coalesce(matrix_0_2, 0), null) * 9.806 /
                                            1000                                                          as road_x_stddev,
-                                      stddev((speed_limit > 5000 and speed_limit <= 10000) * array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  (speed_limit > 5000 and speed_limit <= 10000) * array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 /
+                                      stddev(if(speed_limit > 5000 and speed_limit <= 10000, array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  array_avg(accz) * coalesce(matrix_1_2, 0), null) * 9.806 /
                                            1000                                                          as road_y_stddev,
-                                      stddev((speed_limit <= 5000) * array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                  (speed_limit <= 5000) * array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                  (speed_limit <= 5000) * array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                                          as city_x_stddev,
-                                      stddev((speed_limit <= 5000) * array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  (speed_limit <= 5000) * array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  (speed_limit <= 5000) * array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                                          as city_y_stddev,
+                                      stddev(if(speed_limit <= 5000, array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                  array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                  array_avg(accz) * coalesce(matrix_0_2, 0), null) * 9.806 / 1000                                                          as city_x_stddev,
+                                      stddev(if(speed_limit <= 5000, array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                  array_avg(accz) * coalesce(matrix_1_2, 0), null) * 9.806 / 1000                                                          as city_y_stddev,
                                       avg(if(speed_limit > 10000, mdp.speed / speed_limit, null)) as highway_speed_ratio,
                                       avg(if(speed_limit > 5000 and speed_limit <= 10000, mdp.speed / speed_limit,
                                              null))                                               as road_speed_ratio,

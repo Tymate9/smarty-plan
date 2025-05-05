@@ -40,9 +40,13 @@ data class VehicleStatsQseDTO(
     var driverName: String? = null,
     val idleDuration: String?,
 
+    var accelScore : Int? = null,
+
     var highwayAccelScore: Int? = null,
     var roadAccelScore: Int? = null,
     var cityAccelScore: Int? = null,
+
+    var turnScore : Int? = null,
 
     var highwayTurnScore: Int? = null,
     var roadTurnScore: Int? = null,

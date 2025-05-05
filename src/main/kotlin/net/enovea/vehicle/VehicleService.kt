@@ -21,6 +21,7 @@ import net.enovea.commons.ICRUDService
 import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.round
 
@@ -249,9 +250,13 @@ open class VehicleService(
             (vehiclesStats.sumOf { convertHHMMToSeconds(it.idleDuration) } / 3600),
             (vehiclesStats.sumOf { convertHHMMToSeconds(it.idleDuration) } % 3600) / 60)
         val longestTrip=vehiclesStats.maxOf { it.distanceMax ?:0 }
-        val selectionScore = "A"
-        val severityOfUseTurn = "B"
-        val severityOfAcceleration ="C"
+
+        // get accel stddev averages weighted by distance and compute selection scores with them
+        val avgTurnScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.turnScore?.times(it) } }.average() / totalDistance
+        val avgAccelScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.accelScore?.times(it) } }.average() / totalDistance
+        val selectionScore = getLetterScoring(min(avgTurnScore, avgAccelScore))
+        val severityOfUseTurn = getLetterScoring(avgTurnScore)
+        val severityOfAcceleration = getLetterScoring(avgAccelScore)
 
         return mapOf(
             "totalDistanceSum" to totalDistance,
@@ -263,8 +268,18 @@ open class VehicleService(
             "longestTrip" to longestTrip,
             "averageRangeAvg" to averageRangeAvg,
             "idleDurationTotal" to idleDurationTotal
-
         )
+    }
+
+    private fun getLetterScoring(score: Double): String {
+        return when {
+            score > 16 && score < 20 -> "A"
+            score > 14 -> "B"
+            score > 12 -> "C"
+            score > 10 -> "D"
+            score > 0 -> "E"
+            else -> "N/A"
+        }
     }
 
 

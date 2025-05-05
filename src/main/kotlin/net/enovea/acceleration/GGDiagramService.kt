@@ -27,8 +27,8 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
     }
 
     fun computeGGDiagram(deviceId: Int,
-                         beginDate: LocalDateTime,
-                         endDate: LocalDateTime,
+                         beginDate: Timestamp,
+                         endDate: Timestamp,
                          phi: Int,
                          theta: Int,
                          psi: Int
@@ -82,17 +82,17 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         }
     }
 
-    fun getPeriodBeginAndEnd(deviceId: Int, beginDate: LocalDateTime): Pair<LocalDateTime, LocalDateTime> {
+    fun getPeriodBeginAndEnd(deviceId: Int, beginDate: Timestamp): Pair<Timestamp, Timestamp> {
         val deviceAccelAnglesList: List<DeviceAccelAnglesEntity> =
             DeviceAccelAnglesEntity.list("id.deviceId", sort = Sort.by("id.beginDate"), deviceId)
 
         val found = deviceAccelAnglesList.withIndex()
-            .firstOrNull { (i, it) -> it.id.beginDate == Timestamp.valueOf(beginDate) }
+            .firstOrNull { (_, it) -> it.id.beginDate == beginDate }
             ?: throw NotFoundException()
 
         val endDate = if (found.index < deviceAccelAnglesList.size - 1) {
-            deviceAccelAnglesList[found.index + 1].id.beginDate.toLocalDateTime()
-        } else LocalDateTime.now()
+            deviceAccelAnglesList[found.index + 1].id.beginDate
+        } else Timestamp.valueOf(LocalDateTime.now())
         return beginDate to endDate
     }
 

@@ -21,7 +21,7 @@ export class AccelerationService {
                    psi: number
                    ): Observable<GGDiagramDTO[]> {
     let httpParams = {'phi': phi, 'theta': theta, 'psi': psi}
-    return this.http.get<GGDiagramDTO[]>(`${this.baseUrl}/${id}/${new Date(beginDate).toISOString()}/gg-diagram`, { params: httpParams });
+    return this.http.get<GGDiagramDTO[]>(`${this.baseUrl}/${id}/${beginDate}/gg-diagram`, { params: httpParams });
   }
 
   listCalibrationPeriods(): Observable<VehicleAccelPeriodsDTO[]>{

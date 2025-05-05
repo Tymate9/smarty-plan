@@ -16,6 +16,7 @@ release.properties
 .project
 .classpath
 .settings/
+.externalToolBuilders/
 bin/
 
 # IntelliJ

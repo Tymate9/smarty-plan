@@ -35,7 +35,6 @@ export class ListVehiclePageComponent implements OnInit{
   ngOnInit(): void {
     this.accelerationService.listCalibrationPeriods().subscribe({
       next: (vehicleAccelPeriods) => {
-        console.log(vehicleAccelPeriods)
         this.vehicleAccelPeriods = vehicleAccelPeriods
       },
       error: (err) => {

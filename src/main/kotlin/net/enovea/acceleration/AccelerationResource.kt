@@ -10,11 +10,11 @@ import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.Response.Status
+import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
-
 
 @Path("/api/acceleration")
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,8 +33,8 @@ class AccelerationResource(
                          @QueryParam("psi") psi: Int
     ): Response {
         try {
-            val beginDateUTC = LocalDateTime.ofInstant(Instant.parse(beginDate), ZoneOffset.UTC)
-            val (begin, end) = ggDiagramService.getPeriodBeginAndEnd(deviceId, beginDateUTC)
+            val beginTimestamp = Timestamp.from(Instant.parse(beginDate))
+            val (begin, end) = ggDiagramService.getPeriodBeginAndEnd(deviceId, beginTimestamp)
             val ggDiagram = ggDiagramService.computeGGDiagram(deviceId, begin, end, phi, theta, psi)
             return Response.ok(ggDiagram).build()
         } catch (e: DateTimeParseException) {

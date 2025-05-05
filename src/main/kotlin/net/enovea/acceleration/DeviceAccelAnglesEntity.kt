@@ -49,7 +49,7 @@ data class DeviceAccelAnglesId(
     val deviceId: Int=-1,
 
     @Column(name = "begin_date", nullable = false)
-    val beginDate: Timestamp =Timestamp(System.currentTimeMillis())
+    val beginDate: Timestamp = Timestamp(System.currentTimeMillis())
 ) : Serializable
 
 enum class DeviceAccelAnglesStatus{

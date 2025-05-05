@@ -3,7 +3,7 @@
   <br/>
   <span>Id du boîtier : {{period?.deviceId || "Choisissez une période"}}</span>
   <br/>
-  <span>Date de début : {{dateFormatter.formatDateHM(period?.beginDate) || "Choisissez une période"}}</span>
+  <span>Date de début : {{ dateFormatter.formatDateHM(period?.beginDate) || "Choisissez une période"}}</span>
   <br/>
   <label for="phi">&Phi; :</label>
   <input type="number" [(ngModel)]="phi" id="phi" name="phi"/>

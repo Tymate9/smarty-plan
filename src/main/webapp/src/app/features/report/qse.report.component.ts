@@ -1,39 +1,47 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
 import {
-  qseIndicatorAlertMap, qseIndicatorWarningMap,
-  QseAlertCount,
-  QseIndicatorCheckers,
-  TeamHierarchyNodeStats,
+  qseIndicatorAlertMap,
+  qseIndicatorWarningMap,
   TeamHierarchyNodeStatsQSE,
   VehicleService
 } from "../vehicle/vehicle.service";
 import {Subscription} from "rxjs";
 import {dto} from "../../../habarta/dto";
-import VehicleStatsDTO = dto.VehicleStatsDTO;
 import {TreeNode} from "primeng/api";
 import {DateRangePickerComponent} from "../dateRange/dateRange.component";
-import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
 import {TreeTableModule} from "primeng/treetable";
-import {KeyValuePipe, NgClass, NgIf} from "@angular/common";
+import {NgClass, NgIf} from "@angular/common";
+import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
+import {Stat} from "./report.component";
+import {Divider} from "primeng/divider";
 import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
 import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
-import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
-import {StatsCount} from "./report.component";
-import {Divider} from "primeng/divider";
 
 
-const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> = {
-  totalDrivingTime: {displayName: "TEMPS DE CONDUITE TOTAL", color: "#fee2e2"},
-  totalWaitingTime: {displayName: "TEMPS D'ARRET TOTAL (en hh:mm)", color: "#fee2e2"},
-  totalDistanceSum: {displayName: "DISTANCE PARCOURUE (en km)", color: "#fee2e2"},
-  selectionScore: {displayName: "SCORE DE LA SELECTION", color: "#fee2e2"},
-  severityOfUseTurn: {displayName: "SEVERITE D'USAGE VIRAGE", color: "#fee2e2"},
-  severityOfAcceleration: {displayName: "SEVERITE D'USAGE ACCELERATION-FREINAGE", color: "#fee2e2"},
-  averageRangeAvg: {displayName: "AMPLITUDE MOYENNE", color: "#fee2e2"},
-  idleDurationTotal: {displayName: "TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)", color: "#fee2e2"},
-  longestTrip: {displayName: "LE TRAJET LE PLUS LONG", color: "#d1d5db"}
+const QSE_STATS_DETAILS: Record<string, {displayName: string, color: string, selectable: boolean}> = {
+  totalDrivingTime: {displayName: "TEMPS DE CONDUITE TOTAL", color: "#fda9a9", selectable: false},
+  totalWaitingTime: {displayName: "TEMPS D'ARRET TOTAL", color: "#fda9a9", selectable: false},
+  totalDistanceSum: {displayName: "DISTANCE PARCOURUE", color: "#fda9a9", selectable: false},
+  selectionScore: {displayName: "SCORE DE LA SELECTION", color: "#fda9a9", selectable: false},
+  severityOfUseTurn: {displayName: "SEVERITE D'USAGE VIRAGE", color: "#fda9a9", selectable: false},
+  severityOfAcceleration: {displayName: "SEVERITE D'USAGE ACCELERATION-FREINAGE", color: "#fda9a9", selectable: false},
+  averageRangeAvg: {displayName: "AMPLITUDE MOYENNE", color: "#fda9a9", selectable: false},
+  idleDurationTotal: {displayName: "TEMPS DE MOTEUR TOURNANT ESTIME TOTAL", color: "#fda9a9", selectable: false},
+  longestTrip: {displayName: "LE TRAJET LE PLUS LONG", color: "#a0b2d9", selectable: true}
 };
+
+const QSE_ALERTS_NAMINGS = {
+  highwayAccelScore: 'ACCÉLÉRATION SÉVÈRE SUR AUTOROUTE',
+  roadAccelScore: 'ACCÉLÉRATION SÉVÈRE SUR ROUTE',
+  cityAccelScore: 'ACCÉLÉRATION SÉVÈRE EN VILLE',
+  highwayTurnScore: 'VIRAGE SÉVÈRE SUR AUTOROUTE',
+  roadTurnScore: 'VIRAGE SÉVÈRE SUR ROUTE',
+  cityTurnScore: 'VIRAGE SÉVÈRE EN VILLE',
+  highwaySpeedScore: 'ALLURE ÉLEVÉE SUR AUTOROUTE',
+  roadSpeedScore: 'ALLURE ÉLEVÉE SUR ROUTE',
+  citySpeedScore: 'ALLURE ÉLEVÉE EN VILLE'
+}
 
 
 @Component({
@@ -59,27 +67,25 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
     <!--    </app-indicator-buttons>-->
     <div class="indicators">
       <app-toggle-buttons-group
-        [items]="statsCounts.slice(0,4)"
-        [selectedItem]="selectedStats"
+        [items]="stats"
         [identifierFn]="identifierFn"
         [displayFn]="displayFn"
         [colorFn]="colorFn"
-        (selectionChange)="filterByKey($event)"
         buttonWidth="18vw"
         [clickable]="false"
-        fontSize="0.7rem"
+        fontSize="1rem"
         textColor="black">
       </app-toggle-buttons-group>
       <app-toggle-buttons-group
-        [items]="statsCounts.slice(4,9)"
-        [selectedItem]="selectedStats"
+        [items]="selectableStats"
+        [selectedItem]="selectedStat"
         [identifierFn]="identifierFn"
         [displayFn]="displayFn"
         [colorFn]="colorFn"
-        (selectionChange)="filterByKey($event)"
+        (selectionChange)="filterBySelectedStat($event)"
         buttonWidth="18vw"
         [clickable]="true"
-        fontSize="0.7rem"
+        fontSize="1rem"
         textColor="black">
       </app-toggle-buttons-group>
 
@@ -87,17 +93,17 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
 
       <h2>Alertes</h2>
       <app-toggle-buttons-group
-      [items]="alerts"
-      [selectedItem]="selectedAlert"
-      [identifierFn]="alertIdentifierFn"
-      [displayFn]="alertDisplayFn"
-      [colorFn]="alertColorFn"
-      (selectionChange)="filterByAlert($event)"
-      buttonWidth="18vw"
-      [clickable]="true"
-      fontSize="0.7rem"
-      textColor="black">
-    </app-toggle-buttons-group>
+        [items]="alerts"
+        [selectedItem]="selectedStat"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterBySelectedStat($event)"
+        buttonWidth="18vw"
+        [clickable]="true"
+        fontSize="1rem"
+        textColor="black">
+      </app-toggle-buttons-group>
     </div>
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
@@ -126,14 +132,14 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
           <td rowspan="2">Véhicule</td>
           <td rowspan="2">Conducteur</td>
           <td rowspan="2">Distance parcourue</td>
-          <td rowspan="2">Durée de conduite moyenne (en HH:MM)</td>
-          <td rowspan="2">Amplitude moyenne (en HH:MM)</td>
-          <td rowspan="2">Temps de moteur tournant estimé total (en HH:MM)</td>
+          <td rowspan="2">Durée de conduite moyenne</td>
+          <td rowspan="2">Amplitude moyenne</td>
+          <td rowspan="2">Temps de moteur tournant estimé total</td>
 
           <!-- Grouped Columns -->
-          <td colspan="3">Accélération et freinage (/20)</td>
-          <td colspan="3">Virage (/20)</td>
-          <td colspan="3">Allure (%)</td>
+          <td colspan="3">Accélération et freinage</td>
+          <td colspan="3">Virage</td>
+          <td colspan="3">Allure</td>
         </tr>
         <!-- Sub-header row for AR, R, V -->
         <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
@@ -226,7 +232,7 @@ const STATS_QSE_DETAILS: Record<string, { displayName: string, color: string }> 
     }
   `]
 })
-export class QseReportComponent implements OnInit {
+export class QseReportComponent implements OnInit, OnDestroy {
 
   constructor(private filterService: FilterService, private vehicleService: VehicleService) {
   }
@@ -244,32 +250,15 @@ export class QseReportComponent implements OnInit {
   vehiclesStatsTree: TreeNode[] = [];
   vehiclesStatsTotal: Record<string, any>;
 
-  statsCounts: StatsCount[] = [];
-  selectedStats: StatsCount | null = null;
+  stats: Stat[] = [];
 
-  alerts: QseAlertCount[] = [];
-  selectedAlert: QseAlertCount | null = null;
+  selectableStats: Stat[] = [];
+  alerts: Stat[] = [];
+  selectedStat: Stat | null = null;
 
-  keyToPropertyMap: Record<string, keyof VehicleStatsQseDTO> = {
-    // example# totalHasLastTripLong: "hasLastTripLong",
-    longestTrip: "distanceMax"
-  };
-
-  // keyLabels: Record<string, string> = {
-  //   totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
-  //   totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
-  //   totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-  //   selectionScore: "SCORE DE LA SELECTION",
-  //   severityOfUseTurn: "SEVERITE D'USAGE VIRAGE",
-  //   severityOfAcceleration: "SEVERITE D'USAGE ACCELERATION-FREINAGE",
-  //   averageRangeAvg: "AMPLITUDE MOYENNE",
-  //   idleDurationTotal: "TEMPS DE MOTEUR TOURNANT ESTIME TOTAL(en hh:mm)",
-  //   longestTrip: "LE TRAJET LE PLUS LONG"
-  // };
-
-  identifierFn = (item: StatsCount) => item.state;
-  displayFn = (item: StatsCount) => `${item.displayName}`;
-  colorFn = (item: StatsCount) => item.color;
+  identifierFn = (item: Stat) => item.key;
+  displayFn = (item: Stat) => `${item.displayName}`;
+  colorFn = (item: Stat) => item.color;
 
   ngOnInit() {
     this.filtersSubscription = this.subscribeToFilterChanges();
@@ -304,16 +293,25 @@ export class QseReportComponent implements OnInit {
 
           this.vehicleStatsQse = teamHierarchyNodes;
           this.vehiclesStatsTotal = stats;
-          this.alerts = this.vehicleService.getQseAlerts(teamHierarchyNodes);
 
-          this.statsCounts = Object.entries(this.vehiclesStatsTotal)
-            .filter(([key]) => STATS_QSE_DETAILS[key]) // only include keys defined in STATS_DETAILS
+          this.stats = Object.entries(this.vehiclesStatsTotal)
+            .filter(([key]) => {
+              return QSE_STATS_DETAILS[key] && !QSE_STATS_DETAILS[key].selectable;
+            }) // only include keys defined in STATS_DETAILS and that aren't selectable
             .map(([key, value]) => ({
-              state: key,
+              key: key,
               count: value,
-              displayName: STATS_QSE_DETAILS[key].displayName,
-              color: STATS_QSE_DETAILS[key].color
+              displayName: QSE_STATS_DETAILS[key].displayName,
+              color: QSE_STATS_DETAILS[key].color
             }));
+          // todo : generalize selectable stats
+          this.selectableStats = [{
+            key: 'longestTrip',
+            count: this.vehiclesStatsTotal['longestTrip'],
+            displayName: QSE_STATS_DETAILS['longestTrip'].displayName,
+            color: QSE_STATS_DETAILS['longestTrip'].color
+          }]
+          this.alerts = this.getQseAlerts(teamHierarchyNodes);
 
           //transformer les résultats originaux de la table.ts en TreeNode
           this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
@@ -341,56 +339,16 @@ export class QseReportComponent implements OnInit {
     })
   };
 
-
-  filterByKey(selected: StatsCount): void {
-    const property = this.keyToPropertyMap[selected.state];
-
-    console.log(property);
-    if (property) {
-      const longestTripValue = this.vehiclesStatsTotal?.[selected.state];
-
-      if (typeof longestTripValue !== 'number') {
-        return;
-      }
-
-      //Filter vehicles that match `longestTrip` value for `distanceMax`
-      const filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = this.vehicleStatsQse.map((node: TeamHierarchyNodeStatsQSE) => ({
-        ...node,
-        vehicles: node.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
-          const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
-          return distanceMaxValue === longestTripValue; // Filter vehicles with the same `distanceMax` as `longestTrip`
-        }) || [],
-        children: node.children?.map((childNode: TeamHierarchyNodeStatsQSE) => ({
-          ...childNode,
-          vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
-            const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
-            return distanceMaxValue === longestTripValue; // Same filter logic for children
-          }) || [],
-        }))
-          .filter((childNode) => childNode.vehicles.length > 0) || [],
-      }))
-        .filter((node) => node.children.length > 0 || node.vehicles.length > 0);
-
-      //Update the table or tree structure
-      this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
-        filteredVehiclesStats,
-        (vehicle: VehiclesStatsQseDTO) => ({
-          driverName: vehicle.vehicleStatsQse.driverName || '',
-          licensePlate: vehicle.vehicleStatsQse.licensePlate || 'unknown',
-        })
-      );
-    }
-  }
-
-  filterByAlert(selected: QseAlertCount | null): void {
-    this.selectedAlert = selected;
+  filterBySelectedStat(selected: Stat | null): void {
+    this.selectedStat = selected;
 
     this.vehiclesStatsTree = VehicleService.transformToTreeNodes(
       selected === null ?
         this.vehicleStatsQse :
-        this.vehicleService.filterQseAlerts(
+        this.vehicleService.filterVehiclesHierarchyByQseStat(
           this.vehicleStatsQse,
-          selected.key
+          selected.key,
+          this.vehiclesStatsTotal
         ),
       (vehicle: VehiclesStatsQseDTO) => ({
         driverName: vehicle.vehicleStatsQse.driverName || '',
@@ -399,8 +357,25 @@ export class QseReportComponent implements OnInit {
     );
   }
 
+  getQseAlerts(vehicleStatsQse: TeamHierarchyNodeStatsQSE[]): Stat[] {
+    return Object.entries(QSE_ALERTS_NAMINGS).map(([key, displayName]) => {
+      const filteredStats = this.vehicleService.filterVehiclesHierarchyByQseStat(vehicleStatsQse, key, this.vehiclesStatsTotal);
+      const count = filteredStats.reduce((acc, node) => {
+        const nodeCount = node.vehicles.length + (node.children ? node.children.reduce((childAcc, childNode) => childAcc + childNode.vehicles.length, 0) : 0);
+        return acc + nodeCount;
+      }, 0);
+
+      return {
+        key,
+        count,
+        displayName,
+        color: count > 0 ? '#C71400' : '#21A179',
+      };
+    });
+  }
+
   getIndicatorStyle(
-    indicatorKey: keyof QseIndicatorCheckers,
+    indicatorKey: keyof typeof QSE_ALERTS_NAMINGS,
     indicatorValue: number | null
   ): { [key: string]: string } {
     if (indicatorValue === null) {
@@ -408,16 +383,13 @@ export class QseReportComponent implements OnInit {
     }
 
     if (qseIndicatorAlertMap[indicatorKey](indicatorValue)) {
-      return {color: 'var(--p-red-500)'};
+      return {backgroundColor: 'var(--p-red-300)'};
     } else if (qseIndicatorWarningMap[indicatorKey](indicatorValue)) {
-      return {color: 'var(--p-orange-500)'};
+      return {backgroundColor: 'var(--p-orange-300)'};
     } else {
       return {};
     }
   }
 
-  alertIdentifierFn = (alert: QseAlertCount) => alert.key;
-  alertDisplayFn = (alert: QseAlertCount) => alert.displayName;
-  alertColorFn = (alert: QseAlertCount) => alert.color;
   protected readonly indicatorAlertMap = qseIndicatorAlertMap;
 }

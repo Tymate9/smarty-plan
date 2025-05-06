@@ -15,6 +15,7 @@ import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
 import TeamDTO = dto.TeamDTO;
 import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
+import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -202,45 +203,38 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       stats: Record<string, any>
     }>(`${this.baseUrl}/vehicleStats/report-qse`, {params});
   }
-
-  filterQseAlerts(vehicleStatsQSE: TeamHierarchyNodeStatsQSE[], indicatorKey: keyof QseIndicatorCheckers) {
-    const filteredVehiclesStats: TeamHierarchyNodeStatsQSE[] = vehicleStatsQSE.map((node: TeamHierarchyNodeStatsQSE) => ({
-      ...node,
-      vehicles: node.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
-        const indicatorValue = vehicle.vehicleStatsQse?.[indicatorKey];
-        return indicatorValue !== null && qseIndicatorAlertMap[indicatorKey](indicatorValue);
-      }) || [],
-      children: node.children?.map((childNode: TeamHierarchyNodeStatsQSE) => ({
-        ...childNode,
-        vehicles: childNode.vehicles?.filter((vehicle: VehiclesStatsQseDTO) => {
-          const indicatorValue = vehicle.vehicleStatsQse?.[indicatorKey];
-          return indicatorValue !== null && qseIndicatorAlertMap[indicatorKey](indicatorValue);
-        }) || [],
-      }))
-        .filter((childNode) => childNode.vehicles.length > 0) || [],
-    }))
-      .filter((node) => node.children.length > 0 || node.vehicles.length > 0);
-
-
-    return filteredVehiclesStats;
+  private filterVehiclesByQseStat(
+    vehicles: VehiclesStatsQseDTO[],
+    statKey: string,
+    vehiclesStatsTotal: Record<string, any>,
+  ) {
+    return vehicles.filter((vehicle: VehiclesStatsQseDTO) => {
+      if (statKey === 'longestTrip') {
+        const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
+        return distanceMaxValue === vehiclesStatsTotal['longestTrip'];
+      } else if (statKey in vehicle.vehicleStatsQse) {
+        const indicatorValue = (vehicle.vehicleStatsQse as Record<string, any>)[statKey];
+        return indicatorValue && qseIndicatorAlertMap[statKey](indicatorValue);
+      } else return false
+    })
   }
 
-  getQseAlerts(vehicleStatsQse: TeamHierarchyNodeStatsQSE[]): QseAlertCount[] {
-    return Object.keys(qseIndicatorAlertMap).map((key) => {
-      const alertKey = key as keyof QseIndicatorCheckers;
-      const filteredStats = this.filterQseAlerts(vehicleStatsQse, alertKey);
-      const count = filteredStats.reduce((acc, node) => {
-        const nodeCount = node.vehicles.length + (node.children ? node.children.reduce((childAcc, childNode) => childAcc + childNode.vehicles.length, 0) : 0);
-        return acc + nodeCount;
-      }, 0);
-
-      return {
-        key: alertKey,
-        count,
-        displayName: qseIndicatorNamingMap[alertKey],
-        color: count > 0 ? '#C71400' : '#21A179',
-      };
-    });
+  filterVehiclesHierarchyByQseStat(
+    vehiclesStatsQSE: TeamHierarchyNodeStatsQSE[],
+    statKey: string,
+    vehiclesStatsTotal: Record<string, any>,
+  ): TeamHierarchyNodeStatsQSE[] {
+    console.log('filterVehiclesHierarchyByQseStat', vehiclesStatsQSE, statKey, vehiclesStatsTotal)
+    return vehiclesStatsQSE.map((node: TeamHierarchyNodeStatsQSE) => ({
+      ...node,
+      vehicles: this.filterVehiclesByQseStat(node.vehicles, statKey, vehiclesStatsTotal),
+      children: node.children?.map((childNode: TeamHierarchyNodeStatsQSE) => ({
+        ...childNode,
+        vehicles: this.filterVehiclesByQseStat(childNode.vehicles, statKey, vehiclesStatsTotal),
+      }))
+        ?.filter((childNode) => childNode.vehicles.length > 0) || [],
+    }))
+      .filter((node) => node.children.length > 0 || node.vehicles.length > 0);
   }
 
 //TODO make it more general (>3 levels)
@@ -632,38 +626,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
   }
 }
 
-export interface QseIndicatorCheckers {
-  highwayAccelScore: (val: number) => boolean,
-  roadAccelScore: (val: number) => boolean,
-  cityAccelScore: (val: number) => boolean,
-  highwayTurnScore: (val: number) => boolean,
-  roadTurnScore: (val: number) => boolean,
-  cityTurnScore: (val: number) => boolean,
-  highwaySpeedScore: (val: number) => boolean,
-  roadSpeedScore: (val: number) => boolean,
-  citySpeedScore: (val: number) => boolean
-}
-
-export interface QseAlertCount {
-  key: keyof QseIndicatorCheckers;
-  count: number;
-  displayName: string;
-  color: string;
-}
-
-export const qseIndicatorNamingMap: { [key in keyof QseIndicatorCheckers]: string } = {
-  highwayAccelScore: 'Accélération sévère sur autoroute',
-  roadAccelScore: 'Accélération sévère sur route',
-  cityAccelScore: 'Accélération sévère en ville',
-  highwayTurnScore: 'Virage sévère sur autoroute',
-  roadTurnScore: 'Virage sévère sur route',
-  cityTurnScore: 'Virage sévère en ville',
-  highwaySpeedScore: 'Allure élevée sur autoroute',
-  roadSpeedScore: 'Allure élevée sur route',
-  citySpeedScore: 'Allure élevée en ville'
-}
-
-export const qseIndicatorWarningMap: QseIndicatorCheckers = {
+export const qseIndicatorWarningMap: Record<string, (val: number) => boolean> = {
   highwayAccelScore: (val: number) => val <= 12,
   roadAccelScore: (val: number) => val <= 12,
   cityAccelScore: (val: number) => val <= 12,
@@ -675,7 +638,7 @@ export const qseIndicatorWarningMap: QseIndicatorCheckers = {
   citySpeedScore: (val: number) => val >= 75,
 }
 
-export const qseIndicatorAlertMap: QseIndicatorCheckers = {
+export const qseIndicatorAlertMap: Record<string, (val: number) => boolean> = {
   highwayAccelScore: (val: number) => val <= 10,
   roadAccelScore: (val: number) => val <= 10,
   cityAccelScore: (val: number) => val <= 10,

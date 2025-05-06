@@ -26,6 +26,39 @@ data class VehiclesStatsDTO(
 
 )
 
+data class VehicleStatsQseQueryResult(
+    val tripDate: java.time.LocalDate?,
+    val vehicleId: String?,
+    val tripCount: Int,
+    val distanceSum: Int?,
+    val distanceMax: Int?,
+    val drivingTime: Long?,
+    val durationPerTripAvg: Long?,
+    val waitingDuration: Long?,
+    val rangeAvg: Long?,
+    var licensePlate: String? = null,
+    var driverName: String? = null,
+    val idleDuration: Long?,
+
+    var accelScore : Int? = null,
+
+    var highwayAccelScore: Int? = null,
+    var roadAccelScore: Int? = null,
+    var cityAccelScore: Int? = null,
+
+    var turnScore : Int? = null,
+
+    var highwayTurnScore: Int? = null,
+    var roadTurnScore: Int? = null,
+    var cityTurnScore: Int? = null,
+
+    var highwaySpeedScore: Int? = null,
+    var roadSpeedScore: Int? = null,
+    var citySpeedScore: Int? = null
+
+)
+
+
 data class VehicleStatsQseDTO(
     val tripDate: java.time.LocalDate?,
     val vehicleId: String?,
@@ -56,9 +89,9 @@ data class VehicleStatsQseDTO(
     var roadSpeedScore: Int? = null,
     var citySpeedScore: Int? = null
 )
+
 data class VehiclesStatsQseDTO(
     val vehicleStatsQse: VehicleStatsQseDTO,
     var team: TeamDTO?,
     var teamHierarchy:String?
-
 )

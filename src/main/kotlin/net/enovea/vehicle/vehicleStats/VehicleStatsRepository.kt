@@ -168,7 +168,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         vehicleIds: List<String>? = null,
         driversIds: List<String>? = null,
         dorisView: String
-    ): List<VehicleStatsQseDTO> {
+    ): List<VehicleStatsQseQueryResult> {
         val clauses =
             if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
                 "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
@@ -200,7 +200,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 }
                 conditions.joinToString(" ")
             }
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseDTO>, Exception> { handle ->
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseQueryResult>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
@@ -211,21 +211,11 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         SUM(trip_count) AS trip_count,
                         :startDate AS trip_date,      
                         ROUND(SUM(distance_sum)/1000) AS distance_sum,
-                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
-                        CONCAT(LPAD(CAST(FLOOR(SUM(duration_sum) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration_sum) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
-                        CONCAT(
-                            LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
-                            LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS waiting_duration,
-                        CONCAT(
-                            LPAD(CAST(FLOOR(AVG(`range`) / 3600) AS STRING), 2, '0'), ':',
-                            LPAD(CAST(FLOOR((AVG(`range`) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS range_avg,
-                        CONCAT(
-                            LPAD(CAST(FLOOR(SUM(daily_idle_duration) / 3600) AS STRING), 2, '0'), 
-                            ':',
-                            LPAD(CAST(FLOOR((SUM(daily_idle_duration) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS idle_duration,
+                        SUM(duration_sum) / SUM(trip_count) AS duration_per_trip_avg,
+                        SUM(duration_sum) AS driving_time,
+                        SUM(`range` - duration_sum) AS waiting_duration,
+                        AVG(`range`) AS range_avg,
+                        SUM(daily_idle_duration) AS idle_duration,
                         if(scores.x_stddev = 0, null, round(20 - scores.x_stddev * 10)) as accel_score,
                         if(scores.y_stddev = 0, null, round(20 - scores.y_stddev * 10)) as turn_score,
                         if(scores.city_x_stddev = 0, null, round(20 - scores.city_x_stddev * 10)) as city_accel_score,
@@ -257,38 +247,48 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                           ${clauses}
                         GROUP BY vehicle_id, device_id, date(start_time), driver_name , license_plate
                          ) daily_trip_data
-                         JOIN (select dp.device_id,stddev(array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                  array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                  array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                                          as x_stddev,
-                                      stddev(array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                                          as y_stddev,
-                                      stddev(if(speed_limit > 10000, 
-                                                array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                array_avg(accz) * coalesce(matrix_0_2, 0), null) * 9.806 / 1000                                                          as highway_x_stddev,
-                                      stddev(if(speed_limit > 10000, array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  array_avg(accz) * coalesce(matrix_1_2, 0), null) * 9.806 / 1000                                                          as highway_y_stddev,
-                                      stddev(if(speed_limit > 5000 and speed_limit <= 10000, array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                  array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                  array_avg(accz) * coalesce(matrix_0_2, 0), null) * 9.806 /
-                                           1000                                                          as road_x_stddev,
-                                      stddev(if(speed_limit > 5000 and speed_limit <= 10000, array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  array_avg(accz) * coalesce(matrix_1_2, 0), null) * 9.806 /
-                                           1000                                                          as road_y_stddev,
-                                      stddev(if(speed_limit <= 5000, array_avg(accx) * coalesce(matrix_0_0, 1) +
-                                                  array_avg(accy) * coalesce(matrix_0_1, 0) +
-                                                  array_avg(accz) * coalesce(matrix_0_2, 0), null) * 9.806 / 1000                                                          as city_x_stddev,
-                                      stddev(if(speed_limit <= 5000, array_avg(accx) * coalesce(matrix_1_0, 0) +
-                                                  array_avg(accy) * coalesce(matrix_1_1, 1) +
-                                                  array_avg(accz) * coalesce(matrix_1_2, 0), null) * 9.806 / 1000                                                          as city_y_stddev,
-                                      avg(if(speed_limit > 10000, mdp.speed / speed_limit, null)) as highway_speed_ratio,
-                                      avg(if(speed_limit > 5000 and speed_limit <= 10000, mdp.speed / speed_limit,
-                                             null))                                               as road_speed_ratio,
-                                      avg(if(speed_limit <= 5000, mdp.speed / speed_limit, null)) as city_speed_ratio
-                               FROM datapoints dp
+                         JOIN (select dp.device_id,
+                               stddev(array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                      array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                      array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                as x_stddev,
+                               stddev(array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                      array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                      array_avg(accz) * coalesce(matrix_1_2, 0)) * 9.806 / 1000                                as y_stddev,
+                               stddev(if(speed_limit > 10000,
+                                         array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                         array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                         array_avg(accz) * coalesce(matrix_0_2, 0), null)) * 9.806 /
+                               1000                                                                                            as highway_x_stddev,
+                               stddev(if(speed_limit > 10000, array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                              array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                              array_avg(accz) * coalesce(matrix_1_2, 0), null)) * 9.806 / 1000 as
+                                                                                                                                  highway_y_stddev,
+                               stddev(if(speed_limit > 5000 and speed_limit <= 10000, array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                                                      array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                                                      array_avg(accz) * coalesce(matrix_0_2, 0),
+                                         null)) * 9.806 /
+                               1000                                                                                            as road_x_stddev,
+                               stddev(if(speed_limit > 5000 and speed_limit <= 10000,
+                                         array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                         array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                         array_avg(accz) * coalesce(matrix_1_2, 0), null)) * 9.806 /
+                               1000                                                                                            as road_y_stddev,
+                               stddev(if(speed_limit <= 5000, array_avg(accx) * coalesce(matrix_0_0, 1) +
+                                                              array_avg(accy) * coalesce(matrix_0_1, 0) +
+                                                              array_avg(accz) * coalesce(matrix_0_2, 0), null)) *
+                               9.806 / 1000                                                                                    as city_x_stddev,
+                               stddev(if(speed_limit <= 5000, array_avg(accx) * coalesce(matrix_1_0, 0) +
+                                                              array_avg(accy) * coalesce(matrix_1_1, 1) +
+                                                              array_avg(accz) * coalesce(matrix_1_2, 0),
+                                         null)) * 9.806 / 1000                                                                 as city_y_stddev,
+                               avg(if(speed_limit > 10000, mdp.speed / speed_limit, null))                                     as
+                                                                                                                                  highway_speed_ratio,
+                               avg(if(speed_limit > 5000 and speed_limit <= 10000,
+                                      mdp.speed / speed_limit,
+                                      null))                                                                                   as road_speed_ratio,
+                               avg(if(speed_limit <= 5000, mdp.speed / speed_limit, null))                                     as
+                                                                                                                                  city_speed_ratio
+                        FROM datapoints dp
                                       JOIN <dorisView> t
                                            ON t.trip_id = dp.trip_id and t.device_id = dp.device_id
                                       LEFT JOIN map_datapoints mdp
@@ -305,7 +305,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                                  AND accz is not null
                                  ${clauses}
                                GROUP BY dp.device_id) scores ON scores.device_id = daily_trip_data.device_id
-                    GROUP BY vehicle_id, scores.device_id, license_plate, city_x_stddev, city_y_stddev,
+                    GROUP BY vehicle_id, scores.device_id, license_plate, x_stddev, y_stddev, city_x_stddev, city_y_stddev,
                      city_speed_ratio, road_x_stddev, road_y_stddev, road_speed_ratio,
                      highway_x_stddev, highway_y_stddev, highway_speed_ratio ;
                 """.trimIndent()
@@ -324,7 +324,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         bindList("driversIds", driversIds)
                     }
                 }
-                .mapTo(VehicleStatsQseDTO::class.java)
+                .mapTo(VehicleStatsQseQueryResult::class.java)
                 .list()
         }
     }

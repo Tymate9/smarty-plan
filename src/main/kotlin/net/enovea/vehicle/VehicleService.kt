@@ -199,19 +199,19 @@ open class VehicleService(
             // Build the team hierarchy
             val teamHierarchy = buildTeamHierarchy(team)
 
-            // Create a new instance of VehicleStatsQseDTO with enriched information
-            val vehicleStatsQseDTO=VehicleStatsQseDTO(
+            // Create an instance of VehicleStatsQseDTO
+            val vehicleStatsQseDTO = VehicleStatsQseDTO(
                 tripDate = stats.tripDate,
                 vehicleId = stats.vehicleId,
                 distanceSum = stats.distanceSum,
-                durationPerTripAvg = stats.durationPerTripAvg,
+                durationPerTripAvg = formatTime(stats.durationPerTripAvg ?: 0),
                 licensePlate = stats.licensePlate,
                 driverName = stats.driverName,
                 tripCount = stats.tripCount,
-                waitingDuration = stats.waitingDuration,
-                drivingTime = stats.drivingTime,
-                rangeAvg = stats.rangeAvg,
-                idleDuration = stats.idleDuration,
+                waitingDuration = formatTime(stats.waitingDuration ?: 0),
+                drivingTime = formatTime(stats.drivingTime ?: 0),
+                rangeAvg = formatTime(stats.rangeAvg ?: 0),
+                idleDuration = formatTime(stats.idleDuration ?: 0),
                 distanceMax = stats.distanceMax,
                 highwayAccelScore = stats.highwayAccelScore,
                 roadAccelScore = stats.roadAccelScore,
@@ -234,26 +234,27 @@ open class VehicleService(
     }
 
     //function to calculate total statistics(indicators) displayed on the page('QSE Reports')
-    private fun calculateTotalVehiclesStatsQSE(vehiclesStats: List<VehicleStatsQseDTO>): Map<String, Any> {
+    private fun calculateTotalVehiclesStatsQSE(vehiclesStats: List<VehicleStatsQseQueryResult>): Map<String, Any> {
         val totalDistance = vehiclesStats.sumOf { it.distanceSum ?: 0 }
-        val totalDrivingTime = String.format(
-            "%02d:%02d",
-            (vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) } / 3600),
-            ((vehiclesStats.sumOf { convertHHMMToSeconds(it.drivingTime) } % 3600) / 60))
-        val totalWaitingTime = String.format(
-            "%02d:%02d",
-            (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } / 3600),
-            (vehiclesStats.sumOf { convertHHMMToSeconds(it.waitingDuration) } % 3600) / 60)
-        val averageRangeAvg = String.format("%02d:%02d", (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() / 3600), (vehiclesStats.map { convertHHMMToSeconds(it.rangeAvg) }.average().toInt() % 3600)/ 60)
-        val idleDurationTotal = String.format(
-            "%02d:%02d",
-            (vehiclesStats.sumOf { convertHHMMToSeconds(it.idleDuration) } / 3600),
-            (vehiclesStats.sumOf { convertHHMMToSeconds(it.idleDuration) } % 3600) / 60)
-        val longestTrip=vehiclesStats.maxOf { it.distanceMax ?:0 }
+        val totalDrivingTime = formatTime(vehiclesStats.sumOf { it.drivingTime ?: 0 })
+        val totalWaitingTime = formatTime(vehiclesStats.sumOf { it.waitingDuration ?: 0 })
+        val averageRangeAvg = formatTime(vehiclesStats.mapNotNull { it.rangeAvg }.average().toLong())
+        val idleDurationTotal = formatTime(vehiclesStats.sumOf { it.idleDuration ?: 0 })
+        val longestTrip = vehiclesStats.maxOf { it.distanceMax ?:0 }
 
         // get accel stddev averages weighted by distance and compute selection scores with them
-        val avgTurnScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.turnScore?.times(it) } }.average() / totalDistance
-        val avgAccelScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.accelScore?.times(it) } }.average() / totalDistance
+        //todo
+        // Sévérité d'usage total de la flotte
+        // Sévérité d'usage de la flotte en virage
+        // Sévérité d'usage de la flotte en accélération
+        // Exposition aux risques totale
+        // Exposition aux risques en virage
+        // Exposition aux risques en accélération
+        // Split distance
+
+
+        val avgTurnScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.turnScore?.times(it) } }.sum().toDouble() / totalDistance
+        val avgAccelScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.accelScore?.times(it) } }.sum().toDouble() / totalDistance
         val selectionScore = getLetterScoring(min(avgTurnScore, avgAccelScore))
         val severityOfUseTurn = getLetterScoring(avgTurnScore)
         val severityOfAcceleration = getLetterScoring(avgAccelScore)
@@ -271,6 +272,18 @@ open class VehicleService(
         )
     }
 
+    private fun formatTime(seconds: Long): String {
+        val days = seconds / 86400
+        val hours = (seconds % 86400) / 3600
+        val minutes = (seconds % 3600) / 60
+        return when {
+            days > 0 -> String.format("%dj %dh %dm", days, hours, minutes)
+            hours > 0 -> String.format("%dh %dm", hours, minutes)
+            minutes > 0 -> String.format("%dm", minutes)
+            else -> String.format("%ds", seconds)
+        }
+    }
+
     private fun getLetterScoring(score: Double): String {
         return when {
             score > 16 && score < 20 -> "A"
@@ -282,6 +295,21 @@ open class VehicleService(
         }
     }
 
+    //To convert time from HH:MM format to second
+    private fun convertHHMMToSeconds(drivingTime: String?): Long {
+        if (drivingTime.isNullOrBlank()) {
+            return 0L
+        }
+
+        // Split HH:MM string and convert to seconds
+        val timeParts = drivingTime.split(":")
+        if (timeParts.size == 2) {
+            val hours = timeParts[0].toIntOrNull() ?: 0
+            val minutes = timeParts[1].toIntOrNull() ?: 0
+            return (hours * 3600L) + (minutes * 60L)
+        }
+        return 0L
+    }
 
     fun filterVehicle(vehicles: List<VehicleEntity>): List<VehicleEntity> {
         //Get the IDs of untracked vehicles/drivers
@@ -635,22 +663,6 @@ open class VehicleService(
             stats = stats
         )
     }
-}
-
-//To convert time from HH:MM format to second
-fun convertHHMMToSeconds(drivingTime: String?): Long {
-    if (drivingTime.isNullOrBlank()) {
-        return 0L
-    }
-
-    // Split HH:MM string and convert to seconds
-    val timeParts = drivingTime.split(":")
-    if (timeParts.size == 2) {
-        val hours = timeParts[0].toIntOrNull() ?: 0
-        val minutes = timeParts[1].toIntOrNull() ?: 0
-        return (hours * 3600L) + (minutes * 60L)
-    }
-    return 0L
 }
 
 // Tree node data class

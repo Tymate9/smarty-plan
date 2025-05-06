@@ -18,42 +18,26 @@ import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/tog
 
 
 const STATS_DETAILS: Record<string, { displayName: string, color: string }> = {
-  totalHasLastTripLong: { displayName: 'DERNIER TRAJET>45mn  (en nb)', color: '#d1d5db'},
-  totalHasLateStartSum: { displayName: 'DEPART TARDIF  (en nb)', color: '#d1d5db'},
+  totalHasLastTripLong: { displayName: 'DERNIER TRAJET>45mn', color: '#d1d5db'},
+  totalHasLateStartSum: { displayName: 'DEPART TARDIF', color: '#d1d5db'},
   totalHasLateStop: { displayName: 'ARRETS TARDIFS', color: '#d1d5db'},
-  averageDistance: { displayName: 'DISTANCE MOYENNE/TRAJET (en km)', color: '#fee2e2' },
+  averageDistance: { displayName: 'DISTANCE MOYENNE/TRAJET', color: '#fee2e2' },
   averageDuration: { displayName: 'TEMPS DE CONDUITE DECLARE TOTAL', color: '#fee2e2' },
   averageRangeAvg: { displayName: 'AMPLITUDE MOYENNE', color: '#fee2e2' },
-  totalDistanceSum: { displayName: 'DISTANCE PARCOURUE (en km)', color: '#fee2e2' },
+  totalDistanceSum: { displayName: 'DISTANCE PARCOURUE', color: '#fee2e2' },
   totalDrivers: { displayName: 'NOMBRE TOTAL DE CONDUCTEURS', color: '#fee2e2'},
   totalDrivingTime: { displayName: 'TEMPS DE CONDUITE TOTAL', color: '#fee2e2'},
-  totalTripCount: { displayName: 'TRAJETS EFFECTUES (en nb)', color: '#fee2e2'},
+  totalTripCount: { displayName: 'NOMBRE DE TRAJETS EFFECTUES', color: '#fee2e2'},
   totalVehicles: { displayName: 'NOMBRE TOTAL DE VEHICULES', color: '#fee2e2'},
-  totalWaitingTime: { displayName: 'TEMPS D\'ARRET TOTAL (en hh:mm)', color: '#fee2e2'}
+  totalWaitingTime: { displayName: 'TEMPS D\'ARRET TOTAL', color: '#fee2e2'},
 };
 
-export interface StatsCount {
-  state: string;
+export interface Stat {
+  key: string;
   count: number;
   displayName: string;
   color: string;
 }
-
-// keyLabels: Record<string, string> = {
-//   averageDistance: "DISTANCE MOYENNE/TRAJET (en km)",
-//   averageDuration: "TEMPS DE CONDUITE DECLARE TOTAL",
-//   averageRangeAvg: "AMPLITUDE MOYENNE",
-//   totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-//   totalDrivers: "NOMBRE TOTAL DE CONDUCTEURS",
-//   totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
-//   totalHasLastTripLong: "DERNIER TRAJET>45mn  (en nb)",
-//   totalHasLateStartSum: "DEPART TARDIF  (en nb)",
-//   totalHasLateStop: "ARRETS TARDIFS",
-//   totalTripCount: "TRAJETS EFFECTUES (en nb)",
-//   totalVehicles: "NOMBRE TOTAL DE VEHICULES",
-//   totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
-// };
-
 
 @Component({
   selector: 'app-report',
@@ -80,7 +64,7 @@ export interface StatsCount {
 <!--    </app-indicator-buttons>-->
 
     <app-toggle-buttons-group
-      [items]="statsCounts.slice(0,6)"
+      [items]="statsCounts.slice(0, 6)"
       [selectedItem]="selectedStats"
       [identifierFn]="identifierFn"
       [displayFn]="displayFn"
@@ -92,7 +76,7 @@ export interface StatsCount {
       textColor="black">
     </app-toggle-buttons-group>
     <app-toggle-buttons-group
-      [items]="statsCounts.slice(6,12)"
+      [items]="statsCounts.slice(6, 12)"
       [selectedItem]="selectedStats"
       [identifierFn]="identifierFn"
       [displayFn]="displayFn"
@@ -103,7 +87,6 @@ export interface StatsCount {
       fontSize="0.7rem"
       textColor="black">
     </app-toggle-buttons-group>
-
 
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
@@ -289,8 +272,8 @@ export class ReportComponent implements OnInit {
   displayDailyStats: boolean = false;
   selectedDailyStat: string = '';
 
-  statsCounts: StatsCount[] = [];
-  selectedStats: StatsCount | null = null;
+  statsCounts: Stat[] = [];
+  selectedStats: Stat | null = null;
 
 
   constructor(private filterService: FilterService , private vehicleService: VehicleService) {}
@@ -323,9 +306,9 @@ export class ReportComponent implements OnInit {
     date.setHours(3);
   }
 
-  identifierFn = (item: StatsCount) => item.state;
-  displayFn    = (item: StatsCount) => `${item.displayName}`;
-  colorFn      = (item: StatsCount) => item.color;
+  identifierFn = (item: Stat) => item.key;
+  displayFn    = (item: Stat) => `${item.displayName}`;
+  colorFn      = (item: Stat) => item.color;
 
 
   //Récupérer des statistiques pour une période spécifique
@@ -349,22 +332,17 @@ export class ReportComponent implements OnInit {
           this.vehicleStats = teamHierarchyNodes;
 
           //Cette variable contient les résultats originaux des boutons statistiques
-          this.vehiclesStatsTotal=stats;
+          this.vehiclesStatsTotal = stats;
 
 
-         this.statsCounts=Object.entries(this.vehiclesStatsTotal)
-            .filter(([key]) => STATS_DETAILS[key]) // only include keys defined in STATS_DETAILS
-            .map(([key, value]) => ({
-              state: key,
-              count: value,
-              displayName: STATS_DETAILS[key].displayName,
-              color: STATS_DETAILS[key].color
-            }));
-
-          // this.statsCounts = this.calculatestatsCounts(this.vehiclesStatsTotal);
-
-
-
+          this.statsCounts = Object.entries(this.vehiclesStatsTotal)
+          .filter(([key]) => STATS_DETAILS[key]) // only include keys defined in STATS_DETAILS
+          .map(([key, value]) => ({
+            key: key,
+            count: value,
+            displayName: STATS_DETAILS[key].displayName,
+            color: STATS_DETAILS[key].color
+          }));
 
           //transformer les résultats originaux de la table.ts en TreeNode
           this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
@@ -373,7 +351,6 @@ export class ReportComponent implements OnInit {
               driverName: vehicle.vehicleStats.driverName ||'',
               licensePlate: vehicle.vehicleStats.licensePlate || 'unknown',
             })
-
           )
         },
         error: (err) => {
@@ -419,8 +396,8 @@ export class ReportComponent implements OnInit {
   }
 
   //fonction permettant de filtrer les résultats en fonction des boutons cliqués
-  filterByKey(selected: StatsCount): void {
-     const property = this.keyToPropertyMap[selected.state]; // Obtenir le nom de la propriété pour filtrer par
+  filterByKey(selected: Stat): void {
+     const property = this.keyToPropertyMap[selected.key]; // Obtenir le nom de la propriété pour filtrer par
 
     // const property=selected.state
 

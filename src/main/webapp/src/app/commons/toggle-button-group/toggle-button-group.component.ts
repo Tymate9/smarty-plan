@@ -14,6 +14,7 @@ import {black} from "ansi-colors";
                 '--button-color': colorFn ? colorFn(item) : '#007bff',
                 'min-width': buttonWidth,
                 'height': buttonHeight,
+                'flex-grow': '0',
                 'display': 'flex',
                 'flex-direction' : 'row'
               }"
@@ -55,7 +56,7 @@ import {black} from "ansi-colors";
       gap: 15px;
       margin-bottom: 20px;
       margin-top: 20px;
-      justify-content: center;
+      justify-content: start;
       align-items: center;
       flex-direction: row;
       flex-wrap: wrap;
@@ -97,7 +98,9 @@ import {black} from "ansi-colors";
       display: flex;
       justify-content: space-evenly;
       align-items: center;
-      font-size:1.5rem;
+      text-wrap: auto;
+      padding: 0.5rem;
+      font-size: 1.5rem;
     }
 
     .toggle-buttons-group .status-text-container i {
@@ -112,6 +115,7 @@ import {black} from "ansi-colors";
       min-width: 30%;
       display: flex;
       align-items: center;
+      text-wrap: auto;
       justify-content: center;
       height: 100%;
     }

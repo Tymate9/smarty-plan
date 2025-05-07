@@ -211,7 +211,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     return vehicles.filter((vehicle: VehiclesStatsQseDTO) => {
       if (statKey === 'longestTrip') {
         const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
-        return distanceMaxValue === vehiclesStatsTotal['longestTrip'].slice(-3);
+        return distanceMaxValue === vehiclesStatsTotal['longestTrip'].slice(0, -3);
       } else if (statKey in vehicle.vehicleStatsQse) {
         const indicatorValue = (vehicle.vehicleStatsQse as Record<string, any>)[statKey];
         return indicatorValue && qseIndicatorAlertMap[statKey](indicatorValue);

@@ -23,11 +23,14 @@ const QSE_STATS_DETAILS: Record<string, {displayName: string, color: string, sel
   totalDrivingTime: {displayName: "TEMPS DE CONDUITE TOTAL", color: "#fda9a9", selectable: false},
   totalWaitingTime: {displayName: "TEMPS D'ARRET TOTAL", color: "#fda9a9", selectable: false},
   totalDistanceSum: {displayName: "DISTANCE PARCOURUE", color: "#fda9a9", selectable: false},
-  selectionScore: {displayName: "SCORE DE LA SELECTION", color: "#fda9a9", selectable: false},
-  severityOfUseTurn: {displayName: "SEVERITE D'USAGE VIRAGE", color: "#fda9a9", selectable: false},
-  severityOfAcceleration: {displayName: "SEVERITE D'USAGE ACCELERATION-FREINAGE", color: "#fda9a9", selectable: false},
   averageRangeAvg: {displayName: "AMPLITUDE MOYENNE", color: "#fda9a9", selectable: false},
   idleDurationTotal: {displayName: "TEMPS DE MOTEUR TOURNANT ESTIME TOTAL", color: "#fda9a9", selectable: false},
+  useSeverity: {displayName: "SÉVÉRITÉ D'USAGE TOTAL DE LA FLOTTE", color: "#fda9a9", selectable: false},
+  turnUseSeverity: {displayName: "SÉVÉRITÉ D'USAGE DE LA FLOTTE EN VIRAGE", color: "#fda9a9", selectable: false},
+  accelerationUseSeverity: {displayName: "SÉVÉRITÉ D'USAGE DE LA FLOTTE EN ACCÉLÉRATION", color: "#fda9a9", selectable: false},
+  riskExposure: {displayName: "EXPOSITION AUX RISQUES TOTALE", color: "#fda9a9", selectable: false},
+  turnRiskExposure: {displayName: "EXPOSITION AUX RISQUES EN VIRAGE", color: "#fda9a9", selectable: false},
+  accelerationRiskExposure: {displayName: "EXPOSITION AUX RISQUES EN ACCÉLÉRATION", color: "#fda9a9", selectable: false},
   longestTrip: {displayName: "LE TRAJET LE PLUS LONG", color: "#a0b2d9", selectable: true}
 };
 
@@ -121,7 +124,7 @@ const QSE_ALERTS_NAMINGS = {
           'no-vehicle': rowNode.parent && rowData.children && rowData.children.length > 0,
           'dynamic-tt-leaf': rowData.vehicle
         }">
-          <td *ngIf="!rowData.vehicle" colspan="15">
+          <td *ngIf="!rowData.vehicle" colspan="17">
             <p-treeTableToggler class="dynamic-tt-togglerButton" [rowNode]="rowNode"/>
             {{ rowData.label }}
           </td>
@@ -131,18 +134,21 @@ const QSE_ALERTS_NAMINGS = {
             class="dynamic-tt-header">
           <td rowspan="2">Véhicule</td>
           <td rowspan="2">Conducteur</td>
-          <td rowspan="2">Distance parcourue</td>
           <td rowspan="2">Durée de conduite moyenne</td>
           <td rowspan="2">Amplitude moyenne</td>
           <td rowspan="2">Temps de moteur tournant estimé total</td>
 
           <!-- Grouped Columns -->
+          <td colspan="3">Distance parcourue</td>
           <td colspan="3">Accélération et freinage</td>
           <td colspan="3">Virage</td>
           <td colspan="3">Allure</td>
         </tr>
         <!-- Sub-header row for AR, R, V -->
         <tr [ttRow]="rowNode" *ngIf="!rowNode.parent" class="dynamic-tt-header">
+          <td>AR</td>
+          <td>R</td>
+          <td>V</td>
           <td>AR</td>
           <td>R</td>
           <td>V</td>
@@ -169,44 +175,46 @@ const QSE_ALERTS_NAMINGS = {
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
           </ng-template>
-          <td>{{ rowData.vehicle.vehicleStatsQse.distanceSum }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
-          <td
-            [style]="getIndicatorStyle('highwayAccelScore', rowData.vehicle.vehicleStatsQse.highwayAccelScore)"
+          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.highwayDistanceSum }} km</td>
+          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.roadDistanceSum }} km</td>
+          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.cityDistanceSum }} km</td>
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('highwayAccelScore', rowData.vehicle.vehicleStatsQse.highwayAccelScore)"
           >{{ rowData.vehicle.vehicleStatsQse.highwayAccelScore ?? 'N/A' }}/20
           </td>
-          <td
-            [style]="getIndicatorStyle('roadAccelScore', rowData.vehicle.vehicleStatsQse.roadAccelScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('roadAccelScore', rowData.vehicle.vehicleStatsQse.roadAccelScore)"
           >{{ rowData.vehicle.vehicleStatsQse.roadAccelScore ?? 'N/A' }}/20
           </td>
-          <td
-            [style]="getIndicatorStyle('cityAccelScore', rowData.vehicle.vehicleStatsQse.cityAccelScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('cityAccelScore', rowData.vehicle.vehicleStatsQse.cityAccelScore)"
           >{{ rowData.vehicle.vehicleStatsQse.cityAccelScore ?? 'N/A' }}/20
           </td>
-          <td
-            [style]="getIndicatorStyle('highwayTurnScore', rowData.vehicle.vehicleStatsQse.highwayTurnScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('highwayTurnScore', rowData.vehicle.vehicleStatsQse.highwayTurnScore)"
           >{{ rowData.vehicle.vehicleStatsQse.highwayTurnScore ?? 'N/A' }}/20
           </td>
-          <td
-            [style]="getIndicatorStyle('roadTurnScore', rowData.vehicle.vehicleStatsQse.roadTurnScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('roadTurnScore', rowData.vehicle.vehicleStatsQse.roadTurnScore)"
           >{{ rowData.vehicle.vehicleStatsQse.roadTurnScore ?? 'N/A' }}/20
           </td>
-          <td
-            [style]="getIndicatorStyle('cityTurnScore', rowData.vehicle.vehicleStatsQse.cityTurnScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('cityTurnScore', rowData.vehicle.vehicleStatsQse.cityTurnScore)"
           >{{ rowData.vehicle.vehicleStatsQse.cityTurnScore ?? 'N/A' }}/20
           </td>
-          <td
-            [style]="getIndicatorStyle('highwaySpeedScore', rowData.vehicle.vehicleStatsQse.highwaySpeedScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('highwaySpeedScore', rowData.vehicle.vehicleStatsQse.highwaySpeedScore)"
           >{{ rowData.vehicle.vehicleStatsQse.highwaySpeedScore ?? 'N/A' }}%
           </td>
-          <td
-            [style]="getIndicatorStyle('roadSpeedScore', rowData.vehicle.vehicleStatsQse.roadSpeedScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('roadSpeedScore', rowData.vehicle.vehicleStatsQse.roadSpeedScore)"
           >{{ rowData.vehicle.vehicleStatsQse.roadSpeedScore ?? 'N/A' }}%
           </td>
-          <td
-            [style]="getIndicatorStyle('citySpeedScore', rowData.vehicle.vehicleStatsQse.citySpeedScore)"
+          <td class="centered-and-nowrapped"
+            [style]="getAlertIndicatorStyle('citySpeedScore', rowData.vehicle.vehicleStatsQse.citySpeedScore)"
           >{{ rowData.vehicle.vehicleStatsQse.citySpeedScore ?? 'N/A' }}%
           </td>
 
@@ -229,6 +237,11 @@ const QSE_ALERTS_NAMINGS = {
     .indicators {
       width: 96vw;
       margin: 0 auto;
+    }
+
+    .centered-and-nowrapped {
+      text-align: center;
+      text-wrap: nowrap;
     }
   `]
 })
@@ -374,17 +387,17 @@ export class QseReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  getIndicatorStyle(
-    indicatorKey: keyof typeof QSE_ALERTS_NAMINGS,
-    indicatorValue: number | null
+  getAlertIndicatorStyle(
+    alertIndicatorKey: keyof typeof QSE_ALERTS_NAMINGS,
+    alertIndicatorValue: number | null
   ): { [key: string]: string } {
-    if (indicatorValue === null) {
+    if (alertIndicatorValue === null) {
       return {};
     }
 
-    if (qseIndicatorAlertMap[indicatorKey](indicatorValue)) {
+    if (qseIndicatorAlertMap[alertIndicatorKey](alertIndicatorValue)) {
       return {backgroundColor: 'var(--p-red-300)'};
-    } else if (qseIndicatorWarningMap[indicatorKey](indicatorValue)) {
+    } else if (qseIndicatorWarningMap[alertIndicatorKey](alertIndicatorValue)) {
       return {backgroundColor: 'var(--p-orange-300)'};
     } else {
       return {};

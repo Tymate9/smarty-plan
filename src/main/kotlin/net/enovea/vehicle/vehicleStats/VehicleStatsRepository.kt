@@ -210,7 +210,10 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         ROUND(MAX(longest_trip_distance_daily)/1000) AS longest_trip_distance,
                         SUM(trip_count) AS trip_count,
                         :startDate AS trip_date,      
-                        ROUND(SUM(distance_sum)/1000) AS distance_sum,
+                        ROUND(SUM(distance) / 1000) AS distance_sum,
+                        ROUND(SUM(highway_distance) / 100000) AS highway_distance_sum,
+                        ROUND(SUM(road_distance) / 100000) AS road_distance_sum,
+                        ROUND(SUM(city_distance) / 100000) AS city_distance_sum,
                         SUM(duration_sum) / SUM(trip_count) AS duration_per_trip_avg,
                         SUM(duration_sum) AS driving_time,
                         SUM(`range` - duration_sum) AS waiting_duration,
@@ -235,7 +238,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             license_plate,
                             COUNT(*) AS trip_count,
                             MAX(distance) As longest_trip_distance_daily,
-                            SUM(distance) AS distance_sum,
+                            SUM(distance) AS distance,
                             SUM(duration) AS duration_sum,
                             time_to_sec(timediff(max(end_time), min(start_time))) AS `range`,
                             SUM(idle_duration) As daily_idle_duration
@@ -248,6 +251,9 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         GROUP BY vehicle_id, device_id, date(start_time), driver_name , license_plate
                          ) daily_trip_data
                          JOIN (select dp.device_id,
+                               sum((speed_limit > 10000) * mdp.delta_distance) as highway_distance,
+                               sum((speed_limit > 5000 and speed_limit <= 10000) * mdp.delta_distance) as road_distance,
+                               sum((speed_limit <= 5000) * mdp.delta_distance) as city_distance,
                                stddev(array_avg(accx) * coalesce(matrix_0_0, 1) +
                                       array_avg(accy) * coalesce(matrix_0_1, 0) +
                                       array_avg(accz) * coalesce(matrix_0_2, 0)) * 9.806 / 1000                                as x_stddev,

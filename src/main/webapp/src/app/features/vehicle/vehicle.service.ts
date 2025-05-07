@@ -211,7 +211,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     return vehicles.filter((vehicle: VehiclesStatsQseDTO) => {
       if (statKey === 'longestTrip') {
         const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
-        return distanceMaxValue === vehiclesStatsTotal['longestTrip'];
+        return distanceMaxValue === vehiclesStatsTotal['longestTrip'].slice(-3);
       } else if (statKey in vehicle.vehicleStatsQse) {
         const indicatorValue = (vehicle.vehicleStatsQse as Record<string, any>)[statKey];
         return indicatorValue && qseIndicatorAlertMap[statKey](indicatorValue);
@@ -224,7 +224,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     statKey: string,
     vehiclesStatsTotal: Record<string, any>,
   ): TeamHierarchyNodeStatsQSE[] {
-    console.log('filterVehiclesHierarchyByQseStat', vehiclesStatsQSE, statKey, vehiclesStatsTotal)
     return vehiclesStatsQSE.map((node: TeamHierarchyNodeStatsQSE) => ({
       ...node,
       vehicles: this.filterVehiclesByQseStat(node.vehicles, statKey, vehiclesStatsTotal),
@@ -516,7 +515,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
             entityService: this, // référence à VehicleService
             confirmationMessage: 'Voulez-vous vraiment supprimer ce véhicule ?',
             onSuccess: (response: any) => {
-              console.log(response)
               this.messageService.add({
                 severity: 'success',
                 summary: "Suppression réussie",
@@ -527,7 +525,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
               const status: number = err?.status ?? 500;
               let summary: string;
               let detail: string;
-              console.log(err)
 
               switch (status) {
                 case 404:

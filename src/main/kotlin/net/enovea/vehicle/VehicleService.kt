@@ -21,7 +21,6 @@ import net.enovea.commons.ICRUDService
 import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
-import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.round
 
@@ -191,7 +190,7 @@ open class VehicleService(
         val totalVehiclesStatsQSEMap = calculateTotalVehiclesStatsQSE(vehiclesStatsQse)
         val latestTeams: Map<String, TeamDTO> = VehicleTeamEntity.getLatestTeams().mapValues { teamMapper.toDto(it.value) }
 
-        val vehiclesWithHierarchy = vehiclesStatsQse?.map { stats ->
+        val vehiclesWithHierarchy = vehiclesStatsQse.map { stats ->
 
             // Fetch the team using the vehicleId
             val team = stats.vehicleId?.let { latestTeams[it] }
@@ -203,7 +202,10 @@ open class VehicleService(
             val vehicleStatsQseDTO = VehicleStatsQseDTO(
                 tripDate = stats.tripDate,
                 vehicleId = stats.vehicleId,
-                distanceSum = stats.distanceSum,
+                distanceSum = formatDistance(stats.distanceSum ?: 0),
+                highwayDistanceSum = formatDistance(stats.highwayDistanceSum ?: 0),
+                roadDistanceSum = formatDistance(stats.roadDistanceSum ?: 0),
+                cityDistanceSum = formatDistance(stats.cityDistanceSum ?: 0),
                 durationPerTripAvg = formatTime(stats.durationPerTripAvg ?: 0),
                 licensePlate = stats.licensePlate,
                 driverName = stats.driverName,
@@ -212,7 +214,7 @@ open class VehicleService(
                 drivingTime = formatTime(stats.drivingTime ?: 0),
                 rangeAvg = formatTime(stats.rangeAvg ?: 0),
                 idleDuration = formatTime(stats.idleDuration ?: 0),
-                distanceMax = stats.distanceMax,
+                distanceMax = formatDistance(stats.distanceMax ?: 0),
                 highwayAccelScore = stats.highwayAccelScore,
                 roadAccelScore = stats.roadAccelScore,
                 cityAccelScore = stats.cityAccelScore,
@@ -243,33 +245,52 @@ open class VehicleService(
         val longestTrip = vehiclesStats.maxOf { it.distanceMax ?:0 }
 
         // get accel stddev averages weighted by distance and compute selection scores with them
-        //todo
-        // Sévérité d'usage total de la flotte
-        // Sévérité d'usage de la flotte en virage
-        // Sévérité d'usage de la flotte en accélération
-        // Exposition aux risques totale
-        // Exposition aux risques en virage
-        // Exposition aux risques en accélération
-        // Split distance
-
-
-        val avgTurnScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.turnScore?.times(it) } }.sum().toDouble() / totalDistance
-        val avgAccelScore = vehiclesStats.mapNotNull { v -> v.distanceSum?.let { v.accelScore?.times(it) } }.sum().toDouble() / totalDistance
-        val selectionScore = getLetterScoring(min(avgTurnScore, avgAccelScore))
-        val severityOfUseTurn = getLetterScoring(avgTurnScore)
-        val severityOfAcceleration = getLetterScoring(avgAccelScore)
+        val avgScore = vehiclesStats.mapNotNull { v ->
+            if (v.turnScore != null && v.accelScore != null)
+                (v.turnScore!! + v.accelScore!!) / 2
+            else null
+        }.average()
+        val avgTurnScore = vehiclesStats.mapNotNull { v -> v.turnScore }.average()
+        val avgAccelScore = vehiclesStats.mapNotNull { v -> v.accelScore }.average()
+        val weightedAvgScore = vehiclesStats.mapNotNull { v ->
+            if (v.distanceSum != null && v.turnScore != null && v.accelScore != null)
+                v.distanceSum!!.toDouble() * (v.turnScore!! + v.accelScore!!) / 2
+            else null
+        }.sum() / totalDistance
+        val weightedAvgTurnScore = vehiclesStats.mapNotNull { v ->
+            if (v.distanceSum != null && v.turnScore != null && v.accelScore != null)
+                v.distanceSum!! * v.turnScore!!
+            else null
+        }.sum().toDouble() / totalDistance
+        val weightedAvgAccelScore = vehiclesStats.mapNotNull { v ->
+            if (v.distanceSum != null && v.turnScore != null && v.accelScore != null)
+                v.distanceSum!! * v.accelScore!!
+            else null
+        }.sum().toDouble() / totalDistance
 
         return mapOf(
-            "totalDistanceSum" to totalDistance,
+            "totalDistanceSum" to "${formatDistance(totalDistance)} km",
             "totalDrivingTime" to totalDrivingTime,
             "totalWaitingTime" to totalWaitingTime,
-            "selectionScore" to selectionScore,
-            "severityOfUseTurn" to severityOfUseTurn,
-            "severityOfAcceleration" to severityOfAcceleration,
-            "longestTrip" to longestTrip,
+            "longestTrip" to "${formatDistance(longestTrip)} km",
             "averageRangeAvg" to averageRangeAvg,
-            "idleDurationTotal" to idleDurationTotal
+            "idleDurationTotal" to idleDurationTotal,
+            "useSeverity" to getLetterScoring(avgScore),
+            "turnUseSeverity" to getLetterScoring(avgTurnScore),
+            "accelerationUseSeverity" to getLetterScoring(avgAccelScore),
+            "riskExposure" to getLetterScoring(weightedAvgScore),
+            "turnRiskExposure" to getLetterScoring(weightedAvgTurnScore),
+            "accelerationRiskExposure" to getLetterScoring(weightedAvgAccelScore)
         )
+    }
+
+    private fun formatDistance(distance: Int): String {
+        return distance
+            .toString()
+            .reversed()
+            .chunked(3)
+            .joinToString(" ")
+            .reversed()
     }
 
     private fun formatTime(seconds: Long): String {

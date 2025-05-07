@@ -134,7 +134,7 @@ const QSE_ALERTS_NAMINGS = {
             class="dynamic-tt-header">
           <td rowspan="2">Véhicule</td>
           <td rowspan="2">Conducteur</td>
-          <td rowspan="2">Durée de conduite moyenne</td>
+          <td rowspan="2">Durée de conduite totale</td>
           <td rowspan="2">Amplitude moyenne</td>
           <td rowspan="2">Temps de moteur tournant estimé total</td>
 
@@ -175,7 +175,7 @@ const QSE_ALERTS_NAMINGS = {
           <ng-template #noDriver>
             <td>Véhicule non attribué</td>
           </ng-template>
-          <td>{{ rowData.vehicle.vehicleStatsQse.durationPerTripAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStatsQse.drivingTime }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
           <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.highwayDistanceSum }} km</td>

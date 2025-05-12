@@ -70,7 +70,7 @@ export interface Stat {
         [displayFn]="displayFn"
         [colorFn]="colorFn"
         (selectionChange)="filterByKey($event)"
-        buttonWidth="18.5vw"
+        buttonWidth="18vw"
         [clickable]="false"
         fontSize="1rem"
         textColor="black">
@@ -82,7 +82,7 @@ export interface Stat {
         [displayFn]="displayFn"
         [colorFn]="colorFn"
         (selectionChange)="filterByKey($event)"
-        buttonWidth="18.5vw"
+        buttonWidth="18vw"
         [clickable]="true"
         fontSize="1rem"
         textColor="black">
@@ -145,9 +145,9 @@ export interface Stat {
             <td>Véhicule non attribué</td>
           </ng-template>
           <td>{{ rowData.vehicle.vehicleStats.tripCount }}</td>
-          <td>{{ rowData.vehicle.vehicleStats.distanceSum }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.distanceSum }} km</td>
           <td>{{ rowData.vehicle.vehicleStats.drivingTime }}</td>
-          <td>{{ rowData.vehicle.vehicleStats.distancePerTripAvg }}</td>
+          <td>{{ rowData.vehicle.vehicleStats.distancePerTripAvg }} km</td>
           <td>{{ rowData.vehicle.vehicleStats.durationPerTripAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStats.hasLateStartSum }}</td>
           <td>{{ rowData.vehicle.vehicleStats.hasLateStop }}</td>

@@ -2,13 +2,30 @@ package net.enovea.vehicle.vehicleStats
 
 import net.enovea.team.TeamDTO
 
-data class VehicleStatsDTO(
+data class VehicleStatsQueryResult(
     val tripDate: java.time.LocalDate?,
     val vehicleId: String?,
     val tripCount: Int,
     val distanceSum: Int?,
-    val drivingTime: String?,
+    val drivingTime: Long?,
     val distancePerTripAvg: Int?,
+    val durationPerTripAvg: Long?,
+    val hasLateStartSum: Int,
+    val hasLateStop: Int,
+    val hasLastTripLong: Int,
+    val rangeAvg: Long?,
+    val waitingDuration: Long?,
+    var licensePlate: String? = null,
+    var driverName: String? = null,
+    )
+
+data class VehicleStatsDTO(
+    val tripDate: java.time.LocalDate?,
+    val vehicleId: String?,
+    val tripCount: Int,
+    val distanceSum: String?,
+    val drivingTime: String?,
+    val distancePerTripAvg: String?,
     val durationPerTripAvg: String?,
     val hasLateStartSum: Int,
     val hasLateStop:Int,
@@ -17,13 +34,12 @@ data class VehicleStatsDTO(
     val waitingDuration: String?,
     var licensePlate: String? = null,
     var driverName: String? = null,
-    )
+)
 
 data class VehiclesStatsDTO(
     val vehicleStats: VehicleStatsDTO,
     var team: TeamDTO?,
     var teamHierarchy:String?
-
 )
 
 data class VehicleStatsQseQueryResult(

@@ -12,8 +12,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         vehicleIds: List<String>? = null,
         driversIds: List<String>? = null,
         dorisView: String
-    ): List<VehicleStatsDTO> {
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
+    ): List<VehicleStatsQueryResult> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQueryResult>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
@@ -23,21 +23,14 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         :startDate AS trip_date,
                         SUM(trip_count) AS trip_count,
                         ROUND(SUM(distance_sum)/1000) AS distance_sum,
-                        CONCAT(LPAD(CAST(FLOOR(SUM(duration_sum) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration_sum) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
                         ROUND((SUM(distance_sum) / SUM(trip_count))/1000) AS distance_per_trip_avg,
-                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
+                        SUM(duration_sum) / SUM(trip_count) AS duration_per_trip_avg,
+                        SUM(duration_sum) AS driving_time,
                         SUM(has_late_start) AS has_late_start_sum,
                         SUM(has_late_stop) AS has_late_stop_sum,
                         SUM(has_last_trip_long) AS has_last_trip_long_sum,
-                        CONCAT(
-                            LPAD(CAST(FLOOR(AVG(`range`) / 3600) AS STRING), 2, '0'), ':',
-                            LPAD(CAST(FLOOR((AVG(`range`) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS range_avg,
-                        CONCAT(
-                            LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
-                            LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
-                        ) AS waiting_duration
-                    
+                        AVG(`range`) AS range_avg,
+                        SUM(`range`) - SUM(duration_sum) AS waiting_duration
                     FROM (
                         SELECT
                             vehicle_id,
@@ -108,15 +101,15 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         bindList("driversIds", driversIds)
                     }
                 }
-                .mapTo(VehicleStatsDTO::class.java)
+                .mapTo(VehicleStatsQueryResult::class.java)
                 .list()
         }
     }
 
     fun findVehicleDailyStats(
         startDate: String, endDate: String, vehicleId: String , dorisView: String
-    ): List<VehicleStatsDTO> {
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
+    ): List<VehicleStatsQueryResult> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQueryResult>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT  
@@ -126,21 +119,14 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             license_plate,
                             COUNT(*) AS trip_count,
                             ROUND(SUM(distance)/1000) AS distance_sum,
-                            CONCAT(LPAD(CAST(FLOOR(SUM(duration) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
                             ROUND((SUM(distance) / COUNT(*))/1000) AS distance_per_trip_avg,
-                            CONCAT( LPAD(CAST(FLOOR(SUM(duration) / COUNT(*) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration) / COUNT(*)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
-                            CONCAT(
-                                LPAD(CAST(FLOOR(time_to_sec(timediff(MAX(end_time), MIN(start_time))) / 3600) AS STRING), 2, '0'), ':',
-                                LPAD(CAST(FLOOR((time_to_sec(timediff(MAX(end_time), MIN(start_time))) % 3600) / 60) AS STRING), 2, '0')
-                            ) AS range_avg,
+                            SUM(duration) / COUNT(*) AS duration_per_trip_avg,
+                            SUM(duration) AS driving_time,
+                            TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) AS range_avg,
                             hour(minutes_add(MIN(start_time), 30)) >= 8 AS has_late_start_sum,
                             hour(MAX(end_time)) > 18 AS has_late_stop_sum,
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long_sum,
-                            CONCAT(
-                                LPAD(CAST(FLOOR((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) / 3600) AS STRING), 2, '0'), ':',
-                                LPAD(CAST(FLOOR(((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) % 3600) / 60) AS STRING), 2, '0')
-                            ) AS waiting_duration
-                    
+                            TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration) AS waiting_duration
                         FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
@@ -156,7 +142,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 .bind("endDate", endDate)
                 .bind("vehicleId", vehicleId)
                 .define("dorisView", dorisView)
-                .mapTo(VehicleStatsDTO::class.java)
+                .mapTo(VehicleStatsQueryResult::class.java)
                 .list()
         }
     }

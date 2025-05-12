@@ -15,7 +15,7 @@
       </tr>
     </ng-template>
     <ng-template #body let-entity>
-      <tr (click)="selectVehicle(entity)" class="tr-vehicle">
+      <tr (click)="selectVehicle(entity)" [class]="{'tr-vehicle': true, 'tr-selected': vehicleToDisplay == entity.vehicle}">
         <td>{{ entity.vehicle.id }}</td>
         <td>{{ entity.vehicle.licenseplate }}</td>
       </tr>
@@ -34,7 +34,7 @@
               </tr>
             </ng-template>
             <ng-template #body let-period>
-              <tr (click)="selectPeriod(period, entity.vehicle)" class="tr-period">
+              <tr (click)="selectPeriod(period, entity.vehicle)" [class]="{'tr-period': true, 'tr-selected': periodToDisplay == period}">
                 <td>{{ period.deviceId }}</td>
                 <td>{{ dateFormatter.formatDateHM(period.beginDate) }}</td>
                 <td>{{ period.phi }}</td>

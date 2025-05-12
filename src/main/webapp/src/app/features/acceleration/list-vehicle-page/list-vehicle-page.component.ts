@@ -6,8 +6,8 @@ import {AccelerationService} from "../acceleration.service";
 import { TableModule } from 'primeng/table';
 import {NgIf} from "@angular/common";
 import {DATE_FORMATTER} from "../../../core/date-formatter"
-import {GgDiagramCalibrationComponent} from "../gg-diagram-calibration/gg-diagram-calibration.component";
 import VehicleDTO = dto.VehicleDTO;
+import {GgDiagramCalibrationComponent} from "../gg-diagram-calibration/gg-diagram-calibration.component";
 
 
 @Component({
@@ -19,9 +19,10 @@ import VehicleDTO = dto.VehicleDTO;
 })
 export class ListVehiclePageComponent implements OnInit{
 
-  vehicleAccelPeriods: VehicleAccelPeriodsDTO[]
 
-  vehicleSelected: VehicleAccelPeriodsDTO[] = []
+  vehicleAccelPeriods: VehicleAccelPeriodsDTO[];
+
+  vehicleSelected: VehicleAccelPeriodsDTO[] = [];
 
   periodToDisplay?: DeviceAccelAnglesDTO;
   vehicleToDisplay?: VehicleDTO;
@@ -35,7 +36,7 @@ export class ListVehiclePageComponent implements OnInit{
   ngOnInit(): void {
     this.accelerationService.listCalibrationPeriods().subscribe({
       next: (vehicleAccelPeriods) => {
-        this.vehicleAccelPeriods = vehicleAccelPeriods
+        this.vehicleAccelPeriods = vehicleAccelPeriods;
       },
       error: (err) => {
         console.error('Error loading list vehicle accel periods', err);
@@ -44,11 +45,11 @@ export class ListVehiclePageComponent implements OnInit{
   }
 
   selectVehicle(entity: VehicleAccelPeriodsDTO) {
-    let indexEntity = this.vehicleSelected.indexOf(entity)
+    let indexEntity = this.vehicleSelected.indexOf(entity);
     if (indexEntity != -1) {
-      this.vehicleSelected.splice(indexEntity, 1)
+      this.vehicleSelected.splice(indexEntity, 1);
     } else {
-      this.vehicleSelected.push(entity)
+      this.vehicleSelected.push(entity);
     }
   }
 

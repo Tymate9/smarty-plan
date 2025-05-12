@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {GgDiagramComponent} from "../gg-diagram/gg-diagram.component";
 import {Button} from "primeng/button";
 import {FormsModule} from "@angular/forms";
@@ -17,7 +17,7 @@ import { SelectModule } from 'primeng/select';
   standalone: true,
   styleUrl: './gg-diagram-calibration.component.scss'
 })
-export class GgDiagramCalibrationComponent {
+export class GgDiagramCalibrationComponent implements OnChanges{
 
   @Input()
   vehicle?: VehicleDTO;
@@ -46,16 +46,24 @@ export class GgDiagramCalibrationComponent {
     if (this.period){
       this.accelerationService.computeGGDiagram(this.period!!.deviceId, this.period!!.beginDate, this.proj, this.phi, this.theta, this.psi).subscribe({
         next: (ggDiagram) => {
-          this.ggDiagram = ggDiagram
+          this.ggDiagram = ggDiagram;
         },
         error: (err) => {
           console.error('Erreur chargement gg-diagram', err);
         }
       })
-    } else this.ggDiagram = []
+    } else this.ggDiagram = [];
   }
 
   saveAngles() {
 
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.proj = this.projections[0];
+    this.phi = changes["period"].currentValue.phi || 0;
+    this.theta = changes["period"].currentValue.theta || 0;
+    this.psi = changes["period"].currentValue.psi || 0;
+    this.displayGgDiagram();
   }
 }

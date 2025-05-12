@@ -18,18 +18,18 @@ import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/tog
 
 
 const STATS_DETAILS: Record<string, { displayName: string, color: string }> = {
-  totalHasLastTripLong: { displayName: 'DERNIER TRAJET>45mn', color: '#d1d5db'},
-  totalHasLateStartSum: { displayName: 'DEPART TARDIF', color: '#d1d5db'},
-  totalHasLateStop: { displayName: 'ARRETS TARDIFS', color: '#d1d5db'},
-  averageDistance: { displayName: 'DISTANCE MOYENNE/TRAJET', color: '#fee2e2' },
-  averageDuration: { displayName: 'TEMPS DE CONDUITE DECLARE TOTAL', color: '#fee2e2' },
-  averageRangeAvg: { displayName: 'AMPLITUDE MOYENNE', color: '#fee2e2' },
-  totalDistanceSum: { displayName: 'DISTANCE PARCOURUE', color: '#fee2e2' },
-  totalDrivers: { displayName: 'NOMBRE TOTAL DE CONDUCTEURS', color: '#fee2e2'},
-  totalDrivingTime: { displayName: 'TEMPS DE CONDUITE TOTAL', color: '#fee2e2'},
-  totalTripCount: { displayName: 'NOMBRE DE TRAJETS EFFECTUES', color: '#fee2e2'},
-  totalVehicles: { displayName: 'NOMBRE TOTAL DE VEHICULES', color: '#fee2e2'},
-  totalWaitingTime: { displayName: 'TEMPS D\'ARRET TOTAL', color: '#fee2e2'},
+  totalHasLastTripLong: { displayName: 'DERNIER TRAJET>45mn', color: '#a0b2d9'},
+  totalHasLateStartSum: { displayName: 'DEPART TARDIF', color: '#a0b2d9'},
+  totalHasLateStop: { displayName: 'ARRETS TARDIFS', color: '#a0b2d9'},
+  averageDistance: { displayName: 'DISTANCE MOYENNE/TRAJET', color: '#fda9a9' },
+  averageDuration: { displayName: 'TEMPS DE CONDUITE DECLARE TOTAL', color: '#fda9a9' },
+  averageRangeAvg: { displayName: 'AMPLITUDE MOYENNE', color: '#fda9a9' },
+  totalDistanceSum: { displayName: 'DISTANCE PARCOURUE', color: '#fda9a9' },
+  totalDrivers: { displayName: 'NOMBRE TOTAL DE CONDUCTEURS', color: '#fda9a9'},
+  totalDrivingTime: { displayName: 'TEMPS DE CONDUITE TOTAL', color: '#fda9a9'},
+  totalTripCount: { displayName: 'NOMBRE DE TRAJETS EFFECTUES', color: '#fda9a9'},
+  totalVehicles: { displayName: 'NOMBRE TOTAL DE VEHICULES', color: '#fda9a9'},
+  totalWaitingTime: { displayName: 'TEMPS D\'ARRET TOTAL', color: '#fda9a9'},
 };
 
 export interface Stat {
@@ -62,32 +62,32 @@ export interface Stat {
 <!--      [keyToPropertyMap]="keyToPropertyMap"-->
 <!--      (filterClicked)="filterByKey($event)">-->
 <!--    </app-indicator-buttons>-->
-
-    <app-toggle-buttons-group
-      [items]="statsCounts.slice(0, 6)"
-      [selectedItem]="selectedStats"
-      [identifierFn]="identifierFn"
-      [displayFn]="displayFn"
-      [colorFn]="colorFn"
-      (selectionChange)="filterByKey($event)"
-      buttonWidth="18.5vw"
-      [clickable]="false"
-      fontSize="0.7rem"
-      textColor="black">
-    </app-toggle-buttons-group>
-    <app-toggle-buttons-group
-      [items]="statsCounts.slice(6, 12)"
-      [selectedItem]="selectedStats"
-      [identifierFn]="identifierFn"
-      [displayFn]="displayFn"
-      [colorFn]="colorFn"
-      (selectionChange)="filterByKey($event)"
-      buttonWidth="18.5vw"
-      [clickable]="true"
-      fontSize="0.7rem"
-      textColor="black">
-    </app-toggle-buttons-group>
-
+    <div class="indicators">
+      <app-toggle-buttons-group
+        [items]="statsCounts.slice(0, 9)"
+        [selectedItem]="selectedStats"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterByKey($event)"
+        buttonWidth="18.5vw"
+        [clickable]="false"
+        fontSize="1rem"
+        textColor="black">
+      </app-toggle-buttons-group>
+      <app-toggle-buttons-group
+        [items]="statsCounts.slice(9)"
+        [selectedItem]="selectedStats"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterByKey($event)"
+        buttonWidth="18.5vw"
+        [clickable]="true"
+        fontSize="1rem"
+        textColor="black">
+      </app-toggle-buttons-group>
+    </div>
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
@@ -117,11 +117,11 @@ export interface Stat {
             class="dynamic-tt-header">
           <td>Véhicule</td>
           <td>Conducteur</td>
-          <td>Nb de trajets effectués (nb)</td>
+          <td>Nb de trajets effectués</td>
           <td>Distance parcourue</td>
-          <td>Temps de conduite (en HH:MM)</td>
-          <td>Distance moyenne / Trajet (en km)</td>
-          <td>Durée moyenne / Trajet (en HH:MM)</td>
+          <td>Temps de conduite</td>
+          <td>Distance moyenne / trajet</td>
+          <td>Durée moyenne / trajet</td>
           <td>Départ tardif (>7H30)</td>
           <td>Dernier arrêt tardif (>18H)</td>
           <td>Dernier trajet long (>45mn)</td>
@@ -176,11 +176,11 @@ export interface Stat {
             <tr>
               <th>Date</th>
               <th>Conducteur</th>
-              <th>Nb de trajets effectués (nb)</th>
-              <th>Distance parcourue (en km)</th>
-              <th>Temps de conduite (en HH:MM)</th>
-              <th>Distance moyenne / Trajet (en km)</th>
-              <th>Durée moyenne / Trajet (en HH:MM)</th>
+              <th>Nb de trajets effectués</th>
+              <th>Distance parcourue</th>
+              <th>Temps de conduite</th>
+              <th>Distance moyenne / trajet</th>
+              <th>Durée moyenne / trajet</th>
               <th>Départ tardif (>7H30)</th>
               <th>Dernier arrêt tardif (>18H)</th>
               <th>Dernier trajet long (>45mn)</th>
@@ -227,6 +227,11 @@ export interface Stat {
     ToggleButtonsGroupComponent
   ],
   styles: [`
+    .indicators {
+      width: 96vw;
+      margin: 0 auto;
+    }
+
     /* Make dialog content flexible */
     ::ng-deep .p-dialog {
       max-width: 95%;

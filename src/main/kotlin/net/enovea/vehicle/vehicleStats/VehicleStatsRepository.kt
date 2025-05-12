@@ -55,6 +55,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
+                          AND duration > 60
 
                            ${
                     if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
@@ -145,6 +146,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
                           AND vehicle_id = :vehicleId
+                          AND duration > 60
                         GROUP BY vehicle_id, date(start_time), driver_name , license_plate
                         ORDER BY trip_date
                         ;

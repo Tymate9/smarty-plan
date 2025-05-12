@@ -5,6 +5,8 @@
   <br/>
   <span>Date de début : {{ dateFormatter.formatDateHM(period?.beginDate) || "Choisissez une période"}}</span>
   <br/>
+  <p-select [options]="projections" [(ngModel)]="proj" />
+  <br/>
   <label for="phi">&Phi; :</label>
   <input type="number" [(ngModel)]="phi" id="phi" name="phi"/>
   <label for="theta">&Theta; :</label>

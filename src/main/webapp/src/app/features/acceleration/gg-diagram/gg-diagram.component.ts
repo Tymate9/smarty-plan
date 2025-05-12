@@ -23,7 +23,6 @@ export class GgDiagramComponent {
     this._ggDiagram = this.transformJsonData(value)
   }
 
-
   private max_bucket = 100
   private gg_width = this.max_bucket * 2 + 1
 
@@ -34,7 +33,7 @@ export class GgDiagramComponent {
     let z = Array.from({length: this.gg_width}, (x, i) => Array(this.gg_width).fill(-7))
     if (data) {
       for (let accel of data) {
-        z[accel.idxx + this.max_bucket][accel.idxy + this.max_bucket] = accel.value
+        z[accel.idxVert + this.max_bucket][accel.idxHoriz + this.max_bucket] = accel.value
       }
     }
 

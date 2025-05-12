@@ -5,8 +5,8 @@ import org.jdbi.v3.core.statement.StatementContext
 import java.sql.ResultSet
 
 data class GGDiagramDTO(
-    val idxx: Int,
-    val idxy: Int,
+    val idxVert: Int,
+    val idxHoriz: Int,
     val value: Double
 )
 
@@ -15,7 +15,8 @@ class GGDiagramDTORowMapper : RowMapper<GGDiagramDTO> {
         rs: ResultSet,
         ctx: StatementContext
     ): GGDiagramDTO = GGDiagramDTO(
-        idxx = rs.getInt(GGDiagramDTO::idxx.name),
-        idxy = rs.getInt(GGDiagramDTO::idxy.name),
-        value = rs.getDouble(GGDiagramDTO::value.name))
+        idxVert = rs.getInt(GGDiagramDTO::idxVert.name),
+        idxHoriz = rs.getInt(GGDiagramDTO::idxHoriz.name),
+        value = rs.getDouble(GGDiagramDTO::value.name),
+    )
 }

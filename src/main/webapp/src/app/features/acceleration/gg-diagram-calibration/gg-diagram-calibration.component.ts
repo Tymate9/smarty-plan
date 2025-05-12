@@ -8,10 +8,11 @@ import GGDiagramDTO = dto.GGDiagramDTO;
 import DeviceAccelAnglesDTO = dto.DeviceAccelAnglesDTO;
 import VehicleDTO = dto.VehicleDTO;
 import {DATE_FORMATTER} from "../../../core/date-formatter";
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'gg-diagram-calibration',
-  imports: [GgDiagramComponent, Button, FormsModule],
+  imports: [GgDiagramComponent, Button, FormsModule, SelectModule],
   templateUrl: './gg-diagram-calibration.component.html',
   standalone: true,
   styleUrl: './gg-diagram-calibration.component.scss'
@@ -22,6 +23,9 @@ export class GgDiagramCalibrationComponent {
   vehicle?: VehicleDTO;
   @Input()
   period?: DeviceAccelAnglesDTO;
+
+  projections = ['XY', 'XZ', 'YZ']
+  proj: string = this.projections[0];
 
   //deviceId: number = 161;
   //beginDate: string = "2025-01-01T00:00:00";
@@ -40,7 +44,7 @@ export class GgDiagramCalibrationComponent {
 
   displayGgDiagram() {
     if (this.period){
-      this.accelerationService.computeGGDiagram(this.period!!.deviceId,this.period!!.beginDate,this.phi,this.theta,this.psi).subscribe({
+      this.accelerationService.computeGGDiagram(this.period!!.deviceId, this.period!!.beginDate, this.proj, this.phi, this.theta, this.psi).subscribe({
         next: (ggDiagram) => {
           this.ggDiagram = ggDiagram
         },

@@ -22,31 +22,45 @@ import java.time.format.DateTimeParseException
 //@Authenticated
 class AccelerationResource(
     private val ggDiagramService: GGDiagramService,
-    private val calibrationService: CalibrationService) {
-
-    @GET
-    @Path("/{id}/{beginDate}/gg-diagram")
-    fun computeGGDiagram(@PathParam("id") deviceId: Int,
-                         @PathParam("beginDate") beginDate: String,
-                         @QueryParam("phi") phi: Int,
-                         @QueryParam("theta") theta: Int,
-                         @QueryParam("psi") psi: Int
-    ): Response {
-        try {
-            val beginTimestamp = Timestamp.from(Instant.parse(beginDate))
-            val (begin, end) = ggDiagramService.getPeriodBeginAndEnd(deviceId, beginTimestamp)
-            val ggDiagram = ggDiagramService.computeGGDiagram(deviceId, begin, end, phi, theta, psi)
-            return Response.ok(ggDiagram).build()
-        } catch (e: DateTimeParseException) {
-            return Response.status(Status.BAD_REQUEST).entity(e.message).build()
-        } catch (e: NotFoundException) {
-            return Response.status(Status.NOT_FOUND).build()
-        }
-    }
+    private val calibrationService: CalibrationService,
+) {
 
     @GET
     fun listCalibrationPeriods(): Response {
         val vehicleWithPeriods = calibrationService.listCalibrationPeriods()
         return Response.ok(vehicleWithPeriods).build()
     }
+
+    @GET
+    @Path("/{id}/{beginDate}/gg-diagram")
+    fun computeGGDiagram(
+        @PathParam("id") deviceId: Int,
+        @PathParam("beginDate") beginDate: String,
+        @QueryParam("proj") proj: String,
+        @QueryParam("phi") phi: Int,
+        @QueryParam("theta") theta: Int,
+        @QueryParam("psi") psi: Int,
+    ): Response {
+        val beginTimestamp = try {
+            Timestamp.from(Instant.parse(beginDate))
+        } catch (e: DateTimeParseException) {
+            return Response.status(Status.BAD_REQUEST).entity(e.message).build()
+        }
+
+        val ggProjection = try {
+            GGProjection.valueOf(proj.uppercase())
+        } catch (e: IllegalArgumentException) {
+            return Response.status(Status.BAD_REQUEST).entity(e.message).build()
+        }
+
+        val (begin, end) = try {
+            ggDiagramService.getPeriodBeginAndEnd(deviceId, beginTimestamp)
+        } catch (e: NotFoundException) {
+            return Response.status(Status.NOT_FOUND).build()
+        }
+
+        val ggDiagram = ggDiagramService.computeGGDiagram(deviceId, begin, end, ggProjection, phi, theta, psi)
+        return Response.ok(ggDiagram).build()
+    }
+
 }

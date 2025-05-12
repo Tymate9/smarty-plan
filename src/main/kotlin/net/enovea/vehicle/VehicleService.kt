@@ -177,9 +177,26 @@ open class VehicleService(
 
 
     //function to get the daily statistics of a vehicle over a period
-    fun getVehicleStatsDaily(startDate: String, endDate: String , vehicleId: String, vehiclesType: String): List<VehicleStatsQueryResult>{
+    fun getVehicleStatsDaily(startDate: String, endDate: String , vehicleId: String, vehiclesType: String): List<VehicleStatsDTO>{
         val dorisView = getDorisView(vehiclesType)
-        return  vehicleStatsRepository.findVehicleDailyStats(startDate,endDate,vehicleId,dorisView)
+        return  vehicleStatsRepository.findVehicleDailyStats(startDate,endDate,vehicleId,dorisView).map {
+            VehicleStatsDTO(
+                tripDate = it.tripDate,
+                vehicleId = it.vehicleId,
+                tripCount = it.tripCount,
+                distanceSum = formatDistance(it.distanceSum ?: 0),
+                drivingTime = formatDuration(it.drivingTime ?: 0),
+                distancePerTripAvg = formatDistance(it.distancePerTripAvg ?: 0),
+                durationPerTripAvg = formatDuration(it.durationPerTripAvg ?: 0),
+                hasLateStartSum = it.hasLateStartSum,
+                hasLateStop = it.hasLateStop,
+                hasLastTripLong = it.hasLastTripLong,
+                rangeAvg = formatDuration(it.rangeAvg ?: 0),
+                waitingDuration = formatDuration(it.waitingDuration ?: 0),
+                licensePlate = it.licensePlate,
+                driverName = it.driverName
+            )
+        }
     }
 
     //function returns vehicles statistics displayed on the page ('QSE  reports')

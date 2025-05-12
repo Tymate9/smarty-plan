@@ -193,9 +193,9 @@ export interface Stat {
               <td>{{ dailyStat.tripDate }}</td>
               <td>{{ dailyStat.driverName }}</td>
               <td>{{ dailyStat.tripCount }}</td>
-              <td>{{ dailyStat.distanceSum }}</td>
+              <td>{{ dailyStat.distanceSum }} km</td>
               <td>{{ dailyStat.drivingTime }}</td>
-              <td>{{ dailyStat.distancePerTripAvg }}</td>
+              <td>{{ dailyStat.distancePerTripAvg }} km</td>
               <td>{{ dailyStat.durationPerTripAvg }}</td>
               <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#fca5a5' : 'transparent'}">
                 {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}

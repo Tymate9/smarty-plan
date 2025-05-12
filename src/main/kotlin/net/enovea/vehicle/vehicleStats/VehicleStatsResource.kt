@@ -45,7 +45,7 @@ class VehicleStatsResource (
         @QueryParam("endDate") endDate: String,
         @QueryParam("vehicleId") vehicleId: String,
         @QueryParam("vehiclesType") vehiclesType: String,
-    ): List<VehicleStatsQueryResult> {
+    ): List<VehicleStatsDTO> {
         return vehicleService.getVehicleStatsDaily(startDate,endDate,vehicleId,vehiclesType)
     }
 

@@ -1,10 +1,13 @@
 package net.enovea.acceleration
 
+import io.quarkus.security.Authenticated
+import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.Response.Status
+import net.enovea.auth.ROLE_ADMIN
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.format.DateTimeParseException
@@ -12,13 +15,14 @@ import java.time.format.DateTimeParseException
 @Path("/api/acceleration")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-//@Authenticated
+@Authenticated
 class AccelerationResource(
     private val ggDiagramService: GGDiagramService,
     private val calibrationService: CalibrationService,
 ) {
 
     @GET
+    @RolesAllowed(ROLE_ADMIN)
     fun listCalibrationPeriods(): Response {
         val vehicleWithPeriods = calibrationService.listCalibrationPeriods()
         return Response.ok(vehicleWithPeriods).build()
@@ -26,6 +30,7 @@ class AccelerationResource(
 
     @GET
     @Path("/{id}/{beginDate}/gg-diagram")
+    @RolesAllowed(ROLE_ADMIN)
     fun computeGGDiagram(
         @PathParam("id") deviceId: Int,
         @PathParam("beginDate") beginDate: String,
@@ -59,6 +64,7 @@ class AccelerationResource(
     @POST
     @Path("/{id}/{beginDate}")
     @Transactional
+    @RolesAllowed(ROLE_ADMIN)
     fun saveAngles(
         @PathParam("id") deviceId: Int,
         @PathParam("beginDate") beginDate: String,

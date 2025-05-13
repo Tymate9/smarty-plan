@@ -8,13 +8,15 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 import {Subscription} from "rxjs";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import {TreeTableModule} from "primeng/treetable";
-import {NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
+import {AsyncPipe, NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
 import {Button} from "primeng/button";
 import {Dialog} from "primeng/dialog";
 import {DateRangePickerComponent} from "../dateRange/dateRange.component";
 import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
 import {TableModule} from "primeng/table";
 import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
+import {LoadingService} from "../../services/loading.service";
+import {ProgressSpinner} from "primeng/progressspinner";
 
 
 const STATS_DETAILS: Record<string, { displayName: string, color: string }> = {
@@ -42,6 +44,9 @@ export interface Stat {
 @Component({
   selector: 'app-report',
   template: `
+    <!-- Spinner local au composant -->
+    <p-progressSpinner *ngIf="(loadingService.loading$ | async)"></p-progressSpinner>
+
 
     <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
 
@@ -224,9 +229,22 @@ export interface Stat {
     NgStyle,
     DateRangePickerComponent,
     TableModule,
-    ToggleButtonsGroupComponent
+    ToggleButtonsGroupComponent,
+    AsyncPipe,
+    ProgressSpinner
   ],
   styles: [`
+    p-progressSpinner {
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      margin-top: -75px;
+      background-color: #0001;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+
     .indicators {
       width: 96vw;
       margin: 0 auto;
@@ -259,7 +277,8 @@ export interface Stat {
       overflow-y: auto;
     }
 
-  `]
+  `],
+  providers: [LoadingService]
 })
 
 export class ReportComponent implements OnInit {
@@ -281,7 +300,12 @@ export class ReportComponent implements OnInit {
   selectedStats: Stat | null = null;
 
 
-  constructor(private filterService: FilterService , private vehicleService: VehicleService) {}
+  constructor(
+    private filterService: FilterService,
+    private vehicleService: VehicleService,
+    protected loadingService: LoadingService,
+  ) {}
+
   @Input()
   vehicleId: string = '';
   @Input()
@@ -319,6 +343,7 @@ export class ReportComponent implements OnInit {
   //Récupérer des statistiques pour une période spécifique
   fetchVehicleStats(): void {
     if (this.dateFrom && this.dateTo) {
+      this.loadingService.setLoading(true);
 
       const startDate = this.dateFrom.getFullYear() + '-' +
         String(this.dateFrom.getMonth() + 1).padStart(2, '0') + '-' +
@@ -357,9 +382,12 @@ export class ReportComponent implements OnInit {
               licensePlate: vehicle.vehicleStats.licensePlate || 'unknown',
             })
           )
+
+          this.loadingService.setLoading(false)
         },
         error: (err) => {
           console.error('Erreur lors de la récupération des statistiques du véhicule:', err);
+          this.loadingService.setLoading(false);
         }
       });
     } else {

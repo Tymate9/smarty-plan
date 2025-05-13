@@ -11,12 +11,14 @@ import {dto} from "../../../habarta/dto";
 import {TreeNode} from "primeng/api";
 import {DateRangePickerComponent} from "../dateRange/dateRange.component";
 import {TreeTableModule} from "primeng/treetable";
-import {NgClass, NgIf} from "@angular/common";
+import {AsyncPipe, NgClass, NgIf} from "@angular/common";
 import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
 import {Stat} from "./report.component";
 import {Divider} from "primeng/divider";
 import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
 import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
+import {LoadingService} from "../../services/loading.service";
+import {ProgressSpinner} from "primeng/progressspinner";
 
 
 const QSE_STATS_DETAILS: Record<string, {displayName: string, color: string, selectable: boolean}> = {
@@ -50,6 +52,9 @@ const QSE_ALERTS_NAMINGS = {
 @Component({
   selector: 'app-qse-report',
   template: `
+    <!-- Spinner local au composant -->
+    <p-progressSpinner *ngIf="(loadingService.loading$ | async)"></p-progressSpinner>
+
     <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
     <!--    <app-indicator-buttons-->
     <!--      [statsMap]="vehiclesStatsTotal"-->
@@ -231,9 +236,22 @@ const QSE_ALERTS_NAMINGS = {
     NgClass,
     NgIf,
     ToggleButtonsGroupComponent,
-    Divider
+    Divider,
+    AsyncPipe,
+    ProgressSpinner
   ],
   styles: [`
+    p-progressSpinner {
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      margin-top: -75px;
+      background-color: #0001;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+
     .indicators {
       width: 96vw;
       margin: 0 auto;
@@ -243,12 +261,16 @@ const QSE_ALERTS_NAMINGS = {
       text-align: center;
       text-wrap: nowrap;
     }
-  `]
+  `],
+  providers: [LoadingService]
 })
 export class QseReportComponent implements OnInit, OnDestroy {
 
-  constructor(private filterService: FilterService, private vehicleService: VehicleService) {
-  }
+  constructor(
+    private filterService: FilterService,
+    private vehicleService: VehicleService,
+    protected loadingService: LoadingService
+  ) {}
 
   private filtersSubscription?: Subscription;
   filters: { agencies: string[], vehicles: string[], drivers: string[] } = {
@@ -290,6 +312,7 @@ export class QseReportComponent implements OnInit, OnDestroy {
 
   fetchVehicleStatsQse(): void {
     if (this.dateFrom && this.dateTo) {
+      this.loadingService.setLoading(true);
 
       const startDate = this.dateFrom.getFullYear() + '-' +
         String(this.dateFrom.getMonth() + 1).padStart(2, '0') + '-' +
@@ -335,9 +358,11 @@ export class QseReportComponent implements OnInit, OnDestroy {
             })
           )
 
+          this.loadingService.setLoading(false);
         },
         error: (err) => {
           console.error('Erreur lors de la récupération des statistiques du véhicule:', err);
+          this.loadingService.setLoading(false);
         }
       });
     } else {

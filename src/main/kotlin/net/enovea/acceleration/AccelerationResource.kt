@@ -1,19 +1,12 @@
 package net.enovea.acceleration
 
-import jakarta.ws.rs.Consumes
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.NotFoundException
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
-import jakarta.ws.rs.Produces
-import jakarta.ws.rs.QueryParam
+import jakarta.transaction.Transactional
+import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.Response.Status
 import java.sql.Timestamp
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
 
 @Path("/api/acceleration")
@@ -63,4 +56,24 @@ class AccelerationResource(
         return Response.ok(ggDiagram).build()
     }
 
+    @POST
+    @Path("/{id}/{beginDate}")
+    @Transactional
+    fun saveAngles(
+        @PathParam("id") deviceId: Int,
+        @PathParam("beginDate") beginDate: String,
+        angles: AnglesForm,
+    ):Response {
+        val beginTimestamp = try {
+            Timestamp.from(Instant.parse(beginDate))
+        } catch (e: DateTimeParseException) {
+            return Response.status(Status.BAD_REQUEST).entity(e.message).build()
+        }
+        return try {
+            val dto = calibrationService.saveAngles(deviceId, beginTimestamp, angles.phi, angles.theta, angles.psi)
+            Response.ok(dto).build()
+        } catch (e: NotFoundException) {
+            Response.status(Status.NOT_FOUND).build()
+        }
+    }
 }

@@ -6,7 +6,6 @@ import {AccelerationService} from "../acceleration.service";
 import { TableModule } from 'primeng/table';
 import {NgIf} from "@angular/common";
 import {DATE_FORMATTER} from "../../../core/date-formatter"
-import VehicleDTO = dto.VehicleDTO;
 import {GgDiagramCalibrationComponent} from "../gg-diagram-calibration/gg-diagram-calibration.component";
 
 
@@ -19,13 +18,12 @@ import {GgDiagramCalibrationComponent} from "../gg-diagram-calibration/gg-diagra
 })
 export class ListVehiclePageComponent implements OnInit{
 
-
   vehicleAccelPeriods: VehicleAccelPeriodsDTO[];
 
   vehicleSelected: VehicleAccelPeriodsDTO[] = [];
 
   periodToDisplay?: DeviceAccelAnglesDTO;
-  vehicleToDisplay?: VehicleDTO;
+  entityToDisplay?: VehicleAccelPeriodsDTO;
 
   readonly dateFormatter = DATE_FORMATTER
 
@@ -53,8 +51,19 @@ export class ListVehiclePageComponent implements OnInit{
     }
   }
 
-  selectPeriod(period: DeviceAccelAnglesDTO, vehicle: VehicleDTO) {
+  selectPeriod(period: DeviceAccelAnglesDTO, entity: VehicleAccelPeriodsDTO) {
     this.periodToDisplay = period;
-    this.vehicleToDisplay = vehicle;
+    this.entityToDisplay = entity;
+  }
+
+  callbackOnSavedAngles(period: DeviceAccelAnglesDTO) {
+    if (this.periodToDisplay) {
+      let indexPeriodToChange = this.entityToDisplay?.periods.indexOf(this.periodToDisplay)
+      console.log(indexPeriodToChange)
+      if (indexPeriodToChange != null && indexPeriodToChange !=-1) {
+        this.entityToDisplay!!.periods[indexPeriodToChange] = period
+      }
+      this.periodToDisplay = period
+    }
   }
 }

@@ -1,15 +1,19 @@
 package net.enovea.acceleration
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.quarkus.panache.common.Sort
-import net.enovea.DorisJdbiContext
+import jakarta.ws.rs.NotFoundException
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
-import net.enovea.vehicle.VehicleEntity
 import net.enovea.vehicle.VehicleMapper
+import java.sql.Timestamp
+
 
 class CalibrationService(
     private val vehicleMapper: VehicleMapper,
     private val deviceAccelAnglesMapper: DeviceAccelAnglesMapper
 ) {
+    val logger = KotlinLogging.logger {  }
+
     fun listCalibrationPeriods(): List<VehicleAccelPeriodsDTO> {
 
         val installsByDevice = DeviceVehicleInstallEntity.listAll().groupBy { it.id.deviceId }
@@ -40,5 +44,18 @@ class CalibrationService(
                 val periods = listPairs.map { deviceAccelAnglesMapper.toDto(it.first) }
                 VehicleAccelPeriodsDTO(vehicle, periods)
             }
+    }
+
+    fun saveAngles(deviceId: Int, beginDate: Timestamp, phi: Double, theta: Double, psi: Double): DeviceAccelAnglesDTO {
+        val entity = DeviceAccelAnglesEntity.findById(DeviceAccelAnglesId(deviceId, beginDate))
+            ?: throw NotFoundException()
+
+        entity.phi = phi
+        entity.theta = theta
+        entity.psi = psi
+        entity.status = DeviceAccelAnglesStatus.MANUAL
+        entity.computationTime = Timestamp(System.currentTimeMillis())
+        logger.info { "angles updated" }
+        return deviceAccelAnglesMapper.toDto(entity)
     }
 }

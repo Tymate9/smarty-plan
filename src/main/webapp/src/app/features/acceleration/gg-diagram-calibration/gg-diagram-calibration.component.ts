@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, Input, Output, OnChanges, SimpleChanges, EventEmitter} from '@angular/core';
 import {GgDiagramComponent} from "../gg-diagram/gg-diagram.component";
 import {Button} from "primeng/button";
 import {FormsModule} from "@angular/forms";
@@ -23,6 +23,9 @@ export class GgDiagramCalibrationComponent implements OnChanges{
   vehicle?: VehicleDTO;
   @Input()
   period?: DeviceAccelAnglesDTO;
+
+  @Output() anglesSaved = new EventEmitter<DeviceAccelAnglesDTO>()
+
 
   projections = ['XY', 'XZ', 'YZ']
   proj: string = this.projections[0];
@@ -56,14 +59,26 @@ export class GgDiagramCalibrationComponent implements OnChanges{
   }
 
   saveAngles() {
-
+    if (this.period) {
+      this.accelerationService.saveAngles(this.period!!.deviceId, this.period!!.beginDate, this.phi, this.theta, this.psi).subscribe({
+        next: (dto) => {
+          this.anglesSaved.emit(dto)
+        },
+        error: (err) => {
+          console.error('Erreur a la sauvegarde des angles', err);
+        }
+      })
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.proj = this.projections[0];
-    this.phi = changes["period"].currentValue.phi || 0;
-    this.theta = changes["period"].currentValue.theta || 0;
-    this.psi = changes["period"].currentValue.psi || 0;
-    this.displayGgDiagram();
+    let periodChanged = changes["period"].currentValue
+    if (periodChanged) {
+      this.proj = this.projections[0];
+      this.phi = periodChanged.phi || 0;
+      this.theta = periodChanged.theta || 0;
+      this.psi = periodChanged.psi || 0;
+      this.displayGgDiagram();
+    }
   }
 }

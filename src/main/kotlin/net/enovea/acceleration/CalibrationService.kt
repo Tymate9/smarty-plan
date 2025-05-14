@@ -55,7 +55,7 @@ class CalibrationService(
         entity.psi = psi
         entity.status = DeviceAccelAnglesStatus.MANUAL
         entity.computationTime = Timestamp(System.currentTimeMillis())
-        logger.info { "angles updated" }
+        logger.info { "angles updated for device ${deviceId} for period at ${beginDate}" }
         return deviceAccelAnglesMapper.toDto(entity)
     }
 }

@@ -23,11 +23,19 @@ export class GgDiagramComponent {
     this._ggDiagram = this.transformJsonData(value)
   }
 
+  private defaultProjection: string = 'XY'
+  @Input() ggProjection?: string
+
+  private max_accel = 1000
   private max_bucket = 100
   private gg_width = this.max_bucket * 2 + 1
 
   private x = Array.from({length: this.gg_width}, (x, i) => i - this.max_bucket)
   private y = Array.from({length: this.gg_width}, (x, i) => i - this.max_bucket)
+
+  private tickStep = this.max_bucket / 4
+  private tickVals = this.x.filter(i => i % this.tickStep == 0)
+  private tickText = this.tickVals.map(i => i * this.max_accel / this.max_bucket)
 
   private transformJsonData(data?: GGDiagramDTO[]) {
     let z = Array.from({length: this.gg_width}, (x, i) => Array(this.gg_width).fill(-7))
@@ -43,6 +51,7 @@ export class GgDiagramComponent {
       z: z,
       xaxis: 'x',
       yaxis: 'y',
+      hovertemplate: this.customHoverTemplate(this.ggProjection || this.defaultProjection),
       type: 'heatmap',
       zmin: -7,
       zmax: 0,
@@ -71,16 +80,18 @@ export class GgDiagramComponent {
     xaxis: {
       type: 'linear',
       range: [-this.max_bucket, this.max_bucket],
-      dtick: 25,
-      tickmode: 'linear',
+      tickvals: this.tickVals,
+      ticktext: this.tickText,
+      tickmode: 'array',
       //domain: [0, 0.85],
       anchor: 'y',
     },
     yaxis: {
       type: 'linear',
       range: [-this.max_bucket, this.max_bucket],
-      dtick: 25,
-      tickmode: 'linear',
+      tickvals: this.tickVals,
+      ticktext: this.tickText,
+      tickmode: 'array',
       //domain: [0, 0.85],
       anchor: 'x',
     },
@@ -122,6 +133,17 @@ export class GgDiagramComponent {
     ]
   }
 
+  private customHoverTemplate(proj: string): string | undefined {
+    switch (proj) {
+      case 'XY': return this.hoverTemplate('Longitudinal', 'Latéral')
+      case 'XZ': return this.hoverTemplate('Vertical', 'Longitudinal')
+      case 'YZ': return this.hoverTemplate('Vertical', 'Latéral')
+      default: return undefined
+    }
+  }
 
+  private hoverTemplate(labelVert: String, labelHoriz: string): string {
+    return `${labelVert}: %{y}<br>${labelHoriz}: %{x}<br>Valeur: %{z}<extra></extra>`
+  }
 
 }

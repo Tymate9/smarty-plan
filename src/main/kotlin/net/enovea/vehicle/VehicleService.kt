@@ -21,6 +21,7 @@ import net.enovea.commons.ICRUDService
 import java.sql.Timestamp
 import java.time.*
 import java.time.temporal.Temporal
+import kotlin.math.min
 import kotlin.math.round
 
 open class VehicleService(
@@ -323,9 +324,13 @@ open class VehicleService(
         }
     }
 
-    private fun formatScore(string: Int?, isPercent: Boolean = false): String {
-        return if (string != null) {
-            "$string${if (isPercent) "%" else "/20"}"
+    private fun formatScore(score: Int?, isPercent: Boolean = false): String {
+        return if (score != null) {
+            if (isPercent) {
+                "${min(score, 100)}%" // we cap percentage scores at 100
+            } else {
+                "$score/20"
+            }
         } else {
             "N/A"
         }

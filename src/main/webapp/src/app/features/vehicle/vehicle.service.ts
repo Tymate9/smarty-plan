@@ -623,26 +623,27 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
   }
 }
 
-export const qseIndicatorWarningMap: Record<string, (val: number) => boolean> = {
-  highwayAccelScore: (val: number) => val <= 12,
-  roadAccelScore: (val: number) => val <= 12,
-  cityAccelScore: (val: number) => val <= 12,
-  highwayTurnScore: (val: number) => val <= 12,
-  roadTurnScore: (val: number) => val <= 12,
-  cityTurnScore: (val: number) => val <= 12,
-  highwaySpeedScore: (val: number) => val >= 85,
-  roadSpeedScore: (val: number) => val >= 80,
-  citySpeedScore: (val: number) => val >= 75,
+// todo : somehow maybe compute that in the backend ?
+export const qseIndicatorWarningMap: Record<string, (val: string) => boolean> = {
+  highwayAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
+  roadAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
+  cityAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
+  highwayTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
+  roadTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
+  cityTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
+  highwaySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 85,
+  roadSpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 80,
+  citySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 75,
 }
 
-export const qseIndicatorAlertMap: Record<string, (val: number) => boolean> = {
-  highwayAccelScore: (val: number) => val <= 10,
-  roadAccelScore: (val: number) => val <= 10,
-  cityAccelScore: (val: number) => val <= 10,
-  highwayTurnScore: (val: number) => val <= 10,
-  roadTurnScore: (val: number) => val <= 10,
-  cityTurnScore: (val: number) => val <= 10,
-  highwaySpeedScore: (val: number) => val >= 90,
-  roadSpeedScore: (val: number) => val >= 85,
-  citySpeedScore: (val: number) => val >= 80,
+export const qseIndicatorAlertMap: Record<string, (val: string) => boolean> = {
+  highwayAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
+  roadAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
+  cityAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
+  highwayTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
+  roadTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
+  cityTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
+  highwaySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 90,
+  roadSpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 85,
+  citySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 80,
 }

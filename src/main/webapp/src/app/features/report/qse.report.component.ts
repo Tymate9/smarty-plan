@@ -183,44 +183,44 @@ const QSE_ALERTS_NAMINGS = {
           <td>{{ rowData.vehicle.vehicleStatsQse.drivingTime }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.rangeAvg }}</td>
           <td>{{ rowData.vehicle.vehicleStatsQse.idleDuration }}</td>
-          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.highwayDistanceSum }} km</td>
-          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.roadDistanceSum }} km</td>
-          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.cityDistanceSum }} km</td>
+          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.highwayDistanceSum }}</td>
+          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.roadDistanceSum }}</td>
+          <td class="centered-and-nowrapped">{{ rowData.vehicle.vehicleStatsQse.cityDistanceSum }}</td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('highwayAccelScore', rowData.vehicle.vehicleStatsQse.highwayAccelScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.highwayAccelScore ?? 'N/A' }}/20
+          >{{ rowData.vehicle.vehicleStatsQse.highwayAccelScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('roadAccelScore', rowData.vehicle.vehicleStatsQse.roadAccelScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.roadAccelScore ?? 'N/A' }}/20
+          >{{ rowData.vehicle.vehicleStatsQse.roadAccelScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('cityAccelScore', rowData.vehicle.vehicleStatsQse.cityAccelScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.cityAccelScore ?? 'N/A' }}/20
+          >{{ rowData.vehicle.vehicleStatsQse.cityAccelScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('highwayTurnScore', rowData.vehicle.vehicleStatsQse.highwayTurnScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.highwayTurnScore ?? 'N/A' }}/20
+          >{{ rowData.vehicle.vehicleStatsQse.highwayTurnScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('roadTurnScore', rowData.vehicle.vehicleStatsQse.roadTurnScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.roadTurnScore ?? 'N/A' }}/20
+          >{{ rowData.vehicle.vehicleStatsQse.roadTurnScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('cityTurnScore', rowData.vehicle.vehicleStatsQse.cityTurnScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.cityTurnScore ?? 'N/A' }}/20
+          >{{ rowData.vehicle.vehicleStatsQse.cityTurnScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('highwaySpeedScore', rowData.vehicle.vehicleStatsQse.highwaySpeedScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.highwaySpeedScore ?? 'N/A' }}%
+          >{{ rowData.vehicle.vehicleStatsQse.highwaySpeedScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('roadSpeedScore', rowData.vehicle.vehicleStatsQse.roadSpeedScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.roadSpeedScore ?? 'N/A' }}%
+          >{{ rowData.vehicle.vehicleStatsQse.roadSpeedScore }}
           </td>
           <td class="centered-and-nowrapped"
             [style]="getAlertIndicatorStyle('citySpeedScore', rowData.vehicle.vehicleStatsQse.citySpeedScore)"
-          >{{ rowData.vehicle.vehicleStatsQse.citySpeedScore ?? 'N/A' }}%
+          >{{ rowData.vehicle.vehicleStatsQse.citySpeedScore }}
           </td>
 
         </tr>
@@ -414,7 +414,7 @@ export class QseReportComponent implements OnInit, OnDestroy {
 
   getAlertIndicatorStyle(
     alertIndicatorKey: keyof typeof QSE_ALERTS_NAMINGS,
-    alertIndicatorValue: number | null
+    alertIndicatorValue: string | null
   ): { [key: string]: string } {
     if (alertIndicatorValue === null) {
       return {};

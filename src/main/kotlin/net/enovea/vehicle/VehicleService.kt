@@ -92,7 +92,7 @@ open class VehicleService(
     }
 
     //function returns trips statistics displayed on the page ('suivi d'activité')
-    fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>? , vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
+    fun getVehiclesStatsOverPeriod(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>? , vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, String>>? {
 
         //choose the doris view depending on the vehiclesType (all, tracked or untracked)
         println(vehiclesType)
@@ -135,13 +135,13 @@ open class VehicleService(
                 teamHierarchy = teamHierarchy
             )
         }
-        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
+        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy) { it.teamHierarchy }
         return Pair(teamHierarchy, totalVehiclesStatsMap)
     }
 
 
     //function to calculate total statistics(indicators) displayed on the page('suivi d'activité')
-    private fun calculateTotalVehiclesStats(vehiclesStats: List<VehicleStatsQueryResult>): Map<String, Any> {
+    private fun calculateTotalVehiclesStats(vehiclesStats: List<VehicleStatsQueryResult>): Map<String, String> {
 
         val totalVehicles = vehiclesStats.size
         val totalDrivers = vehiclesStats.count { !it.driverName.isNullOrEmpty() }
@@ -160,18 +160,18 @@ open class VehicleService(
 
         // Return results as a map
         return mapOf(
-            "totalVehicles" to totalVehicles,
-            "totalDrivers" to totalDrivers,
-            "totalDistanceSum" to "${formatDistance(totalDistance)} km",
-            "totalTripCount" to totalTripCount,
+            "totalVehicles" to totalVehicles.toString(),
+            "totalDrivers" to totalDrivers.toString(),
+            "totalDistanceSum" to formatDistance(totalDistance),
+            "totalTripCount" to totalTripCount.toString(),
             "totalDrivingTime" to formatDuration(totalDrivingTime),
-            "averageDistance" to "${formatDistance(averageDistance)} km",
+            "averageDistance" to formatDistance(averageDistance),
             "averageDuration" to formatDuration(averageDuration),
             "totalWaitingTime" to formatDuration(totalWaitingTime),
             "averageRangeAvg" to formatDuration(averageRangeAvg),
-            "totalHasLateStartSum" to totalHasLateStart,
-            "totalHasLateStop" to totalHasLateStop,
-            "totalHasLastTripLong" to totalHasLastTripLong
+            "totalHasLateStartSum" to totalHasLateStart.toString(),
+            "totalHasLateStop" to totalHasLateStop.toString(),
+            "totalHasLastTripLong" to totalHasLastTripLong.toString()
         )
     }
 
@@ -200,7 +200,7 @@ open class VehicleService(
     }
 
     //function returns vehicles statistics displayed on the page ('QSE  reports')
-    fun getVehiclesStatsQSEReport(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?, vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, Any>>? {
+    fun getVehiclesStatsQSEReport(startDate: String, endDate: String , teamLabels: List<String>? ,vehicleIds :List<String>?, driversIds: List<String>?, vehiclesType: String): Pair<List<TeamHierarchyNode>, Map<String, String>>? {
 
         val dorisView = getDorisView(vehiclesType)
         val vehiclesStatsQse = vehicleStatsRepository.findVehicleStatsQSEOverSpecificPeriod(startDate, endDate ,teamLabels ,vehicleIds, driversIds , dorisView )
@@ -233,33 +233,33 @@ open class VehicleService(
                 rangeAvg = formatDuration(stats.rangeAvg ?: 0),
                 idleDuration = formatDuration(stats.idleDuration ?: 0),
                 distanceMax = formatDistance(stats.distanceMax ?: 0),
-                highwayAccelScore = stats.highwayAccelScore,
-                roadAccelScore = stats.roadAccelScore,
-                cityAccelScore = stats.cityAccelScore,
-                highwayTurnScore = stats.highwayTurnScore,
-                roadTurnScore = stats.roadTurnScore,
-                cityTurnScore = stats.cityTurnScore,
-                highwaySpeedScore = stats.highwaySpeedScore,
-                roadSpeedScore = stats.roadSpeedScore,
-                citySpeedScore = stats.citySpeedScore,
-                )
+                highwayAccelScore = formatScore(stats.highwayAccelScore),
+                roadAccelScore = formatScore(stats.roadAccelScore),
+                cityAccelScore = formatScore(stats.cityAccelScore),
+                highwayTurnScore = formatScore(stats.highwayTurnScore),
+                roadTurnScore = formatScore(stats.roadTurnScore),
+                cityTurnScore = formatScore(stats.cityTurnScore),
+                highwaySpeedScore = formatScore(stats.highwaySpeedScore, isPercent = true),
+                roadSpeedScore = formatScore(stats.roadSpeedScore, isPercent = true),
+                citySpeedScore = formatScore(stats.citySpeedScore, isPercent = true),
+            )
             VehiclesStatsQseDTO(
                 vehicleStatsQse = vehicleStatsQseDTO,
                 team = team,
                 teamHierarchy = teamHierarchy
             )
         }
-        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy ?: emptyList()) { it.teamHierarchy }
+        val teamHierarchy = buildTeamHierarchyForest(vehiclesWithHierarchy) { it.teamHierarchy }
         return Pair(teamHierarchy, totalVehiclesStatsQSEMap)
     }
 
     //function to calculate total statistics(indicators) displayed on the page('QSE Reports')
-    private fun calculateTotalVehiclesStatsQSE(vehiclesStats: List<VehicleStatsQseQueryResult>): Map<String, Any> {
+    private fun calculateTotalVehiclesStatsQSE(vehiclesStats: List<VehicleStatsQseQueryResult>): Map<String, String> {
         val totalDistance = vehiclesStats.sumOf { it.distanceSum ?: 0 }
-        val totalDrivingTime = formatDuration(vehiclesStats.sumOf { it.drivingTime ?: 0 })
-        val totalWaitingTime = formatDuration(vehiclesStats.sumOf { it.waitingDuration ?: 0 })
-        val averageRangeAvg = formatDuration(vehiclesStats.mapNotNull { it.rangeAvg }.average().toLong())
-        val idleDurationTotal = formatDuration(vehiclesStats.sumOf { it.idleDuration ?: 0 })
+        val totalDrivingTime = vehiclesStats.sumOf { it.drivingTime ?: 0 }
+        val totalWaitingTime = vehiclesStats.sumOf { it.waitingDuration ?: 0 }
+        val averageRangeAvg = vehiclesStats.mapNotNull { it.rangeAvg }.average().toLong()
+        val idleDurationTotal = vehiclesStats.sumOf { it.idleDuration ?: 0 }
         val longestTrip = vehiclesStats.maxOf { it.distanceMax ?:0 }
 
         // get accel stddev averages weighted by distance and compute selection scores with them
@@ -287,12 +287,12 @@ open class VehicleService(
         }.sum().toDouble() / totalDistance
 
         return mapOf(
-            "totalDistanceSum" to "${formatDistance(totalDistance)} km",
-            "totalDrivingTime" to totalDrivingTime,
-            "totalWaitingTime" to totalWaitingTime,
-            "longestTrip" to "${formatDistance(longestTrip)} km",
-            "averageRangeAvg" to averageRangeAvg,
-            "idleDurationTotal" to idleDurationTotal,
+            "totalDistanceSum" to formatDistance(totalDistance),
+            "totalDrivingTime" to formatDuration(totalDrivingTime),
+            "totalWaitingTime" to formatDuration(totalWaitingTime),
+            "longestTrip" to formatDistance(longestTrip),
+            "averageRangeAvg" to formatDuration(averageRangeAvg),
+            "idleDurationTotal" to formatDuration(idleDurationTotal),
             "useSeverity" to getLetterScoring(avgScore),
             "turnUseSeverity" to getLetterScoring(avgTurnScore),
             "accelerationUseSeverity" to getLetterScoring(avgAccelScore),
@@ -308,7 +308,7 @@ open class VehicleService(
             .reversed()
             .chunked(3)
             .joinToString(" ")
-            .reversed()
+            .reversed() + " km"
     }
 
     private fun formatDuration(seconds: Long): String {
@@ -320,6 +320,14 @@ open class VehicleService(
             hours > 0 -> String.format("%dh %dm", hours, minutes)
             minutes > 0 -> String.format("%dm", minutes)
             else -> String.format("%ds", seconds)
+        }
+    }
+
+    private fun formatScore(string: Int?, isPercent: Boolean = false): String {
+        return if (string != null) {
+            "$string${if (isPercent) "%" else "/20"}"
+        } else {
+            "N/A"
         }
     }
 

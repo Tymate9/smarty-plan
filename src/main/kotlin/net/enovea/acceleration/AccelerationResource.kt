@@ -1,6 +1,5 @@
 package net.enovea.acceleration
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.quarkus.security.Authenticated
 import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
@@ -22,8 +21,6 @@ class AccelerationResource(
     private val calibrationService: CalibrationService,
 ) {
 
-    private val logger = KotlinLogging.logger {  }
-
     @GET
     @RolesAllowed(ROLE_ADMIN)
     fun listCalibrationPeriods(): Response {
@@ -38,17 +35,15 @@ class AccelerationResource(
         @PathParam("id") deviceId: Int,
         @PathParam("beginDate") beginDate: String,
         @QueryParam("proj") proj: String,
-        @QueryParam("phi") phi: Int,
-        @QueryParam("theta") theta: Int,
-        @QueryParam("psi") psi: Int,
+        @QueryParam("phi") phi: Double,
+        @QueryParam("theta") theta: Double,
+        @QueryParam("psi") psi: Double,
     ): Response {
-        logger.info { "query param beginDate: $beginDate" }
         val parsedBeginDate = try {
             LocalDateTime.parse(beginDate)
         } catch (e: DateTimeParseException) {
             return Response.status(Status.BAD_REQUEST).entity(e.message).build()
         }
-        logger.info { "parsed beginDate: $parsedBeginDate" }
 
         val ggProjection = try {
             GGProjection.valueOf(proj.uppercase())

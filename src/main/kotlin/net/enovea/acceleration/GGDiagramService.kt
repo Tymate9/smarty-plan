@@ -28,7 +28,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
 
     fun computeGGDiagram(
         deviceId: Int, beginDate: LocalDateTime, endDate: LocalDateTime,
-        proj: GGProjection, phi: Int, theta: Int, psi: Int,
+        proj: GGProjection, phi: Double, theta: Double, psi: Double,
     ): List<GGDiagramDTO> =  dorisJdbiContext.jdbi.withHandle<List<GGDiagramDTO>, Exception> { handle ->
 
         val (bucketVert, bucketHoriz) = projectBucketColumns(proj)
@@ -84,7 +84,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         return beginDate to endDate
     }
 
-    private fun rotateAccelColumns(proj: GGProjection, phi: Int, theta: Int, psi: Int): String {
+    private fun rotateAccelColumns(proj: GGProjection, phi: Double, theta: Double, psi: Double): String {
         val matrixRotation = generateRotationMatrix(phi, theta, psi)
 
         val columns = mutableListOf<String>()
@@ -132,9 +132,9 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         return "CAST(ROUND($column/$granularity) AS INT)"
     }
 
-    private fun generateRotationZ(angle: Int): RealMatrix {
-        val cos = cos(Math.toRadians(angle.toDouble()))
-        val sin = sin(Math.toRadians(angle.toDouble()))
+    private fun generateRotationZ(angle: Double): RealMatrix {
+        val cos = cos(Math.toRadians(angle))
+        val sin = sin(Math.toRadians(angle))
         val matrix =
             arrayOf(
                 doubleArrayOf(cos, -sin, 0.0),
@@ -144,9 +144,9 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         return createRealMatrix(matrix)
     }
 
-    private fun generateRotationX(angle: Int): RealMatrix {
-        val cos = cos(Math.toRadians(angle.toDouble()))
-        val sin = sin(Math.toRadians(angle.toDouble()))
+    private fun generateRotationX(angle: Double): RealMatrix {
+        val cos = cos(Math.toRadians(angle))
+        val sin = sin(Math.toRadians(angle))
         val matrix =
             arrayOf(
                 doubleArrayOf(1.0, 0.0, 0.0),
@@ -156,7 +156,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         return createRealMatrix(matrix)
     }
 
-    private fun generateRotationMatrix(phi: Int, theta: Int, psi: Int): RealMatrix {
+    private fun generateRotationMatrix(phi: Double, theta: Double, psi: Double): RealMatrix {
         return generateRotationZ(psi).multiply(generateRotationX(theta).multiply(generateRotationZ(phi)))
     }
 }

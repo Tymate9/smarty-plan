@@ -1,13 +1,13 @@
 package net.enovea.acceleration
 
-import java.sql.Timestamp
+import java.time.LocalDateTime
 
 data class DeviceAccelAnglesDTO (
     val deviceId: Int,
-    val beginDate: Timestamp,
+    val beginDate: LocalDateTime,
     val phi: Double?,
     val theta: Double?,
     val psi: Double?,
     val status: DeviceAccelAnglesStatus,
-    val computationTime: Timestamp
+    val computationTime: LocalDateTime,
 )

@@ -5,7 +5,6 @@ import jakarta.ws.rs.NotFoundException
 import net.enovea.DorisJdbiContext
 import org.apache.commons.math3.linear.MatrixUtils.createRealMatrix
 import org.apache.commons.math3.linear.RealMatrix
-import java.sql.Timestamp
 import java.time.LocalDateTime
 import kotlin.math.cos
 import kotlin.math.sin
@@ -28,7 +27,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
     }
 
     fun computeGGDiagram(
-        deviceId: Int, beginDate: Timestamp, endDate: Timestamp,
+        deviceId: Int, beginDate: LocalDateTime, endDate: LocalDateTime,
         proj: GGProjection, phi: Int, theta: Int, psi: Int,
     ): List<GGDiagramDTO> =  dorisJdbiContext.jdbi.withHandle<List<GGDiagramDTO>, Exception> { handle ->
 
@@ -70,7 +69,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
             .list()
     }
 
-    fun getPeriodBeginAndEnd(deviceId: Int, beginDate: Timestamp): Pair<Timestamp, Timestamp> {
+    fun getPeriodBeginAndEnd(deviceId: Int, beginDate: LocalDateTime): Pair<LocalDateTime, LocalDateTime> {
         val deviceAccelAnglesList: List<DeviceAccelAnglesEntity> =
             DeviceAccelAnglesEntity.list("id.deviceId", Sort.by("id.beginDate"), deviceId)
 
@@ -80,7 +79,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         val endDate = if (found.index < deviceAccelAnglesList.size - 1) {
             deviceAccelAnglesList[found.index + 1].id.beginDate
         } else {
-            Timestamp.valueOf(LocalDateTime.now())
+            LocalDateTime.now()
         }
         return beginDate to endDate
     }

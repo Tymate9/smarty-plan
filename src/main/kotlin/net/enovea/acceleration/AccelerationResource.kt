@@ -1,5 +1,6 @@
 package net.enovea.acceleration
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.quarkus.security.Authenticated
 import jakarta.annotation.security.RolesAllowed
 import jakarta.transaction.Transactional
@@ -8,9 +9,9 @@ import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.Response.Status
 import net.enovea.auth.ROLE_ADMIN
-import java.sql.Timestamp
 import java.time.Instant
 import java.time.format.DateTimeParseException
+import java.time.LocalDateTime
 
 @Path("/api/acceleration")
 @Produces(MediaType.APPLICATION_JSON)
@@ -20,6 +21,8 @@ class AccelerationResource(
     private val ggDiagramService: GGDiagramService,
     private val calibrationService: CalibrationService,
 ) {
+
+    private val logger = KotlinLogging.logger {  }
 
     @GET
     @RolesAllowed(ROLE_ADMIN)
@@ -39,11 +42,13 @@ class AccelerationResource(
         @QueryParam("theta") theta: Int,
         @QueryParam("psi") psi: Int,
     ): Response {
-        val beginTimestamp = try {
-            Timestamp.from(Instant.parse(beginDate))
+        logger.info { "query param beginDate: $beginDate" }
+        val parsedBeginDate = try {
+            LocalDateTime.parse(beginDate)
         } catch (e: DateTimeParseException) {
             return Response.status(Status.BAD_REQUEST).entity(e.message).build()
         }
+        logger.info { "parsed beginDate: $parsedBeginDate" }
 
         val ggProjection = try {
             GGProjection.valueOf(proj.uppercase())
@@ -52,7 +57,7 @@ class AccelerationResource(
         }
 
         val (begin, end) = try {
-            ggDiagramService.getPeriodBeginAndEnd(deviceId, beginTimestamp)
+            ggDiagramService.getPeriodBeginAndEnd(deviceId, parsedBeginDate)
         } catch (e: NotFoundException) {
             return Response.status(Status.NOT_FOUND).build()
         }
@@ -71,10 +76,11 @@ class AccelerationResource(
         angles: AnglesForm,
     ):Response {
         val beginTimestamp = try {
-            Timestamp.from(Instant.parse(beginDate))
+            LocalDateTime.parse(beginDate)
         } catch (e: DateTimeParseException) {
             return Response.status(Status.BAD_REQUEST).entity(e.message).build()
         }
+
         return try {
             val dto = calibrationService.saveAngles(deviceId, beginTimestamp, angles.phi, angles.theta, angles.psi)
             Response.ok(dto).build()
@@ -82,4 +88,5 @@ class AccelerationResource(
             Response.status(Status.NOT_FOUND).build()
         }
     }
+
 }

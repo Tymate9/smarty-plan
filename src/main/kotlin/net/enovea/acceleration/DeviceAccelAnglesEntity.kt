@@ -7,8 +7,7 @@ import net.enovea.device.DeviceEntity
 import org.hibernate.annotations.JdbcType
 import org.hibernate.dialect.PostgreSQLEnumJdbcType
 import java.io.Serializable
-import java.sql.Timestamp
-
+import java.time.LocalDateTime
 
 @Entity(name = DeviceAccelAnglesEntity.ENTITY_NAME)
 @Table(name = DeviceAccelAnglesEntity.TABLE_NAME)
@@ -30,7 +29,7 @@ data class DeviceAccelAnglesEntity(
     var status: DeviceAccelAnglesStatus = DeviceAccelAnglesStatus.NOT_COMPUTED,
 
     @Column(name = "computation_time", nullable = false)
-    var computationTime: Timestamp = Timestamp(System.currentTimeMillis()),
+    var computationTime: LocalDateTime = LocalDateTime.now(),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("deviceId")
@@ -49,7 +48,7 @@ data class DeviceAccelAnglesId(
     val deviceId: Int=-1,
 
     @Column(name = "begin_date", nullable = false)
-    val beginDate: Timestamp = Timestamp(System.currentTimeMillis())
+    val beginDate: LocalDateTime = LocalDateTime.now()
 ) : Serializable
 
 enum class DeviceAccelAnglesStatus{

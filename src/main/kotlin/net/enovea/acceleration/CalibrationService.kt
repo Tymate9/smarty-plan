@@ -5,8 +5,7 @@ import io.quarkus.panache.common.Sort
 import jakarta.ws.rs.NotFoundException
 import net.enovea.device.deviceVehicle.DeviceVehicleInstallEntity
 import net.enovea.vehicle.VehicleMapper
-import java.sql.Timestamp
-
+import java.time.LocalDateTime
 
 class CalibrationService(
     private val vehicleMapper: VehicleMapper,
@@ -15,7 +14,6 @@ class CalibrationService(
     val logger = KotlinLogging.logger {  }
 
     fun listCalibrationPeriods(): List<VehicleAccelPeriodsDTO> {
-
         val installsByDevice = DeviceVehicleInstallEntity.listAll().groupBy { it.id.deviceId }
 
         return DeviceAccelAnglesEntity
@@ -25,7 +23,7 @@ class CalibrationService(
                 val beginDate = calibrationPeriod.id.beginDate
 
                 val vehicleEntity = installsByDevice[deviceId]
-                    ?.firstOrNull{ it.id.startDate <= beginDate && (it.endDate == null || it.endDate!! > beginDate)}
+                    ?.firstOrNull{ it.id.startDate.toLocalDateTime() <= beginDate && (it.endDate == null || it.endDate!!.toLocalDateTime() > beginDate)}
                     ?.vehicle
 
                 if (vehicleEntity != null) {
@@ -46,7 +44,7 @@ class CalibrationService(
             }
     }
 
-    fun saveAngles(deviceId: Int, beginDate: Timestamp, phi: Double, theta: Double, psi: Double): DeviceAccelAnglesDTO {
+    fun saveAngles(deviceId: Int, beginDate: LocalDateTime, phi: Double, theta: Double, psi: Double): DeviceAccelAnglesDTO {
         val entity = DeviceAccelAnglesEntity.findById(DeviceAccelAnglesId(deviceId, beginDate))
             ?: throw NotFoundException()
 
@@ -54,7 +52,7 @@ class CalibrationService(
         entity.theta = theta
         entity.psi = psi
         entity.status = DeviceAccelAnglesStatus.MANUAL
-        entity.computationTime = Timestamp(System.currentTimeMillis())
+        entity.computationTime = LocalDateTime.now()
         logger.info { "angles updated for device ${deviceId} for period at ${beginDate}" }
         return deviceAccelAnglesMapper.toDto(entity)
     }

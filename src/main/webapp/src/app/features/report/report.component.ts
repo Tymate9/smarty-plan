@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {FilterService} from "../../commons/navbar/filter.service";
-import {TeamHierarchyNodeStats, VehicleService} from "../vehicle/vehicle.service";
+import {TeamHierarchyNodeBase, TeamHierarchyNodeStats, VehicleService} from "../vehicle/vehicle.service";
 import {Calendar} from "primeng/calendar";
 import {TreeNode} from "primeng/api";
 import {dto} from "../../../habarta/dto";
@@ -8,37 +8,74 @@ import VehiclesStatsDTO = dto.VehiclesStatsDTO;
 import {Subscription} from "rxjs";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import {TreeTableModule} from "primeng/treetable";
-import {NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
+import {AsyncPipe, NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
 import {Button} from "primeng/button";
 import {Dialog} from "primeng/dialog";
 import {DateRangePickerComponent} from "../dateRange/dateRange.component";
 import {IndicatorButtonsComponent} from "../indicator/indicator-buttons.component";
 import {TableModule} from "primeng/table";
+import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
+import {LoadingService} from "../../services/loading.service";
+import {ProgressSpinner} from "primeng/progressspinner";
+import {VehicleStatsDialogComponent} from "./stats.dialog.component";
 
+const STATS_DETAILS: Record<string, { displayName: string, color: string }> = {
+  totalHasLastTripLong: { displayName: 'DERNIER TRAJET>45mn', color: '#a0b2d9'},
+  totalHasLateStartSum: { displayName: 'DEPART TARDIF', color: '#a0b2d9'},
+  totalHasLateStop: { displayName: 'ARRETS TARDIFS', color: '#a0b2d9'},
+  averageDistance: { displayName: 'DISTANCE MOYENNE/TRAJET', color: '#fda9a9' },
+  averageDuration: { displayName: 'TEMPS DE CONDUITE DECLARE TOTAL', color: '#fda9a9' },
+  averageRangeAvg: { displayName: 'AMPLITUDE MOYENNE', color: '#fda9a9' },
+  totalDistanceSum: { displayName: 'DISTANCE PARCOURUE', color: '#fda9a9' },
+  totalDrivers: { displayName: 'NOMBRE TOTAL DE CONDUCTEURS', color: '#fda9a9'},
+  totalDrivingTime: { displayName: 'TEMPS DE CONDUITE TOTAL', color: '#fda9a9'},
+  totalTripCount: { displayName: 'NOMBRE DE TRAJETS EFFECTUES', color: '#fda9a9'},
+  totalVehicles: { displayName: 'NOMBRE TOTAL DE VEHICULES', color: '#fda9a9'},
+  totalWaitingTime: { displayName: 'TEMPS D\'ARRET TOTAL', color: '#fda9a9'},
+};
+
+export interface Stat {
+  key: string;
+  count: number;
+  displayName: string;
+  color: string;
+}
 
 @Component({
   selector: 'app-report',
   template: `
+    <!-- Spinner local au composant -->
+    <p-progressSpinner *ngIf="(loadingService.loading$ | async)"></p-progressSpinner>
+
 
     <app-date-range (fetchStats)="onFetchVehicleStats($event)"></app-date-range>
 
-    <app-indicator-buttons
-      [statsMap]="vehiclesStatsTotal"
-      [keyLabels]="keyLabels"
-      [buttonColor]="'var(--p-red-100)'"
-      [sliceRange]="[0, 6]"
-      [keyToPropertyMap]="keyToPropertyMap"
-      (filterClicked)="filterByKey($event)">
-    </app-indicator-buttons>
-
-    <app-indicator-buttons
-      [statsMap]="vehiclesStatsTotal"
-      [keyLabels]="keyLabels"
-      [buttonColor]="'var(--p-gray-300)'"
-      [sliceRange]="[6, 12]"
-      [keyToPropertyMap]="keyToPropertyMap"
-      (filterClicked)="filterByKey($event)">
-    </app-indicator-buttons>
+    <div class="indicators">
+      <app-toggle-buttons-group
+        [items]="statsCounts.slice(0, 9)"
+        [selectedItem]="selectedStats"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterByKey($event)"
+        buttonWidth="18vw"
+        [clickable]="false"
+        fontSize="1rem"
+        textColor="black">
+      </app-toggle-buttons-group>
+      <app-toggle-buttons-group
+        [items]="statsCounts.slice(9)"
+        [selectedItem]="selectedStats"
+        [identifierFn]="identifierFn"
+        [displayFn]="displayFn"
+        [colorFn]="colorFn"
+        (selectionChange)="filterByKey($event)"
+        buttonWidth="18vw"
+        [clickable]="true"
+        fontSize="1rem"
+        textColor="black">
+      </app-toggle-buttons-group>
+    </div>
 
     <p-treeTable *ngIf="vehiclesStatsTree.length"
                  #treeTable
@@ -68,16 +105,16 @@ import {TableModule} from "primeng/table";
             class="dynamic-tt-header">
           <td>Véhicule</td>
           <td>Conducteur</td>
-          <td>Nb de trajets effectués (nb)</td>
+          <td>Nb de trajets effectués</td>
           <td>Distance parcourue</td>
-          <td>Temps de conduite (en HH:MM)</td>
-          <td>Distance moyenne / Trajet (en km)</td>
-          <td>Durée moyenne / Trajet (en HH:MM)</td>
+          <td>Temps de conduite</td>
+          <td>Distance moyenne / trajet</td>
+          <td>Durée moyenne / trajet</td>
           <td>Départ tardif (>7H30)</td>
           <td>Dernier arrêt tardif (>18H)</td>
           <td>Dernier trajet long (>45mn)</td>
-          <td>Amplitude</td>
-          <td>Temps d'attente</td>
+          <td>Amplitude moyenne journalière</td>
+          <td>Durée arrêt total</td>
           <td>Détails</td>
         </tr>
 
@@ -114,56 +151,13 @@ import {TableModule} from "primeng/table";
 
       </ng-template>
     </p-treeTable>
-
-    <p-dialog [(visible)]="displayDailyStats"
-              [modal]="false"
-              [header]="'Détails journaliers - ' + selectedDailyStat"
-              [style]="{width: '60vw'}"
-              [draggable]="false"
-              (onHide)="closeDialog()">
-      <div class="table-container">
-        <p-table [value]="vehicleDailyStats" showGridlines stripedRows>
-          <ng-template #header>
-            <tr>
-              <th>Date</th>
-              <th>Conducteur</th>
-              <th>Nb de trajets effectués (nb)</th>
-              <th>Distance parcourue</th>
-              <th>Temps de conduite (en HH:MM)</th>
-              <th>Distance moyenne / Trajet (en km)</th>
-              <th>Durée moyenne / Trajet (en HH:MM)</th>
-              <th>Départ tardif (>7H30)</th>
-              <th>Dernier arrêt tardif (>18H)</th>
-              <th>Dernier trajet long (>45mn)</th>
-              <th>Amplitude</th>
-              <th>Temps d'attente</th>
-            </tr>
-          </ng-template>
-          <ng-template #body let-dailyStat>
-            <tr>
-              <td>{{ dailyStat.tripDate }}</td>
-              <td>{{ dailyStat.driverName }}</td>
-              <td>{{ dailyStat.tripCount }}</td>
-              <td>{{ dailyStat.distanceSum }}</td>
-              <td>{{ dailyStat.drivingTime }}</td>
-              <td>{{ dailyStat.distancePerTripAvg }}</td>
-              <td>{{ dailyStat.durationPerTripAvg }}</td>
-              <td [ngStyle]="{'background-color': dailyStat.hasLateStartSum ? '#e5e7eb' : 'transparent'}">
-                {{ dailyStat.hasLateStartSum ? 'Oui' : 'Non' }}
-              </td>
-              <td [ngStyle]="{'background-color': dailyStat.hasLateStop ? '#e5e7eb' : 'transparent'}">
-                {{ dailyStat.hasLateStop ? 'Oui' : 'Non' }}
-              </td>
-              <td [ngStyle]="{'background-color': dailyStat.hasLastTripLong ? '#e5e7eb' : 'transparent'}">
-                {{ dailyStat.hasLastTripLong ? 'Oui' : 'Non' }}
-              </td>
-              <td>{{ dailyStat.rangeAvg }}</td>
-              <td>{{ dailyStat.waitingDuration }}</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
-    </p-dialog>
+    <app-vehicle-stats-dialog
+      [displayDialog]="displayDailyStats"
+      [dialogHeader]="'Détails journaliers - ' + selectedDailyStat"
+      [tableData]="vehicleDailyStats"
+      [columns]="dailyStatsColumns"
+      (close)="closeDialog()">
+    </app-vehicle-stats-dialog>
   `,
   standalone: true,
   imports: [
@@ -172,13 +166,32 @@ import {TableModule} from "primeng/table";
     NgClass,
     Button,
     Dialog,
-    NgForOf,
     NgStyle,
     DateRangePickerComponent,
+    TableModule,
+    ToggleButtonsGroupComponent,
+    AsyncPipe,
+    ProgressSpinner,
     IndicatorButtonsComponent,
-    TableModule
+    VehicleStatsDialogComponent
   ],
   styles: [`
+    p-progressSpinner {
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      margin-top: -75px;
+      background-color: #0001;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+
+    .indicators {
+      width: 96vw;
+      margin: 0 auto;
+    }
+
     /* Make dialog content flexible */
     ::ng-deep .p-dialog {
       max-width: 95%;
@@ -205,7 +218,9 @@ import {TableModule} from "primeng/table";
       max-height: 60vh;
       overflow-y: auto;
     }
-  `]
+
+  `],
+  providers: [LoadingService]
 })
 
 export class ReportComponent implements OnInit {
@@ -223,7 +238,16 @@ export class ReportComponent implements OnInit {
   displayDailyStats: boolean = false;
   selectedDailyStat: string = '';
 
-  constructor(private filterService: FilterService , private vehicleService: VehicleService) {}
+  statsCounts: Stat[] = [];
+  selectedStats: Stat | null = null;
+
+
+  constructor(
+    private filterService: FilterService,
+    private vehicleService: VehicleService,
+    protected loadingService: LoadingService,
+  ) {}
+
   @Input()
   vehicleId: string = '';
   @Input()
@@ -242,34 +266,52 @@ export class ReportComponent implements OnInit {
     totalHasLateStop: "hasLateStop",
   };
 
+  dailyStatsColumns = [
+    { field: 'tripDate', header: 'Date' },
+    { field: 'driverName', header: 'Conducteur' },
+    { field: 'tripCount', header: 'Nb de trajets effectués' },
+    { field: 'distanceSum', header: 'Distance parcourue' },
+    { field: 'drivingTime', header: 'Temps de conduite' },
+    { field: 'distancePerTripAvg', header: 'Distance moyenne / Trajet' },
+    { field: 'durationPerTripAvg', header: 'Durée moyenne / Trajet' },
+    {
+      field: 'hasLateStartSum',
+      header: 'Départ tardif (>7H30)',
+      style: (data: VehicleStatsDTO) => ({ 'background-color': data.hasLateStartSum ? '#e5e7eb' : 'transparent' })
+    },
+    {
+      field: 'hasLateStop',
+      header: 'Dernier arrêt tardif (>18H)',
+      style: (data: VehicleStatsDTO) => ({ 'background-color': data.hasLateStop ? '#e5e7eb' : 'transparent' })
+    },
+    {
+      field: 'hasLastTripLong',
+      header: 'Dernier trajet long (>45mn)',
+      style: (data: VehicleStatsDTO) => ({ 'background-color': data.hasLastTripLong ? '#e5e7eb' : 'transparent' })
+    },
+    { field: 'rangeAvg', header: 'Amplitude' },
+    { field: 'waitingDuration', header: 'Temps d\'attente' }
+  ];
 
-  keyLabels: Record<string, string> = {
-    averageDistance: "DISTANCE MOYENNE/TRAJET (en km)",
-    averageDuration: "TEMPS DE CONDUITE DECLARE TOTAL",
-    averageRangeAvg: "AMPLITUDE MOYENNE",
-    totalDistanceSum: "DISTANCE PARCOURUE (en km)",
-    totalDrivers: "NOMBRE TOTAL DE CONDUCTEURS",
-    totalDrivingTime: "TEMPS DE CONDUITE TOTAL",
-    totalHasLastTripLong: "DERNIER TRAJET>45mn  (en nb)",
-    totalHasLateStartSum: "DEPART TARDIF  (en nb)",
-    totalHasLateStop: "ARRETS TARDIFS",
-    totalTripCount: "TRAJETS EFFECTUES (en nb)",
-    totalVehicles: "NOMBRE TOTAL DE VEHICULES",
-    totalWaitingTime: "TEMPS D\'ARRET TOTAL (en hh:mm)",
-  };
 
+  //
+  // get calendarDate(): string {
+  //   return this.date;
+  // }
+  //
+  // set calendarDate(date: Date) {
+  //   date.setHours(3);
+  // }
 
-  get calendarDate(): string {
-    return this.date;
-  }
+  identifierFn = (item: Stat) => item.key;
+  displayFn    = (item: Stat) => `${item.displayName}`;
+  colorFn      = (item: Stat) => item.color;
 
-  set calendarDate(date: Date) {
-    date.setHours(3);
-  }
 
   //Récupérer des statistiques pour une période spécifique
   fetchVehicleStats(): void {
     if (this.dateFrom && this.dateTo) {
+      this.loadingService.setLoading(true);
 
       const startDate = this.dateFrom.getFullYear() + '-' +
         String(this.dateFrom.getMonth() + 1).padStart(2, '0') + '-' +
@@ -288,7 +330,17 @@ export class ReportComponent implements OnInit {
           this.vehicleStats = teamHierarchyNodes;
 
           //Cette variable contient les résultats originaux des boutons statistiques
-          this.vehiclesStatsTotal=stats;
+          this.vehiclesStatsTotal = stats;
+
+
+          this.statsCounts = Object.entries(this.vehiclesStatsTotal)
+          .filter(([key]) => STATS_DETAILS[key]) // only include keys defined in STATS_DETAILS
+          .map(([key, value]) => ({
+            key: key,
+            count: value,
+            displayName: STATS_DETAILS[key].displayName,
+            color: STATS_DETAILS[key].color
+          }));
 
           //transformer les résultats originaux de la table.ts en TreeNode
           this.vehiclesStatsTree=VehicleService.transformToTreeNodes(
@@ -297,11 +349,13 @@ export class ReportComponent implements OnInit {
               driverName: vehicle.vehicleStats.driverName ||'',
               licensePlate: vehicle.vehicleStats.licensePlate || 'unknown',
             })
-
           )
+
+          this.loadingService.setLoading(false)
         },
         error: (err) => {
           console.error('Erreur lors de la récupération des statistiques du véhicule:', err);
+          this.loadingService.setLoading(false);
         }
       });
     } else {
@@ -343,9 +397,14 @@ export class ReportComponent implements OnInit {
   }
 
   //fonction permettant de filtrer les résultats en fonction des boutons cliqués
-  filterByKey(key: string): void {
-    const property = this.keyToPropertyMap[key]; // Obtenir le nom de la propriété pour filtrer par
+  filterByKey(selected: Stat): void {
+     const property = this.keyToPropertyMap[selected.key]; // Obtenir le nom de la propriété pour filtrer par
 
+    // const property=selected.state
+
+    console.log(selected);
+
+    this.selectedStats = selected;
     if (property) {
       this.filteredVehiclesStats = this.vehicleStats.map((node: TeamHierarchyNodeStats) => ({
         ...node,

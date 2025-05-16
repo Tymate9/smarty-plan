@@ -3,9 +3,7 @@ package net.enovea.vehicle.vehicleStats
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import net.enovea.vehicle.TeamHierarchyNode
 import net.enovea.vehicle.VehicleService
-import net.enovea.vehicle.VehicleSummaryDTO
 
 @Path("/api/vehicles/vehicleStats")
 //@Authenticated

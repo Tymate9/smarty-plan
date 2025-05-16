@@ -12,6 +12,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import {NgClass, NgIf} from '@angular/common';
 import { Drawer } from 'primeng/drawer';
 import { DrawerService } from "../../services/drawer.service";
+import {Button} from "primeng/button";
 
 /**
  * Interface pour la configuration d'un composant enfant dynamique
@@ -39,7 +40,8 @@ export interface DrawerOptions {
   imports: [
     PrimeTemplate,
     NgIf,
-    Drawer
+    Drawer,
+    Button
   ],
   providers: [
     MessageService
@@ -78,9 +80,14 @@ export interface DrawerOptions {
     <ng-template pTemplate="footer">
       <div class="drawer-footer">
         <!-- Bouton Close que l'on contrôle nous-même -->
-        <button type="button" (click)="onTryClose()">
-          Fermer le Drawer
-        </button>
+<!--        <button type="button" (click)="onTryClose()">-->
+<!--          Fermer le Drawer-->
+<!--        </button>-->
+        <p-button
+          label="Fermer"
+          (onClick)="onTryClose()"
+          icon="pi pi-times">
+        </p-button>
       </div>
     </ng-template>
     </p-drawer>

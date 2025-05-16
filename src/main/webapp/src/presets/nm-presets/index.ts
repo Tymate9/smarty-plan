@@ -19,6 +19,7 @@ import {autocompleteConfig} from "./components/autocomplete";
 import {treeSelectConfig} from "./components/treeselect";
 import {checkboxConfig} from "./components/checkbox";
 import {tabsConfig} from "./components/tabs";
+import {paginatorConfig} from "./components/paginator";
 
 
 
@@ -42,7 +43,8 @@ export const NmPreset = definePreset(Nora, {
     autocomplete:autocompleteConfig,
     treeselect:treeSelectConfig,
     tabs:tabsConfig,
-    checkbox:checkboxConfig
+    checkbox:checkboxConfig,
+    paginator:paginatorConfig
 
   }
 });

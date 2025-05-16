@@ -8,7 +8,7 @@ export interface IFormDependency {
 }
 
 export interface IFormDescription {
-  title: string;
+  title: string | undefined;
   formValidator?: ValidatorFn;
   formInputs: IFormInput[];
   dependencies?: IFormDependency[];

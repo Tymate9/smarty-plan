@@ -38,6 +38,7 @@ interface DynamicComponentConfig {
 
     <p-treeTable
       [value]="treeData"
+      autoLayout="true"
       (onNodeExpand)="handleExpand($event)"
       (onNodeCollapse)="handleCollapse($event)"
     >
@@ -63,16 +64,16 @@ interface DynamicComponentConfig {
         <ng-container *ngIf="!rowNode.parent && rowNode.node?.expanded">
           <tr class="dynamic-tt-header">
             <td [ttRow]="rowNode" *ngFor="let col of columns">
-              <span>{{ col.header }}</span>
-              <p-button
-                *ngIf="col.field && col.comparator"
-                (click)="onColumnHeaderClick(col)"
-                [icon]="col.ascending ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
-              >
-              </p-button>
-              <span *ngIf="col.field && col.comparator">
-            ({{ col.ascending ? 'Asc' : 'Desc' }})
-          </span>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>{{ col.header }}</span>
+                <p-button
+                  *ngIf="col.field && col.comparator"
+                  (click)="onColumnHeaderClick(col)"
+                  [icon]="col.ascending ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+                >
+                </p-button>
+
+              </div>
             </td>
           </tr>
         </ng-container>
@@ -81,6 +82,8 @@ interface DynamicComponentConfig {
         <tr class="dynamic-tt-leaf">
           <ng-container *ngFor="let col of columns">
             <td *ngIf="!(rowNode.node.children?.length > 0)">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+
               <ng-container *ngIf="!col.isDynamic">
                 {{ col.field ? (rowData[col.field] || '-') : '-' }}
               </ng-container>
@@ -92,6 +95,7 @@ interface DynamicComponentConfig {
                 [rowData]="rowData"
                 [treeNode]="rowNode.node"
               ></ng-template>
+                </div>
             </td>
           </ng-container>
         </tr>
@@ -118,9 +122,10 @@ interface DynamicComponentConfig {
     }
 
     .error {
-      color: red;
+      color: #aa001f;
       font-weight: bold;
     }
+
   `],
   providers: [LoadingService]
 })

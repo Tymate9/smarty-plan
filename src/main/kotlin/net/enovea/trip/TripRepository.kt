@@ -5,7 +5,7 @@ import net.enovea.trip.DatapointDTO
 import net.enovea.trip.DatapointSimpleRowMapper
 import net.enovea.trip.TripDTO
 import net.enovea.trip.TripDailyStatsDTO
-import net.enovea.vehicle.vehicleStats.VehicleStatsDTO
+import net.enovea.vehicle.vehicleStats.VehicleStatsQueryResult
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -68,7 +68,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId
-                AND duration > 60
+                AND duration > 60 OR (distance / duration * 3.6 > 5 AND distance / duration * 3.6 < 180)
             """.trimIndent()
             )
                 .bind("vehicleId", vehicleId)
@@ -97,7 +97,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     idle_duration,      
                     idle_count,
                     trip_status,
-                    st_astext(st_geometryfromwkb(trace)) as trace 
+                    st_astext(st_geometryfromwkb(trace)) as trace
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId 
                 AND date_trunc(start_time, 'day') = :date
@@ -186,8 +186,8 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
         }
     }
 
-    fun aggregateVehicleStatsOverSpecificPeriod(startDate: String, endDate: String): List<VehicleStatsDTO> {
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
+    fun aggregateVehicleStatsOverSpecificPeriod(startDate: String, endDate: String): List<VehicleStatsQueryResult> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQueryResult>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
@@ -224,7 +224,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
             )
                 .bind("startDate", startDate)
                 .bind("endDate",endDate)
-                .mapTo(VehicleStatsDTO::class.java)
+                .mapTo(VehicleStatsQueryResult::class.java)
                 .list()
         }
     }

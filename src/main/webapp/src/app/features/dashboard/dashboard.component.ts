@@ -30,7 +30,7 @@ const STATUS_DETAILS: Record<string, { displayName: string, color: string, icon:
   DRIVING: { displayName: 'ROULANT', color: '#21A179', icon: 'pi pi-play' },
   PARKED: { displayName: 'ARRÊTÉ', color: '#C71400', icon: 'pi pi-stop' },
   IDLE: { displayName: 'À L\'ARRÊT', color: '#FE8F2B', icon: 'pi pi-step-forward' },
-  CALCULATING: { displayName: 'CALCUL EN COURS', color: '#2bc6fe', icon: 'pi pi-refresh' },
+  CALCULATING: { displayName: 'CALCUL EN COURS', color: '#66afe9', icon: 'pi pi-refresh' },
   NO_COM: { displayName: 'SANS SIGNAL', color: '#E0E0E0', icon: 'pi pi-times' },
   UNPLUGGED: { displayName: 'DÉCONNECTÉ', color: '#BDBDBD', icon: 'pi pi-ban' }
 };
@@ -528,7 +528,7 @@ interface StatusCount {
       color: white;
     }
     .CALCULATING {
-      background-color: #2bc6fe;
+      background-color: #66afe9;
       color: white;
     }
     .NO_COM {

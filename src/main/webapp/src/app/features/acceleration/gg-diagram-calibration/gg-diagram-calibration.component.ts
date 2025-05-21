@@ -26,10 +26,11 @@ export class GgDiagramCalibrationComponent implements OnChanges{
 
   @Output() anglesSaved = new EventEmitter<DeviceAccelAnglesDTO>()
 
-
-  projections = ['XY', 'XZ', 'YZ']
+  projections = ['XY', 'XZ', 'YZ'];
   proj: string = this.projections[0];
 
+  granularities = [1, 2, 4, 5, 10];
+  granularity = this.granularities[4];
   //deviceId: number = 161;
   //beginDate: string = "2025-01-01T00:00:00";
   //endDate: string = "2025-05-05T00:00:00";
@@ -47,7 +48,7 @@ export class GgDiagramCalibrationComponent implements OnChanges{
 
   displayGgDiagram() {
     if (this.period){
-      this.accelerationService.computeGGDiagram(this.period!!.deviceId, this.period!!.beginDate, this.proj, this.phi, this.theta, this.psi).subscribe({
+      this.accelerationService.computeGGDiagram(this.period!!.deviceId, this.period!!.beginDate, this.proj, this.phi, this.theta, this.psi, this.granularity).subscribe({
         next: (ggDiagram) => {
           this.ggDiagram = ggDiagram;
         },

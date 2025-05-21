@@ -16,8 +16,8 @@ export class AccelerationService {
 
   constructor(private http: HttpClient) {}
 
-  computeGGDiagram(id: number, beginDate: Date, proj: string, phi: number, theta: number, psi: number): Observable<GGDiagramDTO[]> {
-    let httpParams = {'proj': proj, 'phi': phi, 'theta': theta, 'psi': psi};
+  computeGGDiagram(id: number, beginDate: Date, proj: string, phi: number, theta: number, psi: number, granularity: number): Observable<GGDiagramDTO[]> {
+    let httpParams = {'proj': proj, 'phi': phi, 'theta': theta, 'psi': psi, 'granularity': granularity};
     return this.http.get<GGDiagramDTO[]>(`${this.baseUrl}/${id}/${beginDate}/gg-diagram`, { params: httpParams });
   }
 

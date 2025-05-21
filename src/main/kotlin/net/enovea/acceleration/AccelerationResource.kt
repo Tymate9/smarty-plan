@@ -8,7 +8,6 @@ import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.Response.Status
 import net.enovea.auth.ROLE_ADMIN
-import java.time.Instant
 import java.time.format.DateTimeParseException
 import java.time.LocalDateTime
 
@@ -38,6 +37,7 @@ class AccelerationResource(
         @QueryParam("phi") phi: Double,
         @QueryParam("theta") theta: Double,
         @QueryParam("psi") psi: Double,
+        @QueryParam("granularity") granularity: Int,
     ): Response {
         val parsedBeginDate = try {
             LocalDateTime.parse(beginDate)
@@ -57,7 +57,7 @@ class AccelerationResource(
             return Response.status(Status.NOT_FOUND).build()
         }
 
-        val ggDiagram = ggDiagramService.computeGGDiagram(deviceId, begin, end, ggProjection, phi, theta, psi)
+        val ggDiagram = ggDiagramService.computeGGDiagram(deviceId, begin, end, ggProjection, phi, theta, psi, granularity)
         return Response.ok(ggDiagram).build()
     }
 

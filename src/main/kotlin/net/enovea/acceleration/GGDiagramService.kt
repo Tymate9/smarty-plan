@@ -19,8 +19,8 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         private const val column_deviceId = "device_id"
         private const val column_timestamp = "timestamp"
         private const val max_accel = 1000
-        private const val max_bucket = 100
-        private const val granularity = max_accel/max_bucket
+        //private const val max_bucket = 100
+        //private const val granularity = max_accel/max_bucket
         private const val avg_accx = "avg_accx"
         private const val avg_accy = "avg_accy"
         private const val avg_accz = "avg_accz"
@@ -28,10 +28,10 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
 
     fun computeGGDiagram(
         deviceId: Int, beginDate: LocalDateTime, endDate: LocalDateTime,
-        proj: GGProjection, phi: Double, theta: Double, psi: Double,
+        proj: GGProjection, phi: Double, theta: Double, psi: Double, granularity: Int
     ): List<GGDiagramDTO> =  dorisJdbiContext.jdbi.withHandle<List<GGDiagramDTO>, Exception> { handle ->
 
-        val (bucketVert, bucketHoriz) = projectBucketColumns(proj)
+        val (bucketVert, bucketHoriz) = projectBucketColumns(proj,granularity)
 
         handle.createQuery("""
             SELECT <bucket_vert> AS <idx_vert>,
@@ -58,7 +58,7 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
             .define("alias_accz", avg_accz)
             .define("bucket_vert", bucketVert)
             .define("bucket_horiz", bucketHoriz)
-            .define("max_bucket", max_bucket)
+            .define("max_bucket", max_accel/granularity)
             .define("idx_vert", GGDiagramDTO::idxVert.name)
             .define("idx_horiz", GGDiagramDTO::idxHoriz.name)
             .define("value", GGDiagramDTO::value.name)
@@ -119,16 +119,16 @@ class GGDiagramService(private val dorisJdbiContext: DorisJdbiContext) {
         return columns.joinToString(separator = ", ")
     }
 
-    private fun projectBucketColumns(proj: GGProjection): Pair<String, String> {
+    private fun projectBucketColumns(proj: GGProjection, granularity: Int): Pair<String, String> {
         val (columnVert, columnHoriz) = when (proj) {
             GGProjection.XY -> avg_accx to avg_accy
             GGProjection.XZ -> avg_accz to avg_accx
             GGProjection.YZ -> avg_accz to avg_accy
         }
-        return accelValueToBucket(columnVert) to accelValueToBucket(columnHoriz)
+        return accelValueToBucket(columnVert, granularity) to accelValueToBucket(columnHoriz, granularity)
     }
 
-    private fun accelValueToBucket(column: String): String {
+    private fun accelValueToBucket(column: String, granularity: Int): String {
         return "CAST(ROUND($column/$granularity) AS INT)"
     }
 

@@ -6,6 +6,7 @@
   <span>Date de début : {{ dateFormatter.formatDateHM(period?.beginDate) || "Choisissez une période"}}</span>
   <br/>
   <p-select [options]="projections" [(ngModel)]="proj" />
+  <p-select [options]="granularities" [(ngModel)]="granularity" />
   <br/>
   <label for="phi">&Phi; :</label>
   <input type="number" [(ngModel)]="phi" id="phi" name="phi"/>
@@ -18,5 +19,5 @@
 
   <p-button (onClick)="saveAngles()" title="Sauvegarder manuellementangles redressement">Save Angles</p-button>
 
-  <gg-diagram [ggDiagram]="ggDiagram" [ggProjection]="proj" />
+  <gg-diagram [ggDiagram]="ggDiagram" [ggProjection]="proj" [granularity]="granularity" />
 </div>

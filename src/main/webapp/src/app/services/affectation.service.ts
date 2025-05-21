@@ -129,7 +129,7 @@ export abstract class AffectationService<S, T> implements IEntityService<Affecta
       (item as any).startDate ? (item as any).startDate : '',
       (item as any).endDate ? (item as any).endDate : ''
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(';');
   }
 }
 

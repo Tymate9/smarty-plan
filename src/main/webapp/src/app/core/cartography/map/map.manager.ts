@@ -420,7 +420,7 @@ export class MapManager {
         return this.convertVehicleToCSVRow(vehicle, address);
       });
       const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, "-");
-      downloadAsCsv([headers.join(','), ...csvRows], `export_vehicles_${timestamp}.csv`)
+      downloadAsCsv([headers.join(';'), ...csvRows], `export_vehicles_${timestamp}.csv`)
     }, error => {
       console.error('Erreur lors de l\'exportation CSV:', error);
       alert('Une erreur est survenue lors de l\'exportation CSV.');

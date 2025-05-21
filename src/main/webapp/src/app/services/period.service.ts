@@ -117,7 +117,7 @@ export abstract class PeriodService<R> implements IEntityService<PeriodDTO<R>, P
       item.endDate ? item.endDate.toString() : '',
       item.resource ? item.resource.toString() : ''
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(';');
   }
 
 }

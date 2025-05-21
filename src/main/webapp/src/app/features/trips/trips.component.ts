@@ -226,8 +226,8 @@ export class TripsComponent implements OnInit {
         tripEvent.eventType === dto.TripEventType.TRIP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
         tripEvent.eventType === dto.TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-',
         tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance || 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
-      ].join(',')) || [];
-    downloadAsCsv([headers.join(','), ...dataRows], `trips_` +
+      ].join(';')) || [];
+    downloadAsCsv([headers.join(';'), ...dataRows], `trips_` +
       (this.tripGeoloc ? `` : `non_geoloc_`) + `${this.vehicleId}_${this.date}.csv`);
   }
 

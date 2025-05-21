@@ -282,6 +282,6 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
       item.phoneNumber || '',
       item.phoneComment || ''
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(';');
   }
 }

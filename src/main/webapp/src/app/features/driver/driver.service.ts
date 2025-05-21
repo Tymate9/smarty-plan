@@ -290,6 +290,6 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
       item.lastName,
       item.phoneNumber
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(';');
   }
 }

@@ -587,6 +587,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       item.serviceDate
     ];
     // Chaque valeur est entourée de guillemets pour éviter les soucis avec les virgules présentes dans les données
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(';');
   }
 }

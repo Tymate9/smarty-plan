@@ -420,14 +420,14 @@ export class MapManager {
         return this.convertVehicleToCSVRow(vehicle, address);
       });
       const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, "-");
-      downloadAsCsv([headers.join(';'), ...csvRows], `export_vehicles_${timestamp}.csv`)
+      downloadAsCsv([headers, ...csvRows], `export_vehicles_${timestamp}.csv`)
     }, error => {
       console.error('Erreur lors de l\'exportation CSV:', error);
       alert('Une erreur est survenue lors de l\'exportation CSV.');
     });
   }
 
-  private convertVehicleToCSVRow(vehicle: any, address: string): string {
+  private convertVehicleToCSVRow(vehicle: any, address: string): string[] {
     // Extraire les champs requis
     const id = vehicle.id ?? 'vehicle id is null';
     const licenceplate = vehicle.licenseplate ?? 'licenseplate is null';
@@ -466,7 +466,7 @@ export class MapManager {
         value = `"${value}"`;
       }
       return value;
-    }).join(',');
+    });
   }
 
 }

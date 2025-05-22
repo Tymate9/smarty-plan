@@ -273,7 +273,7 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
     ];
   }
 
-  convertToCsv(item: TeamDTO): string {
+  convertToCsv(item: TeamDTO): string[] {
     const values = [
       item.id,
       item.label,
@@ -282,6 +282,6 @@ export class TeamService implements IEntityService<TeamDTO, TeamForm>{
       item.phoneNumber || '',
       item.phoneComment || ''
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(';');
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`);
   }
 }

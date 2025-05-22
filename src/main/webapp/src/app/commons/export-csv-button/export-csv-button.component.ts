@@ -61,10 +61,9 @@ export class ExportCsvButtonComponent {
     this.dataService.getAuthorizedData().subscribe({
       next: (data: any[]) => {
         const headers = this.dataService.getCsvHeaders();
-        const headerLine = headers.join(';');
         // Appliquer la méthode convertToCsv de l'interface sur chaque objet
         const rows = data.map(item => this.dataService.convertToCsv(item));
-        downloadAsCsv([headerLine, ...rows], 'export.csv');
+        downloadAsCsv([headers, ...rows], 'export.csv');
         this.loading = false;
       },
       error: (err) => {

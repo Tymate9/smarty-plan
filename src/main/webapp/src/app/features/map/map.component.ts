@@ -235,6 +235,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Reset unTrackedVehicle list for each filter change
     this.noComVehicle = "Liste des véhicules non-communicant ou sans statut : ";
+    this.unpluggedVehicle = "Liste des véhicules dont le boitier est déconnecté : ";
 
     const filteredVehicles = vehicles.filter(vehicle => {
       // Garde seulement ceux qui NE SONT PAS en pause
@@ -247,7 +248,11 @@ export class MapComponent implements OnInit, OnDestroy {
       if (vehicle.device && vehicle.device.coordinate) {
 
         this.mapManager.addMarker(EntityType.VEHICLE, vehicle);
-        const refVehicle = `[${vehicle.driver?.lastName + " " + vehicle.driver?.firstName}-${vehicle.licenseplate}] /// `;
+        const refVehicle = (
+          vehicle.driver === null ?
+            "[Véhicule non attribué" :
+            `[${vehicle.driver.lastName + " " + vehicle.driver.firstName}`
+        ) + `-${vehicle.licenseplate}] /// `;
         if (vehicle.device.state === "" || vehicle.device.state === "NO_COM" || vehicle.device.state === "UNPLUGGED"
           || vehicle.device?.state === null) {
           this.noComVehicle += refVehicle

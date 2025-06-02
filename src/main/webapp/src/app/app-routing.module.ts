@@ -8,6 +8,7 @@ import {TripsComponent} from "./features/trips/trips.component";
 import {EntityAdminComponent} from "./commons/admin/entity-admin/entity-admin.component";
 import {ReportComponent} from "./features/report/report.component";
 import {QseReportComponent} from "./features/report/qse.report.component";
+import {ListVehiclePageComponent} from "./features/acceleration/list-vehicle-page/list-vehicle-page.component";
 
 export const routes: Routes = [
   {
@@ -19,14 +20,23 @@ export const routes: Routes = [
       { path: 'dashboard-non-geoloc', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit', component: PoiMapComponent},
-      // Commented path will be propose to NM later.
-      // { path: 'report', component: ReportComponent },
-      // { path: 'qse-report', component: QseReportComponent },
+      { path: 'report', component: ReportComponent },
+      { path: 'qse-report', component: QseReportComponent },
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      // { path: 'administration', component: EntityAdminComponent }
+      { path: 'administration', component: EntityAdminComponent }
+    ]
+  },
+  {
+    path: '',
+    canActivate: [canActivateAuth],
+    component: MainLayoutComponent,
+    data: {roles: ["admin"]},
+    children: [
+      { path: 'acceleration', component: ListVehiclePageComponent }
     ]
   },
   { path: '**', redirectTo: 'dashboard' }
+
 ];

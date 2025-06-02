@@ -39,8 +39,8 @@ export interface Option {
               <p-button (onClick)="navigateTo('dashboard')" icon="pi pi-th-large" title="Tableau de bord"></p-button>
               <p-button (onClick)="navigateTo('cartography')" icon="pi pi-map" title="Cartographie"></p-button>
               <p-button (onClick)="navigateTo('poiedit')" icon="pi pi-map-marker" title="POIs"></p-button>
-              <p-button disabled="true" (onClick)="navigateTo('report')" icon="pi pi-chart-bar" title="Suivi d'activité"></p-button>
-              <p-button disabled="true" (onClick)="navigateTo('qse-report')" icon="pi pi-chart-line" title="Rapport QSE"></p-button>
+              <p-button (onClick)="navigateTo('report')" icon="pi pi-chart-bar" title="Suivi d'activité"></p-button>
+              <p-button (onClick)="navigateTo('qse-report')" icon="pi pi-chart-line" title="Rapport QSE"></p-button>
             </div>
           </div>
           <div class="filters center">
@@ -81,7 +81,7 @@ export interface Option {
       </ng-template>
       <ng-template pTemplate="end">
         <div class="user-info compact">
-          <p-button disabled="true" icon="pi pi-cog" class="user-settings" (onClick)="navigateTo('administration')"></p-button>
+          <p-button icon="pi pi-cog" class="user-settings" (onClick)="navigateTo('administration')"></p-button>
           <p-button (onClick)="logout()" icon="pi pi-power-off"
                     [disabled]="!logoutURL"></p-button>
         </div>

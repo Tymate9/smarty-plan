@@ -99,7 +99,7 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
   map: L.Map;
   mapManager: MapManager;
   poiCategories: PointOfInterestCategoryEntity[] = [];
-  drawControl: L.Control.Draw = new L.Control.Draw();
+  drawControl!: L.Control.Draw;
 
   @ViewChild('poiList') poiListComponent: PoiListComponent;
   currentDrawingPoi: PointOfInterestEntity | null = null; // POI en cours de dessin
@@ -121,6 +121,114 @@ export class PoiMapComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // TODO : Beurk ! Il faut extraire toute la logique de création de L.Control.Draw dans une LeafletControlFactory dédiée afin de centraliser et tester la construction des DrawOptions sans recourir à ce contournement.
+    L.drawLocal.draw ={
+      toolbar: {
+        actions: {
+          title: "Annuler le dessin",
+            text: "Annuler"
+        },
+        finish: {
+          title: "Terminer le dessin",
+            text: "Terminer"
+        },
+        undo: {
+          title: "Supprimer le dernier point",
+            text: "Supprimer"
+        },
+        buttons: {
+          polyline: "Dessiner une polyligne",
+            polygon: "Dessiner un polygone",
+            rectangle: "Dessiner un rectangle",
+            circle: "Dessiner un cercle",
+            marker: "Placer un marqueur",
+            circlemarker: "Placer un cercle marqueur"
+        }
+      },
+      handlers: {
+        circle: {
+          tooltip: {
+            start: "Cliquer et glisser pour dessiner un cercle"
+          },
+          radius: "Rayon"
+        },
+        circlemarker: {
+          tooltip: {
+            start: "Cliquer sur la carte pour placer un cercle marqueur"
+          }
+        },
+        marker: {
+          tooltip: {
+            start: "Cliquer sur la carte pour placer un marqueur"
+          }
+        },
+        polygon: {
+          tooltip: {
+            start: "Cliquer pour commencer à dessiner la forme",
+              cont: "Cliquer pour ajouter un point",
+              end: "Cliquer sur le premier point pour fermer la forme"
+          }
+        },
+        polyline: {
+          error: "<strong>Erreur :</strong> les segments ne peuvent pas se croiser !",
+            tooltip: {
+            start: "Cliquer pour commencer à dessiner la ligne",
+              cont: "Cliquer pour continuer la ligne",
+              end: "Cliquer sur le dernier point pour terminer"
+          }
+        },
+        rectangle: {
+          tooltip: {
+            start: "Cliquer et glisser pour dessiner un rectangle"
+          }
+        },
+        simpleshape: {
+          tooltip: {
+            end: "Relâcher la souris pour terminer le dessin"
+          }
+        }
+      }
+    }
+    L.drawLocal.edit = {
+      toolbar: {
+        actions: {
+          save: {
+            title: "Enregistrer les modifications",
+            text: "Enregistrer"
+          },
+          cancel: {
+            title: "Annuler la modification, toutes les modifications seront perdues",
+            text: "Annuler"
+          },
+          clearAll: {
+            title: "Tout supprimer",
+            text: "Tout supprimer"
+          }
+        },
+        buttons: {
+          edit: "Modifier les objets",
+          editDisabled: "Aucun objet à modifier",
+          remove: "Supprimer les objets",
+          removeDisabled: "Aucun objet à supprimer"
+        }
+      },
+      handlers: {
+        edit: {
+          tooltip: {
+            text: "Déplacer les poignées pour modifier la forme",
+            subtext: "Cliquer sur Annuler pour revenir en arrière"
+          }
+        },
+        remove: {
+          tooltip: {
+            text: "Cliquer sur un objet pour le supprimer"
+          }
+        }
+      }
+    }
+
+    this.drawControl = new L.Control.Draw()
+
     this.initMap();
 
     this.map.on(L.Draw.Event.CREATED, (e: any) => {

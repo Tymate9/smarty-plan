@@ -32,5 +32,5 @@ export interface IEntityService<D, R> {
   notifyCrudEvent(event: CrudEvent<D>): void;
   buildTreeLeaf(entity: D): TreeNode;
   getCsvHeaders(): string[];
-  convertToCsv(item: D): string;
+  convertToCsv(item: D): (string | number)[];
 }

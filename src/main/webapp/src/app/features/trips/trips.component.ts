@@ -216,18 +216,20 @@ export class TripsComponent implements OnInit {
       'Distance',
       'Allure moyenne'
     ]
-    const dataRows = this.tripData?.tripEvents
+    const dataRows: string[][] = this.tripData?.tripEvents
       .filter(tripEvent => tripEvent.eventType !== dto.TripEventType.TRIP_EXPECTATION)
       .map(tripEvent => [
-        tripEvent.eventType !== dto.TripEventType.TRIP ? tripEvent.poiLabel ? `${tripEvent.poiLabel} ${tripEvent.address}` : tripEvent.address : 'Trajet',
-        tripEvent.start?.toLocaleTimeString() || '',
-        tripEvent.end?.toLocaleTimeString() || '',
+        tripEvent.eventType !== dto.TripEventType.TRIP ?
+          tripEvent.poiLabel !== null ? `${tripEvent.poiLabel} ${tripEvent.address!}` :
+            tripEvent.address! : 'Trajet',
+        tripEvent.start?.toLocaleTimeString() ?? '',
+        tripEvent.end?.toLocaleTimeString() ?? '',
         tripEvent.eventType === dto.TripEventType.STOP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
         tripEvent.eventType === dto.TripEventType.TRIP ? this.tripsService.formatDuration(tripEvent.duration!) : '-',
-        tripEvent.eventType === dto.TripEventType.TRIP ? tripEvent.distance?.toFixed(1) + ' Km' : '-',
-        tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance || 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
-      ].join(',')) || [];
-    downloadAsCsv([headers.join(','), ...dataRows], `trips_` +
+        tripEvent.eventType === dto.TripEventType.TRIP ? (tripEvent.distance?.toFixed(1) ?? 0) + ' Km' : '-',
+        tripEvent.eventType === dto.TripEventType.TRIP ? `${((tripEvent.distance ?? 0) / (tripEvent.duration! / 3600))?.toFixed(1)} Km/h` : '-'
+      ]) || [];
+    downloadAsCsv([headers, ...dataRows], `trips_` +
       (this.tripGeoloc ? `` : `non_geoloc_`) + `${this.vehicleId}_${this.date}.csv`);
   }
 

@@ -3,6 +3,7 @@ import {NgClass, NgIf, NgStyle} from "@angular/common";
 import {Button} from "primeng/button";
 import {ProgressSpinner} from "primeng/progressspinner";
 import {IEntityService} from "../crud/interface/ientity-service";
+import {downloadAsCsv} from "../../core/csv/csv.downloader";
 
 @Component({
   selector: 'app-export-csv-button',
@@ -60,17 +61,9 @@ export class ExportCsvButtonComponent {
     this.dataService.getAuthorizedData().subscribe({
       next: (data: any[]) => {
         const headers = this.dataService.getCsvHeaders();
-        const headerLine = headers.join(',');
         // Appliquer la méthode convertToCsv de l'interface sur chaque objet
         const rows = data.map(item => this.dataService.convertToCsv(item));
-        const csvContent = headerLine + '\r\n' + rows.join('\r\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = window.URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = 'export.csv';
-        anchor.click();
-        window.URL.revokeObjectURL(url);
+        downloadAsCsv([headers, ...rows], 'export.csv');
         this.loading = false;
       },
       error: (err) => {

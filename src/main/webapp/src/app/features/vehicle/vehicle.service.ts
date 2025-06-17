@@ -574,7 +574,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     ];
   }
 
-  convertToCsv(item: dto.VehicleDTO): string {
+  convertToCsv(item: dto.VehicleDTO): (string | number)[] {
     const values = [
       item.id,
       item.energy,
@@ -586,7 +586,16 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       item.mileage,
       item.serviceDate
     ];
-    // Chaque valeur est entourée de guillemets pour éviter les soucis avec les virgules présentes dans les données
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
+    return values.map(value => {
+      switch (typeof value) {
+        case 'string':
+        case 'number':
+          return value;
+        case 'object': // Date and null are of type 'object' (why?)
+          return value?.toString() ?? '';
+        default:
+          return '';
+      }
+    });
   }
 }

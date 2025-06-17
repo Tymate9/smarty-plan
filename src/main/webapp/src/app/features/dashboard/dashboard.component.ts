@@ -24,6 +24,7 @@ import {SmsFormComponent} from "../sms/sms-form/sms-form.component";
 import {MaskToggleComponent} from "../../commons/mask-toggle/mask-toggle.component";
 import {ToggleButtonsGroupComponent} from "../../commons/toggle-button-group/toggle-button-group.component";
 import {NotificationService} from "../../commons/notification/notification.service";
+import {downloadAsCsv} from "../../core/csv/csv.downloader";
 
 /** Définition d'une constante pour les détails de statuts (primaires + unplugged) */
 const STATUS_DETAILS: Record<string, { displayName: string, color: string, icon: string }> = {
@@ -984,31 +985,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   //Cette méthode permet d'exporter un fichier CSV
   exportToCSV(): void {
     const csvData = this.convertToCSV(this.teamHierarchy);
-    const bom = '\uFEFF';
-    const fullData = bom + csvData;
-    const blob = new Blob([fullData], {type: 'text/csv;charset=utf-8;'});
+
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString('fr-FR'); // Format: dd/mm/yyyy
     const formattedTime = currentDate.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}); // Format: hh:mm
     const fileName = `Positions ` + (this.non_geoloc ? ` non géolocalisées` : ``) + ` Au ${formattedDate} ${formattedTime}.csv`.replace(/[:]/g, '-'); // Replace colons in time for compatibility
 
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadAsCsv(csvData, fileName);
   }
 
-  convertToCSV(data: TeamHierarchyNode<dto.VehicleTableDTO>[]): string {
-    const rows: string[] = [];
+  convertToCSV(data: TeamHierarchyNode<dto.VehicleTableDTO>[]): (string | number)[][] {
+    const rows: (string | number)[][] = [];
     const headers = [
       'Véhicule', 'Immatriculation', 'Marque', 'Modèle', 'Etat', 'Energie', 'Conducteur',
       'Dernière communication', 'Heure de départ', 'Adresse', 'Type d\'adresse de référence',
       'Distance totale', 'Entité Conducteur', 'Entité Véhicule', 'Groupe de salarié'
     ];
-    rows.push(headers.join(','));
+    rows.push(headers);
 
     const processNode = (node: TeamHierarchyNode<dto.VehicleTableDTO>, parentLabel: string = ''): void => {
       const teamLabel = node.label;
@@ -1019,20 +1012,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
             vehicle.licenseplate,
             vehicle.category.label,
             vehicle.category.label,
-            vehicle.device?.deviceDataState?.state,
-            vehicle.energy,
+            vehicle.device?.deviceDataState?.state ?? '',
+            vehicle.energy ?? '',
             vehicle.driver
               ? (vehicle.driver.lastName + ' ' + vehicle.driver.firstName)
               : 'Véhicule non attribué',
             this.formatDateTime(vehicle.device?.deviceDataState?.lastPositionTime),
-            vehicle.firstTripStart,
-            vehicle.lastPositionAddress,
-            vehicle.lastPositionAddressInfo?.label,
-            vehicle.distance?.toString() ?? '0',
+            vehicle.firstTripStart?.toString() ?? 'Journée non commencée',
+            vehicle.lastPositionAddress ?? '',
+            vehicle.lastPositionAddressInfo?.label ?? '',
+            vehicle.distance ?? 0,
             vehicle.driver?.team?.label ?? '',
             parentLabel || teamLabel,
             teamLabel,
-          ].join(','));
+          ]);
         }
       }
       if (node.children) {
@@ -1044,7 +1037,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     for (const team of data) {
       processNode(team);
     }
-    return rows.join('\n');
+    return rows;
   }
 
   toggleTree(): void {

@@ -20,12 +20,12 @@ export const routes: Routes = [
       { path: 'dashboard-non-geoloc', component: DashboardComponent },
       { path: 'cartography', component: CartographyComponent },
       { path: 'poiedit', component: PoiMapComponent},
-      { path: 'report', component: ReportComponent },
-      { path: 'qse-report', component: QseReportComponent },
+      // { path: 'report', component: ReportComponent },
+      // { path: 'qse-report', component: QseReportComponent },
       { path: 'trip/:vehicleId/:date', component: TripsComponent },
       { path: 'trip-non-geoloc/:vehicleId/:date', component: TripsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'administration', component: EntityAdminComponent }
+      // { path: 'administration', component: EntityAdminComponent }
     ]
   },
   {

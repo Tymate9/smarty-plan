@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
-    // todo : replace raw timezone computation with timezone field
 
     fun findById(tripId: String): TripDTO? {
         return dorisJdbiContext.jdbi.withHandle<TripDTO, Exception> { handle ->
@@ -100,7 +99,7 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                     st_astext(st_geometryfromwkb(trace)) as trace 
                 FROM trips_vehicle_view 
                 WHERE coalesce(vehicle_id, '') = :vehicleId 
-                AND date_trunc(start_time, 'day') = :date
+                AND date_trunc(coalesce(minutes_add(start_time, tz_offset * 10), convert_tz(start_time, 'UTC', 'Europe/Paris')), 'day') = :date
                 AND duration > 60
                 ORDER BY start_time
                 """.trimIndent()
@@ -121,7 +120,9 @@ class TripRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         sum(distance) as distance, 
                         coalesce(minutes_add(min(start_time), min_by(tz_offset, start_time) * 10), convert_tz(min(start_time), 'UTC', 'Europe/Paris')) as first_trip_start
                     FROM trips_vehicle_view
-                    WHERE date(start_time) = date(now()) and vehicle_id is not null
+                    WHERE date(coalesce(minutes_add(start_time, tz_offset * 10), convert_tz(start_time, 'UTC', 'Europe/Paris'))) = 
+                        date(coalesce(minutes_add(now(), tz_offset * 10), convert_tz(now(), 'UTC', 'Europe/Paris'))) 
+                        and vehicle_id is not null
                     GROUP BY vehicle_id, date(start_time)
                 """.trimIndent()
             )

@@ -35,7 +35,6 @@ import {VehicleService} from "../../vehicle/vehicle.service";
     PeriodFormComponent
   ],
   template: `
-    <h2>Driver Form</h2>
     <p-tabView>
       <!-- Onglet 1 : Détails du driver -->
       <p-tabPanel header="Détails du driver">
@@ -189,7 +188,7 @@ export class DriverFormComponent implements OnInit {
     };
 
     this.formDescription = new FormDescription(
-      'Création / Mise à jour du Driver',
+      undefined,
       inputs,
       undefined, // Aucun validateur global nécessaire ici
       [],        // Pas de dépendances particulières

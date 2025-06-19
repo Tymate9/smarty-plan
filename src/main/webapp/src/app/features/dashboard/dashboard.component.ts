@@ -28,9 +28,10 @@ import {downloadAsCsv} from "../../core/csv/csv.downloader";
 
 /** Définition d'une constante pour les détails de statuts (primaires + unplugged) */
 const STATUS_DETAILS: Record<string, { displayName: string, color: string, icon: string }> = {
-  DRIVING: { displayName: 'ROULANT(S)', color: '#21A179', icon: 'pi pi-play' },
+  DRIVING: { displayName: 'ROULANT', color: '#21A179', icon: 'pi pi-play' },
   PARKED: { displayName: 'ARRÊTÉ', color: '#C71400', icon: 'pi pi-stop' },
   IDLE: { displayName: 'À L\'ARRÊT', color: '#FE8F2B', icon: 'pi pi-step-forward' },
+  CALCULATING: { displayName: 'CALCUL EN COURS', color: '#66afe9', icon: 'pi pi-refresh' },
   NO_COM: { displayName: 'SANS SIGNAL', color: '#E0E0E0', icon: 'pi pi-times' },
   UNPLUGGED: { displayName: 'DÉCONNECTÉ', color: '#BDBDBD', icon: 'pi pi-ban' }
 };
@@ -49,7 +50,7 @@ interface StatusCount {
   template: `
     <!-- Barres de filtres statuts via toggle-buttons-group -->
     <div class="status-buttons">
-      <!-- Statuts primaires : DRIVING, PARKED, IDLE, NO_COM -->
+      <!-- Statuts primaires : DRIVING, PARKED, IDLE, CALCULATING, NO_COM -->
       <app-toggle-buttons-group
         [items]="primaryStatusCounts"
         [selectedItem]="selectedPrimaryStatus"
@@ -58,7 +59,7 @@ interface StatusCount {
         [colorFn]="primaryColorFn"
         [iconFn]="primaryIconFn"
         (selectionChange)="onPrimaryStatusChange($event)"
-        buttonWidth="18.5vw">
+        buttonWidth="15vw">
       </app-toggle-buttons-group>
 
       <!-- Statut unplugged -->
@@ -70,7 +71,7 @@ interface StatusCount {
         [colorFn]="unpluggedColorFn"
         [iconFn]="unpluggedIconFn"
         (selectionChange)="onUnpluggedStatusChange($event)"
-        buttonWidth="18.5vw">
+        buttonWidth="15vw">
       </app-toggle-buttons-group>
     </div>
 
@@ -193,6 +194,7 @@ interface StatusCount {
               'DRIVING': rowData.vehicle.device?.deviceDataState?.state === 'DRIVING',
               'PARKED': rowData.vehicle.device?.deviceDataState?.state === 'PARKED',
               'IDLE': rowData.vehicle.device?.deviceDataState?.state === 'IDLE',
+              'CALCULATING': rowData.vehicle.device?.deviceDataState?.state === 'CALCULATING',
               'NO_COM': rowData.vehicle.device?.deviceDataState?.state === 'NO_COM',
               'UNPLUGGED': rowData.vehicle.device?.deviceDataState?.state === 'UNPLUGGED',
               'DEFAULT': rowData.vehicle.device?.deviceDataState?.state === null
@@ -225,8 +227,20 @@ interface StatusCount {
                        height="16"
                        width="16"
                        style="float: right; margin-left: 8px;"
-                  /></div>
-                </span>
+                  />
+                </div>
+              </span>
+              <span *ngSwitchCase="'CALCULATING'" class="status-icon">Calcul en cours
+                <div>
+                  <i class="pi pi-refresh"></i>
+                  <img *ngIf="rowData.vehicle.device?.deviceDataState?.plugged == false"
+                       ngSrc="../../../assets/icon/unplugged.svg"
+                       alt="unplugged"
+                       height="16" width="16"
+                       style="float: right;
+                       margin-left: 8px;"/>
+                </div>
+              </span>
               <span *ngSwitchCase="'NO_COM'" class="status-icon">Aucun signal
                 <div>
                   <i class="pi pi-times"></i>
@@ -235,8 +249,10 @@ interface StatusCount {
                        alt="unplugged"
                        height="16" width="16"
                        style="float: right;
-                       margin-left: 8px;"/>
-                </div></span>
+                       margin-left: 8px;"
+                  />
+                </div>
+              </span>
               <span *ngSwitchCase="'UNPLUGGED'" class="status-icon">Déconnecté
                 <div>
                   <i class="pi pi-ban"></i>
@@ -510,6 +526,10 @@ interface StatusCount {
     }
     .PARKED {
       background-color: #C71400;
+      color: white;
+    }
+    .CALCULATING {
+      background-color: #66afe9;
       color: white;
     }
     .NO_COM {
@@ -836,7 +856,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   //Cette méthode permet de calculer le nombre de véhicules pour chaque état
   calculatePrimaryStatusCounts(teamNodes: TeamHierarchyNodeBase[]): StatusCount[] {
-    const primaryStates = ['DRIVING', 'PARKED', 'IDLE', 'NO_COM'];
+    const primaryStates = ['DRIVING', 'PARKED', 'IDLE', 'CALCULATING', 'NO_COM'];
     const counts: Record<string, number> = {};
 
     const traverse = (nodes: TeamHierarchyNodeBase[]) => {

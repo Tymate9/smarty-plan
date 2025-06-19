@@ -30,12 +30,16 @@ abstract class DeviceDataStateMapper ()
     fun StateMapper(deviceDataState: DeviceDataStateEntity) : String? {
         return if(deviceDataState.lastCommTime?.toInstant().until(Instant.now()).toHours() >= 12) {
             "NO_COM"
-        }else {
+        } else if(deviceDataState.lastPositionTime?.toInstant().until(deviceDataState.lastCommTime?.toInstant()).toHours() >= 1) {
+            "CALCULATING"
+        } else {
             deviceDataState.state
         }
     }
 }
 
-fun Instant?.until(duration: Temporal): Duration {
-    return this?.let { Duration.between(this, duration) } ?: Duration.ZERO
+fun Instant?.until(duration: Temporal?): Duration {
+    return if (this == null || duration == null)
+        Duration.ZERO
+    else Duration.between(this, duration)
 }

@@ -18,6 +18,7 @@ import {
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {filter, Subscription} from 'rxjs';
 import {JsonPipe, NgForOf, NgIf} from "@angular/common";
+import {InputText} from "primeng/inputtext";
 
 /**
  * Événement émis quand l’utilisateur sélectionne une option.
@@ -37,6 +38,7 @@ export interface AutocompleteSelectedEvent {
     <div class="autocomplete-container">
       <!-- Champ texte -->
       <input
+        pInputText
         #inputRef
         type="text"
         [placeholder]="placeholder"
@@ -124,7 +126,8 @@ export interface AutocompleteSelectedEvent {
   imports: [
     JsonPipe,
     NgIf,
-    NgForOf
+    NgForOf,
+    InputText
   ],
   providers: [
     {

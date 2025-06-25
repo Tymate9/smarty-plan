@@ -21,21 +21,21 @@ const isAccessAllowed = async (
       return resourceRoles.includes(role) || realmRoles.includes(role);
     });
     if (authenticated && hasRequiredRoles) {
-      console.debug('Utilisateur authentifié et possédant les rôles requis');
+      //console.log('Utilisateur authentifié et possédant les rôles requis');
       return true;
     }
-    console.debug('Rôles insuffisants ou utilisateur non authentifié');
+    //console.log('Rôles insuffisants ou utilisateur non authentifié');
   } else {
     // Si aucun rôle requis n'est spécifié, vérifier simplement l'authentification
     if (authenticated) {
-      console.debug('Utilisateur authentifié');
+      //console.log('Utilisateur authentifié');
       return true;
     }
-    console.debug('Utilisateur non authentifié');
+    //console.log('Utilisateur non authentifié');
   }
 
   const router = inject(Router);
-  console.debug('Redirection vers /forbidden');
+  //console.log('Redirection vers /forbidden');
   return router.parseUrl('/login');
 };
 

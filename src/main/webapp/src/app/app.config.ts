@@ -1,8 +1,6 @@
-import {dto} from "../habarta/dto";
-
-
-export type AppConfigDTO = dto.AppConfigDTO;
+import { AppConfigDTO } from './core/config/config.service';
 
 export class AppConfig {
-  static config: AppConfigDTO;
+  public static config: AppConfigDTO;
 }
+

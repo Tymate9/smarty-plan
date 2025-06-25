@@ -1,0 +1,27 @@
+// src/styles/theme.scss
+// Import des partials et paramètres par défaut
+@import './tokens';
+@import './generate-themes';
+
+// Fallback global : demo1
+:root {
+  @include generate-css-vars(map-get(map-get($themes, demo1), color));
+}
+
+// Basculer automatiquement en client3 via OS dark
+@media (prefers-color-scheme: dark) {
+  :root {
+    @include generate-css-vars(map-get(map-get($themes, client3), color));
+  }
+}
+
+// Overrides manuels
+[data-theme='demo1'] {
+  @include generate-css-vars(map-get(map-get($themes, demo1), color));
+}
+[data-theme='demo2'] {
+  @include generate-css-vars(map-get(map-get($themes, demo2), color));
+}
+[data-theme='client3'] {
+  @include generate-css-vars(map-get(map-get($themes, client3), color));
+}

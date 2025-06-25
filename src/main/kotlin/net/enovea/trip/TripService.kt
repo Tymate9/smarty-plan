@@ -441,10 +441,10 @@ class TripService(
                     else null
                 }.toTypedArray()
 
-                val traceBefore = if (coordsBefore.size > 1)
+                val traceBefore = if (coordsBefore.isNotEmpty())
                     writer.write(geometryFactory.createLineString(coordsBefore))
                 else ""
-                val traceAfter = if (coordsAfter.size > 1)
+                val traceAfter = if (coordsAfter.isNotEmpty())
                     writer.write(geometryFactory.createLineString(coordsAfter))
                 else ""
 
@@ -493,7 +493,7 @@ class TripService(
                 }.toTypedArray()
 
                 // Générer la trace (WKT) à partir des coordonnées filtrées
-                val newTrace = if (coords.size > 1)
+                val newTrace = if (coords.isNotEmpty())
                     writer.write(geometryFactory.createLineString(coords))
                 else ""
 
@@ -531,7 +531,7 @@ class TripService(
                 }.toTypedArray()
 
                 // Générer la trace (WKT) à partir des coordonnées filtrées
-                val newTrace = if (coords.size > 1)
+                val newTrace = if (coords.isNotEmpty())
                     writer.write(geometryFactory.createLineString(coords))
                 else ""
 

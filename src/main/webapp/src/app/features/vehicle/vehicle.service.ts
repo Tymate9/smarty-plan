@@ -1,21 +1,19 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {map, Observable, of, Subject} from 'rxjs';
 
 import {dto} from "../../../habarta/dto";
 import {MessageService, TreeNode} from "primeng/api";
 import {CrudEvent, IEntityService} from "../../commons/crud/interface/ientity-service";
-import {EntityDeleteButtonComponent} from "../../commons/crud/inputs/entity-delete-button.component";
+import { EntityDeleteButtonComponent } from "../../commons/crud/inputs/entity-delete-button.component";
 import {CompOpenerButtonComponent} from "../../commons/drawer/comp-opener-button.component";
-import {EntityColumn} from "../../commons/admin/entity-tree/entity-tree.component";
-import {VehicleFormComponent} from "./form/vehicle-form.component";
-import {DrawerOptions} from "../../commons/drawer/drawer.component";
 import GenericNodeDTO = dto.GenericNodeDTO;
+import {EntityColumn} from "../../commons/admin/entity-tree/entity-tree.component";
 import VehicleStatsDTO = dto.VehicleStatsDTO;
 import VehicleSummaryDTO = dto.VehicleSummaryDTO;
+import {VehicleFormComponent} from "./form/vehicle-form.component";
+import {DrawerOptions} from "../../commons/drawer/drawer.component";
 import TeamDTO = dto.TeamDTO;
-import VehiclesStatsQseDTO = dto.VehiclesStatsQseDTO;
-import VehicleStatsQseDTO = dto.VehicleStatsQseDTO;
 
 export interface VehicleWithDistanceDTO {
   first: number; // Distance en mètres
@@ -202,38 +200,6 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       teamHierarchyNodes: TeamHierarchyNodeStatsQSE[];
       stats: Record<string, any>
     }>(`${this.baseUrl}/vehicleStats/report-qse`, {params});
-  }
-  private filterVehiclesByQseStat(
-    vehicles: VehiclesStatsQseDTO[],
-    statKey: string,
-    vehiclesStatsTotal: Record<string, any>,
-  ) {
-    return vehicles.filter((vehicle: VehiclesStatsQseDTO) => {
-      if (statKey === 'longestTrip') {
-        const distanceMaxValue = vehicle.vehicleStatsQse?.distanceMax;
-        return distanceMaxValue === vehiclesStatsTotal['longestTrip'].slice(0, -3);
-      } else if (statKey in vehicle.vehicleStatsQse) {
-        const indicatorValue = (vehicle.vehicleStatsQse as Record<string, any>)[statKey];
-        return indicatorValue && qseIndicatorAlertMap[statKey](indicatorValue);
-      } else return false
-    })
-  }
-
-  filterVehiclesHierarchyByQseStat(
-    vehiclesStatsQSE: TeamHierarchyNodeStatsQSE[],
-    statKey: string,
-    vehiclesStatsTotal: Record<string, any>,
-  ): TeamHierarchyNodeStatsQSE[] {
-    return vehiclesStatsQSE.map((node: TeamHierarchyNodeStatsQSE) => ({
-      ...node,
-      vehicles: this.filterVehiclesByQseStat(node.vehicles, statKey, vehiclesStatsTotal),
-      children: node.children?.map((childNode: TeamHierarchyNodeStatsQSE) => ({
-        ...childNode,
-        vehicles: this.filterVehiclesByQseStat(childNode.vehicles, statKey, vehiclesStatsTotal),
-      }))
-        ?.filter((childNode) => childNode.vehicles.length > 0) || [],
-    }))
-      .filter((node) => node.children.length > 0 || node.vehicles.length > 0);
   }
 
 //TODO make it more general (>3 levels)
@@ -515,6 +481,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
             entityService: this, // référence à VehicleService
             confirmationMessage: 'Voulez-vous vraiment supprimer ce véhicule ?',
             onSuccess: (response: any) => {
+              console.log(response)
               this.messageService.add({
                 severity: 'success',
                 summary: "Suppression réussie",
@@ -525,6 +492,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
               const status: number = err?.status ?? 500;
               let summary: string;
               let detail: string;
+              console.log(err)
 
               switch (status) {
                 case 404:
@@ -606,7 +574,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
     ];
   }
 
-  convertToCsv(item: dto.VehicleDTO): (string | number)[] {
+  convertToCsv(item: dto.VehicleDTO): string {
     const values = [
       item.id,
       item.energy,
@@ -618,41 +586,7 @@ export class VehicleService implements IEntityService<dto.VehicleDTO, dto.Vehicl
       item.mileage,
       item.serviceDate
     ];
-    return values.map(value => {
-      switch (typeof value) {
-        case 'string':
-        case 'number':
-          return value;
-        case 'object': // Date and null are of type 'object' (why?)
-          return value?.toString() ?? '';
-        default:
-          return '';
-      }
-    });
+    // Chaque valeur est entourée de guillemets pour éviter les soucis avec les virgules présentes dans les données
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
   }
-}
-
-// todo : somehow maybe compute that in the backend ?
-export const qseIndicatorWarningMap: Record<string, (val: string) => boolean> = {
-  highwayAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
-  roadAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
-  cityAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
-  highwayTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
-  roadTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
-  cityTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 12,
-  highwaySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 85,
-  roadSpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 80,
-  citySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 75,
-}
-
-export const qseIndicatorAlertMap: Record<string, (val: string) => boolean> = {
-  highwayAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
-  roadAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
-  cityAccelScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
-  highwayTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
-  roadTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
-  cityTurnScore: (val: string) => parseInt(val.split("/")[0]) <= 10,
-  highwaySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 90,
-  roadSpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 85,
-  citySpeedScore: (val: string) => parseInt(val.split("%")[0]) >= 80,
 }

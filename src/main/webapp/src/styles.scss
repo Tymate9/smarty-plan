@@ -1,53 +1,37 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* 1) Génération des thèmes dynamiques */
+@import './styles/_tokens';
+@import './styles/_generate-themes';
+
+/* 2) Overrides génériques (PrimeNG, composants…) */
+@import './styles/_theme-overrides';
+
+/* 3) Librairies externes */
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.css";
+
+/* 4) Styles custom */
 @import './styles/custom-treetable';
 @import './styles/custom-drawer';
 
 
-// Variables de couleur
-$color-primary-dark: #3B6997; // Bleu sombre, principal
-$color-primary-dark-secondary: #598392; // Bleu sombre, secondaire
-$color-primary-light: #51B3DE; // Bleu clair, principal
-$color-green-primary: #79D841; // Vert pomme, principal
-$color-light-secondary: #C2D5EF; // Bleu clair, fond secondaire
-$color-red: #C71400; // Rouge Smarty
-$color-warning: #FE8F2B; // Orange, Warning
-$color-warning-semi: #FED42A; // Jaune, Semi Warning
-$color-green-ok: #21A179; // Vert, OK
-$color-gray-secondary: #E5E5E5; // Gris, fond secondaire
-$color-brown-tertiary: #EEE3D4; // Marron clair, fond tertiaire
-$primary-color: #aa001f;
-$secondary-color: #808080;
 
-// Classe pour créer un effet transparent ( verre dépoli )
-.transparent-blur-bg {
-  background-color: rgba(255, 255, 255, 0.3); // Couleur de fond blanche avec une opacité de 30%
-  backdrop-filter: blur(10px); // Applique un flou de 10px aux éléments en arrière-plan
-  -webkit-backdrop-filter: blur(10px); // Compatibilité avec Safari  <!! Non testé !!>
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Optionnel : légère ombre pour un effet de profondeur
-  display: inline-block;
-
-}
-
+/* 5) Global resets et typographie */
 html, body {
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(
-      to right,
-      var(--p-red-100),
-      var(--p-red-50),
-      var(--p-surface-50),
-      var(--p-surface-0),
-      var(--p-red-50),
-      var(--p-red-100)
-  ) !important;
-  color: $secondary-color;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  height: 100%;
   margin: 0;
   padding: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--background);
+  color:            var(--text);
 }
 
+/* 6) Classes utilitaires */
+.transparent-blur-bg {
+  background-color: rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
 
 :host {
   display: flex;
@@ -56,7 +40,7 @@ html, body {
 }
 
 .card {
-  background: var(--surface-card);
+  background: var(--surface);
   padding: 2rem;
   border-radius: 10px;
   margin-bottom: 1rem;
@@ -65,7 +49,6 @@ html, body {
 .custom-vehicle-icon {
   width: 30px !important;
   height: 45px !important;
-
   & > img {
     width: 180% !important;
     height: 180% !important;
@@ -73,76 +56,50 @@ html, body {
 }
 
 .highlighted-marker {
-  width: 45px !important; // Augmenter la largeur de 15px
-  height: 60px !important; // Augmenter la hauteur de 15px
-  & > svg {
+  width: 45px !important;
+  height: 60px !important;
+  & > svg, & > img {
     margin: -7.5px 0 0 -7.5px;
     width: 100% !important;
     height: 100% !important;
     animation: grow 0.5s ease-in-out infinite alternate;
   }
-
-  & > img {
-    margin: 7.5px 0 0 7.5px;
-    width: 100% !important;
-    height: 100% !important;
-    animation: grow 0.5s ease-in-out infinite alternate;
-  }
 }
 
-// Définir les keyframes pour l'animation de saut
 @keyframes grow {
-  from {
-    transform: scale3d(0.66, 0.66, 0.66);
-  }
-  to {
-    transform: scale3d(1.1, 1.1, 1.1);
-  }
+  from { transform: scale3d(0.66, 0.66, 0.66); }
+  to   { transform: scale3d(1.1, 1.1, 1.1); }
 }
 
 .fixed-control-container {
-  @extend .transparent-blur-bg; // Hérite des styles de .transparent-blur-bg
+  @extend .transparent-blur-bg;
   padding: 10px;
   display: inline-block;
+
+  .close-button {
+    display: block;
+    margin-bottom: 10px;
+    background: #ff5e5e;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+
+    &:hover {
+      background: #ff3b3b;
+    }
+  }
 }
 
-.fixed-control-container .close-button {
-  display: block;
-  margin-bottom: 10px;
-  background: #ff5e5e;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-.fixed-control-container .close-button:hover {
-  background: #ff3b3b;
-}
-
-/* Style pour le marqueur sélectionné */
-.selected-marker {
-  transform: scale(1.5);
-  background-color: gold;
-  border-radius: 50%;
-}
-
-.selected-marker img {
-  transform: scale(1.5);
-  background-color: gold;
-  border-radius: 50%;
-}
-
+.selected-marker,
+.selected-marker img,
 .selected-marker svg {
   transform: scale(1.5);
   background-color: gold;
   border-radius: 50%;
 }
 
-.required {
-  color: red;
-}
-
+.required { color: red; }
 .error-message {
   color: red;
   font-size: 0.875rem;
@@ -150,72 +107,81 @@ html, body {
   display: block;
 }
 
-.primary-button {
-  background-color: #007ad9;
-  color: white;
-}
+.primary-button  { background-color: #007ad9; color: white; }
+.danger-button   { background-color: #d90000; color: white; }
+.secondary-button{ background-color: #6c757d; color: white; }
 
-.danger-button {
-  background-color: #d90000;
-  color: white;
-}
-
-.secondary-button {
-  background-color: #6c757d;
-  color: white;
-}
-
-.p-toast {
-  z-index: 9999 !important;
-}
-
-.p-inputtext {
-  margin: 0;
-  width: 100%;
-}
-
-//a custom class for all gray buttons
+.p-toast            { z-index: 9999 !important; }
+.p-inputtext        { margin: 0; width: 100%; }
 .custom-gray-button {
   background-color: var(--p-gray-400) !important;
   border-color: var(--p-gray-400) !important;
   color: white !important;
-}
-.custom-gray-button:focus,
-.custom-gray-button:active {
-  border-color: white !important;
-  box-shadow: 0 0 0 0.2rem rgba(20, 20, 20, 0.25);
-}
-
-
-
-.space-bottom {
-  margin-bottom: 10px;
+  &:focus, &:active {
+    border-color: white !important;
+    box-shadow: 0 0 0 0.2rem rgba(20,20,20,0.25);
+  }
 }
 
-//to change the focus and active color for p-button
+.space-bottom { margin-bottom: 10px; }
+
 .p-button.p-component:focus,
 .p-button.p-component:active {
   border-color: white !important;
-  box-shadow: 0 0 0 0.2rem rgba(255, 87, 51, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(255,87,51,0.25);
 }
 
-//to change the background color of the selected tab in tabview
-.p-tab-active {
-  background: #aa001f !important;
-}
-
-//to change the font size of the autocomplete component in filters
-.p-autocomplete-option {
-  font-size: 0.85rem !important;
-}
-.p-chip {
-  font-size: 0.85rem !important;
-}
-
-.p-button-text {
-  color:#aa001f !important;
-}
-.p-button-text:not(:disabled):active
-{
+.p-tab-active          { background: #aa001f !important; }
+.p-autocomplete-option { font-size: 0.85rem !important; }
+.p-chip                { font-size: 0.85rem !important; }
+.p-button-text         { color: #aa001f !important; }
+.p-button-text:not(:disabled):active {
   background-color: #f0f0f0 !important;
+}
+
+.my-popup .leaflet-popup-tip-container {
+  position: absolute;
+  width: 30px; height: 15px;
+  overflow: hidden;
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.my-popup .leaflet-popup-tip {
+  background: #fff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  width: 12px; height: 12px;
+  margin: -6px auto 0;
+  transform: rotate(45deg);
+}
+.my-popup.leaflet-popup-top .leaflet-popup-tip {
+  transform: rotate(45deg);
+  margin: 0 auto -9px;
+}
+.my-popup.leaflet-popup-bottom .leaflet-popup-tip {
+  transform: rotate(225deg);
+  margin: -9px auto 0;
+}
+
+.mapContextMenu {
+  background: var(--popup-bg);
+  color:      var(--popup-text);
+  border:     1px solid var(--border);
+}
+
+/* 6) APPLICATION DES VARIABLES CSS selon data-theme */
+body {
+  background-color: var(--background) !important;
+  color:            var(--warning)       !important;
+}
+
+/* exemples d’utilisation des autres variables générées : */
+.card {
+  background-color: var(--surface) !important;
+  border-color:     var(--border)  !important;
+}
+
+.btn-primary {
+  background-color: var(--primary) !important;
+  color:            var(--text)    !important;
 }

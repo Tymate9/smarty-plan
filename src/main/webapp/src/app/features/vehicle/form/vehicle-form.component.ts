@@ -36,6 +36,7 @@ import {VehicleUpPeriodService} from "../../../services/period.service";
     PeriodFormComponent
   ],
   template: `
+    <h2>Vehicle Form</h2>
     <p-tabView>
       <!-- Onglet 1 : Formulaire principal -->
       <p-tabPanel header="Détails véhicule">
@@ -254,7 +255,7 @@ export class VehicleFormComponent implements OnInit {
       };
 
       this.formDescription = new FormDescription(
-        undefined,
+        'Édition du véhicule',
         inputs,
         undefined,
         undefined,

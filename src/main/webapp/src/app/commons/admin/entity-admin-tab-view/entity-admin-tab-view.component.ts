@@ -26,21 +26,20 @@ export interface EntityAdminTabConfig {
       ></app-entity-stats>
 
       <hr *ngIf="config.showStats && config.showTree"/>
-      <div style="display: flex; gap: 1rem;">
-        <app-export-csv-button
-          *ngIf="service"
-          buttonText="Exporter les entités"
-          iconClass="pi pi-download"
-          [dataService]="service">
-        </app-export-csv-button>
-        <app-comp-opener-button
-          *ngIf="service"
-          [showLabel]="true"
-          label="Créer une entité"
-          icon="pi pi-plus"
-          [drawerOptions]="service?.getDrawerOptions(null)"
-        ></app-comp-opener-button>
-      </div>
+
+      <app-export-csv-button
+        *ngIf="service"
+        buttonText="Exporter les entités"
+        iconClass="pi pi-download"
+        [dataService]="service">
+      </app-export-csv-button>
+      <app-comp-opener-button
+        *ngIf="service"
+        [showLabel]="true"
+        label="Créer une entité"
+        icon="pi pi-plus"
+        [drawerOptions]="service?.getDrawerOptions(null)"
+      ></app-comp-opener-button>
 
       <app-entity-tree
         *ngIf="config.showTree"

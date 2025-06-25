@@ -9,15 +9,65 @@ import {LayerEvent, LayerEventType} from "../../../core/cartography/layer/layer.
 import PointOfInterestCategoryEntity = dto.PointOfInterestCategoryEntity;
 import {TabPanel, TabView, TabViewChangeEvent} from "primeng/tabview";
 import {Button} from "primeng/button";
-import {DecimalPipe, NgForOf, NgIf} from "@angular/common";
+import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
 import { ButtonModule } from 'primeng/button';
+import {ProgressSpinner} from "primeng/progressspinner";
 
 @Component({
   selector: 'app-map-popup',
   template: `
     <div class="mapContextMenu">
-      <h4>Adresse : {{ address }}</h4>
-      <h4>Coordonnées : {{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</h4>
+      <div class="field">
+        <label>Adresse</label>
+        <div class="copy-container">
+          <input readonly [value]="address" class="copy-input">
+          <button pButton type="button" icon="pi pi-copy"
+                  class="copy-btn"
+                  (click)="copyToClipboard(address)">
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+                <label>Coordonnées (lat,lon)</label>
+                <div class="copy-container">
+                  <input
+                    readonly
+                    [value]="latitude.toFixed(5) + ', ' + longitude.toFixed(5)"
+                    class="copy-input" />
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-copy"
+                    class="copy-btn"
+                    (click)="copyToClipboard(latitude.toFixed(5) + ',' + longitude.toFixed(5))">
+                  </button>
+                </div>
+      </div>
+
+      <div class="field">
+        <label>Latitude / Longitude</label>
+        <div class="copy-container">
+          <input readonly
+                 [value]="latitude.toFixed(5)"
+                 class="copy-input">
+          <button pButton type="button" icon="pi pi-copy"
+                  class="copy-btn"
+                  (click)="copyToClipboard(latitude.toFixed(5))">
+          </button>
+          <input readonly
+                 [value]="longitude.toFixed(5)"
+                 class="copy-input">
+          <button pButton type="button" icon="pi pi-copy"
+                  class="copy-btn"
+                  (click)="copyToClipboard(longitude.toFixed(5))">
+          </button>
+        </div>
+
+
+
+      </div>
+
       <!-- Create POI Tab -->
       <p-button (click)="redirectToPoiEditWithCoords()" styleClass="space-bottom custom-gray-button" >Créer un POI
       </p-button>
@@ -77,7 +127,10 @@ import { ButtonModule } from 'primeng/button';
   standalone: true,
   imports: [
     Button,
+    ButtonModule,
     DecimalPipe,
+    DatePipe,
+    ProgressSpinner,
     TabPanel,
     TabView,
     NgIf,
@@ -89,10 +142,82 @@ import { ButtonModule } from 'primeng/button';
       color: white;
     }
 
+    /* 1. Popup global – plus étroit, hauteur auto, plus de scroll interne */
     .mapContextMenu {
-      width: 300px;
-      height: 300px;
-      overflow: auto;
+      background: var(--popup-bg);
+      color:      var(--popup-text);
+      border:     1px solid var(--border);
+    }
+    .copy-btn.p-button-active {
+      background-color: var(--primary) !important;
+    }
+
+    /* 2. Champs “Adresse”/“Coordonnées” – marges resserrées */
+    .field {
+      margin-bottom: 0.5rem;
+    }
+    .field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      font-size: 0.8em;
+    }
+
+    /* 3. Conteneur input + bouton – gap réduit */
+    .copy-container {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* 4. Input – texte et padding plus petits */
+    .copy-input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.2rem 0.3rem;
+      font-size: 0.7rem;
+      border: 1px solid #666;
+      border-radius: 2px;
+      background: white;
+      color:black;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 5. Bouton copy – plus compact */
+    .copy-btn {
+      flex: 0 0 auto;
+      width: 1.6rem;
+      height: 1.6rem;
+      line-height: 1.6rem;
+      font-size: 0.7rem;
+      padding: 0;
+    }
+
+    /* 6. État “copié” */
+    .copy-btn.p-button-active {
+      background: #28a745 !important;
+      color: #fff !important;
+    }
+
+    /* test de ta popup */
+    :host ::ng-deep .mapContextMenu {
+      /* ajoute !important pour écraser tout autre style */
+      background: var(--popup-bg) !important;
+      color:      var(--popup-text) !important;
+      border:     1px solid var(--border) !important;
+    }
+
+    /* tu peux aussi tester surface/text global sur le host */
+    :host {
+      background: var(--surface) !important;
+      color:      var(--text) !important;
+    }
+
+    /* conserve ton reste de style… */
+    .copy-btn.p-button-active {
+      background-color: var(--primary) !important;
     }
 
   `]
@@ -119,6 +244,13 @@ export class MapPopupComponent implements OnInit {
     private poiService: PoiService,
     private vehicleService: VehicleService
   ) {}
+
+  /** Copie le texte en presse-papier */
+  copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text)
+      .then(() => console.log('Copié :', text))
+      .catch(() => console.error('Échec copie'));
+  }
 
   ngOnInit() {
     this.poiService.getAddressFromCoordinates(this.latitude, this.longitude).subscribe({
@@ -297,3 +429,4 @@ export class MapPopupComponent implements OnInit {
     window.location.href = `/poiedit?coords=${this.latitude},${this.longitude}`;
   }
 }
+

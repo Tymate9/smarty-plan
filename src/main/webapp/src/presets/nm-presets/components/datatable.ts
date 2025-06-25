@@ -1,174 +1,38 @@
-import {nmColors} from "../constants/colors";
-//TODO : not finished
-export const dataTableConfig = {
-    root: {
 
-    },
-    header: {
-      background: "{content.background}",
-      borderColor: nmColors.darkGray,
-      color: "{content.color}",
-      borderWidth: "1px 1px 1px 1px",
-      padding: "0.75rem 1rem"
-    },
-    headerCell: {
-      background: nmColors.brandRed,
-      hoverBackground: "{content.hover.background}",
-      selectedBackground: "{highlight.background}",
-      borderColor: nmColors.darkGray,
-      color: nmColors.brandWhite,
-      hoverColor: "{content.hover.color}",
-      selectedColor: "{highlight.color}",
-      gap: "0.5rem",
-      padding: "0.75rem 1rem",
-      focusRing: {
-        width: "{focus.ring.width}",
-        style: "{focus.ring.style}",
-        color: "{focus.ring.color}",
-        offset: "-1px",
-        shadow: "{focus.ring.shadow}"
-      }
-    },
-    columnTitle: {
-      fontWeight: "700"
-    },
-    row: {
-      background: "{content.background}",
-      hoverBackground: "{content.hover.background}",
-      selectedBackground: nmColors.headerGray,
-      color: "{content.color}",
-      hoverColor: "{content.hover.color}",
-      selectedColor: "{highlight.color}",
-      focusRing: {
-        width: "{focus.ring.width}",
-        style: "{focus.ring.style}",
-        color: "{focus.ring.color}",
-        offset: "-1px",
-        shadow: "{focus.ring.shadow}"
-      }
-    },
-    bodyCell: {
-      borderColor: nmColors.darkGray,
-      padding: "0.75rem 1rem"
-    },
-    footerCell: {
-      background: "{content.background}",
-      borderColor: nmColors.darkGray,
-      color: "{content.color}",
-      padding: "0.75rem 1rem"
-    },
-    columnFooter: {
-      fontWeight: "700"
-    },
-    footer: {
-      background: "{content.background}",
-      borderColor:nmColors.darkGray,
-      color: "{content.color}",
-      borderWidth: "1px 1px 1px 1px",
-      padding: "0.75rem 1rem"
-    },
-    dropPoint: {
-      color: "{primary.color}"
-    },
-    columnResizerWidth: "0.5rem",
-    resizeIndicator: {
-      width: "1px",
-      color: "{primary.color}"
-    },
-    sortIcon: {
-      color: "{text.muted.color}",
-      hoverColor: "{text.hover.muted.color}",
-      size: "0.875rem"
-    },
-    loadingIcon: {
-      size: "2rem"
-    },
-    rowToggleButton: {
-      hoverBackground: "{content.hover.background}",
-      selectedHoverBackground: "{content.background}",
-      color: "{text.muted.color}",
-      hoverColor: "{text.color}",
-      selectedHoverColor: "{primary.color}",
-      size: "1.75rem",
-      borderRadius: "50%",
-      focusRing: {
-        width: "{focus.ring.width}",
-        style: "{focus.ring.style}",
-        color: "{focus.ring.color}",
-        offset: "{focus.ring.offset}",
-        shadow: "{focus.ring.shadow}"
-      }
-    },
-    filter: {
-      inlineGap: "0.5rem",
-      overlaySelect: {
-        background: "{overlay.select.background}",
-        borderColor: "{overlay.select.border.color}",
-        borderRadius: "{overlay.select.border.radius}",
-        color: "{overlay.select.color}",
-        shadow: "{overlay.select.shadow}"
-      },
-      overlayPopover: {
-        background: "{overlay.popover.background}",
-        borderColor: "{overlay.popover.border.color}",
-        borderRadius: "{overlay.popover.border.radius}",
-        color: "{overlay.popover.color}",
-        shadow: "{overlay.popover.shadow}",
-        padding: "{overlay.popover.padding}",
-        gap: "0.5rem"
-      },
-      rule: {
-        borderColor: "{content.border.color}"
-      },
-      constraintList: {
-        padding: "{list.padding}",
-        gap: "{list.gap}"
-      },
-      constraint: {
-        focusBackground: "{list.option.focus.background}",
-        selectedBackground: "{list.option.selected.background}",
-        selectedFocusBackground: "{list.option.selected.focus.background}",
-        color: "{list.option.color}",
-        focusColor: "{list.option.focus.color}",
-        selectedColor: "{list.option.selected.color}",
-        selectedFocusColor: "{list.option.selected.focus.color}",
-        separator: {
-          borderColor: "{content.border.color}"
-        },
-        padding: "{list.option.padding}",
-        borderRadius: "{list.option.border.radius}"
-      }
-    },
-    paginatorTop: {
-      borderColor: "{datatable.border.color}",
-      borderWidth: "1px 1px 1px 1px"
-    },
-    paginatorBottom: {
-      borderColor: "{datatable.border.color}",
-      borderWidth: "1px 1px 1px 1px"
-    },
-    colorScheme: {
-      light: {
-        root: {
-          borderColor: nmColors.darkGray
-        },
-        row: {
-          stripedBackground: "{surface.50}"
-        },
-        bodyCell: {
-          selectedBorderColor: "{primary.100}"
-        }
-      },
-      dark: {
-        root: {
-          borderColor: "{surface.600}"
-        },
-        row: {
-          stripedBackground: "{surface.950}"
-        },
-        bodyCell: {
-          selectedBorderColor: "{primary.900}"
-        }
-      }
+import { commonComponentConfig } from "../../../theme/commonComponentConfig";
+import { nmColors } from "../constants/colors";
+
+const { light: commonLight, dark: commonDark } = commonComponentConfig;
+// 3. DatePicker
+// 2. DataTable
+export const dataTableConfig = {
+  root: {
+    ...commonLight.root,
+  },
+  header: {
+    ...commonLight.root,
+    background: "{content.background}",
+    borderColor: nmColors.darkGray,
+    color: "{content.color}",
+    borderWidth: "1px",
+    padding: "0.75rem 1rem"
+  },
+  headerCell: {
+    ...commonLight.root,
+    background: nmColors.brandRed,
+    hoverBackground: "{content.hover.background}",
+    selectedBackground: "{highlight.background}",
+    borderColor: nmColors.darkGray,
+    color: nmColors.brandWhite,
+    hoverColor: "{content.hover.color}",
+    selectedColor: "{highlight.color}",
+    gap: "0.5rem",
+    padding: "0.75rem 1rem",
+    focusRing: {
+      ...commonLight.root.focusRing,
+      offset: "-1px"
     }
-  };
+  },
+  // ... appliquer le même pattern pour row, bodyCell, footerCell, etc.
+  colorScheme: commonComponentConfig
+};

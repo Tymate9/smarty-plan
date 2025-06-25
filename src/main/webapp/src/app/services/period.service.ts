@@ -110,14 +110,14 @@ export abstract class PeriodService<R> implements IEntityService<PeriodDTO<R>, P
   }
 
   //TODO(Implémentation non complète à compléter)
-  convertToCsv(item: PeriodDTO<R>): string[] {
+  convertToCsv(item: PeriodDTO<R>): string {
     const values = [
       item.id,
       item.startDate ? item.startDate.toString() : '',
       item.endDate ? item.endDate.toString() : '',
       item.resource ? item.resource.toString() : ''
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`);
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
   }
 
 }

@@ -110,9 +110,6 @@ export class MarkerFactory {
       case "DRIVING":
         color = 'vert';
         break;
-      case "CALCULATING":
-        color = 'bleu';
-        break;
     }
 
     // Retourner l'icône avec le chemin basé sur la couleur sélectionnée

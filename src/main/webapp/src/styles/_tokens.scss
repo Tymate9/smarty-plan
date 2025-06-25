@@ -1,0 +1,48 @@
+// src/styles/_tokens.scss
+// Cartes de plusieurs thèmes (demo1, demo2, client3…)
+$themes: (
+  demo1: (
+    light: (
+      background:  #ffffff,
+      surface:     #f7f7f7,
+      text:        #333333,
+      border:      #dddddd,
+      primary:     #aa001f
+    ),
+    dark: (
+      background:  #1e1e1e,
+      surface:     #242424,
+      text:        #eeeeee,
+      border:      #333333,
+      primary:     #e05561
+    )
+  ),
+  demo2: (
+    light: (
+      background:  #fafafa,
+      surface:     #ffffff,
+      text:        #222222,
+      border:      #cccccc,
+      primary:     #007bff
+    ),
+    dark: (
+      background:  #121212,
+      surface:     #1e1e1e,
+      text:        #dddddd,
+      border:      #333333,
+      primary:     #3399ff
+    )
+  ),
+  client3: (
+    background:  #1e1e1e,
+    surface:     #242424,
+    text:        #eeeeee,
+    text-muted:  #aaaaaa,
+    border:      #333333,
+    primary:     #e05561,
+    secondary:   #999999,
+    success:     #15803d,
+    warning:     #f59e0b,
+    error:       #aa001f
+  )
+);

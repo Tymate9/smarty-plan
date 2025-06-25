@@ -12,8 +12,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         vehicleIds: List<String>? = null,
         driversIds: List<String>? = null,
         dorisView: String
-    ): List<VehicleStatsQueryResult> {
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQueryResult>, Exception> { handle ->
+    ): List<VehicleStatsDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
@@ -23,14 +23,21 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         :startDate AS trip_date,
                         SUM(trip_count) AS trip_count,
                         ROUND(SUM(distance_sum)/1000) AS distance_sum,
+                        CONCAT(LPAD(CAST(FLOOR(SUM(duration_sum) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration_sum) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
                         ROUND((SUM(distance_sum) / SUM(trip_count))/1000) AS distance_per_trip_avg,
-                        SUM(duration_sum) / SUM(trip_count) AS duration_per_trip_avg,
-                        SUM(duration_sum) AS driving_time,
+                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
                         SUM(has_late_start) AS has_late_start_sum,
                         SUM(has_late_stop) AS has_late_stop_sum,
                         SUM(has_last_trip_long) AS has_last_trip_long_sum,
-                        AVG(`range`) AS range_avg,
-                        SUM(`range`) - SUM(duration_sum) AS waiting_duration
+                        CONCAT(
+                            LPAD(CAST(FLOOR(AVG(`range`) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((AVG(`range`) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS range_avg,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS waiting_duration
+                    
                     FROM (
                         SELECT
                             vehicle_id,
@@ -44,11 +51,10 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             hour(MAX(end_time)) > 18 AS has_late_stop,
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long
                     
-                        FROM <dorisView> 
+                        FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
-                          AND duration > 60
 
                            ${
                     if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
@@ -101,15 +107,15 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         bindList("driversIds", driversIds)
                     }
                 }
-                .mapTo(VehicleStatsQueryResult::class.java)
+                .mapTo(VehicleStatsDTO::class.java)
                 .list()
         }
     }
 
     fun findVehicleDailyStats(
         startDate: String, endDate: String, vehicleId: String , dorisView: String
-    ): List<VehicleStatsQueryResult> {
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQueryResult>, Exception> { handle ->
+    ): List<VehicleStatsDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsDTO>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT  
@@ -119,20 +125,26 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                             license_plate,
                             COUNT(*) AS trip_count,
                             ROUND(SUM(distance)/1000) AS distance_sum,
+                            CONCAT(LPAD(CAST(FLOOR(SUM(duration) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
                             ROUND((SUM(distance) / COUNT(*))/1000) AS distance_per_trip_avg,
-                            SUM(duration) / COUNT(*) AS duration_per_trip_avg,
-                            SUM(duration) AS driving_time,
-                            TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) AS range_avg,
+                            CONCAT( LPAD(CAST(FLOOR(SUM(duration) / COUNT(*) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration) / COUNT(*)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
+                            CONCAT(
+                                LPAD(CAST(FLOOR(time_to_sec(timediff(MAX(end_time), MIN(start_time))) / 3600) AS STRING), 2, '0'), ':',
+                                LPAD(CAST(FLOOR((time_to_sec(timediff(MAX(end_time), MIN(start_time))) % 3600) / 60) AS STRING), 2, '0')
+                            ) AS range_avg,
                             hour(minutes_add(MIN(start_time), 30)) >= 8 AS has_late_start_sum,
                             hour(MAX(end_time)) > 18 AS has_late_stop_sum,
                             TIMESTAMPDIFF(MINUTE,max(end_time),max(start_time)) > 45 AS has_last_trip_long_sum,
-                            TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration) AS waiting_duration
+                            CONCAT(
+                                LPAD(CAST(FLOOR((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) / 3600) AS STRING), 2, '0'), ':',
+                                LPAD(CAST(FLOOR(((TIME_TO_SEC(TIMEDIFF(MAX(end_time), MIN(start_time))) - SUM(duration)) % 3600) / 60) AS STRING), 2, '0')
+                            ) AS waiting_duration
+                    
                         FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
                           AND vehicle_id = :vehicleId
-                          AND duration > 60
                         GROUP BY vehicle_id, date(start_time), driver_name , license_plate
                         ORDER BY trip_date
                         ;
@@ -142,7 +154,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                 .bind("endDate", endDate)
                 .bind("vehicleId", vehicleId)
                 .define("dorisView", dorisView)
-                .mapTo(VehicleStatsQueryResult::class.java)
+                .mapTo(VehicleStatsDTO::class.java)
                 .list()
         }
     }
@@ -156,39 +168,8 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
         vehicleIds: List<String>? = null,
         driversIds: List<String>? = null,
         dorisView: String
-    ): List<VehicleStatsQseQueryResult> {
-        val clauses =
-            if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
-                "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
-                        " AND (license_plate IN (<vehicleIds>) OR driver_name IN (<driversIds>))"
-            } else {
-                var conditions = mutableListOf<String>()
-                if (!teamLabels.isNullOrEmpty()) {
-                    conditions.add("AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))")
-                }
-                if (!vehicleIds.isNullOrEmpty()) {
-                    conditions.add("AND license_plate IN (<vehicleIds>)")
-                }
-                if (!driversIds.isNullOrEmpty()) {
-                    val hasUnassignedSentinel = driversIds.contains("Véhicule non attribué")
-                    val realDriverNames = driversIds.filter { it != "Véhicule non attribué" }
-                    when {
-                        hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
-                            conditions.add("AND (driver_name IN (<driversIds>) OR driver_name IS NULL)")
-                        }
-
-                        hasUnassignedSentinel -> {
-                            conditions.add("AND driver_name IS NULL")
-                        }
-
-                        else -> {
-                            conditions.add("AND driver_name IN (<driversIds>)")
-                        }
-                    }
-                }
-                conditions.joinToString(" ")
-            }
-        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseQueryResult>, Exception> { handle ->
+    ): List<VehicleStatsQseDTO> {
+        return dorisJdbiContext.jdbi.withHandle<List<VehicleStatsQseDTO>, Exception> { handle ->
             handle.createQuery(
                 """
                     SELECT
@@ -198,110 +179,74 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         ROUND(MAX(longest_trip_distance_daily)/1000) AS longest_trip_distance,
                         SUM(trip_count) AS trip_count,
                         :startDate AS trip_date,      
-                        ROUND(SUM(distance) / 1000) AS distance_sum,
-                        ROUND(SUM(highway_distance) / 100000) AS highway_distance_sum,
-                        ROUND(SUM(road_distance) / 100000) AS road_distance_sum,
-                        ROUND(SUM(city_distance) / 100000) AS city_distance_sum,
-                        SUM(duration_sum) / SUM(trip_count) AS duration_per_trip_avg,
-                        SUM(duration_sum) AS driving_time,
-                        SUM(`range` - duration_sum) AS waiting_duration,
-                        AVG(`range`) AS range_avg,
-                        SUM(daily_idle_duration) AS idle_duration,
-                        if(scores.x_stddev = 0, null, round(20 - scores.x_stddev * 10)) as accel_score,
-                        if(scores.y_stddev = 0, null, round(20 - scores.y_stddev * 10)) as turn_score,
-                        if(scores.city_x_stddev = 0, null, round(20 - scores.city_x_stddev * 10)) as city_accel_score,
-                        if(scores.city_y_stddev = 0, null, round(20 - scores.city_y_stddev * 10)) as city_turn_score,
-                        if(scores.road_x_stddev = 0, null, round(20 - scores.road_x_stddev * 10)) as road_accel_score,
-                        if(scores.road_y_stddev = 0, null, round(20 - scores.road_y_stddev * 10)) as road_turn_score,
-                        if(scores.highway_x_stddev = 0, null, round(20 - scores.highway_x_stddev * 10)) as highway_accel_score,
-                        if(scores.highway_y_stddev = 0, null, round(20 - scores.highway_y_stddev * 10)) as highway_turn_score,
-                        round(scores.city_speed_ratio * 100) as city_speed_score,
-                        round(scores.road_speed_ratio * 100) as road_speed_score,
-                        round(scores.highway_speed_ratio * 100) as highway_speed_score
+                        ROUND(SUM(distance_sum)/1000) AS distance_sum,
+                        CONCAT( LPAD(CAST(FLOOR(SUM(duration_sum) / SUM(trip_count) / 3600) AS STRING), 2, '0'), ':',LPAD(CAST(FLOOR((SUM(duration_sum) / SUM(trip_count)) % 3600 / 60) AS STRING), 2, '0')) AS duration_per_trip_avg,
+                        CONCAT(LPAD(CAST(FLOOR(SUM(duration_sum) / 3600) AS STRING), 2, '0'), ':', LPAD(CAST(FLOOR((SUM(duration_sum) % 3600) / 60) AS STRING), 2, '0')) AS driving_time,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(SUM(`range` - duration_sum) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((SUM(`range` - duration_sum) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS waiting_duration,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(AVG(`range`) / 3600) AS STRING), 2, '0'), ':',
+                            LPAD(CAST(FLOOR((AVG(`range`) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS range_avg,
+                        CONCAT(
+                            LPAD(CAST(FLOOR(SUM(daily_idle_duration) / 3600) AS STRING), 2, '0'), 
+                            ':',
+                            LPAD(CAST(FLOOR((SUM(daily_idle_duration) % 3600) / 60) AS STRING), 2, '0')
+                        ) AS idle_duration
                     FROM (
                         SELECT
-                            device_id,
                             vehicle_id,
                             driver_name,
                             license_plate,
                             COUNT(*) AS trip_count,
                             MAX(distance) As longest_trip_distance_daily,
-                            SUM(distance) AS distance,
+                            SUM(distance) AS distance_sum,
                             SUM(duration) AS duration_sum,
                             time_to_sec(timediff(max(end_time), min(start_time))) AS `range`,
                             SUM(idle_duration) As daily_idle_duration
                             
-                        FROM <dorisView> t
+                        FROM <dorisView>
                         WHERE DATE(start_time) = DATE(end_time)
                           AND DATE(start_time) BETWEEN :startDate AND :endDate
                           AND vehicle_id IS NOT NULL
-                          ${clauses}
-                        GROUP BY vehicle_id, device_id, date(start_time), driver_name , license_plate
-                         ) daily_trip_data
-                         JOIN (select dp.device_id,
-                               sum((speed_limit > 10000) * mdp.delta_distance) as highway_distance,
-                               sum((speed_limit > 5000 and speed_limit <= 10000) * mdp.delta_distance) as road_distance,
-                               sum((speed_limit <= 5000) * mdp.delta_distance) as city_distance,
-                               stddev(array_avg(accx) * matrix_0_0 +
-                                      array_avg(accy) * matrix_0_1 +
-                                      array_avg(accz) * matrix_0_2) * 9.806 / 1000                                as x_stddev,
-                               stddev(array_avg(accx) * matrix_1_0 +
-                                      array_avg(accy) * matrix_1_1 +
-                                      array_avg(accz) * matrix_1_2) * 9.806 / 1000                                as y_stddev,
-                               stddev(if(speed_limit > 10000,
-                                         array_avg(accx) * matrix_0_0 +
-                                         array_avg(accy) * matrix_0_1 +
-                                         array_avg(accz) * matrix_0_2, null)) * 9.806 /
-                               1000                                                                                            as highway_x_stddev,
-                               stddev(if(speed_limit > 10000, array_avg(accx) * matrix_1_0 +
-                                                              array_avg(accy) * matrix_1_1 +
-                                                              array_avg(accz) * matrix_1_2, null)) * 9.806 / 1000 as
-                                                                                                                                  highway_y_stddev,
-                               stddev(if(speed_limit > 5000 and speed_limit <= 10000, array_avg(accx) * matrix_0_0 +
-                                                                                      array_avg(accy) * matrix_0_1 +
-                                                                                      array_avg(accz) * matrix_0_2,
-                                         null)) * 9.806 /
-                               1000                                                                                            as road_x_stddev,
-                               stddev(if(speed_limit > 5000 and speed_limit <= 10000,
-                                         array_avg(accx) * matrix_1_0 +
-                                         array_avg(accy) * matrix_1_1 +
-                                         array_avg(accz) * matrix_1_2, null)) * 9.806 /
-                               1000                                                                                            as road_y_stddev,
-                               stddev(if(speed_limit <= 5000, array_avg(accx) * matrix_0_0 +
-                                                              array_avg(accy) * matrix_0_1 +
-                                                              array_avg(accz) * matrix_0_2, null)) *
-                               9.806 / 1000                                                                                    as city_x_stddev,
-                               stddev(if(speed_limit <= 5000, array_avg(accx) * matrix_1_0 +
-                                                              array_avg(accy) * matrix_1_1 +
-                                                              array_avg(accz) * matrix_1_2,
-                                         null)) * 9.806 / 1000                                                                 as city_y_stddev,
-                               avg(if(speed_limit > 10000, mdp.speed / speed_limit, null))                                     as
-                                                                                                                                  highway_speed_ratio,
-                               avg(if(speed_limit > 5000 and speed_limit <= 10000,
-                                      mdp.speed / speed_limit,
-                                      null))                                                                                   as road_speed_ratio,
-                               avg(if(speed_limit <= 5000, mdp.speed / speed_limit, null))                                     as
-                                                                                                                                  city_speed_ratio
-                        FROM datapoints dp
-                                      JOIN <dorisView> t
-                                           ON t.trip_id = dp.trip_id and t.device_id = dp.device_id
-                                      LEFT JOIN map_datapoints mdp
-                                                ON mdp.trip_id = dp.trip_id and mdp.device_id = dp.device_id and mdp.timestamp = dp.timestamp
-                               where date(dp.timestamp) between :startDate
-                                 AND :endDate
-                                 AND speed_limit is not null
-                                 AND mdp.speed
-                                 > 0
-                                 AND mdp.speed
-                                 < 14000
-                                 AND accx is not null
-                                 AND accy is not null
-                                 AND accz is not null
-                                 ${clauses}
-                               GROUP BY dp.device_id) scores ON scores.device_id = daily_trip_data.device_id
-                    GROUP BY vehicle_id, scores.device_id, license_plate, x_stddev, y_stddev, city_x_stddev, city_y_stddev,
-                     city_speed_ratio, road_x_stddev, road_y_stddev, road_speed_ratio,
-                     highway_x_stddev, highway_y_stddev, highway_speed_ratio ;
+
+                           ${
+                    if (!teamLabels.isNullOrEmpty() && !vehicleIds.isNullOrEmpty() && !driversIds.isNullOrEmpty()) {
+                        "AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))" +
+                                " AND (license_plate IN (<vehicleIds>) OR driver_name IN (<driversIds>))"
+                    } else {
+                        var conditions = mutableListOf<String>()
+                        if (!teamLabels.isNullOrEmpty()) {
+                            conditions.add("AND (team_label IN (<teamLabels>) OR parent_team_label IN (<teamLabels>))")
+                        }
+                        if (!vehicleIds.isNullOrEmpty()) {
+                            conditions.add("AND license_plate IN (<vehicleIds>)")
+                        }
+                        if (!driversIds.isNullOrEmpty()) {
+                            val hasUnassignedSentinel = driversIds.contains("Véhicule non attribué")
+                            val realDriverNames = driversIds.filter { it != "Véhicule non attribué" }
+                            when {
+                                hasUnassignedSentinel && realDriverNames.isNotEmpty() -> {
+                                    conditions.add("AND (driver_name IN (<driversIds>) OR driver_name IS NULL)")
+                                }
+
+                                hasUnassignedSentinel -> {
+                                    conditions.add("AND driver_name IS NULL")
+                                }
+
+                                else -> {
+                                    conditions.add("AND driver_name IN (<driversIds>)")
+                                }
+                            }
+                        }
+                        conditions.joinToString(" ")
+                    }
+                }
+                        GROUP BY vehicle_id, date(start_time), driver_name , license_plate
+                         ) daily
+                    GROUP BY vehicle_id , license_plate ;
                 """.trimIndent()
             )
                 .bind("startDate", startDate)
@@ -318,7 +263,7 @@ class VehicleStatsRepository(private val dorisJdbiContext: DorisJdbiContext) {
                         bindList("driversIds", driversIds)
                     }
                 }
-                .mapTo(VehicleStatsQseQueryResult::class.java)
+                .mapTo(VehicleStatsQseDTO::class.java)
                 .list()
         }
     }

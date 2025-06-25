@@ -1,42 +1,62 @@
-import {Component, LOCALE_ID} from '@angular/core';
-import { Toast } from 'primeng/toast';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { ConfirmDialog } from 'primeng/confirmdialog';
-import {ConfirmationService, SharedModule} from 'primeng/api';
-import {DrawerComponent} from "./commons/drawer/drawer.component";
-import { registerLocaleData } from '@angular/common';
-import localeFr from '@angular/common/locales/fr';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule }      from '@angular/common';
+import { FormsModule }       from '@angular/forms';
+import { RouterModule }      from '@angular/router';
 
-registerLocaleData(localeFr);
+import { ThemeService } from './theme.service';
+import { AppConfig }    from './app.config';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    Toast,
-    ConfirmDialog,
-    SharedModule,
-    DrawerComponent
-  ],
-  providers: [
-    ConfirmationService,
-    { provide: LOCALE_ID, useValue: 'fr-FR' }
-  ],
+  imports: [CommonModule, FormsModule, RouterModule],
+  host: { '[class]': 'rootClass' },
   template: `
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
-    <app-drawer></app-drawer>
+    <div class="theme-toggle">
+      <label>Thème :</label>
+      <select [(ngModel)]="selectedTheme" (ngModelChange)="switchTheme($event)">
+        <option *ngFor="let t of themes" [value]="t">{{ t }}</option>
+      </select>
+    </div>
     <router-outlet></router-outlet>
   `,
   styles: [`
-    /* Aucune règle de style ici */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: .5rem;
+      background: rgba(255,255,255,0.8);
+      border-radius: 4px;
+      z-index: 9999;
+    }
   `]
 })
-export class AppComponent {
-  title = 'webapp';
+export class AppComponent implements OnInit {
+  themes: string[] = [];
+  selectedTheme!: string;
 
-  constructor() {}
+  constructor(private themeService: ThemeService) {}
+
+  get rootClass() {
+    return `${this.selectedTheme}-theme`;
+  }
+
+  ngOnInit() {
+    const cfg = AppConfig.config;
+    // remplir la liste
+    this.themes = cfg.availableThemes;
+    // thème initial (localStorage ou défaut)
+    this.selectedTheme = localStorage.getItem('app-theme') || cfg.defaultTheme;
+    // appliquer
+    this.themeService.setTheme(this.selectedTheme);
+  }
+
+  switchTheme(themeKey: string) {
+    this.themeService.setTheme(themeKey);
+    this.selectedTheme = themeKey;
+  }
 }

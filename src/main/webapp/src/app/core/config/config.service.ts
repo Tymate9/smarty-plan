@@ -1,36 +1,39 @@
+// src/app/core/config/config.service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { dto } from '../../../habarta/dto';
-import {AppConfig} from "../../app.config";
+import { AppConfig } from '../../app.config';
 
-export type AppConfigDTO = dto.AppConfigDTO;
+export interface AppConfigDTO {
+  keycloakConfig: {
+    redirectUrl: string;       // ← on ajoute ce champ
+    authServerUrl: string;
+    realmName: string;
+    frontendClientId: string;
+  };
+  tilesApiKey: string;
+  testEnv: boolean;
+  defaultTheme: string;
+  availableThemes: string[];
+}
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ConfigService {
   private readonly baseUrl = '/api/config';
   public config!: AppConfigDTO;
 
   constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Charge la configuration depuis le back-end et la stocke dans le service ainsi que dans AppConfig.
-   * Cette méthode sera appelée via APP_INITIALIZER pour être exécutée avant le démarrage de l'application.
-   */
   loadConfig(): Observable<AppConfigDTO> {
     return this.http.get<AppConfigDTO>(this.baseUrl).pipe(
-      tap((config) => {
-        this.config = config;
-        AppConfig.config = config;
+      tap(cfg => {
+        this.config = cfg;
+        AppConfig.config = cfg;
       })
     );
   }
 
-  /**
-   * Méthode pour récupérer la configuration sans la stocker (optionnel).
-   */
   getConfig(): Observable<AppConfigDTO> {
     return this.http.get<AppConfigDTO>(this.baseUrl);
   }

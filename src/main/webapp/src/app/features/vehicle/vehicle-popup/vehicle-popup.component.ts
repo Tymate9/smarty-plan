@@ -115,7 +115,7 @@ import {ProgressSpinner} from "primeng/progressspinner";
 
     .p-field label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.2rem;
     }
 
     .error {
@@ -140,6 +140,7 @@ import {ProgressSpinner} from "primeng/progressspinner";
 
     .poi-item {
       border: 1px solid #ccc;
+      backdrop-filter: blur();
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;

@@ -283,13 +283,13 @@ export class DriverService implements IEntityService<DriverDTO, DriverForm> {
    * @param item - Le DriverDTO à convertir.
    * @returns La représentation CSV d'une ligne.
    */
-  convertToCsv(item: DriverDTO): string[] {
+  convertToCsv(item: DriverDTO): string {
     const values = [
       item.id,
       item.firstName,
       item.lastName,
       item.phoneNumber
     ];
-    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`);
+    return values.map(value => `"${value !== null && value !== undefined ? value : ''}"`).join(',');
   }
 }

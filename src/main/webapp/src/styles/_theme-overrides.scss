@@ -1,0 +1,33 @@
+// src/styles/_theme-overrides.scss
+// Overrides génériques PrimeNG, basés sur les CSS vars
+
+[data-theme] {
+  .p-button {
+    background-color: var(--primary)   !important;
+    color:            var(--text)      !important;
+    border:           2px solid var(--border) !important;
+  }
+  .p-button:hover {
+    background-color: var(--secondary) !important;
+    color:            var(--background)!important;
+  }
+
+  .p-inputswitch-slider {
+    background: var(--surface)            !important;
+    border:     3px dashed var(--border) !important;
+  }
+  .p-inputswitch.p-highlight .p-inputswitch-slider {
+    background:   var(--primary)          !important;
+    border-color: var(--primary)          !important;
+  }
+
+  .p-panel, .p-dialog, .p-toast {
+    background-color: var(--surface)   !important;
+    color:            var(--text)      !important;
+    border-color:     var(--border)    !important;
+  }
+
+  a, h1, h2, h3, h4, h5, h6 {
+    color: var(--primary) !important;
+  }
+}

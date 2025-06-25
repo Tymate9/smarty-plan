@@ -31,7 +31,7 @@ import { TextareaModule } from 'primeng/textarea';
         </ng-template>
       </p-table>
 
-      <!--  (B) Achat de pack SMS &ndash;&gt;
+      <!--      &lt;!&ndash; (B) Achat de pack SMS &ndash;&gt;
             <div class="sms-pack-form" style="margin-top: 1rem;">
               <h5>Achat de pack SMS</h5>
               <form [formGroup]="smsPackFormGroup" (ngSubmit)="buySmsPack()">
@@ -87,7 +87,6 @@ import { TextareaModule } from 'primeng/textarea';
                   id="callingCode"
                   formControlName="callingCode"
                   class="p-inputtext"
-                  readonly
                 />
 
               </div>
@@ -102,7 +101,6 @@ import { TextareaModule } from 'primeng/textarea';
                   type="text"
                   formControlName="phoneNumber"
                   class="p-inputtext"
-                  readonly
                 />
               </div>
             </div>

@@ -1,0 +1,22 @@
+@import './_tokens';
+
+// Mixin : génère les var pour une map de couleurs
+@mixin gen-vars($map) {
+  @each $key, $val in $map {
+    --#{$key}: #{$val};
+  }
+}
+
+// Pour chaque couple (theme, modes) et chaque mode (light/dark)
+@each $theme-name, $modes-map in $themes {
+  @each $mode-name, $colors in $modes-map {
+    html[data-theme="#{$theme-name}-#{$mode-name}"] {
+      @include gen-vars($colors);
+    }
+  }
+}
+
+// Fallback global (demo1-light par défaut)
+:root {
+  @include gen-vars(map-get(map-get($themes, demo1), light));
+}
